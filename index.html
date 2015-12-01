@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="UTF-8">
+    <title>WB Bones by gfazioli</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+  </head>
+  <body>
+    <section class="page-header">
+      <h1 class="project-name">WB Bones</h1>
+      <h2 class="project-tagline">WordPress library</h2>
+      <a href="https://github.com/gfazioli/WPBones" class="btn">View on GitHub</a>
+      <a href="https://github.com/gfazioli/WPBones/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/gfazioli/WPBones/tarball/master" class="btn">Download .tar.gz</a>
+    </section>
+
+    <section class="main-content">
+      <h3>
+<a id="welcome-to-wp-bones" class="anchor" href="#welcome-to-wp-bones" aria-hidden="true"><span class="octicon octicon-link"></span></a>Welcome to WP Bones.</h3>
+
+<p>WPBones is a library that provides a lot of tools and rules in order to write a WordPress plugin and theme.</p>
+
+<h3>
+<a id="requirement" class="anchor" href="#requirement" aria-hidden="true"><span class="octicon octicon-link"></span></a>Requirement</h3>
+
+<p>WP Bones has a few system requirements. However, if you are a newbie in composer, npm, laravel and gulp, please, visit​ the related web site before continue.</p>
+
+<h3>
+<a id="installation" class="anchor" href="#installation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Installation</h3>
+
+<p>First, download the WPKirk boilerplate.
+You can use either git command line or github for mac application. You can download the develop or release version:</p>
+
+<p>Develop</p>
+
+<pre><code>$ git clone -b develop https://github.com/gfazioli/WPKirk.git &lt;your plugin name&gt;
+</code></pre>
+
+<p>Master release</p>
+
+<pre><code>$ git clone https://github.com/gfazioli/WPKirk.git &lt;your plugin name&gt;
+</code></pre>
+
+<p>Then</p>
+
+<pre><code>$ cd &lt;your plugin name&gt;
+$ php bones install
+</code></pre>
+
+<p>Enter you plugin name or namespace</p>
+
+<pre><code>$ php bones
+</code></pre>
+
+<p>Then you will see</p>
+
+<pre><code>Bones Version 0.1.3
+
+ Usage:
+
+command [options] [arguments]
+</code></pre>
+
+<p>Once downloaded, follow the instruction in the README file.</p>
+
+<h3>
+<a id="naming-your-application" class="anchor" href="#naming-your-application" aria-hidden="true"><span class="octicon octicon-link"></span></a>Naming Your Application</h3>
+
+<p>After installing WPKirk, you may wish to "name" your plugin. By default, the plugin directory is namespaced under WPKirk, and autoloaded by Composer using the <a href="http://www.php-fig.org/psr/psr-4/">PSR-4 autoloading standard</a>. However, you may change the namespace to match the name of your application, which you can easily do via the <code>namespace</code> Bones command.</p>
+
+<p>For example, at beginning, the plugin is named "WPKirk", you could run the following command from the root of your installation:</p>
+
+<pre><code>php bones namespace WPMyAwesomePlugin
+</code></pre>
+
+<p>Of course, renaming your plugin is not optional.</p>
+
+<h1>
+<a id="tutorials" class="anchor" href="#tutorials" aria-hidden="true"><span class="octicon octicon-link"></span></a>Tutorials</h1>
+
+<h2>
+<a id="boilerplate" class="anchor" href="#boilerplate" aria-hidden="true"><span class="octicon octicon-link"></span></a>Boilerplate</h2>
+
+<p>If you would like to write a WordPress plugin with WPBones library, you can use the WPKirk boilerplate.</p>
+
+<h1>
+<a id="the-basics" class="anchor" href="#the-basics" aria-hidden="true"><span class="octicon octicon-link"></span></a>The Basics</h1>
+
+<h2>
+<a id="menus" class="anchor" href="#menus" aria-hidden="true"><span class="octicon octicon-link"></span></a>Menus</h2>
+
+<h2>
+<a id="actions-and-filters" class="anchor" href="#actions-and-filters" aria-hidden="true"><span class="octicon octicon-link"></span></a>Actions and filters</h2>
+
+<h1>
+<a id="services" class="anchor" href="#services" aria-hidden="true"><span class="octicon octicon-link"></span></a>Services</h1>
+
+<h2>
+<a id="bones-console" class="anchor" href="#bones-console" aria-hidden="true"><span class="octicon octicon-link"></span></a>Bones Console</h2>
+
+<p>Bones is also the name of the command-line interface included with WPKirk boilerplate. It provides a number of helpful commands for your use while developing your plugin. You will use bone command-line interface for start your develop. First of all, try the command-line console by run:</p>
+
+<pre><code>$ php bones
+</code></pre>
+
+<p>Then, you can change the plugin namespace from WPKirk to MyFirstWPBonesPlugin, for example:</p>
+
+<pre><code>$php bones namespace MyFirstWPBonesPlugin
+</code></pre>
+
+<p>Awesome! You are quite ready to start to ​develop.</p>
+
+<h2>
+<a id="views" class="anchor" href="#views" aria-hidden="true"><span class="octicon octicon-link"></span></a>Views</h2>
+
+<h3>
+<a id="authors-and-contributors" class="anchor" href="#authors-and-contributors" aria-hidden="true"><span class="octicon octicon-link"></span></a>Authors and Contributors</h3>
+
+<p>You can <a href="https://github.com/blog/821" class="user-mention">@mention</a> a GitHub username to generate a link to their profile. The resulting <code>&lt;a&gt;</code> element will link to the contributor’s GitHub Profile. For example: In 2007, Chris Wanstrath (<a href="https://github.com/defunkt" class="user-mention">@defunkt</a>), PJ Hyett (<a href="https://github.com/pjhyett" class="user-mention">@pjhyett</a>), and Tom Preston-Werner (<a href="https://github.com/mojombo" class="user-mention">@mojombo</a>) founded GitHub.</p>
+
+<h3>
+<a id="support-or-contact" class="anchor" href="#support-or-contact" aria-hidden="true"><span class="octicon octicon-link"></span></a>Support or Contact</h3>
+
+<p>Having trouble with Pages? Check out our <a href="https://help.github.com/pages">documentation</a> or <a href="https://github.com/contact">contact support</a> and we’ll help you sort it out.</p>
+
+      <footer class="site-footer">
+        <span class="site-footer-owner"><a href="https://github.com/gfazioli/WPBones">WB Bones</a> is maintained by <a href="https://github.com/gfazioli">gfazioli</a>.</span>
+
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
+      </footer>
+
+    </section>
+
+  
+  </body>
+</html>
