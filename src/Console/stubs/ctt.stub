@@ -1,0 +1,25 @@
+<?php
+
+namespace {Namespace}\CustomTaxonomyTypes;
+
+use {Namespace}\WPBones\Foundation\WordPressCustomTaxonomyTypeServiceProvider as ServiceProvider;
+
+class {ClassName} extends ServiceProvider
+{
+
+  protected $id         = '{ID}';
+  protected $name       = '{Name}';
+  protected $plural     = '{Plural}';
+  protected $objectType = '{ObjectType}';
+
+  /**
+   * You may override this method in order to register your own actions and filters.
+   *
+   */
+  public function boot()
+  {
+    // You may override this method
+  }
+
+
+}

@@ -1,0 +1,13 @@
+<?php
+
+use {Namespace}\WPBones\Database\Migrations\Migration;
+
+class {Tablename} extends Migration
+{
+
+  public function up()
+  {
+    // Create your table
+  }
+
+}

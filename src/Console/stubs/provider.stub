@@ -1,0 +1,14 @@
+<?php
+
+namespace {Namespace}\Providers;
+
+use {Namespace}\WPBones\Support\ServiceProvider;
+
+class {ClassName} extends ServiceProvider
+{
+
+  public function register()
+  {
+    // TODO
+  }
+}

@@ -1,0 +1,23 @@
+<?php
+
+namespace {Namespace}\Console\Commands;
+
+use {Namespace}\WPBones\Console\Command;
+
+class {ClassName} extends Command
+{
+
+  protected $signature = '{Signature}:{CommandName} {--name= : Display your name}';
+
+  protected $description = 'Description of your own bones command';
+
+  public function handle()
+  {
+    if( $this->options( 'name' ) ) {
+      $this->line( 'Hello, ' . $this->options( 'name' ) );
+    } else {
+      $this->line( 'Hello, World!' );
+    }
+  }
+
+}
