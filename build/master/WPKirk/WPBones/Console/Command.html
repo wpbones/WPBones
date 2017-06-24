@@ -25,12 +25,15 @@
                 <div id="control-panel">
                     <form action="#" method="GET">
                 <select id="version-switcher" name="version">
-                                            <option value="../../../../0.8.16/index.html">0.8.16</option>
-                                            <option value="../../../../0.8.17/index.html">0.8.17</option>
-                                            <option value="../../../../master/index.html" selected>master branch</option>
+                                            <option value="../../../../0.8.35/index.html" data-version="0.8.35">0.8.35</option>
+                                            <option value="../../../../master/index.html" data-version="master">master branch</option>
+                                            <option value="../../../../develop/index.html" data-version="develop">develop branch</option>
                                     </select>
             </form>
-                <form id="search-form" action="../../../search.html" method="GET">
+                <script>
+            $('option[data-version="'+window.projectVersion+'"]').prop('selected', true);
+        </script>
+        <form id="search-form" action="../../../search.html" method="GET">
             <span class="glyphicon glyphicon-search"></span>
             <input name="search"
                    class="typeahead form-control"
@@ -70,11 +73,7 @@
                         <div class="namespace-breadcrumbs">
             <ol class="breadcrumb">
                 <li><span class="label label-default">class</span></li>
-                                                            <li><a href="../../../WPKirk.html">WPKirk</a></li>
-                                        <li><a href="../../../WPKirk/WPBones.html">WPBones</a></li>
-                                        <li><a href="../../../WPKirk/WPBones/Console.html">Console</a></li>
-    
-                <li>Command</li>
+                        <li><a href="../../../WPKirk.html">WPKirk</a></li><li class="backslash">\</li><li><a href="../../../WPKirk/WPBones.html">WPBones</a></li><li class="backslash">\</li><li><a href="../../../WPKirk/WPBones/Console.html">Console</a></li><li class="backslash">\</li><li>Command</li>
             </ol>
         </div>
                 <div id="page-content">
@@ -100,6 +99,38 @@
 
             <table class="table table-condensed">
                     <tr>
+                <td class="type" id="property_signature">
+                                        protected                                        
+                </td>
+                <td>$signature</td>
+                <td class="last"></td>
+                <td></td>
+            </tr>
+                    <tr>
+                <td class="type" id="property_options">
+                                        protected                                        
+                </td>
+                <td>$options</td>
+                <td class="last"></td>
+                <td></td>
+            </tr>
+                    <tr>
+                <td class="type" id="property_description">
+                                        protected                                        
+                </td>
+                <td>$description</td>
+                <td class="last"></td>
+                <td></td>
+            </tr>
+                    <tr>
+                <td class="type" id="property_argv">
+                                        protected                                        
+                </td>
+                <td>$argv</td>
+                <td class="last"></td>
+                <td></td>
+            </tr>
+                    <tr>
                 <td class="type" id="property_context">
                                                                                 
                 </td>
@@ -121,6 +152,36 @@
             <h2>Methods</h2>
 
             <div class="container-fluid underlined">
+                    <div class="row">
+                <div class="col-md-2 type">
+                    
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_line">line</a>($str)
+        
+                                            <p>Display a colored line in the console.</p>                </div>
+                <div class="col-md-2"></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_info">info</a>($str)
+        
+                                            <p>Display a colored line in the console.</p>                </div>
+                <div class="col-md-2"></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    string
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_ask">ask</a>(string $str, string $default = &#039;&#039;)
+        
+                                            <p>Make a request to end user in the console and return the user input or the default value.</p>                </div>
+                <div class="col-md-2"></div>
+            </div>
                     <div class="row">
                 <div class="col-md-2 type">
                     
@@ -210,8 +271,115 @@
 
             <div id="method-details">
                     <div class="method-item">
+                    <h3 id="method_line">
+        <div class="location">at         line 27</div>
+        <code>            protected        
+    <strong>line</strong>($str)
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                    <div class="method-description">
+                                    <p>Display a colored line in the console.</p>                                                </div>
+                <div class="tags">
+                            <h4>Parameters</h4>
+
+                    <table class="table table-condensed">
+                    <tr>
+                <td></td>
+                <td>$str</td>
+                <td>String to display.</td>
+            </tr>
+            </table>
+
+            
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_info">
+        <div class="location">at         line 38</div>
+        <code>            protected        
+    <strong>info</strong>($str)
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                    <div class="method-description">
+                                    <p>Display a colored line in the console.</p>                                                </div>
+                <div class="tags">
+                            <h4>Parameters</h4>
+
+                    <table class="table table-condensed">
+                    <tr>
+                <td></td>
+                <td>$str</td>
+                <td>String to display.</td>
+            </tr>
+            </table>
+
+            
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_ask">
+        <div class="location">at         line 52</div>
+        <code>            protected        string
+    <strong>ask</strong>(string $str, string $default = &#039;&#039;)
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                    <div class="method-description">
+                                    <p>Make a request to end user in the console and return the user input or the default value.</p>                                                </div>
+                <div class="tags">
+                            <h4>Parameters</h4>
+
+                    <table class="table table-condensed">
+                    <tr>
+                <td>string</td>
+                <td>$str</td>
+                <td>The question string.</td>
+            </tr>
+                    <tr>
+                <td>string</td>
+                <td>$default</td>
+                <td>Optional. A default value whether the user press return.</td>
+            </tr>
+            </table>
+
+            
+                            <h4>Return Value</h4>
+
+                    <table class="table table-condensed">
+        <tr>
+            <td>string</td>
+            <td></td>
+        </tr>
+    </table>
+
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
                     <h3 id="method___construct">
-        <div class="location">at line         line 65</div>
+        <div class="location">at         line 65</div>
         <code>                    
     <strong>__construct</strong>()
         </code>
@@ -230,7 +398,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_options">
-        <div class="location">at line         line 107</div>
+        <div class="location">at         line 107</div>
         <code>                    bool|mixed|void
     <strong>options</strong>(string $value)
         </code>
@@ -240,7 +408,7 @@
     
 
                     <div class="method-description">
-                                    <p>Return true if the options exists.</p>                                </div>
+                                    <p>Return true if the options exists.</p>                                                </div>
                 <div class="tags">
                             <h4>Parameters</h4>
 
@@ -270,7 +438,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_displayHelp">
-        <div class="location">at line         line 147</div>
+        <div class="location">at         line 147</div>
         <code>                    
     <strong>displayHelp</strong>()
         </code>
@@ -280,7 +448,7 @@
     
 
                     <div class="method-description">
-                                    <p>Display the help well formatted.</p>                                </div>
+                                    <p>Display the help well formatted.</p>                                                </div>
                 <div class="tags">
             
             
@@ -291,7 +459,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_getDescriptionAttribute">
-        <div class="location">at line         line 173</div>
+        <div class="location">at         line 173</div>
         <code>                    string
     <strong>getDescriptionAttribute</strong>()
         </code>
@@ -301,7 +469,7 @@
     
 
                     <div class="method-description">
-                                    <p>Return the description of command console.</p>                                </div>
+                                    <p>Return the description of command console.</p>                                                </div>
                 <div class="tags">
             
                             <h4>Return Value</h4>
@@ -321,7 +489,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_setArgvAttribute">
-        <div class="location">at line         line 183</div>
+        <div class="location">at         line 183</div>
         <code>                    
     <strong>setArgvAttribute</strong>(mixed $value)
         </code>
@@ -331,7 +499,7 @@
     
 
                     <div class="method-description">
-                                    <p>Set the argv.</p>                                </div>
+                                    <p>Set the argv.</p>                                                </div>
                 <div class="tags">
                             <h4>Parameters</h4>
 
@@ -352,7 +520,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method___get">
-        <div class="location">at line         line 195</div>
+        <div class="location">at         line 195</div>
         <code>                    mixed
     <strong>__get</strong>(string $name)
         </code>
@@ -362,7 +530,7 @@
     
 
                     <div class="method-description">
-                                    <p>Return the value of the method <code>get{Name}Attribute</code>.</p>                                </div>
+                                    <p>Return the value of the method <code>get{Name}Attribute</code>.</p>                                                </div>
                 <div class="tags">
                             <h4>Parameters</h4>
 
@@ -392,7 +560,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method___set">
-        <div class="location">at line         line 211</div>
+        <div class="location">at         line 211</div>
         <code>                    mixed
     <strong>__set</strong>(string $name, mixed $value)
         </code>
@@ -402,7 +570,7 @@
     
 
                     <div class="method-description">
-                                    <p>Set the value of the method <code>set{Name}Attribute</code>.</p>                                </div>
+                                    <p>Set the value of the method <code>set{Name}Attribute</code>.</p>                                                </div>
                 <div class="tags">
                             <h4>Parameters</h4>
 
@@ -437,7 +605,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_handle">
-        <div class="location">at line         line 219</div>
+        <div class="location">at         line 219</div>
         <code>    abstract                
     <strong>handle</strong>()
         </code>

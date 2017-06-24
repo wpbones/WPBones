@@ -25,12 +25,15 @@
                 <div id="control-panel">
                     <form action="#" method="GET">
                 <select id="version-switcher" name="version">
-                                            <option value="../../../../0.8.16/index.html" selected>0.8.16</option>
-                                            <option value="../../../../0.8.17/index.html">0.8.17</option>
-                                            <option value="../../../../master/index.html">master branch</option>
+                                            <option value="../../../../0.8.35/index.html" data-version="0.8.35">0.8.35</option>
+                                            <option value="../../../../master/index.html" data-version="master">master branch</option>
+                                            <option value="../../../../develop/index.html" data-version="develop">develop branch</option>
                                     </select>
             </form>
-                <form id="search-form" action="../../../search.html" method="GET">
+                <script>
+            $('option[data-version="'+window.projectVersion+'"]').prop('selected', true);
+        </script>
+        <form id="search-form" action="../../../search.html" method="GET">
             <span class="glyphicon glyphicon-search"></span>
             <input name="search"
                    class="typeahead form-control"
@@ -70,11 +73,7 @@
                         <div class="namespace-breadcrumbs">
             <ol class="breadcrumb">
                 <li><span class="label label-default">class</span></li>
-                                                            <li><a href="../../../WPKirk.html">WPKirk</a></li>
-                                        <li><a href="../../../WPKirk/WPBones.html">WPBones</a></li>
-                                        <li><a href="../../../WPKirk/WPBones/Foundation.html">Foundation</a></li>
-    
-                <li>WordPressShortcodesServiceProvider</li>
+                        <li><a href="../../../WPKirk.html">WPKirk</a></li><li class="backslash">\</li><li><a href="../../../WPKirk/WPBones.html">WPBones</a></li><li class="backslash">\</li><li><a href="../../../WPKirk/WPBones/Foundation.html">Foundation</a></li><li class="backslash">\</li><li>WordPressShortcodesServiceProvider</li>
             </ol>
         </div>
                 <div id="page-content">
@@ -96,6 +95,19 @@
     
     
     
+            <h2>Properties</h2>
+
+            <table class="table table-condensed">
+                    <tr>
+                <td class="type" id="property_shortcodes">
+                                        protected                                        array
+                </td>
+                <td>$shortcodes</td>
+                <td class="last">List of registered shortcodes. Here you will used a methods list.</td>
+                <td></td>
+            </tr>
+            </table>
+
     
             <h2>Methods</h2>
 
@@ -138,7 +150,7 @@
             <div id="method-details">
                     <div class="method-item">
                     <h3 id="method_register">
-        <div class="location">at line         line 20</div>
+        <div class="location">at         line 22</div>
         <code>                    void
     <strong>register</strong>()
         </code>
@@ -148,7 +160,7 @@
     
 
                     <div class="method-description">
-                                    <p>Init the registred shortcodes.</p>                                </div>
+                                    <p>Init the registred shortcodes.</p>                                                </div>
                 <div class="tags">
             
                             <h4>Return Value</h4>
@@ -168,7 +180,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method___call">
-        <div class="location">in <a href="../../../WPKirk/WPBones/Support/ServiceProvider.html#method___call"><abbr title="WPKirk\WPBones\Support\ServiceProvider">ServiceProvider</abbr></a> at line         line 23</div>
+        <div class="location">in <a href="../../../WPKirk/WPBones/Support/ServiceProvider.html#method___call"><abbr title="WPKirk\WPBones\Support\ServiceProvider">ServiceProvider</abbr></a> at         line 23</div>
         <code>                    mixed
     <strong>__call</strong>(string $method, array $parameters)
         </code>
@@ -178,7 +190,7 @@
     
 
                     <div class="method-description">
-                                    <p>Dynamically handle missing method calls.</p>                                </div>
+                                    <p>Dynamically handle missing method calls.</p>                                                </div>
                 <div class="tags">
                             <h4>Parameters</h4>
 
@@ -213,7 +225,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_boot">
-        <div class="location">at line         line 34</div>
+        <div class="location">at         line 36</div>
         <code>                    
     <strong>boot</strong>()
         </code>
@@ -223,7 +235,7 @@
     
 
                     <div class="method-description">
-                                    <p>You may override this method in order to register your own actions and filters.</p>                                </div>
+                                    <p>You may override this method in order to register your own actions and filters.</p>                                                </div>
                 <div class="tags">
             
             

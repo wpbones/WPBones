@@ -25,12 +25,15 @@
                 <div id="control-panel">
                     <form action="#" method="GET">
                 <select id="version-switcher" name="version">
-                                            <option value="../../../../../0.8.16/index.html" selected>0.8.16</option>
-                                            <option value="../../../../../0.8.17/index.html">0.8.17</option>
-                                            <option value="../../../../../master/index.html">master branch</option>
+                                            <option value="../../../../../0.8.35/index.html" data-version="0.8.35">0.8.35</option>
+                                            <option value="../../../../../master/index.html" data-version="master">master branch</option>
+                                            <option value="../../../../../develop/index.html" data-version="develop">develop branch</option>
                                     </select>
             </form>
-                <form id="search-form" action="../../../../search.html" method="GET">
+                <script>
+            $('option[data-version="'+window.projectVersion+'"]').prop('selected', true);
+        </script>
+        <form id="search-form" action="../../../../search.html" method="GET">
             <span class="glyphicon glyphicon-search"></span>
             <input name="search"
                    class="typeahead form-control"
@@ -70,12 +73,7 @@
                         <div class="namespace-breadcrumbs">
             <ol class="breadcrumb">
                 <li><span class="label label-default">class</span></li>
-                                                            <li><a href="../../../../WPKirk.html">WPKirk</a></li>
-                                        <li><a href="../../../../WPKirk/WPBones.html">WPBones</a></li>
-                                        <li><a href="../../../../WPKirk/WPBones/Foundation.html">Foundation</a></li>
-                                        <li><a href="../../../../WPKirk/WPBones/Foundation/Console.html">Console</a></li>
-    
-                <li>Kernel</li>
+                        <li><a href="../../../../WPKirk.html">WPKirk</a></li><li class="backslash">\</li><li><a href="../../../../WPKirk/WPBones.html">WPBones</a></li><li class="backslash">\</li><li><a href="../../../../WPKirk/WPBones/Foundation.html">Foundation</a></li><li class="backslash">\</li><li><a href="../../../../WPKirk/WPBones/Foundation/Console.html">Console</a></li><li class="backslash">\</li><li>Kernel</li>
             </ol>
         </div>
                 <div id="page-content">
@@ -97,10 +95,34 @@
     
     
     
+            <h2>Properties</h2>
+
+            <table class="table table-condensed">
+                    <tr>
+                <td class="type" id="property_commands">
+                                        protected                                        
+                </td>
+                <td>$commands</td>
+                <td class="last"></td>
+                <td></td>
+            </tr>
+            </table>
+
     
             <h2>Methods</h2>
 
             <div class="container-fluid underlined">
+                    <div class="row">
+                <div class="col-md-2 type">
+                    
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_line">line</a>($str)
+        
+                                            <p class="no-description">No description</p>
+                                    </div>
+                <div class="col-md-2"></div>
+            </div>
                     <div class="row">
                 <div class="col-md-2 type">
                     
@@ -152,8 +174,37 @@
 
             <div id="method-details">
                     <div class="method-item">
+                    <h3 id="method_line">
+        <div class="location">at         line 13</div>
+        <code>            protected        
+    <strong>line</strong>($str)
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                <div class="tags">
+                            <h4>Parameters</h4>
+
+                    <table class="table table-condensed">
+                    <tr>
+                <td></td>
+                <td>$str</td>
+                <td></td>
+            </tr>
+            </table>
+
+            
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
                     <h3 id="method___construct">
-        <div class="location">at line         line 19</div>
+        <div class="location">at         line 19</div>
         <code>                    
     <strong>__construct</strong>()
         </code>
@@ -172,7 +223,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_hasCommands">
-        <div class="location">at line         line 27</div>
+        <div class="location">at         line 27</div>
         <code>                    
     <strong>hasCommands</strong>()
         </code>
@@ -191,7 +242,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_displayHelp">
-        <div class="location">at line         line 32</div>
+        <div class="location">at         line 32</div>
         <code>                    
     <strong>displayHelp</strong>()
         </code>
@@ -210,7 +261,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_handle">
-        <div class="location">at line         line 48</div>
+        <div class="location">at         line 48</div>
         <code>                    
     <strong>handle</strong>($argv)
         </code>

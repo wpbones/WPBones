@@ -25,12 +25,15 @@
                 <div id="control-panel">
                     <form action="#" method="GET">
                 <select id="version-switcher" name="version">
-                                            <option value="../../../0.8.16/index.html" selected>0.8.16</option>
-                                            <option value="../../../0.8.17/index.html">0.8.17</option>
-                                            <option value="../../../master/index.html">master branch</option>
+                                            <option value="../../../0.8.35/index.html" data-version="0.8.35">0.8.35</option>
+                                            <option value="../../../master/index.html" data-version="master">master branch</option>
+                                            <option value="../../../develop/index.html" data-version="develop">develop branch</option>
                                     </select>
             </form>
-                <form id="search-form" action="../../search.html" method="GET">
+                <script>
+            $('option[data-version="'+window.projectVersion+'"]').prop('selected', true);
+        </script>
+        <form id="search-form" action="../../search.html" method="GET">
             <span class="glyphicon glyphicon-search"></span>
             <input name="search"
                    class="typeahead form-control"
@@ -70,10 +73,7 @@
                 <div class="namespace-breadcrumbs">
         <ol class="breadcrumb">
             <li><span class="label label-default">Namespace</span></li>
-                                                        <li><a href="../../WPKirk.html">WPKirk</a></li>
-                                        <li><a href="../../WPKirk/WPBones.html">WPBones</a></li>
-                                        <li><a href="../../WPKirk/WPBones/Database.html">Database</a></li>
-    
+                    <li><a href="../../WPKirk.html">WPKirk</a></li><li class="backslash">\</li><li><a href="../../WPKirk/WPBones.html">WPBones</a></li><li class="backslash">\</li><li><a href="../../WPKirk/WPBones/Database.html">Database</a></li><li class="backslash">\</li>
         </ol>
     </div>
             <div id="page-content">
@@ -89,6 +89,15 @@
             <h2>Classes</h2>
         
     <div class="container-fluid underlined">
+                    <div class="row">
+                <div class="col-md-6">
+                                            <a href="../../WPKirk/WPBones/Database/Seeder.html"><abbr title="WPKirk\WPBones\Database\Seeder">Seeder</abbr></a>
+                                            
+                </div>
+                <div class="col-md-6">
+                    
+                </div>
+            </div>
                     <div class="row">
                 <div class="col-md-6">
                                             <a href="../../WPKirk/WPBones/Database/WordPressOption.html"><abbr title="WPKirk\WPBones\Database\WordPressOption">WordPressOption</abbr></a>

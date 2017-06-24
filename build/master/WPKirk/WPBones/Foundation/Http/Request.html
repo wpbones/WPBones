@@ -25,12 +25,15 @@
                 <div id="control-panel">
                     <form action="#" method="GET">
                 <select id="version-switcher" name="version">
-                                            <option value="../../../../../0.8.16/index.html">0.8.16</option>
-                                            <option value="../../../../../0.8.17/index.html">0.8.17</option>
-                                            <option value="../../../../../master/index.html" selected>master branch</option>
+                                            <option value="../../../../../0.8.35/index.html" data-version="0.8.35">0.8.35</option>
+                                            <option value="../../../../../master/index.html" data-version="master">master branch</option>
+                                            <option value="../../../../../develop/index.html" data-version="develop">develop branch</option>
                                     </select>
             </form>
-                <form id="search-form" action="../../../../search.html" method="GET">
+                <script>
+            $('option[data-version="'+window.projectVersion+'"]').prop('selected', true);
+        </script>
+        <form id="search-form" action="../../../../search.html" method="GET">
             <span class="glyphicon glyphicon-search"></span>
             <input name="search"
                    class="typeahead form-control"
@@ -70,12 +73,7 @@
                         <div class="namespace-breadcrumbs">
             <ol class="breadcrumb">
                 <li><span class="label label-default">class</span></li>
-                                                            <li><a href="../../../../WPKirk.html">WPKirk</a></li>
-                                        <li><a href="../../../../WPKirk/WPBones.html">WPBones</a></li>
-                                        <li><a href="../../../../WPKirk/WPBones/Foundation.html">Foundation</a></li>
-                                        <li><a href="../../../../WPKirk/WPBones/Foundation/Http.html">Http</a></li>
-    
-                <li>Request</li>
+                        <li><a href="../../../../WPKirk.html">WPKirk</a></li><li class="backslash">\</li><li><a href="../../../../WPKirk/WPBones.html">WPBones</a></li><li class="backslash">\</li><li><a href="../../../../WPKirk/WPBones/Foundation.html">Foundation</a></li><li class="backslash">\</li><li><a href="../../../../WPKirk/WPBones/Foundation/Http.html">Http</a></li><li class="backslash">\</li><li>Request</li>
             </ol>
         </div>
                 <div id="page-content">
@@ -97,6 +95,19 @@
     
     
     
+            <h2>Properties</h2>
+
+            <table class="table table-condensed">
+                    <tr>
+                <td class="type" id="property_posts">
+                                        protected                                        
+                </td>
+                <td>$posts</td>
+                <td class="last"></td>
+                <td></td>
+            </tr>
+            </table>
+
     
             <h2>Methods</h2>
 
@@ -197,7 +208,7 @@
             <div id="method-details">
                     <div class="method-item">
                     <h3 id="method___construct">
-        <div class="location">at line         line 12</div>
+        <div class="location">at         line 14</div>
         <code>                    
     <strong>__construct</strong>()
         </code>
@@ -216,7 +227,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method___get">
-        <div class="location">at line         line 17</div>
+        <div class="location">at         line 19</div>
         <code>                    
     <strong>__get</strong>($name)
         </code>
@@ -245,7 +256,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_getMethodAttribute">
-        <div class="location">at line         line 25</div>
+        <div class="location">at         line 27</div>
         <code>                    
     <strong>getMethodAttribute</strong>()
         </code>
@@ -264,7 +275,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_verifyNonce">
-        <div class="location">at line         line 34</div>
+        <div class="location">at         line 36</div>
         <code>                    
     <strong>verifyNonce</strong>($nonce)
         </code>
@@ -293,7 +304,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_get">
-        <div class="location">at line         line 39</div>
+        <div class="location">at         line 41</div>
         <code>                    
     <strong>get</strong>($key, $default = null)
         </code>
@@ -327,7 +338,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_getAsOptions">
-        <div class="location">at line         line 57</div>
+        <div class="location">at         line 59</div>
         <code>                    
     <strong>getAsOptions</strong>()
         </code>
@@ -346,7 +357,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_getIsAjaxAttribute">
-        <div class="location">at line         line 78</div>
+        <div class="location">at         line 80</div>
         <code>                    
     <strong>getIsAjaxAttribute</strong>()
         </code>
@@ -365,7 +376,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_isVerb">
-        <div class="location">at line         line 92</div>
+        <div class="location">at         line 94</div>
         <code>        static            
     <strong>isVerb</strong>($verb)
         </code>

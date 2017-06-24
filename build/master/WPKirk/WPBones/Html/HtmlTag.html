@@ -25,13 +25,15 @@
                 <div id="control-panel">
                     <form action="#" method="GET">
                 <select id="version-switcher" name="version">
-                                            <option value="../../../../0.8.16/index.html">0.8.16</option>
-                                            <option value="../../../../0.8.17/index.html">0.8.17</option>
-                                            <option value="../../../../0.8.18/index.html">0.8.18</option>
-                                            <option value="../../../../master/index.html" selected>master branch</option>
+                                            <option value="../../../../0.8.35/index.html" data-version="0.8.35">0.8.35</option>
+                                            <option value="../../../../master/index.html" data-version="master">master branch</option>
+                                            <option value="../../../../develop/index.html" data-version="develop">develop branch</option>
                                     </select>
             </form>
-                <form id="search-form" action="../../../search.html" method="GET">
+                <script>
+            $('option[data-version="'+window.projectVersion+'"]').prop('selected', true);
+        </script>
+        <form id="search-form" action="../../../search.html" method="GET">
             <span class="glyphicon glyphicon-search"></span>
             <input name="search"
                    class="typeahead form-control"
@@ -71,11 +73,7 @@
                         <div class="namespace-breadcrumbs">
             <ol class="breadcrumb">
                 <li><span class="label label-default">class</span></li>
-                                                            <li><a href="../../../WPKirk.html">WPKirk</a></li>
-                                        <li><a href="../../../WPKirk/WPBones.html">WPBones</a></li>
-                                        <li><a href="../../../WPKirk/WPBones/Html.html">Html</a></li>
-    
-                <li>HtmlTag</li>
+                        <li><a href="../../../WPKirk.html">WPKirk</a></li><li class="backslash">\</li><li><a href="../../../WPKirk/WPBones.html">WPBones</a></li><li class="backslash">\</li><li><a href="../../../WPKirk/WPBones/Html.html">Html</a></li><li class="backslash">\</li><li>HtmlTag</li>
             </ol>
         </div>
                 <div id="page-content">
@@ -97,6 +95,54 @@
     
     
     
+            <h2>Properties</h2>
+
+            <table class="table table-condensed">
+                    <tr>
+                <td class="type" id="property_globalAttributes">
+                                        protected                                        array
+                </td>
+                <td>$globalAttributes</td>
+                <td class="last">Global common HTML tag attributes.</td>
+                <td></td>
+            </tr>
+                    <tr>
+                <td class="type" id="property_attributes">
+                                        protected                                        array
+                </td>
+                <td>$attributes</td>
+                <td class="last">HTML tag attributes.</td>
+                <td></td>
+            </tr>
+                    <tr>
+                <td class="type" id="property_guardedAttributes">
+                                        protected                                        array
+                </td>
+                <td>$guardedAttributes</td>
+                <td class="last">Callable fluent HTML tag attributes but not formatted.</td>
+                <td></td>
+            </tr>
+                    <tr>
+                <td class="type" id="property_markup">
+                                        protected                                        array
+                </td>
+                <td>$markup</td>
+                <td class="last">HTML Tag markup, open and close.</td>
+                <td></td>
+            </tr>
+                    <tr>
+                <td class="type" id="property_content">
+                                        protected                                        string
+                </td>
+                <td>$content</td>
+                <td class="last">This is the content of a Html tag, suc as</p>
+
+<div>{content}</div>
+</td>
+                <td></td>
+            </tr>
+            </table>
+
     
             <h2>Methods</h2>
 
@@ -106,7 +152,51 @@
                     
                 </div>
                 <div class="col-md-8 type">
+                    <a href="#method_getAttributesAttribute">getAttributesAttribute</a>()
+        
+                                            <p class="no-description">No description</p>
+                                    </div>
+                <div class="col-md-2"></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    
+                </div>
+                <div class="col-md-8 type">
                     <a href="#method_attributes">attributes</a>($values)
+        
+                                            <p class="no-description">No description</p>
+                                    </div>
+                <div class="col-md-2"></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_formatAttributes">formatAttributes</a>()
+        
+                                            <p class="no-description">No description</p>
+                                    </div>
+                <div class="col-md-2"></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_formatGlobalAttributes">formatGlobalAttributes</a>()
+        
+                                            <p class="no-description">No description</p>
+                                    </div>
+                <div class="col-md-2"></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_getStyleAttribute">getStyleAttribute</a>()
         
                                             <p class="no-description">No description</p>
                                     </div>
@@ -150,7 +240,62 @@
                     
                 </div>
                 <div class="col-md-8 type">
-                    <a href="#method___construct">__construct</a>(array $arguments = array())
+                    <a href="#method_formatDataAttributes">formatDataAttributes</a>()
+        
+                                            <p class="no-description">No description</p>
+                                    </div>
+                <div class="col-md-2"></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_getClassAttribute">getClassAttribute</a>()
+        
+                                            <p class="no-description">No description</p>
+                                    </div>
+                <div class="col-md-2"></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_setClassAttribute">setClassAttribute</a>($value)
+        
+                                            <p class="no-description">No description</p>
+                                    </div>
+                <div class="col-md-2"></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_getAcceptcharsetAttribute">getAcceptcharsetAttribute</a>()
+        
+                                            <p class="no-description">No description</p>
+                                    </div>
+                <div class="col-md-2"></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_setAcceptcharsetAttribute">setAcceptcharsetAttribute</a>($value)
+        
+                                            <p class="no-description">No description</p>
+                                    </div>
+                <div class="col-md-2"></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method___construct">__construct</a>(array $arguments = [])
         
                                             <p>HtmlTag constructor.</p>                </div>
                 <div class="col-md-2"></div>
@@ -218,6 +363,28 @@
                                             <p>Display the HTML output.</p>                </div>
                 <div class="col-md-2"></div>
             </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_beforeOpenTag">beforeOpenTag</a>()
+        
+                                            <p class="no-description">No description</p>
+                                    </div>
+                <div class="col-md-2"></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_afterCloseTag">afterCloseTag</a>()
+        
+                                            <p class="no-description">No description</p>
+                                    </div>
+                <div class="col-md-2"></div>
+            </div>
             </div>
 
 
@@ -225,8 +392,27 @@
 
             <div id="method-details">
                     <div class="method-item">
+                    <h3 id="method_getAttributesAttribute">
+        <div class="location">at         line 83</div>
+        <code>            protected        
+    <strong>getAttributesAttribute</strong>()
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                <div class="tags">
+            
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
                     <h3 id="method_attributes">
-        <div class="location">at line         line 81</div>
+        <div class="location">at         line 88</div>
         <code>                    
     <strong>attributes</strong>($values)
         </code>
@@ -254,8 +440,65 @@
 
             </div>
                     <div class="method-item">
+                    <h3 id="method_formatAttributes">
+        <div class="location">at         line 100</div>
+        <code>                    
+    <strong>formatAttributes</strong>()
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                <div class="tags">
+            
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_formatGlobalAttributes">
+        <div class="location">at         line 113</div>
+        <code>                    
+    <strong>formatGlobalAttributes</strong>()
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                <div class="tags">
+            
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_getStyleAttribute">
+        <div class="location">at         line 126</div>
+        <code>            protected        
+    <strong>getStyleAttribute</strong>()
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                <div class="tags">
+            
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
                     <h3 id="method_style">
-        <div class="location">at line         line 110</div>
+        <div class="location">at         line 143</div>
         <code>                    
     <strong>style</strong>()
         </code>
@@ -274,7 +517,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_data">
-        <div class="location">at line         line 134</div>
+        <div class="location">at         line 167</div>
         <code>                    
     <strong>data</strong>()
         </code>
@@ -293,7 +536,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_getDataAttribute">
-        <div class="location">at line         line 152</div>
+        <div class="location">at         line 185</div>
         <code>                    
     <strong>getDataAttribute</strong>()
         </code>
@@ -311,10 +554,125 @@
 
             </div>
                     <div class="method-item">
-                    <h3 id="method___construct">
-        <div class="location">at line         line 202</div>
+                    <h3 id="method_formatDataAttributes">
+        <div class="location">at         line 189</div>
         <code>                    
-    <strong>__construct</strong>(array $arguments = array())
+    <strong>formatDataAttributes</strong>()
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                <div class="tags">
+            
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_getClassAttribute">
+        <div class="location">at         line 211</div>
+        <code>            protected        
+    <strong>getClassAttribute</strong>()
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                <div class="tags">
+            
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_setClassAttribute">
+        <div class="location">at         line 216</div>
+        <code>            protected        
+    <strong>setClassAttribute</strong>($value)
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                <div class="tags">
+                            <h4>Parameters</h4>
+
+                    <table class="table table-condensed">
+                    <tr>
+                <td></td>
+                <td>$value</td>
+                <td></td>
+            </tr>
+            </table>
+
+            
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_getAcceptcharsetAttribute">
+        <div class="location">at         line 225</div>
+        <code>            protected        
+    <strong>getAcceptcharsetAttribute</strong>()
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                <div class="tags">
+            
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_setAcceptcharsetAttribute">
+        <div class="location">at         line 230</div>
+        <code>            protected        
+    <strong>setAcceptcharsetAttribute</strong>($value)
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                <div class="tags">
+                            <h4>Parameters</h4>
+
+                    <table class="table table-condensed">
+                    <tr>
+                <td></td>
+                <td>$value</td>
+                <td></td>
+            </tr>
+            </table>
+
+            
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method___construct">
+        <div class="location">at         line 248</div>
+        <code>                    
+    <strong>__construct</strong>(array $arguments = [])
         </code>
     </h3>
     <div class="details">
@@ -322,7 +680,7 @@
     
 
                     <div class="method-description">
-                                    <p>HtmlTag constructor.</p>                                </div>
+                                    <p>HtmlTag constructor.</p>                                                </div>
                 <div class="tags">
                             <h4>Parameters</h4>
 
@@ -343,7 +701,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method___get">
-        <div class="location">at line         line 227</div>
+        <div class="location">at         line 273</div>
         <code>                    
     <strong>__get</strong>($name)
         </code>
@@ -372,7 +730,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method___set">
-        <div class="location">at line         line 243</div>
+        <div class="location">at         line 293</div>
         <code>                    
     <strong>__set</strong>($name, $value)
         </code>
@@ -406,7 +764,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method___toString">
-        <div class="location">at line         line 264</div>
+        <div class="location">at         line 318</div>
         <code>                    string
     <strong>__toString</strong>()
         </code>
@@ -416,7 +774,7 @@
     
 
                     <div class="method-description">
-                                    <p>Get the string rappresentation of the tag.</p>                                </div>
+                                    <p>Get the string rappresentation of the tag.</p>                                                </div>
                 <div class="tags">
             
                             <h4>Return Value</h4>
@@ -436,7 +794,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method___call">
-        <div class="location">at line         line 269</div>
+        <div class="location">at         line 323</div>
         <code>                    
     <strong>__call</strong>($name, $arguments)
         </code>
@@ -470,7 +828,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_html">
-        <div class="location">at line         line 290</div>
+        <div class="location">at         line 347</div>
         <code>                    string
     <strong>html</strong>()
         </code>
@@ -480,7 +838,7 @@
     
 
                     <div class="method-description">
-                                    <p>Get the HTML output.</p>                                </div>
+                                    <p>Get the HTML output.</p>                                                </div>
                 <div class="tags">
             
                             <h4>Return Value</h4>
@@ -500,7 +858,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_render">
-        <div class="location">at line         line 348</div>
+        <div class="location">at         line 381</div>
         <code>                    
     <strong>render</strong>()
         </code>
@@ -510,7 +868,45 @@
     
 
                     <div class="method-description">
-                                    <p>Display the HTML output.</p>                                </div>
+                                    <p>Display the HTML output.</p>                                                </div>
+                <div class="tags">
+            
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_beforeOpenTag">
+        <div class="location">at         line 387</div>
+        <code>            protected        
+    <strong>beforeOpenTag</strong>()
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                <div class="tags">
+            
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_afterCloseTag">
+        <div class="location">at         line 392</div>
+        <code>            protected        
+    <strong>afterCloseTag</strong>()
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
                 <div class="tags">
             
             

@@ -25,13 +25,15 @@
                 <div id="control-panel">
                     <form action="#" method="GET">
                 <select id="version-switcher" name="version">
-                                            <option value="../../../../0.8.16/index.html">0.8.16</option>
-                                            <option value="../../../../0.8.17/index.html">0.8.17</option>
-                                            <option value="../../../../0.8.18/index.html">0.8.18</option>
-                                            <option value="../../../../master/index.html" selected>master branch</option>
+                                            <option value="../../../../0.8.35/index.html" data-version="0.8.35">0.8.35</option>
+                                            <option value="../../../../master/index.html" data-version="master">master branch</option>
+                                            <option value="../../../../develop/index.html" data-version="develop">develop branch</option>
                                     </select>
             </form>
-                <form id="search-form" action="../../../search.html" method="GET">
+                <script>
+            $('option[data-version="'+window.projectVersion+'"]').prop('selected', true);
+        </script>
+        <form id="search-form" action="../../../search.html" method="GET">
             <span class="glyphicon glyphicon-search"></span>
             <input name="search"
                    class="typeahead form-control"
@@ -71,11 +73,7 @@
                         <div class="namespace-breadcrumbs">
             <ol class="breadcrumb">
                 <li><span class="label label-default">class</span></li>
-                                                            <li><a href="../../../WPKirk.html">WPKirk</a></li>
-                                        <li><a href="../../../WPKirk/WPBones.html">WPBones</a></li>
-                                        <li><a href="../../../WPKirk/WPBones/Support.html">Support</a></li>
-    
-                <li>Widget</li>
+                        <li><a href="../../../WPKirk.html">WPKirk</a></li><li class="backslash">\</li><li><a href="../../../WPKirk/WPBones.html">WPBones</a></li><li class="backslash">\</li><li><a href="../../../WPKirk/WPBones/Support.html">Support</a></li><li class="backslash">\</li><li>Widget</li>
             </ol>
         </div>
                 <div id="page-content">
@@ -122,7 +120,7 @@ unique.</td>
                                                                                 array
                 </td>
                 <td>$widget_options</td>
-                <td class="last">Optional. Passed to wp<em>register</em>sidebar_widget()</td>
+                <td class="last">Optional. Passed to wp_register_sidebar_widget()</td>
                 <td></td>
             </tr>
                     <tr>
@@ -130,7 +128,15 @@ unique.</td>
                                                                                 array
                 </td>
                 <td>$control_options</td>
-                <td class="last">Optional. Passed to wp<em>register</em>widget_control()</td>
+                <td class="last">Optional. Passed to wp_register_widget_control()</td>
+                <td></td>
+            </tr>
+                    <tr>
+                <td class="type" id="property_plugin">
+                                        protected                                        
+                </td>
+                <td>$plugin</td>
+                <td class="last">An instance of plugin.</td>
                 <td></td>
             </tr>
             </table>
@@ -207,7 +213,7 @@ unique.</td>
             <div id="method-details">
                     <div class="method-item">
                     <h3 id="method_viewForm">
-        <div class="location">at line         line 55</div>
+        <div class="location">at         line 57</div>
         <code>    abstract                string
     <strong>viewForm</strong>($instance)
         </code>
@@ -217,7 +223,7 @@ unique.</td>
     
 
                     <div class="method-description">
-                                    <p>Return the view resource path. eg: "widget.form".</p>                                </div>
+                                    <p>Return the view resource path. eg: "widget.form".</p>                                                </div>
                 <div class="tags">
                             <h4>Parameters</h4>
 
@@ -247,7 +253,7 @@ unique.</td>
             </div>
                     <div class="method-item">
                     <h3 id="method_viewWidget">
-        <div class="location">at line         line 65</div>
+        <div class="location">at         line 67</div>
         <code>    abstract                string
     <strong>viewWidget</strong>(array $args, array $instance)
         </code>
@@ -257,7 +263,7 @@ unique.</td>
     
 
                     <div class="method-description">
-                                    <p>Return the view resource path. eg: "widget.demo".</p>                                </div>
+                                    <p>Return the view resource path. eg: "widget.demo".</p>                                                </div>
                 <div class="tags">
                             <h4>Parameters</h4>
 
@@ -265,7 +271,7 @@ unique.</td>
                     <tr>
                 <td>array</td>
                 <td>$args</td>
-                <td>Display arguments including before<em>title, after</em>title, before<em>widget, and after</em>widget.</td>
+                <td>Display arguments including before_title, after_title, before_widget, and after_widget.</td>
             </tr>
                     <tr>
                 <td>array</td>
@@ -292,7 +298,7 @@ unique.</td>
             </div>
                     <div class="method-item">
                     <h3 id="method_defaults">
-        <div class="location">at line         line 72</div>
+        <div class="location">at         line 74</div>
         <code>    abstract                array
     <strong>defaults</strong>()
         </code>
@@ -302,7 +308,7 @@ unique.</td>
     
 
                     <div class="method-description">
-                                    <p>Retrun a key pairs array with the default value for widget.</p>                                </div>
+                                    <p>Retrun a key pairs array with the default value for widget.</p>                                                </div>
                 <div class="tags">
             
                             <h4>Return Value</h4>
@@ -322,7 +328,7 @@ unique.</td>
             </div>
                     <div class="method-item">
                     <h3 id="method___construct">
-        <div class="location">at line         line 79</div>
+        <div class="location">at         line 81</div>
         <code>                    
     <strong>__construct</strong>(string $plugin)
         </code>
@@ -332,7 +338,7 @@ unique.</td>
     
 
                     <div class="method-description">
-                                    <p>Widget constructor.</p>                                </div>
+                                    <p>Widget constructor.</p>                                                </div>
                 <div class="tags">
                             <h4>Parameters</h4>
 
@@ -353,7 +359,7 @@ unique.</td>
             </div>
                     <div class="method-item">
                     <h3 id="method_widget">
-        <div class="location">at line         line 93</div>
+        <div class="location">at         line 95</div>
         <code>                    
     <strong>widget</strong>(array $args, array $instance)
         </code>
@@ -363,7 +369,7 @@ unique.</td>
     
 
                     <div class="method-description">
-                                    <p>Echo the widget content.</p>                    <p>Subclasses should over-ride this function to generate their widget code.</p>            </div>
+                                    <p>Echo the widget content.</p>                    <p>Subclasses should over-ride this function to generate their widget code.</p>                            </div>
                 <div class="tags">
                             <h4>Parameters</h4>
 
@@ -371,7 +377,7 @@ unique.</td>
                     <tr>
                 <td>array</td>
                 <td>$args</td>
-                <td>Display arguments including before<em>title, after</em>title, before<em>widget, and after</em>widget.</td>
+                <td>Display arguments including before_title, after_title, before_widget, and after_widget.</td>
             </tr>
                     <tr>
                 <td>array</td>
@@ -389,7 +395,7 @@ unique.</td>
             </div>
                     <div class="method-item">
                     <h3 id="method_form">
-        <div class="location">at line         line 111</div>
+        <div class="location">at         line 113</div>
         <code>                    void
     <strong>form</strong>(array $instance)
         </code>
@@ -399,7 +405,7 @@ unique.</td>
     
 
                     <div class="method-description">
-                                    <p>Echo the settings update form</p>                                </div>
+                                    <p>Echo the settings update form</p>                                                </div>
                 <div class="tags">
                             <h4>Parameters</h4>
 

@@ -25,13 +25,15 @@
                 <div id="control-panel">
                     <form action="#" method="GET">
                 <select id="version-switcher" name="version">
-                                            <option value="../../../../../0.8.16/index.html">0.8.16</option>
-                                            <option value="../../../../../0.8.17/index.html">0.8.17</option>
-                                            <option value="../../../../../0.8.18/index.html">0.8.18</option>
-                                            <option value="../../../../../master/index.html" selected>master branch</option>
+                                            <option value="../../../../../0.8.35/index.html" data-version="0.8.35">0.8.35</option>
+                                            <option value="../../../../../master/index.html" data-version="master">master branch</option>
+                                            <option value="../../../../../develop/index.html" data-version="develop">develop branch</option>
                                     </select>
             </form>
-                <form id="search-form" action="../../../../search.html" method="GET">
+                <script>
+            $('option[data-version="'+window.projectVersion+'"]').prop('selected', true);
+        </script>
+        <form id="search-form" action="../../../../search.html" method="GET">
             <span class="glyphicon glyphicon-search"></span>
             <input name="search"
                    class="typeahead form-control"
@@ -71,12 +73,7 @@
                         <div class="namespace-breadcrumbs">
             <ol class="breadcrumb">
                 <li><span class="label label-default">class</span></li>
-                                                            <li><a href="../../../../WPKirk.html">WPKirk</a></li>
-                                        <li><a href="../../../../WPKirk/WPBones.html">WPBones</a></li>
-                                        <li><a href="../../../../WPKirk/WPBones/Database.html">Database</a></li>
-                                        <li><a href="../../../../WPKirk/WPBones/Database/Migrations.html">Migrations</a></li>
-    
-                <li>Migration</li>
+                        <li><a href="../../../../WPKirk.html">WPKirk</a></li><li class="backslash">\</li><li><a href="../../../../WPKirk/WPBones.html">WPBones</a></li><li class="backslash">\</li><li><a href="../../../../WPKirk/WPBones/Database.html">Database</a></li><li class="backslash">\</li><li><a href="../../../../WPKirk/WPBones/Database/Migrations.html">Migrations</a></li><li class="backslash">\</li><li>Migration</li>
             </ol>
         </div>
                 <div id="page-content">
@@ -98,6 +95,27 @@
     
     
     
+            <h2>Properties</h2>
+
+            <table class="table table-condensed">
+                    <tr>
+                <td class="type" id="property_charsetCollate">
+                                        protected                                        
+                </td>
+                <td>$charsetCollate</td>
+                <td class="last"></td>
+                <td></td>
+            </tr>
+                    <tr>
+                <td class="type" id="property_tablename">
+                                        protected                                        
+                </td>
+                <td>$tablename</td>
+                <td class="last"></td>
+                <td></td>
+            </tr>
+            </table>
+
     
             <h2>Methods</h2>
 
@@ -134,6 +152,28 @@
                                     </div>
                 <div class="col-md-2"></div>
             </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_create">create</a>($sql)
+        
+                                            <p class="no-description">No description</p>
+                                    </div>
+                <div class="col-md-2"></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_tablename">tablename</a>()
+        
+                                            <p class="no-description">No description</p>
+                                    </div>
+                <div class="col-md-2"></div>
+            </div>
             </div>
 
 
@@ -142,7 +182,7 @@
             <div id="method-details">
                     <div class="method-item">
                     <h3 id="method___construct">
-        <div class="location">at line         line 13</div>
+        <div class="location">at         line 13</div>
         <code>                    
     <strong>__construct</strong>()
         </code>
@@ -152,7 +192,7 @@
     
 
                     <div class="method-description">
-                                    <p>Create a new Migration.</p>                                </div>
+                                    <p>Create a new Migration.</p>                                                </div>
                 <div class="tags">
             
             
@@ -163,7 +203,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_up">
-        <div class="location">at line         line 25</div>
+        <div class="location">at         line 25</div>
         <code>                    
     <strong>up</strong>()
         </code>
@@ -182,9 +222,57 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_down">
-        <div class="location">at line         line 31</div>
+        <div class="location">at         line 31</div>
         <code>                    
     <strong>down</strong>()
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                <div class="tags">
+            
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_create">
+        <div class="location">at         line 36</div>
+        <code>            protected        
+    <strong>create</strong>($sql)
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                <div class="tags">
+                            <h4>Parameters</h4>
+
+                    <table class="table table-condensed">
+                    <tr>
+                <td></td>
+                <td>$sql</td>
+                <td></td>
+            </tr>
+            </table>
+
+            
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_tablename">
+        <div class="location">at         line 42</div>
+        <code>            protected        
+    <strong>tablename</strong>()
         </code>
     </h3>
     <div class="details">

@@ -25,13 +25,15 @@
                 <div id="control-panel">
                     <form action="#" method="GET">
                 <select id="version-switcher" name="version">
-                                            <option value="../../../../0.8.16/index.html">0.8.16</option>
-                                            <option value="../../../../0.8.17/index.html">0.8.17</option>
-                                            <option value="../../../../0.8.18/index.html">0.8.18</option>
-                                            <option value="../../../../master/index.html" selected>master branch</option>
+                                            <option value="../../../../0.8.35/index.html" data-version="0.8.35">0.8.35</option>
+                                            <option value="../../../../master/index.html" data-version="master">master branch</option>
+                                            <option value="../../../../develop/index.html" data-version="develop">develop branch</option>
                                     </select>
             </form>
-                <form id="search-form" action="../../../search.html" method="GET">
+                <script>
+            $('option[data-version="'+window.projectVersion+'"]').prop('selected', true);
+        </script>
+        <form id="search-form" action="../../../search.html" method="GET">
             <span class="glyphicon glyphicon-search"></span>
             <input name="search"
                    class="typeahead form-control"
@@ -71,11 +73,7 @@
                         <div class="namespace-breadcrumbs">
             <ol class="breadcrumb">
                 <li><span class="label label-default">class</span></li>
-                                                            <li><a href="../../../WPKirk.html">WPKirk</a></li>
-                                        <li><a href="../../../WPKirk/WPBones.html">WPBones</a></li>
-                                        <li><a href="../../../WPKirk/WPBones/Routing.html">Routing</a></li>
-    
-                <li>Route</li>
+                        <li><a href="../../../WPKirk.html">WPKirk</a></li><li class="backslash">\</li><li><a href="../../../WPKirk/WPBones.html">WPBones</a></li><li class="backslash">\</li><li><a href="../../../WPKirk/WPBones/Routing.html">Routing</a></li><li class="backslash">\</li><li>Route</li>
             </ol>
         </div>
                 <div id="page-content">
@@ -133,7 +131,7 @@
             <div id="method-details">
                     <div class="method-item">
                     <h3 id="method_get">
-        <div class="location">at line         line 9</div>
+        <div class="location">at         line 11</div>
         <code>        static            
     <strong>get</strong>($path)
         </code>

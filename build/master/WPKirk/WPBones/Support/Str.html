@@ -25,12 +25,15 @@
                 <div id="control-panel">
                     <form action="#" method="GET">
                 <select id="version-switcher" name="version">
-                                            <option value="../../../../0.8.16/index.html">0.8.16</option>
-                                            <option value="../../../../0.8.17/index.html">0.8.17</option>
-                                            <option value="../../../../master/index.html" selected>master branch</option>
+                                            <option value="../../../../0.8.35/index.html" data-version="0.8.35">0.8.35</option>
+                                            <option value="../../../../master/index.html" data-version="master">master branch</option>
+                                            <option value="../../../../develop/index.html" data-version="develop">develop branch</option>
                                     </select>
             </form>
-                <form id="search-form" action="../../../search.html" method="GET">
+                <script>
+            $('option[data-version="'+window.projectVersion+'"]').prop('selected', true);
+        </script>
+        <form id="search-form" action="../../../search.html" method="GET">
             <span class="glyphicon glyphicon-search"></span>
             <input name="search"
                    class="typeahead form-control"
@@ -70,11 +73,7 @@
                         <div class="namespace-breadcrumbs">
             <ol class="breadcrumb">
                 <li><span class="label label-default">class</span></li>
-                                                            <li><a href="../../../WPKirk.html">WPKirk</a></li>
-                                        <li><a href="../../../WPKirk/WPBones.html">WPBones</a></li>
-                                        <li><a href="../../../WPKirk/WPBones/Support.html">Support</a></li>
-    
-                <li>Str</li>
+                        <li><a href="../../../WPKirk.html">WPKirk</a></li><li class="backslash">\</li><li><a href="../../../WPKirk/WPBones.html">WPBones</a></li><li class="backslash">\</li><li><a href="../../../WPKirk/WPBones/Support.html">Support</a></li><li class="backslash">\</li><li>Str</li>
             </ol>
         </div>
                 <div id="page-content">
@@ -96,6 +95,35 @@
     
     
     
+            <h2>Properties</h2>
+
+            <table class="table table-condensed">
+                    <tr>
+                <td class="type" id="property_snakeCache">
+                    static                    protected                                        array
+                </td>
+                <td>$snakeCache</td>
+                <td class="last">The cache of snake-cased words.</td>
+                <td></td>
+            </tr>
+                    <tr>
+                <td class="type" id="property_camelCache">
+                    static                    protected                                        array
+                </td>
+                <td>$camelCache</td>
+                <td class="last">The cache of camel-cased words.</td>
+                <td></td>
+            </tr>
+                    <tr>
+                <td class="type" id="property_studlyCache">
+                    static                    protected                                        array
+                </td>
+                <td>$studlyCache</td>
+                <td class="last">The cache of studly-cased words.</td>
+                <td></td>
+            </tr>
+            </table>
+
     
             <h2>Methods</h2>
 
@@ -350,6 +378,16 @@
                                             <p>Make a string's first character uppercase.</p>                </div>
                 <div class="col-md-2"></div>
             </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    static&nbsp;array
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_charsArray">charsArray</a>()
+        
+                                            <p>Returns the replacements for the ascii method.</p>                </div>
+                <div class="col-md-2"></div>
+            </div>
             </div>
 
 
@@ -358,7 +396,7 @@
             <div id="method-details">
                     <div class="method-item">
                     <h3 id="method_ascii">
-        <div class="location">at line         line 34</div>
+        <div class="location">at         line 36</div>
         <code>        static            string
     <strong>ascii</strong>(string $value)
         </code>
@@ -368,7 +406,7 @@
     
 
                     <div class="method-description">
-                                    <p>Transliterate a UTF-8 value to ASCII.</p>                                </div>
+                                    <p>Transliterate a UTF-8 value to ASCII.</p>                                                </div>
                 <div class="tags">
                             <h4>Parameters</h4>
 
@@ -398,7 +436,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_camel">
-        <div class="location">at line         line 49</div>
+        <div class="location">at         line 51</div>
         <code>        static            string
     <strong>camel</strong>(string $value)
         </code>
@@ -408,7 +446,7 @@
     
 
                     <div class="method-description">
-                                    <p>Convert a value to camel case.</p>                                </div>
+                                    <p>Convert a value to camel case.</p>                                                </div>
                 <div class="tags">
                             <h4>Parameters</h4>
 
@@ -438,7 +476,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_contains">
-        <div class="location">at line         line 65</div>
+        <div class="location">at         line 67</div>
         <code>        static            bool
     <strong>contains</strong>(string $haystack, string|array $needles)
         </code>
@@ -448,7 +486,7 @@
     
 
                     <div class="method-description">
-                                    <p>Determine if a given string contains a given substring.</p>                                </div>
+                                    <p>Determine if a given string contains a given substring.</p>                                                </div>
                 <div class="tags">
                             <h4>Parameters</h4>
 
@@ -483,7 +521,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_endsWith">
-        <div class="location">at line         line 83</div>
+        <div class="location">at         line 85</div>
         <code>        static            bool
     <strong>endsWith</strong>(string $haystack, string|array $needles)
         </code>
@@ -493,7 +531,7 @@
     
 
                     <div class="method-description">
-                                    <p>Determine if a given string ends with a given substring.</p>                                </div>
+                                    <p>Determine if a given string ends with a given substring.</p>                                                </div>
                 <div class="tags">
                             <h4>Parameters</h4>
 
@@ -528,7 +566,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_finish">
-        <div class="location">at line         line 101</div>
+        <div class="location">at         line 103</div>
         <code>        static            string
     <strong>finish</strong>(string $value, string $cap)
         </code>
@@ -538,7 +576,7 @@
     
 
                     <div class="method-description">
-                                    <p>Cap a string with a single instance of a given value.</p>                                </div>
+                                    <p>Cap a string with a single instance of a given value.</p>                                                </div>
                 <div class="tags">
                             <h4>Parameters</h4>
 
@@ -573,7 +611,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_is">
-        <div class="location">at line         line 115</div>
+        <div class="location">at         line 117</div>
         <code>        static            bool
     <strong>is</strong>(string $pattern, string $value)
         </code>
@@ -583,7 +621,7 @@
     
 
                     <div class="method-description">
-                                    <p>Determine if a given string matches a given pattern.</p>                                </div>
+                                    <p>Determine if a given string matches a given pattern.</p>                                                </div>
                 <div class="tags">
                             <h4>Parameters</h4>
 
@@ -618,7 +656,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_length">
-        <div class="location">at line         line 137</div>
+        <div class="location">at         line 139</div>
         <code>        static            int
     <strong>length</strong>(string $value)
         </code>
@@ -628,7 +666,7 @@
     
 
                     <div class="method-description">
-                                    <p>Return the length of the given string.</p>                                </div>
+                                    <p>Return the length of the given string.</p>                                                </div>
                 <div class="tags">
                             <h4>Parameters</h4>
 
@@ -658,7 +696,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_limit">
-        <div class="location">at line         line 150</div>
+        <div class="location">at         line 152</div>
         <code>        static            string
     <strong>limit</strong>(string $value, int $limit = 100, string $end = &#039;...&#039;)
         </code>
@@ -668,7 +706,7 @@
     
 
                     <div class="method-description">
-                                    <p>Limit the number of characters in a string.</p>                                </div>
+                                    <p>Limit the number of characters in a string.</p>                                                </div>
                 <div class="tags">
                             <h4>Parameters</h4>
 
@@ -708,7 +746,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_lower">
-        <div class="location">at line         line 165</div>
+        <div class="location">at         line 167</div>
         <code>        static            string
     <strong>lower</strong>(string $value)
         </code>
@@ -718,7 +756,7 @@
     
 
                     <div class="method-description">
-                                    <p>Convert the given string to lower-case.</p>                                </div>
+                                    <p>Convert the given string to lower-case.</p>                                                </div>
                 <div class="tags">
                             <h4>Parameters</h4>
 
@@ -748,7 +786,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_words">
-        <div class="location">at line         line 178</div>
+        <div class="location">at         line 180</div>
         <code>        static            string
     <strong>words</strong>(string $value, int $words = 100, string $end = &#039;...&#039;)
         </code>
@@ -758,7 +796,7 @@
     
 
                     <div class="method-description">
-                                    <p>Limit the number of words in a string.</p>                                </div>
+                                    <p>Limit the number of words in a string.</p>                                                </div>
                 <div class="tags">
                             <h4>Parameters</h4>
 
@@ -798,7 +836,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_parseCallback">
-        <div class="location">at line         line 196</div>
+        <div class="location">at         line 198</div>
         <code>        static            array
     <strong>parseCallback</strong>(string $callback, string $default)
         </code>
@@ -808,7 +846,7 @@
     
 
                     <div class="method-description">
-                                    <p>Parse a Class@method style callback into class and method.</p>                                </div>
+                                    <p>Parse a Class@method style callback into class and method.</p>                                                </div>
                 <div class="tags">
                             <h4>Parameters</h4>
 
@@ -843,7 +881,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_random">
-        <div class="location">at line         line 207</div>
+        <div class="location">at         line 209</div>
         <code>        static            string
     <strong>random</strong>(int $length = 16)
         </code>
@@ -853,7 +891,7 @@
     
 
                     <div class="method-description">
-                                    <p>Generate a more truly "random" alpha-numeric string.</p>                                </div>
+                                    <p>Generate a more truly "random" alpha-numeric string.</p>                                                </div>
                 <div class="tags">
                             <h4>Parameters</h4>
 
@@ -883,7 +921,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_randomBytes">
-        <div class="location">at line         line 230</div>
+        <div class="location">at         line 232</div>
         <code>        static            string
     <strong>randomBytes</strong>(int $length = 16)
         <small><sup><span class="label label-danger">deprecated</span></sup></small></code>
@@ -900,7 +938,7 @@
     
 
                     <div class="method-description">
-                                    <p>Generate a more truly "random" bytes.</p>                                </div>
+                                    <p>Generate a more truly "random" bytes.</p>                                                </div>
                 <div class="tags">
                             <h4>Parameters</h4>
 
@@ -930,7 +968,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_quickRandom">
-        <div class="location">at line         line 243</div>
+        <div class="location">at         line 245</div>
         <code>        static            string
     <strong>quickRandom</strong>(int $length = 16)
         </code>
@@ -940,7 +978,7 @@
     
 
                     <div class="method-description">
-                                    <p>Generate a "random" alpha-numeric string.</p>                    <p>Should not be considered sufficient for cryptography, etc.</p>            </div>
+                                    <p>Generate a "random" alpha-numeric string.</p>                    <p>Should not be considered sufficient for cryptography, etc.</p>                            </div>
                 <div class="tags">
                             <h4>Parameters</h4>
 
@@ -970,7 +1008,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_equals">
-        <div class="location">at line         line 263</div>
+        <div class="location">at         line 265</div>
         <code>        static            bool
     <strong>equals</strong>(string $knownString, string $userInput)
         <small><sup><span class="label label-danger">deprecated</span></sup></small></code>
@@ -989,7 +1027,7 @@
                     <div class="method-description">
                                     <p>Compares two strings using a constant-time algorithm.</p>                    <p>Note: This method will leak length information.</p>
 
-<p>Note: Adapted from Symfony\Component\Security\Core\Util\StringUtils.</p>            </div>
+<p>Note: Adapted from Symfony\Component\Security\Core\Util\StringUtils.</p>                            </div>
                 <div class="tags">
                             <h4>Parameters</h4>
 
@@ -1024,7 +1062,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_replaceFirst">
-        <div class="location">at line         line 276</div>
+        <div class="location">at         line 278</div>
         <code>        static            string
     <strong>replaceFirst</strong>(string $search, string $replace, string $subject)
         </code>
@@ -1034,7 +1072,7 @@
     
 
                     <div class="method-description">
-                                    <p>Replace the first occurrence of a given value in the string.</p>                                </div>
+                                    <p>Replace the first occurrence of a given value in the string.</p>                                                </div>
                 <div class="tags">
                             <h4>Parameters</h4>
 
@@ -1074,7 +1112,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_replaceLast">
-        <div class="location">at line         line 295</div>
+        <div class="location">at         line 297</div>
         <code>        static            string
     <strong>replaceLast</strong>(string $search, string $replace, string $subject)
         </code>
@@ -1084,7 +1122,7 @@
     
 
                     <div class="method-description">
-                                    <p>Replace the last occurrence of a given value in the string.</p>                                </div>
+                                    <p>Replace the last occurrence of a given value in the string.</p>                                                </div>
                 <div class="tags">
                             <h4>Parameters</h4>
 
@@ -1124,7 +1162,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_upper">
-        <div class="location">at line         line 312</div>
+        <div class="location">at         line 314</div>
         <code>        static            string
     <strong>upper</strong>(string $value)
         </code>
@@ -1134,7 +1172,7 @@
     
 
                     <div class="method-description">
-                                    <p>Convert the given string to upper-case.</p>                                </div>
+                                    <p>Convert the given string to upper-case.</p>                                                </div>
                 <div class="tags">
                             <h4>Parameters</h4>
 
@@ -1164,7 +1202,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_title">
-        <div class="location">at line         line 323</div>
+        <div class="location">at         line 325</div>
         <code>        static            string
     <strong>title</strong>(string $value)
         </code>
@@ -1174,7 +1212,7 @@
     
 
                     <div class="method-description">
-                                    <p>Convert the given string to title case.</p>                                </div>
+                                    <p>Convert the given string to title case.</p>                                                </div>
                 <div class="tags">
                             <h4>Parameters</h4>
 
@@ -1204,7 +1242,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_slug">
-        <div class="location">at line         line 335</div>
+        <div class="location">at         line 337</div>
         <code>        static            string
     <strong>slug</strong>(string $title, string $separator = &#039;-&#039;)
         </code>
@@ -1214,7 +1252,7 @@
     
 
                     <div class="method-description">
-                                    <p>Generate a URL friendly "slug" from a given string.</p>                                </div>
+                                    <p>Generate a URL friendly "slug" from a given string.</p>                                                </div>
                 <div class="tags">
                             <h4>Parameters</h4>
 
@@ -1249,7 +1287,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_snake">
-        <div class="location">at line         line 360</div>
+        <div class="location">at         line 362</div>
         <code>        static            string
     <strong>snake</strong>(string $value, string $delimiter = &#039;_&#039;)
         </code>
@@ -1259,7 +1297,7 @@
     
 
                     <div class="method-description">
-                                    <p>Convert a string to snake case.</p>                                </div>
+                                    <p>Convert a string to snake case.</p>                                                </div>
                 <div class="tags">
                             <h4>Parameters</h4>
 
@@ -1294,7 +1332,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_startsWith">
-        <div class="location">at line         line 384</div>
+        <div class="location">at         line 386</div>
         <code>        static            bool
     <strong>startsWith</strong>(string $haystack, string|array $needles)
         </code>
@@ -1304,7 +1342,7 @@
     
 
                     <div class="method-description">
-                                    <p>Determine if a given string starts with a given substring.</p>                                </div>
+                                    <p>Determine if a given string starts with a given substring.</p>                                                </div>
                 <div class="tags">
                             <h4>Parameters</h4>
 
@@ -1339,7 +1377,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_studly">
-        <div class="location">at line         line 401</div>
+        <div class="location">at         line 403</div>
         <code>        static            string
     <strong>studly</strong>(string $value)
         </code>
@@ -1349,7 +1387,7 @@
     
 
                     <div class="method-description">
-                                    <p>Convert a value to studly caps case.</p>                                </div>
+                                    <p>Convert a value to studly caps case.</p>                                                </div>
                 <div class="tags">
                             <h4>Parameters</h4>
 
@@ -1379,7 +1417,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_substr">
-        <div class="location">at line         line 422</div>
+        <div class="location">at         line 424</div>
         <code>        static            string
     <strong>substr</strong>(string $string, int $start, int|null $length = null)
         </code>
@@ -1389,7 +1427,7 @@
     
 
                     <div class="method-description">
-                                    <p>Returns the portion of string specified by the start and length parameters.</p>                                </div>
+                                    <p>Returns the portion of string specified by the start and length parameters.</p>                                                </div>
                 <div class="tags">
                             <h4>Parameters</h4>
 
@@ -1429,7 +1467,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_ucfirst">
-        <div class="location">at line         line 433</div>
+        <div class="location">at         line 435</div>
         <code>        static            string
     <strong>ucfirst</strong>(string $string)
         </code>
@@ -1439,7 +1477,7 @@
     
 
                     <div class="method-description">
-                                    <p>Make a string's first character uppercase.</p>                                </div>
+                                    <p>Make a string's first character uppercase.</p>                                                </div>
                 <div class="tags">
                             <h4>Parameters</h4>
 
@@ -1463,6 +1501,45 @@
 
             
             
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_charsArray">
+        <div class="location">at         line 449</div>
+        <code>        static    protected        array
+    <strong>charsArray</strong>()
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                    <div class="method-description">
+                                    <p>Returns the replacements for the ascii method.</p>                    <p>Note: Adapted from Stringy\Stringy.</p>                            </div>
+                <div class="tags">
+            
+                            <h4>Return Value</h4>
+
+                    <table class="table table-condensed">
+        <tr>
+            <td>array</td>
+            <td></td>
+        </tr>
+    </table>
+
+            
+            
+                            <h4>See also</h4>
+
+                    <table class="table table-condensed">
+                    <tr>
+                <td>https://github.com/danielstjules/Stringy/blob/2.3.1/LICENSE.txt</td>
+                <td></td>
+            </tr>
+            </table>
+
                     </div>
     </div>
 

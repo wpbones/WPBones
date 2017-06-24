@@ -25,15 +25,15 @@
                 <div id="control-panel">
                     <form action="#" method="GET">
                 <select id="version-switcher" name="version">
-                                            <option value="../0.8.16/index.html">0.8.16</option>
-                                            <option value="../0.8.17/index.html">0.8.17</option>
-                                            <option value="../0.8.18/index.html">0.8.18</option>
-                                            <option value="../0.8.19/index.html">0.8.19</option>
-                                            <option value="../master/index.html" selected>master branch</option>
-                                            <option value="../develop/index.html">develop branch</option>
+                                            <option value="../0.8.35/index.html" data-version="0.8.35">0.8.35</option>
+                                            <option value="../master/index.html" data-version="master">master branch</option>
+                                            <option value="../develop/index.html" data-version="develop">develop branch</option>
                                     </select>
             </form>
-                <form id="search-form" action="search.html" method="GET">
+                <script>
+            $('option[data-version="'+window.projectVersion+'"]').prop('selected', true);
+        </script>
+        <form id="search-form" action="search.html" method="GET">
             <span class="glyphicon glyphicon-search"></span>
             <input name="search"
                    class="typeahead form-control"
@@ -78,7 +78,7 @@
 
     <p>This page allows you to search through the API documentation for
     specific terms. Enter your search words into the box below and click
-    "submit". The search will be performed on namespaces, clases, interfaces,
+    "submit". The search will be performed on namespaces, classes, interfaces,
     traits, functions, and methods.</p>
 
     <form class="form-inline" role="form" action="search.html" method="GET">
@@ -107,10 +107,6 @@
 
             $('#search').val(term);
             var container = $('.search-results');
-
-            // create the search index
-            
-
             var results = Sami.search(term);
             var len = results.length;
 
