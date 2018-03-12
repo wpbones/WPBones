@@ -604,12 +604,16 @@ class Plugin extends Container implements PluginContract
       }
       // default "get"
       else {
-        list( $controller, $method ) = explode( '@', $routes[ 'get' ] );
+          if( isset( $routes[ 'get' ] ) ) {
+              list($controller, $method) = explode('@', $routes[ 'get' ]);
+          }
       }
     }
 
-    $hook = create_function( '', sprintf( '$instance = new %s; return( $instance->render( "%s" ) );',
-                                          'WPKirk\\Http\\Controllers\\' . $controller, $method ) );
+    if( $controller && $method ) {
+        $hook = create_function('', sprintf('$instance = new %s; return( $instance->render( "%s" ) );',
+                                            'WPKirk\\Http\\Controllers\\' . $controller, $method));
+    }
 
     return $hook;
   }
