@@ -1,6 +1,6 @@
 {
   "name": "wpbones/wpbones",
-  "version": "0.8.37",
+  "version": "0.8.38",
   "homepage": "https://github.com/wpbones/wpbones",
   "type": "library",
   "description": "WordPress framework for Laravel developers",

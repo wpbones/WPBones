@@ -66,7 +66,7 @@ class Request
         $temp = &$array;
         foreach ( explode( '/', $key ) as $branchKey ) {
           if ( ! isset( $temp[ $branchKey ] ) ) {
-            $temp[ $branchKey ] = '';
+            $temp[ $branchKey ] = [];
           }
           $temp = &$temp[ $branchKey ];
         };

@@ -1,7 +1,7 @@
 #!/usr/bin/env php
 <?php
 
-define( 'WPBONES_MINIMAL_PHP_VERSION', "5.5.9" );
+define( 'WPBONES_MINIMAL_PHP_VERSION', "7.1" );
 
 if ( version_compare( PHP_VERSION, WPBONES_MINIMAL_PHP_VERSION ) < 0 ) {
   echo "\n\033[33;5;82mWarning!!\n";
@@ -62,7 +62,7 @@ if ( file_exists( __DIR__ . '/bootstrap/plugin.php' ) ) {
 class BonesCommandLine
 {
 
-  const VERSION = '0.8.35';
+  const VERSION = '0.8.38';
 
   protected $plginName;
   protected $namespace;

@@ -627,9 +627,11 @@ class Plugin extends Container implements PluginContract
                     return ($instance->render("{$method}"));
                 }
             };
+
+            return $hook;
         }
 
-        return $hook;
+        return null;
     }
 
     /**
