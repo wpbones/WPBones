@@ -62,7 +62,7 @@ if ( file_exists( __DIR__ . '/bootstrap/plugin.php' ) ) {
 class BonesCommandLine
 {
 
-  const VERSION = '0.8.38';
+  const VERSION = '0.9.0';
 
   protected $plginName;
   protected $namespace;

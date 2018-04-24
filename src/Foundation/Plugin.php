@@ -8,6 +8,7 @@ use WPKirk\WPBones\View\View;
 use WPKirk\WPBones\Contracts\Foundation\Plugin as PluginContract;
 use WPKirk\WPBones\Foundation\Http\Request;
 use WPKirk\WPBones\Support\Str;
+use WPKirk\WPBones\Foundation\Log\LogServiceProvider;
 
 if (! defined('ABSPATH')) {
     exit;
@@ -408,10 +409,15 @@ class Plugin extends Container implements PluginContract
 
             // Here we are going to init Service Providers
 
+            // Log
+            $object = new LogServiceProvider($this);
+            $object->register();
+            $this->provides[ 'Log' ] = $object;
+
             // Custom post types Service Provider
             if (isset($init[ 'custom_post_types' ]) && ! empty($init[ 'custom_post_types' ])) {
                 foreach ($init[ 'custom_post_types' ] as $className) {
-                    $object = new $className;
+                    $object = new $className($this);
                     $object->register();
                     $this->provides[ $className ] = $object;
                 }
@@ -420,7 +426,7 @@ class Plugin extends Container implements PluginContract
             // Custom taxonomy type Service Provider
             if (isset($init[ 'custom_taxonomy_types' ]) && ! empty($init[ 'custom_taxonomy_types' ])) {
                 foreach ($init[ 'custom_taxonomy_types' ] as $className) {
-                    $object = new $className;
+                    $object = new $className($this);
                     $object->register();
                     $this->provides[ $className ] = $object;
                 }
@@ -429,7 +435,7 @@ class Plugin extends Container implements PluginContract
             // Shortcodes Service Provider
             if (isset($init[ 'shortcodes' ]) && ! empty($init[ 'shortcodes' ])) {
                 foreach ($init[ 'shortcodes' ] as $className) {
-                    $object = new $className;
+                    $object = new $className($this);
                     $object->register();
                     $this->provides[ $className ] = $object;
                 }
@@ -439,7 +445,7 @@ class Plugin extends Container implements PluginContract
             if ($this->isAjax()) {
                 if (isset($init[ 'ajax' ]) && ! empty($init[ 'ajax' ])) {
                     foreach ($init[ 'ajax' ] as $className) {
-                        $object = new $className;
+                        $object = new $className($this);
                         $object->register();
                         $this->provides[ $className ] = $object;
                     }
@@ -449,12 +455,17 @@ class Plugin extends Container implements PluginContract
             // Custom service provider
             if (isset($init[ 'providers' ]) && ! empty($init[ 'providers' ])) {
                 foreach ($init[ 'providers' ] as $className) {
-                    $object = new $className;
+                    $object = new $className($this);
                     $object->register();
                     $this->provides[ $className ] = $object;
                 }
             }
         }
+    }
+
+    public function log()
+    {
+        return $this->provides[ 'Log' ];
     }
 
     /**

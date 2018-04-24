@@ -12,18 +12,30 @@ abstract class ServiceProvider
    */
   abstract public function register();
 
-  /**
-   * Dynamically handle missing method calls.
-   *
-   * @param  string $method
-   * @param  array  $parameters
-   *
-   * @return mixed
-   */
-  public function __call( $method, $parameters )
-  {
-    if ( $method == 'boot' ) {
-      return;
+    /**
+     * Instance of main plugin.
+     *
+     * @var
+     */
+    protected $plugin;
+
+    public function __construct( $plugin )
+    {
+        $this->plugin = $plugin;
     }
-  }
+
+    /**
+     * Dynamically handle missing method calls.
+     *
+     * @param  string $method
+     * @param  array  $parameters
+     *
+     * @return mixed
+     */
+    public function __call($method, $parameters)
+    {
+        if ($method == 'boot') {
+            return;
+        }
+    }
 }
