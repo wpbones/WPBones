@@ -68,7 +68,7 @@ class Plugin extends Container implements PluginContract
      *
      * @var string
      */
-    public $slug = "";
+    public $slug = '';
 
     public function __construct($basePath)
     {
@@ -84,10 +84,8 @@ class Plugin extends Container implements PluginContract
             return $this->{$method}();
         }
 
-        foreach ($this->pluginData as $key => $value) {
-            if ($name == $key) {
-                return $value;
-            }
+        if (in_array($name, array_keys($this->pluginData))) {
+            return $this->pluginData[ $name ];
         }
     }
 
@@ -122,10 +120,10 @@ class Plugin extends Container implements PluginContract
          */
 
         // plugin slug
-        $this->slug = str_replace("-", "_", sanitize_title($this->Name)) . "_slug";
+        $this->slug = str_replace('-', '_', sanitize_title($this->pluginData[ 'Name' ])) . '_slug';
 
         // Load text domain
-        load_plugin_textdomain("wp-kirk", false, trailingslashit(basename($this->basePath)) . $this->DomainPath);
+        load_plugin_textdomain("wp-kirk", false, trailingslashit(basename($this->basePath)) . $this->pluginData[ 'DomainPath' ]);
 
         // Activation & Deactivation Hook
         register_activation_hook($this->file, [$this, 'activation']);
@@ -216,22 +214,22 @@ class Plugin extends Container implements PluginContract
 
     public function getCssAttribute()
     {
-        return $this->baseUri . '/public/css';
+        return "{$this->baseUri}/public/css";
     }
 
     public function getJsAttribute()
     {
-        return $this->baseUri . '/public/js';
+        return "{$this->baseUri}/public/js";
     }
 
     public function getImagesAttribute()
     {
-        return $this->baseUri . '/public/images';
+        return "{$this->baseUri}/public/images";
     }
 
     public function vendor($vendor = "wpbones")
     {
-        return $this->baseUri . "/vendor/$vendor";
+        return "{$this->baseUri}/vendor/{$vendor}";
     }
 
     /**
@@ -250,12 +248,12 @@ class Plugin extends Container implements PluginContract
             return [];
         }
 
-        $parts = explode(".", $key);
+        $parts = explode('.', $key);
 
-        $filename = $parts[ 0 ] . ".php";
+        $filename = "{$parts[ 0 ]}.php";
         $key      = isset($parts[ 1 ]) ? $parts[ 1 ] : null;
 
-        $array = include $this->basePath . '/config/' . $filename;
+        $array = include "{$this->basePath}/config/{$filename}";
 
         if (is_null($key)) {
             return $array;
@@ -334,12 +332,8 @@ class Plugin extends Container implements PluginContract
 
     public function provider($name)
     {
-
-        foreach ($this->provides as $key => $value) {
-
-            if ($key == $name) {
-                return $value;
-            }
+        if (in_array($name, array_keys($this->provides))) {
+            return $this->provides[ $name ];
         }
 
         return null;
@@ -363,10 +357,10 @@ class Plugin extends Container implements PluginContract
         $this->options->delta();
 
         // include your own activation
-        $activation = include_once $this->basePath . '/plugin/activation.php';
+        $activation = include_once "{$this->basePath}/plugin/activation.php";
 
         // migrations
-        foreach (glob($this->basePath . '/database/migrations/*.php') as $filename) {
+        foreach (glob("{$this->basePath}/database/migrations/*.php") as $filename) {
             include $filename;
             foreach ($this->getFileClasses($filename) as $className) {
                 $instance = new $className;
@@ -374,7 +368,7 @@ class Plugin extends Container implements PluginContract
         }
 
         // seeders
-        foreach (glob($this->basePath . '/database/seeds/*.php') as $filename) {
+        foreach (glob("{$this->basePath}/database/seeds/*.php") as $filename) {
             include $filename;
             foreach ($this->getFileClasses($filename) as $className) {
                 $instance = new $className;
@@ -388,7 +382,7 @@ class Plugin extends Container implements PluginContract
      */
     public function deactivation()
     {
-        $deactivation = include_once $this->basePath . '/plugin/deactivation.php';
+        $deactivation = include_once "{$this->basePath}/plugin/deactivation.php";
     }
 
     /**
@@ -403,7 +397,7 @@ class Plugin extends Container implements PluginContract
      */
     public function init()
     {
-        $init = include $this->basePath . '/config/plugin.php';
+        $init = include "{$this->basePath}/config/plugin.php";
 
         if (is_array($init)) {
 
@@ -475,7 +469,7 @@ class Plugin extends Container implements PluginContract
     {
         global $admin_page_hooks, $_registered_pages, $_parent_pages;
 
-        $menus = include_once $this->basePath . '/config/menus.php';
+        $menus = include_once "{$this->basePath}/config/menus.php";
 
         if (! empty($menus) && is_array($menus)) {
 
@@ -564,7 +558,7 @@ class Plugin extends Container implements PluginContract
         }
 
         // custom hidden pages
-        $pages = include_once $this->basePath . '/config/routes.php';
+        $pages = include_once "{$this->basePath}/config/routes.php";
 
         if (! empty($pages) && is_array($pages)) {
             foreach ($pages as $pageSlug => $page) {
@@ -588,7 +582,7 @@ class Plugin extends Container implements PluginContract
     {
         global $wp_widget_factory;
 
-        $init = include $this->basePath . '/config/plugin.php';
+        $init = include "{$this->basePath}/config/plugin.php";
 
         if (isset($init[ 'widgets' ]) && is_array($init[ 'widgets' ]) && ! empty($init[ 'widgets' ])) {
             foreach ($init[ 'widgets' ] as $className) {
