@@ -2,15 +2,28 @@
 
 namespace WPKirk\WPBones\Routing;
 
-if ( ! defined( 'ABSPATH' ) ) exit;
+if (! defined('ABSPATH')) {
+    exit;
+}
 
-class Route {
+class Route
+{
 
-  static $menu = [];
+    /**
+     * Custom page routes list.
+     *
+     * @var array
+     */
+    static $menu = [];
 
-  public static function get( $path )
-  {
-    self::$menu[] = $path;
-  }
+    /**
+     * Set the right route path.
+     *
+     * @param string $path
+     */
+    public static function get(string $path)
+    {
+        self::$menu[] = $path;
+    }
 
 }

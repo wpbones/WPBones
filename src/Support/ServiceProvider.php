@@ -4,13 +4,13 @@ namespace WPKirk\WPBones\Support;
 
 abstract class ServiceProvider
 {
-  
-  /**
-   * Register the service provider.
-   *
-   * @return void
-   */
-  abstract public function register();
+
+    /**
+     * Register the service provider.
+     *
+     * @return void
+     */
+    abstract public function register();
 
     /**
      * Instance of main plugin.
@@ -19,7 +19,7 @@ abstract class ServiceProvider
      */
     protected $plugin;
 
-    public function __construct( $plugin )
+    public function __construct($plugin)
     {
         $this->plugin = $plugin;
     }
@@ -32,7 +32,7 @@ abstract class ServiceProvider
      *
      * @return mixed
      */
-    public function __call($method, $parameters)
+    public function __call(string $method, $parameters)
     {
         if ($method == 'boot') {
             return;

@@ -35,7 +35,7 @@ abstract class Command
    *
    * @param $str String to display.
    */
-  protected function info( $str )
+  protected function info( string $str )
   {
     echo "\033[38;5;213m" . $str;
     echo "\033[0m\n";
@@ -49,7 +49,7 @@ abstract class Command
    *
    * @return string
    */
-  protected function ask( $str, $default = '' )
+  protected function ask( string $str, string $default = '' ) : string
   {
 
     echo "\n\e[38;5;88m$str" . ( empty( $default ) ? "" : " (default: {$default})" ) . "\e[0m ";
@@ -102,9 +102,9 @@ abstract class Command
    *
    * @param string $value The option.
    *
-   * @return bool|mixed|void
+   * @return bool|mixed
    */
-  public function options( $value )
+  public function options( string $value )
   {
     $sanitizeOption = '--' . $value;
 
@@ -128,7 +128,8 @@ abstract class Command
         }
 
         if ( ! isset( $valueParam ) || empty( $valueParam ) ) {
-          return $this->info( 'Missing param' );
+            $this->info( 'Missing param' );
+            return false;
         }
 
         return $valueParam;
@@ -170,7 +171,7 @@ abstract class Command
    *
    * @return string
    */
-  public function getDescriptionAttribute()
+  public function getDescriptionAttribute() : string
   {
     return $this->description;
   }
@@ -192,7 +193,7 @@ abstract class Command
    *
    * @return mixed
    */
-  public function __get( $name )
+  public function __get( string $name )
   {
     $method = 'get' . Str::studly( $name ) . 'Attribute';
     if ( method_exists( $this, $method ) ) {
