@@ -2,7 +2,7 @@
 
 namespace WPKirk\WPBones\Foundation\Log;
 
-use WPNCEasyWP\WPBones\Support\ServiceProvider;
+use WPKirk\WPBones\Support\ServiceProvider;
 
 if (! defined('ABSPATH')) {
     exit;

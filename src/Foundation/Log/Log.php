@@ -19,7 +19,7 @@ class Log
     public static function getLog()
     {
         if (is_null(self::$instance)) {
-            self::$instance = WPNCEasyWP()->log();
+            self::$instance = WPKirk()->log();
         }
 
         return self::$instance;
