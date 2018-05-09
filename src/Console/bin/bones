@@ -65,7 +65,7 @@ class BonesCommandLine
     /**
      * WP Bones version
      */
-    const VERSION = '0.9.5';
+    const VERSION = '0.9.6';
 
     /**
      * Plugin name.
@@ -185,7 +185,9 @@ class BonesCommandLine
 
         fclose($handle);
 
-        return trim($line, " \n\r");
+        $line = trim($line, " \n\r");
+
+        return $line ?: $default;
     }
 
     protected function option($option)
@@ -477,7 +479,9 @@ class BonesCommandLine
     {
         // help
         if (empty($package) || $package == '--help') {
-            return $this->info('Use php bones require <PackageName>');
+            $this->info('Use php bones require <PackageName>');
+
+            return;
         }
 
         $this->line(`composer require {$package}`);
@@ -570,7 +574,9 @@ class BonesCommandLine
     {
         // help
         if (empty($tablename) || $tablename == '--help') {
-            return $this->info('Use php bones migrate:make <Tablename>');
+            $this->info('Use php bones migrate:make <Tablename>');
+
+            return;
         }
 
         $filename = sprintf('%s_create_%s_table.php',
@@ -595,7 +601,9 @@ class BonesCommandLine
     {
         // help
         if (empty($className) || $className == '--help') {
-            return $this->info('Use php bones make:cpt <ClassName>');
+            $this->info('Use php bones make:cpt <ClassName>');
+
+            return;
         }
 
         $filename = sprintf('%s.php', $className);
@@ -637,7 +645,9 @@ class BonesCommandLine
     {
         // help
         if (empty($className) || $className == '--help') {
-            return $this->info('Use php bones make:ctt <ClassName>');
+            $this->info('Use php bones make:ctt <ClassName>');
+
+            return;
         }
 
         $filename = sprintf('%s.php', $className);
@@ -684,7 +694,9 @@ class BonesCommandLine
     {
         // help
         if (empty($className) || $className == '--help') {
-            return $this->info('Use php bones make:controller <ClassName>');
+            $this->info('Use php bones make:controller <ClassName>');
+
+            return;
         }
 
         // previous namespace
@@ -724,7 +736,9 @@ class BonesCommandLine
     {
         // help
         if (empty($className) || $className == '--help') {
-            return $this->info('Use php bones make:console <ClassName>');
+            $this->info('Use php bones make:console <ClassName>');
+
+            return;
         }
 
         $filename = sprintf('%s.php', $className);
@@ -753,7 +767,19 @@ class BonesCommandLine
 
         $this->line(" Created plugin/Console/Commands/{$filename}");
 
-        $this->info("Remember to add {$className} in the plugin/Console/Commands/Kernel.php property array \$commands");
+        // check if plugin/Console/Kernel.php already exists
+        if (file_exists('plugin/Console/Kernel.php')) {
+            $this->info("Remember to add {$className} in the plugin/Console/Commands/Kernel.php property array \$commands");
+        } else {
+            // get the stub
+            $content = file_get_contents("vendor/wpbones/wpbones/src/Console/stubs/kernel.stub");
+            $content = str_replace('{Namespace}', $namespace, $content);
+            $content = str_replace('{ClassName}', $className, $content);
+            file_put_contents("plugin/Console/Kernel.php", $content);
+
+            $this->line(" Created plugin/Console/Kernel.php");
+        }
+
 
     }
 
@@ -761,7 +787,9 @@ class BonesCommandLine
     {
         // help
         if (empty($className) || $className == '--help') {
-            return $this->info('Use php bones make:shortcode <ClassName>');
+            $this->info('Use php bones make:shortcode <ClassName>');
+
+            return;
         }
 
         $filename = sprintf('%s.php', $className);
@@ -790,7 +818,9 @@ class BonesCommandLine
     {
         // help
         if (empty($className) || $className == '--help') {
-            return $this->info('Use php bones make:provider <ClassName>');
+            $this->info('Use php bones make:provider <ClassName>');
+
+            return;
         }
 
         $filename = sprintf('%s.php', $className);
@@ -816,7 +846,9 @@ class BonesCommandLine
     {
         // help
         if (empty($className) || $className == '--help') {
-            return $this->info('Use php bones make:widget <ClassName>');
+            $this->info('Use php bones make:widget <ClassName>');
+
+            return;
         }
 
         $filename = sprintf('%s.php', $className);
@@ -858,7 +890,9 @@ class BonesCommandLine
     {
         // help
         if (empty($className) || $className == '--help') {
-            return $this->info('Use php bones make:ajax <ClassName>');
+            $this->info('Use php bones make:ajax <ClassName>');
+
+            return;
         }
 
         $filename = sprintf('%s.php', $className);
