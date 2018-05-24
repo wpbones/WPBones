@@ -65,7 +65,7 @@ class BonesCommandLine
     /**
      * WP Bones version
      */
-    const VERSION = '0.9.6';
+    const VERSION = '0.9.7';
 
     /**
      * Plugin name.
@@ -703,7 +703,7 @@ class BonesCommandLine
         list($pluginName, $namespace) = explode(",", file_get_contents('namespace'));
 
         // get additional path
-        $path = '';
+        $path = $namespacePath = '';
         if (false !== strpos($className, '/')) {
             $parts         = explode('/', $className);
             $className     = array_pop($parts);

@@ -29,8 +29,6 @@ abstract class ServiceProvider
      *
      * @param  string $method
      * @param  array  $parameters
-     *
-     * @return mixed
      */
     public function __call(string $method, $parameters)
     {

@@ -36,6 +36,8 @@ abstract class Controller
         if (method_exists($this, $method)) {
             return $this->{$method}();
         }
+
+        return null;
     }
 
     /**
@@ -83,6 +85,8 @@ abstract class Controller
         if ($view instanceof View) {
             return $view->render();
         }
+
+        return null;
     }
 
     /**

@@ -127,7 +127,7 @@ class LogServiceProvider extends ServiceProvider
      *
      * @return mixed
      */
-    public function __call($method, $parameters)
+    public function __call(string $method, $parameters)
     {
         if ($method == 'boot') {
             return;
@@ -149,7 +149,7 @@ class LogServiceProvider extends ServiceProvider
      * @param mixed  $message
      * @param array  $context
      */
-    protected function write(string $level = 'debug', $message, array $context = [])
+    protected function write(string $level = 'debug', $message = '', array $context = [])
     {
         // if log is disabled, nothing to do
         if (! $this->log) {

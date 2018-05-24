@@ -49,11 +49,12 @@ abstract class Widget extends \WP_Widget
    */
   protected $plugin;
 
-  /**
-   * Return the view resource path. eg: "widget.form".
-   *
-   * @return string
-   */
+    /**
+     * Return the view resource path. eg: "widget.form".
+     *
+     * @param $instance
+     * @return string
+     */
   abstract public function viewForm( $instance );
 
   /**

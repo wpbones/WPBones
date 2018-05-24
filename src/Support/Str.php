@@ -101,9 +101,9 @@ class Str
      *
      * @param  string $value
      * @param  string $cap
-     * @return string
+     * @return bool
      */
-    public static function finish(string $value, string $cap): bool
+    public static function finish(string $value, string $cap)
     {
         $quoted = preg_quote($cap, '/');
 
@@ -198,7 +198,7 @@ class Str
      * @param  string $default
      * @return array
      */
-    public static function parseCallback(string $callback, string $default): string
+    public static function parseCallback(string $callback, string $default)
     {
         return static::contains($callback, '@') ? explode('@', $callback, 2) : [$callback, $default];
     }
@@ -245,7 +245,7 @@ class Str
      * @param  int $length
      * @return string
      */
-    public static function quickRandom(int $length = 16): bool
+    public static function quickRandom(int $length = 16)
     {
         $pool = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
 

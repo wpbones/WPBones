@@ -199,6 +199,8 @@ abstract class Command
     if ( method_exists( $this, $method ) ) {
       return $this->{$method}();
     }
+
+    return null;
   }
 
   /**
@@ -206,14 +208,12 @@ abstract class Command
    *
    * @param string $name Usually the protected property name.
    * @param mixed  $value
-   *
-   * @return mixed
    */
   public function __set( $name, $value )
   {
     $method = 'set' . Str::studly( $name ) . 'Attribute';
     if ( method_exists( $this, $method ) ) {
-      return $this->{$method}( $value );
+        $this->{$method}( $value );
     }
   }
 
