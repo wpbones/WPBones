@@ -190,3 +190,29 @@ if ( ! function_exists( 'wpbones_is_true' ) ) {
     return ! in_array( strtolower( $value ), [ '', 'false', '0', 'no', 'n', 'off', null ] );
   }
 }
+
+if (! function_exists('wpbones_logger')) {
+
+    /**
+     * Utility to get an instance of Logger.
+     */
+    function wpbones_logger()
+    {
+        if (count(func_get_args()) > 0) {
+            return call_user_func_array([WPKirk()->log(), 'debug'], func_get_args());
+        }
+
+        return WPKirk()->log();
+    }
+}
+
+if (! function_exists('logger')) {
+
+    /**
+     * Utility to get an instance of Logger.
+     */
+    function logger()
+    {
+        return call_user_func_array('wpbones_logger', func_get_args());
+    }
+}
