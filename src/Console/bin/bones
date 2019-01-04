@@ -65,7 +65,7 @@ class BonesCommandLine
     /**
      * WP Bones version
      */
-    const VERSION = '0.9.8';
+    const VERSION = '0.9.9';
 
     /**
      * Plugin name.

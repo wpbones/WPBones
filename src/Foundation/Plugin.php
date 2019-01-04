@@ -3,14 +3,14 @@
 namespace WPKirk\WPBones\Foundation;
 
 use WPKirk\WPBones\Container\Container;
-use WPKirk\WPBones\Database\WordPressOption;
-use WPKirk\WPBones\View\View;
 use WPKirk\WPBones\Contracts\Foundation\Plugin as PluginContract;
+use WPKirk\WPBones\Database\WordPressOption;
 use WPKirk\WPBones\Foundation\Http\Request;
-use WPKirk\WPBones\Support\Str;
 use WPKirk\WPBones\Foundation\Log\LogServiceProvider;
+use WPKirk\WPBones\Support\Str;
+use WPKirk\WPBones\View\View;
 
-if (! defined('ABSPATH')) {
+if (!defined('ABSPATH')) {
     exit;
 }
 
@@ -85,7 +85,7 @@ class Plugin extends Container implements PluginContract
         }
 
         if (in_array($name, array_keys($this->pluginData))) {
-            return $this->pluginData[ $name ];
+            return $this->pluginData[$name];
         }
     }
 
@@ -97,7 +97,7 @@ class Plugin extends Container implements PluginContract
         $this->baseUri = rtrim(plugin_dir_url($this->file), '\/');
 
         // Use WordPress get_plugin_data() function for auto retrive plugin information.
-        if (! function_exists('get_plugin_data')) {
+        if (!function_exists('get_plugin_data')) {
             require_once(ABSPATH . 'wp-admin/includes/plugin.php');
         }
         $this->pluginData = get_plugin_data($this->file, false);
@@ -120,10 +120,10 @@ class Plugin extends Container implements PluginContract
          */
 
         // plugin slug
-        $this->slug = str_replace('-', '_', sanitize_title($this->pluginData[ 'Name' ])) . '_slug';
+        $this->slug = str_replace('-', '_', sanitize_title($this->pluginData['Name'])) . '_slug';
 
         // Load text domain
-        load_plugin_textdomain("wp-kirk", false, trailingslashit(basename($this->basePath)) . $this->pluginData[ 'DomainPath' ]);
+        load_plugin_textdomain("wp-kirk", false, trailingslashit(basename($this->basePath)) . $this->pluginData['DomainPath']);
 
         // Activation & Deactivation Hook
         register_activation_hook($this->file, [$this, 'activation']);
@@ -251,7 +251,7 @@ class Plugin extends Container implements PluginContract
         $parts = explode('.', $key);
 
         $filename = "{$parts[ 0 ]}.php";
-        $key      = isset($parts[ 1 ]) ? $parts[ 1 ] : null;
+        $key      = isset($parts[1]) ? $parts[1] : null;
 
         $array = include "{$this->basePath}/config/{$filename}";
 
@@ -259,18 +259,18 @@ class Plugin extends Container implements PluginContract
             return $array;
         }
 
-        if (isset($array[ $key ])) {
-            return $array[ $key ];
+        if (isset($array[$key])) {
+            return $array[$key];
         }
 
-        unset($parts[ 0 ]);
+        unset($parts[0]);
 
         foreach ($parts as $segment) {
-            if (! is_array($array) || ! array_key_exists($segment, $array)) {
+            if (!is_array($array) || !array_key_exists($segment, $array)) {
                 return wpbones_value($default);
             }
 
-            $array = $array[ $segment ];
+            $array = $array[$segment];
         }
 
         return $array;
@@ -316,8 +316,8 @@ class Plugin extends Container implements PluginContract
         if (defined('DOING_AJAX')) {
             return true;
         }
-        if (isset($_SERVER[ 'HTTP_X_REQUESTED_WITH' ]) &&
-            strtolower($_SERVER[ 'HTTP_X_REQUESTED_WITH' ]) == 'xmlhttprequest'
+        if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) &&
+            strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest'
         ) {
             return true;
         }
@@ -333,7 +333,7 @@ class Plugin extends Container implements PluginContract
     public function provider($name)
     {
         if (in_array($name, array_keys($this->provides))) {
-            return $this->provides[ $name ];
+            return $this->provides[$name];
         }
 
         return null;
@@ -406,52 +406,52 @@ class Plugin extends Container implements PluginContract
             // Log
             $object = new LogServiceProvider($this);
             $object->register();
-            $this->provides[ 'Log' ] = $object;
+            $this->provides['Log'] = $object;
 
             // Custom post types Service Provider
-            if (isset($init[ 'custom_post_types' ]) && ! empty($init[ 'custom_post_types' ])) {
-                foreach ($init[ 'custom_post_types' ] as $className) {
+            if (isset($init['custom_post_types']) && !empty($init['custom_post_types'])) {
+                foreach ($init['custom_post_types'] as $className) {
                     $object = new $className($this);
                     $object->register();
-                    $this->provides[ $className ] = $object;
+                    $this->provides[$className] = $object;
                 }
             }
 
             // Custom taxonomy type Service Provider
-            if (isset($init[ 'custom_taxonomy_types' ]) && ! empty($init[ 'custom_taxonomy_types' ])) {
-                foreach ($init[ 'custom_taxonomy_types' ] as $className) {
+            if (isset($init['custom_taxonomy_types']) && !empty($init['custom_taxonomy_types'])) {
+                foreach ($init['custom_taxonomy_types'] as $className) {
                     $object = new $className($this);
                     $object->register();
-                    $this->provides[ $className ] = $object;
+                    $this->provides[$className] = $object;
                 }
             }
 
             // Shortcodes Service Provider
-            if (isset($init[ 'shortcodes' ]) && ! empty($init[ 'shortcodes' ])) {
-                foreach ($init[ 'shortcodes' ] as $className) {
+            if (isset($init['shortcodes']) && !empty($init['shortcodes'])) {
+                foreach ($init['shortcodes'] as $className) {
                     $object = new $className($this);
                     $object->register();
-                    $this->provides[ $className ] = $object;
+                    $this->provides[$className] = $object;
                 }
             }
 
             // Ajax Service Provider
             if ($this->isAjax()) {
-                if (isset($init[ 'ajax' ]) && ! empty($init[ 'ajax' ])) {
-                    foreach ($init[ 'ajax' ] as $className) {
+                if (isset($init['ajax']) && !empty($init['ajax'])) {
+                    foreach ($init['ajax'] as $className) {
                         $object = new $className($this);
                         $object->register();
-                        $this->provides[ $className ] = $object;
+                        $this->provides[$className] = $object;
                     }
                 }
             }
 
             // Custom service provider
-            if (isset($init[ 'providers' ]) && ! empty($init[ 'providers' ])) {
-                foreach ($init[ 'providers' ] as $className) {
+            if (isset($init['providers']) && !empty($init['providers'])) {
+                foreach ($init['providers'] as $className) {
                     $object = new $className($this);
                     $object->register();
-                    $this->provides[ $className ] = $object;
+                    $this->provides[$className] = $object;
                 }
             }
         }
@@ -459,7 +459,7 @@ class Plugin extends Container implements PluginContract
 
     public function log()
     {
-        return $this->provides[ 'Log' ];
+        return $this->provides['Log'];
     }
 
     /**
@@ -471,31 +471,31 @@ class Plugin extends Container implements PluginContract
 
         $menus = include_once "{$this->basePath}/config/menus.php";
 
-        if (! empty($menus) && is_array($menus)) {
+        if (!empty($menus) && is_array($menus)) {
 
             foreach ($menus as $topLevelSlug => $menu) {
 
                 // sanitize array keys
-                $menu[ 'position' ]   = isset($menu[ 'position' ]) ? $menu[ 'position' ] : null;
-                $menu[ 'capability' ] = isset($menu[ 'capability' ]) ? $menu[ 'capability' ] : 'read';
-                $menu[ 'icon' ]       = isset($menu[ 'icon' ]) ? $menu[ 'icon' ] : '';
-                $menu[ 'page_title' ] = isset($menu[ 'page_title' ]) ? $menu[ 'page_title' ] : $menu[ 'menu_title' ];
+                $menu['position']   = isset($menu['position']) ? $menu['position'] : null;
+                $menu['capability'] = isset($menu['capability']) ? $menu['capability'] : 'read';
+                $menu['icon']       = isset($menu['icon']) ? $menu['icon'] : '';
+                $menu['page_title'] = isset($menu['page_title']) ? $menu['page_title'] : $menu['menu_title'];
 
                 // icon
-                $icon = $menu[ 'icon' ];
-                if (isset($menu[ 'icon' ]) && ! empty($menu[ 'icon' ]) && 'dashicons' != substr($menu[ 'icon' ], 0, 9)) {
-                    $icon = $this->getImagesAttribute() . '/' . $menu[ 'icon' ];
+                $icon = $menu['icon'];
+                if (isset($menu['icon']) && !empty($menu['icon']) && 'dashicons' != substr($menu['icon'], 0, 9)) {
+                    $icon = $this->getImagesAttribute() . '/' . $menu['icon'];
                 }
 
                 $firstMenu = true;
 
                 if (substr($topLevelSlug, 0, 8) !== 'edit.php') {
-                    add_menu_page($menu[ 'page_title' ], $menu[ 'menu_title' ], $menu[ 'capability' ], $topLevelSlug, '', $icon, $menu[ 'position' ]);
+                    add_menu_page($menu['page_title'], $menu['menu_title'], $menu['capability'], $topLevelSlug, '', $icon, $menu['position']);
                 } else {
                     $firstMenu = false;
                 }
 
-                foreach ($menu[ 'items' ] as $key => $subMenu) {
+                foreach ($menu['items'] as $key => $subMenu) {
 
                     if (is_null($subMenu)) {
                         continue;
@@ -507,14 +507,14 @@ class Plugin extends Container implements PluginContract
                     }
 
                     // sanitize array keys
-                    $subMenu[ 'capability' ] = isset($subMenu[ 'capability' ]) ? $subMenu[ 'capability' ] : $menu[ 'capability' ];
-                    $subMenu[ 'page_title' ] = isset($subMenu[ 'page_title' ]) ? $subMenu[ 'page_title' ] : $subMenu[ 'menu_title' ];
+                    $subMenu['capability'] = isset($subMenu['capability']) ? $subMenu['capability'] : $menu['capability'];
+                    $subMenu['page_title'] = isset($subMenu['page_title']) ? $subMenu['page_title'] : $subMenu['menu_title'];
 
                     // key could be a number
                     $key = str_replace('-', "_", sanitize_title($key));
 
                     $array     = explode('\\', __NAMESPACE__);
-                    $namespace = sanitize_title($array[ 0 ]);
+                    $namespace = sanitize_title($array[0]);
 
                     // submenu slug
                     $submenuSlug = "{$namespace}_{$key}";
@@ -525,12 +525,12 @@ class Plugin extends Container implements PluginContract
                     }
 
                     // get hook
-                    $hook = $this->getCallableHook($subMenu[ 'route' ]);
+                    $hook = $this->getCallableHook($subMenu['route']);
 
-                    $subMenuHook = add_submenu_page($topLevelSlug, $subMenu[ 'page_title' ], $subMenu[ 'menu_title' ], $subMenu[ 'capability' ], $submenuSlug, $hook);
+                    $subMenuHook = add_submenu_page($topLevelSlug, $subMenu['page_title'], $subMenu['menu_title'], $subMenu['capability'], $submenuSlug, $hook);
 
-                    if (isset($subMenu[ 'route' ][ 'load' ])) {
-                        list($controller, $method) = explode('@', $subMenu[ 'route' ][ 'load' ]);
+                    if (isset($subMenu['route']['load'])) {
+                        list($controller, $method) = explode('@', $subMenu['route']['load']);
 
                         add_action("load-{$subMenuHook}",
                             function () use ($controller, $method) {
@@ -541,8 +541,8 @@ class Plugin extends Container implements PluginContract
                             });
                     }
 
-                    if (isset($subMenu[ 'route' ][ 'resource' ])) {
-                        $controller = $subMenu[ 'route' ][ 'resource' ];
+                    if (isset($subMenu['route']['resource'])) {
+                        $controller = $subMenu['route']['resource'];
 
                         add_action("load-{$subMenuHook}",
                             function () use ($controller) {
@@ -560,19 +560,22 @@ class Plugin extends Container implements PluginContract
         // custom hidden pages
         $pages = include_once "{$this->basePath}/config/routes.php";
 
-        if (! empty($pages) && is_array($pages)) {
+        if (!empty($pages) && is_array($pages)) {
             foreach ($pages as $pageSlug => $page) {
 
-                $pageSlug                      = plugin_basename($pageSlug);
-                $admin_page_hooks[ $pageSlug ] = ! isset($page[ 'title' ]) ? : $page[ 'title' ];
-                $hookName                      = get_plugin_page_hookname($pageSlug, '');
+                $pageSlug                    = plugin_basename($pageSlug);
+                $admin_page_hooks[$pageSlug] = !isset($page['title']) ?: $page['title'];
+                $hookName                    = get_plugin_page_hookname($pageSlug, '');
 
-                if (! empty($hookName)) {
+                if (!empty($hookName)) {
 
-                    add_action($hookName, $this->getCallableHook($page[ 'route' ]));
+                    if ($hook = $this->getCallableHook($page['route'])) {
 
-                    $_registered_pages[ $hookName ] = true;
-                    $_parent_pages[ $pageSlug ]     = false;
+                        add_action($hookName, $hook);
+
+                        $_registered_pages[$hookName] = true;
+                        $_parent_pages[$pageSlug]     = false;
+                    }
                 }
             }
         }
@@ -584,10 +587,10 @@ class Plugin extends Container implements PluginContract
 
         $init = include "{$this->basePath}/config/plugin.php";
 
-        if (isset($init[ 'widgets' ]) && is_array($init[ 'widgets' ]) && ! empty($init[ 'widgets' ])) {
-            foreach ($init[ 'widgets' ] as $className) {
+        if (isset($init['widgets']) && is_array($init['widgets']) && !empty($init['widgets'])) {
+            foreach ($init['widgets'] as $className) {
                 //register_widget( $className );
-                $wp_widget_factory->widgets[ $className ] = new $className($this);
+                $wp_widget_factory->widgets[$className] = new $className($this);
             }
         }
     }
@@ -599,26 +602,26 @@ class Plugin extends Container implements PluginContract
         // get the http request verb
         $verb = $this->request->method;
 
-        if (isset($routes[ 'resource' ])) {
+        if (isset($routes['resource'])) {
             $methods = [
-                'get'    => 'index',
-                'post'   => 'store',
-                'put'    => 'update',
-                'patch'  => 'update',
+                'get' => 'index',
+                'post' => 'store',
+                'put' => 'update',
+                'patch' => 'update',
                 'delete' => 'destroy',
             ];
 
-            $controller = $routes[ 'resource' ];
-            $method     = $methods[ $verb ];
+            $controller = $routes['resource'];
+            $method     = $methods[$verb];
         } // by single verb and controller@method
         else {
 
-            if (isset($routes[ $verb ])) {
-                list($controller, $method) = explode('@', $routes[ $verb ]);
+            if (isset($routes[$verb])) {
+                list($controller, $method) = explode('@', $routes[$verb]);
             } // default "get"
             else {
-                if (isset($routes[ 'get' ])) {
-                    list($controller, $method) = explode('@', $routes[ 'get' ]);
+                if (isset($routes['get'])) {
+                    list($controller, $method) = explode('@', $routes['get']);
                 }
             }
         }
@@ -635,7 +638,6 @@ class Plugin extends Container implements PluginContract
 
             return $hook;
         }
-
         return null;
     }
 
@@ -658,12 +660,12 @@ class Plugin extends Container implements PluginContract
         $tokens  = token_get_all($code);
         $count   = count($tokens);
         for ($i = 2; $i < $count; $i++) {
-            if ($tokens[ $i - 2 ][ 0 ] == T_CLASS
-                && $tokens[ $i - 1 ][ 0 ] == T_WHITESPACE
-                && $tokens[ $i ][ 0 ] == T_STRING
+            if ($tokens[$i - 2][0] == T_CLASS
+                && $tokens[$i - 1][0] == T_WHITESPACE
+                && $tokens[$i][0] == T_STRING
             ) {
 
-                $class_name = $tokens[ $i ][ 1 ];
+                $class_name = $tokens[$i][1];
                 $classes[]  = $class_name;
             }
         }
