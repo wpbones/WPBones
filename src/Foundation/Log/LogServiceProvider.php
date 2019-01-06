@@ -149,7 +149,7 @@ class LogServiceProvider extends ServiceProvider
      * @param mixed  $message
      * @param array  $context
      */
-    protected function write(string $level = 'debug', $message = '', array $context = [])
+    protected function write($level = 'debug', $message = '', $context = [])
     {
         // if log is disabled, nothing to do
         if (! $this->log) {
