@@ -1,6 +1,6 @@
 {
   "name": "wpbones/wpbones",
-  "version": "0.9.10",
+  "version": "0.9.11",
   "homepage": "https://github.com/wpbones/wpbones",
   "type": "library",
   "description": "WordPress framework for Laravel developers",
@@ -22,7 +22,7 @@
     "source": "https://github.com/wpbones/WPBones/"
   },
   "require": {
-    "php": ">=5.5.9"
+    "php": ">=7.1"
   },
   "autoload": {
     "psr-4": {

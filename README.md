@@ -33,6 +33,8 @@ You'll find the [complete docs here](https://github.com/wpbones/WPBones/wiki).
 
 ## Requirement
 
+* We recommend servers running version 7.2 or greater of PHP
+
 ### Composer
 
     $ curl -sS https://getcomposer.org/installer | sudo php -- --install-dir=/usr/local/bin --filename=composer
