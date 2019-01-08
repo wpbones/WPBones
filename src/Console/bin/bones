@@ -65,7 +65,7 @@ class BonesCommandLine
     /**
      * WP Bones version
      */
-    const VERSION = '0.9.13';
+    const VERSION = '0.9.14';
 
     /**
      * Plugin name.
@@ -94,6 +94,13 @@ class BonesCommandLine
      * @var array
      */
     protected $skipWhenDeploy = [];
+
+    /**
+     * Base folder during the deploy.
+     *
+     * @var string
+     */
+    protected $rootDeploy = '';
 
     public function __construct()
     {
@@ -436,30 +443,38 @@ class BonesCommandLine
 
             // files and folders to skip
             $this->skipWhenDeploy = [
-                '.',
-                '..',
-                'node_modules',
-                '.git',
-                '.gitignore',
-                '.DS_Store',
-                '.babelrc',
-                'bones',
-                'deploy.php',
-                'composer.json',
-                'composer.lock',
-                'namespace',
-                'gulpfile.js',
-                'package.json',
-                'package-lock.json',
-                'yarn.lock',
-                'README.md',
-                'webpack.mix.js',
-                'webpack.config.js',
-                'phpcs.xml.dist',
-                'mix-manifest.json',
+                '/.',
+                '/..',
+                '/node_modules',
+                '/.git',
+                '/.gitignore',
+                '/.DS_Store',
+                '/.babelrc',
+                '/bones',
+                '/resources/assets',
+                '/deploy.php',
+                '/composer.json',
+                '/composer.lock',
+                '/namespace',
+                '/gulpfile.js',
+                '/package.json',
+                '/package-lock.json',
+                '/yarn.lock',
+                '/README.md',
+                '/webpack.mix.js',
+                '/webpack.config.js',
+                '/phpcs.xml.dist',
+                '/mix-manifest.json',
             ];
 
+            /**
+             * Filter the list of files and folders to skip during the deploy.
+             *
+             * @param array $array The files and folders are relative to the root of plugin.
+             */
             $this->skipWhenDeploy = apply_filters('wpbones_console_deploy_skip', $this->skipWhenDeploy);
+
+            $this->rootDeploy = __DIR__;
 
             $this->xcopy(__DIR__, $path);
 
@@ -558,9 +573,11 @@ class BonesCommandLine
 
         // Loop through the folder
         $dir = dir($source);
+
         while(false !== $entry = $dir->read()) {
+
             // files and folder to skip
-            if ($this->skip($entry)) {
+            if ($entry === '.' || $entry === '..' || $this->skip("{$source}/{$entry}")) {
                 continue;
             }
 
@@ -574,9 +591,11 @@ class BonesCommandLine
         return true;
     }
 
-    protected function skip($entry)
+    protected function skip($value)
     {
-        return in_array($entry, $this->skipWhenDeploy);
+        $single = str_replace($this->rootDeploy, '', $value);
+
+        return in_array($single, $this->skipWhenDeploy);
     }
 
     protected function createMigrate($tablename)
@@ -944,7 +963,7 @@ class BonesCommandLine
             $this->help();
         } // namespace
         elseif ($this->option('rename')) {
-            $this->rename(($argv[1] ?? null));
+            $this->rename(($argv[1]??null));
         } // install
         elseif ($this->option('install')) {
             $this->install($argv);
