@@ -65,7 +65,7 @@ class BonesCommandLine
     /**
      * WP Bones version
      */
-    const VERSION = '0.9.12';
+    const VERSION = '0.9.13';
 
     /**
      * Plugin name.
@@ -432,7 +432,7 @@ class BonesCommandLine
 
         if (!empty($path)) {
             // alternative method to customize the deploy
-            include 'deploy.php';
+            @include 'deploy.php';
 
             // files and folders to skip
             $this->skipWhenDeploy = [
@@ -442,6 +442,7 @@ class BonesCommandLine
                 '.git',
                 '.gitignore',
                 '.DS_Store',
+                '.babelrc',
                 'bones',
                 'deploy.php',
                 'composer.json',
@@ -453,6 +454,7 @@ class BonesCommandLine
                 'yarn.lock',
                 'README.md',
                 'webpack.mix.js',
+                'webpack.config.js',
                 'phpcs.xml.dist',
                 'mix-manifest.json',
             ];
