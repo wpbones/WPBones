@@ -390,8 +390,8 @@ class BonesCommandLine
 
             // sanitize namespace
             $namespace          = str_replace(" ", "", $pluginName);
-            $previousPluginName = 'WP Bannerize';
-            $previousNamespace  = 'WPBannerize';
+            $previousPluginName = 'WP Kirk';
+            $previousNamespace  = 'WPKirk';
         } else {
             // sanitize namespace
             $namespace = str_replace(' ', '', $pluginName);
@@ -593,7 +593,7 @@ class BonesCommandLine
 
     protected function tinker()
     {
-        $eval = $this->ask(">");
+        $eval = $this->ask(">>>");
 
         try {
 
