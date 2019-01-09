@@ -400,13 +400,7 @@ class BonesCommandLine
             $name = $argv[1];
         }
 
-        // update composer module
-        $res = `composer update`;
-
-        // copy bones
-        //$res = rename('vendor/wpbones/wpbones/src/Console/bin/bones', 'bones');
-
-        //$this->rename($name);
+        $this->update();
 
     }
 
