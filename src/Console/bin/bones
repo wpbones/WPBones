@@ -11,51 +11,6 @@ if (version_compare(PHP_VERSION, WPBONES_MINIMAL_PHP_VERSION) < 0) {
 
 }
 
-/*
-|--------------------------------------------------------------------------
-| Load WordPress
-|--------------------------------------------------------------------------
-|
-| We have to load the WordPress environment.
-|
-*/
-if (!file_exists(__DIR__ . '/../../../wp-load.php')) {
-    echo "\n\033[33;5;82mWarning!!\n";
-    echo "\n\033[38;5;82m\t" . 'You must be inside "wp-content/plugins/" folders';
-    echo "\033[0m\n\n";
-    exit;
-}
-
-require __DIR__ . '/../../../wp-load.php';
-
-/*
-|--------------------------------------------------------------------------
-| Register The Auto Loader
-|--------------------------------------------------------------------------
-|
-| Composer provides a convenient, automatically generated class loader
-| for our application. We just need to utilize it! We'll require it
-| into the script here so that we do not have to worry about the
-| loading of any our classes "manually". Feels great to relax.
-|
-*/
-
-if (file_exists(__DIR__ . '/vendor/autoload.php')) {
-    require __DIR__ . '/vendor/autoload.php';
-}
-
-/*
-|--------------------------------------------------------------------------
-| Load this plugin env
-|--------------------------------------------------------------------------
-|
-*/
-
-if (file_exists(__DIR__ . '/bootstrap/plugin.php')) {
-    $plugin = require_once __DIR__ . '/bootstrap/plugin.php';
-}
-
-
 /**
  * @class BonesCommandLine
  */
@@ -65,7 +20,7 @@ class BonesCommandLine
     /**
      * WP Bones version
      */
-    const VERSION = '0.9.14';
+    const VERSION = '0.9.20';
 
     /**
      * Plugin name.
@@ -109,16 +64,137 @@ class BonesCommandLine
         $this->plginName = $pluginName;
         $this->namespace = $namespace;
 
-        $kernelClass        = "{$namespace}\\Console\\Kernel";
-        $WPBoneskernelClass = "{$namespace}\\WPBones\\Foundation\\Console\\Kernel";
+        $this->boot();
+    }
+
+    /**
+     * Load WordPress core and all environment.
+     *
+     */
+    protected function loadWordPress()
+    {
+        /*
+        |--------------------------------------------------------------------------
+        | Load WordPress
+        |--------------------------------------------------------------------------
+        |
+        | We have to load the WordPress environment.
+        |
+        */
+        if (!file_exists(__DIR__ . '/../../../wp-load.php')) {
+            echo "\n\033[33;5;82mWarning!!\n";
+            echo "\n\033[38;5;82m\t" . 'You must be inside "wp-content/plugins/" folders';
+            echo "\033[0m\n\n";
+            exit;
+        }
+
+        require __DIR__ . '/../../../wp-load.php';
+
+        /*
+        |--------------------------------------------------------------------------
+        | Register The Auto Loader
+        |--------------------------------------------------------------------------
+        |
+        | Composer provides a convenient, automatically generated class loader
+        | for our application. We just need to utilize it! We'll require it
+        | into the script here so that we do not have to worry about the
+        | loading of any our classes "manually". Feels great to relax.
+        |
+        */
+
+        if (file_exists(__DIR__ . '/vendor/autoload.php')) {
+            require __DIR__ . '/vendor/autoload.php';
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Load this plugin env
+        |--------------------------------------------------------------------------
+        |
+        */
+
+        if (file_exists(__DIR__ . '/bootstrap/plugin.php')) {
+            $plugin = require_once __DIR__ . '/bootstrap/plugin.php';
+        }
+    }
+
+    /**
+     * Check and load for console kernel extensions.
+     *
+     */
+    protected function loadKernel()
+    {
+        $kernelClass        = "{$this->namespace}\\Console\\Kernel";
+        $WPBoneskernelClass = "{$this->namespace}\\WPBones\\Foundation\\Console\\Kernel";
 
         if (class_exists($WPBoneskernelClass) && class_exists($kernelClass)) {
             $this->kernel = new $kernelClass;
         }
-
-        $this->handle();
     }
 
+    /**
+     * Return TRUE if the command is in console argument.
+     *
+     * @param string $command Bones command to check.
+     * @return bool
+     */
+    protected function command($command)
+    {
+        $arguments = $this->arguments();
+
+        return ($command === ($arguments[0]??""));
+    }
+
+    /**
+     * Return the arguments after "php bones".
+     *
+     * @param int $index Optional. Index of argument.
+     *                   If NULL will be returned the whole array.
+     * @return mixed|array
+     */
+    protected function arguments($index = null)
+    {
+        $argv = $_SERVER['argv'];
+
+        // strip the application name
+        array_shift($argv);
+
+        return $index ? ($argv[$index]??null) : $argv;
+    }
+
+    protected function isHelp()
+    {
+        $arguments = $this->arguments();
+
+        return (empty($arguments) || $this->command('--help'));
+    }
+
+    /**
+     * This is a special bootstrap in order to avoid the WordPress and kernel envirnment
+     * when we have to rename the plugin and vendor structure.
+     *
+     */
+    public function boot()
+    {
+        if ($this->command('rename')) {
+
+            $this->rename($this->arguments(1));
+
+        } else {
+
+            $this->loadWordPress();
+
+            $this->loadKernel();
+
+            $this->handle();
+        }
+    }
+
+    /**
+     * Let's roll
+     *
+     * @return \BonesCommandLine
+     */
     public static function run()
     {
         $instance = new self;
@@ -205,16 +281,6 @@ class BonesCommandLine
         return $line ?: $default;
     }
 
-    protected function option($option)
-    {
-        $argv = $_SERVER['argv'];
-
-        // strip the application name (bones)
-        array_shift($argv);
-
-        return in_array($option, $argv);
-    }
-
     /**
      * Return an array with all matched files from root folder. This method release the follow filters:
      *
@@ -247,7 +313,9 @@ class BonesCommandLine
          */
         function _rglob($path, $match = '', &$result = [])
         {
-            $files = glob(trailingslashit($path) . '*', GLOB_MARK);
+            $path = rtrim($path, '/\\') . '/';
+
+            $files = glob($path . '*', GLOB_MARK);
             if (false !== $files) {
                 foreach ($files as $file) {
                     if (is_dir($file)) {
@@ -291,6 +359,29 @@ class BonesCommandLine
     |
     */
 
+    protected function sanitize($title)
+    {
+        $title = strip_tags($title);
+        // Preserve escaped octets.
+        $title = preg_replace('|%([a-fA-F0-9][a-fA-F0-9])|', '---$1---', $title);
+        // Remove percent signs that are not part of an octet.
+        $title = str_replace('%', '', $title);
+        // Restore octets.
+        $title = preg_replace('|---([a-fA-F0-9][a-fA-F0-9])---|', '%$1', $title);
+
+        $title = strtolower($title);
+
+        $title = preg_replace('/&.+?;/', '', $title); // kill entities
+        $title = str_replace('.', '-', $title);
+
+        $title = preg_replace('/[^%a-z0-9 _-]/', '', $title);
+        $title = preg_replace('/\s+/', '-', $title);
+        $title = preg_replace('|-+|', '-', $title);
+        $title = trim($title, '-');
+
+        return $title;
+    }
+
     protected function rename($pluginName = '')
     {
         if (empty($pluginName)) {
@@ -299,8 +390,8 @@ class BonesCommandLine
 
             // sanitize namespace
             $namespace          = str_replace(" ", "", $pluginName);
-            $previousPluginName = 'WP Kirk';
-            $previousNamespace  = 'WPKirk';
+            $previousPluginName = 'WP Bannerize';
+            $previousNamespace  = 'WPBannerize';
         } else {
             // sanitize namespace
             $namespace = str_replace(' ', '', $pluginName);
@@ -316,22 +407,22 @@ class BonesCommandLine
         }
 
         // previous slug
-        $previousSlug = str_replace("-", "_", sanitize_title($previousPluginName)) . "_slug";
+        $previousSlug = str_replace("-", "_", $this->sanitize($previousPluginName)) . "_slug";
 
         // slug
-        $slug = str_replace("-", "_", sanitize_title($pluginName)) . "_slug";
+        $slug = str_replace("-", "_", $this->sanitize($pluginName)) . "_slug";
 
         // previous vars
-        $previousVars = str_replace("-", "_", sanitize_title($previousPluginName)) . "_vars";
+        $previousVars = str_replace("-", "_", $this->sanitize($previousPluginName)) . "_vars";
 
         // vars - used in custom post types service provider
-        $vars = str_replace("-", "_", sanitize_title($pluginName)) . "_vars";
+        $vars = str_replace("-", "_", $this->sanitize($pluginName)) . "_vars";
 
         // previous css id
-        $previousCssId = sanitize_title($previousPluginName);
+        $previousCssId = $this->sanitize($previousPluginName);
 
         // current css id
-        $currentCssId = sanitize_title($pluginName);
+        $currentCssId = $this->sanitize($pluginName);
 
         // remove all composer
         $files = array_filter(array_map(function ($e) {
@@ -630,7 +721,7 @@ class BonesCommandLine
         // previous namespace
         list($pluginName, $namespace) = explode(",", file_get_contents('namespace'));
 
-        $slug = str_replace("-", "_", sanitize_title($pluginName));
+        $slug = str_replace("-", "_", $this->sanitize($pluginName));
 
         $id     = $this->ask("Enter a ID:", $slug);
         $name   = $this->ask("Enter the name:");
@@ -674,7 +765,7 @@ class BonesCommandLine
         // previous namespace
         list($pluginName, $namespace) = explode(",", file_get_contents('namespace'));
 
-        $slug = str_replace("-", "_", sanitize_title($pluginName));
+        $slug = str_replace("-", "_", $this->sanitize($pluginName));
 
         $id     = $this->ask("Enter a ID:", $slug);
         $name   = $this->ask("Enter the name:");
@@ -765,8 +856,8 @@ class BonesCommandLine
         // previous namespace
         list($pluginName, $namespace) = explode(",", file_get_contents('namespace'));
 
-        $signature = str_replace("-", "", sanitize_title($pluginName));
-        $command   = str_replace("-", "", sanitize_title($className));
+        $signature = str_replace("-", "", $this->sanitize($pluginName));
+        $command   = str_replace("-", "", $this->sanitize($className));
 
         $signature = $this->ask("Enter a signature:", $signature);
         $command   = $this->ask("Enter the command:", $command);
@@ -875,7 +966,7 @@ class BonesCommandLine
         // previous namespace
         list($pluginName, $namespace) = explode(",", file_get_contents('namespace'));
 
-        $slug = str_replace("-", "_", sanitize_title($className));
+        $slug = str_replace("-", "_", $this->sanitize($className));
 
         // get the stub
         $content = file_get_contents("vendor/wpbones/wpbones/src/Console/stubs/widget.stub");
@@ -950,61 +1041,58 @@ class BonesCommandLine
         // strip the application name
         array_shift($argv);
 
-        if (empty($argv) || (isset($argv[0]) && "--help" === $argv[0])) {
+        if ($this->isHelp()) {
             $this->help();
-        } // namespace
-        elseif ($this->option('rename')) {
-            $this->rename(($argv[1]??null));
         } // install
-        elseif ($this->option('install')) {
-            $this->install($argv);
+        elseif ($this->command('install')) {
+            $this->install($this->arguments());
         } // Update
-        elseif ($this->option('update')) {
+        elseif ($this->command('update')) {
             $this->update();
         } // Deploy
-        elseif ($this->option('deploy')) {
-            $this->deploy($argv[1]);
+        elseif ($this->command('deploy')) {
+            $this->deploy($this->arguments(1));
         } // Optimize
-        elseif ($this->option('optimize')) {
+        elseif ($this->command('optimize')) {
             $this->optimize();
         } // Tinker
-        elseif ($this->option('tinker')) {
+        elseif ($this->command('tinker')) {
             $this->tinker();
         } // Require
-        elseif ($this->option('require')) {
-            $this->requirePackage($argv[1]);
+        elseif ($this->command('require')) {
+            $this->requirePackage($this->arguments(1));
         } // migrate:create {table_name}
-        elseif ($this->option('migrate:create')) {
-            $this->createMigrate($argv[1]);
+        elseif ($this->command('migrate:create')) {
+            $this->createMigrate($this->arguments(1));
         } // make:controller {controller_name}
-        elseif ($this->option('make:controller')) {
-            $this->createController($argv[1]);
+        elseif ($this->command('make:controller')) {
+            $this->createController($this->arguments(1));
         } // make:console {command_name}
-        elseif ($this->option('make:console')) {
-            $this->createCommand($argv[1]);
+        elseif ($this->command('make:console')) {
+            $this->createCommand($this->arguments(1));
         } // make:cpy {className}
-        elseif ($this->option('make:cpt')) {
-            $this->createCustomPostType($argv[1]);
+        elseif ($this->command('make:cpt')) {
+            $this->createCustomPostType($this->arguments(1));
         } // make:shortocde {className}
-        elseif ($this->option('make:shortcode')) {
-            $this->createShortcode($argv[1]);
+        elseif ($this->command('make:shortcode')) {
+            $this->createShortcode($this->arguments(1));
         } // make:provider {className}
-        elseif ($this->option('make:provider')) {
-            $this->createProvider($argv[1]);
+        elseif ($this->command('make:provider')) {
+            $this->createProvider($this->arguments(1));
         } // make:ajax {className}
-        elseif ($this->option('make:ajax')) {
-            $this->createAjax($argv[1]);
+        elseif ($this->command('make:ajax')) {
+            $this->createAjax($this->arguments(1));
         } // make:ctt {className}
-        elseif ($this->option('make:ctt')) {
-            $this->createCustomTaxonomyType($argv[1]);
+        elseif ($this->command('make:ctt')) {
+            $this->createCustomTaxonomyType($this->arguments(1));
         } // make:widget {className}
-        elseif ($this->option('make:widget')) {
-            $this->createWidget($argv[1]);
+        elseif ($this->command('make:widget')) {
+            $this->createWidget($this->arguments(1));
         } else {
             $extended = false;
 
             if ($this->kernel) {
-                $extended = $this->kernel->handle($argv);
+                $extended = $this->kernel->handle($this->arguments());
             }
 
             if (!$extended) {
