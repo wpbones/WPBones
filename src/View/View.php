@@ -65,7 +65,7 @@ class View
         if (! empty($this->adminStyles)) {
             $minified = $this->container->config('plugin.minified', false) ? ".min" : '';
             foreach ($this->adminStyles as $style) {
-                $src = $this->container->getCssAttribute() . '/' . $style[ 0 ] . $minified . '.css';
+                $src = $this->container->css . '/' . $style[ 0 ] . $minified . '.css';
                 wp_enqueue_style($style[ 0 ], $src, $style[ 1 ], $style[ 2 ]);
             }
         }
@@ -76,7 +76,7 @@ class View
         if (! empty($this->adminScripts)) {
             $minified = $this->container->config('plugin.minified', false) ? ".min" : '';
             foreach ($this->adminScripts as $script) {
-                $src = $this->container->getJsAttribute() . '/' . $script[ 0 ] . $minified . '.js';
+                $src = $this->container->js . '/' . $script[ 0 ] . $minified . '.js';
                 wp_enqueue_script($script[ 0 ], $src, $script[ 1 ], $script[ 2 ], true);
             }
         }
@@ -87,7 +87,7 @@ class View
         if (! empty($this->styles)) {
             $minified = $this->container->config('plugin.minified', false) ? ".min" : '';
             foreach ($this->styles as $style) {
-                $src = $this->container->getCssAttribute() . '/' . $style[ 0 ] . $minified . '.css';
+                $src = $this->container->css . '/' . $style[ 0 ] . $minified . '.css';
                 wp_enqueue_style($style[ 0 ], $src, $style[ 1 ], $style[ 2 ]);
             }
         }
@@ -98,7 +98,7 @@ class View
         if (! empty($this->scripts)) {
             $minified = $this->container->config('plugin.minified', false) ? ".min" : '';
             foreach ($this->scripts as $script) {
-                $src = $this->container->getJsAttribute() . '/' . $script[ 0 ] . $minified . '.js';
+                $src = $this->container->js . '/' . $script[ 0 ] . $minified . '.js';
                 wp_enqueue_script($script[ 0 ], $src, $script[ 1 ], $script[ 2 ], true);
             }
         }

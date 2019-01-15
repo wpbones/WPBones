@@ -169,7 +169,7 @@ class Plugin extends Container implements PluginContract
         return $status;
     }
 
-    public function getOptionsAttribute()
+    protected function getOptionsAttribute()
     {
         if (is_null($this->_options)) {
             $this->_options = new WordPressOption($this);
@@ -178,7 +178,7 @@ class Plugin extends Container implements PluginContract
         return $this->_options;
     }
 
-    public function getRequestAttribute()
+    protected function getRequestAttribute()
     {
         if (is_null($this->_request)) {
             $this->_request = new Request();
@@ -187,7 +187,7 @@ class Plugin extends Container implements PluginContract
         return $this->_request;
     }
 
-    public function getPluginBasenameAttribute()
+    protected function getPluginBasenameAttribute()
     {
         return plugin_basename($this->file);
     }
@@ -212,17 +212,17 @@ class Plugin extends Container implements PluginContract
         return $this->baseUri;
     }
 
-    public function getCssAttribute()
+    protected function getCssAttribute()
     {
         return "{$this->baseUri}/public/css";
     }
 
-    public function getJsAttribute()
+    protected function getJsAttribute()
     {
         return "{$this->baseUri}/public/js";
     }
 
-    public function getImagesAttribute()
+    protected function getImagesAttribute()
     {
         return "{$this->baseUri}/public/images";
     }
@@ -337,6 +337,52 @@ class Plugin extends Container implements PluginContract
         }
 
         return null;
+    }
+
+    /**
+     * Helper method to load (enqueue) styles.
+     *
+     * For your convenience, the params $filename may be an array of file.
+     *
+     * @param string|array $filename Filename
+     * @param array        $deps     Optional. Dependences array
+     * @param null         $version  Optional. Default plugin version
+     */
+    public function css($filename, $deps = [], $version = null)
+    {
+        $filenames = (array) $filename;
+
+        foreach ($filenames as $file) {
+            wp_enqueue_style($this->slug . Str::slug($file),
+                $this->css . '/' . $file,
+                (array) $deps,
+                $version??$this->Version
+            );
+        }
+    }
+
+    /**
+     * Helper method to load (enqueue) styles.
+     *
+     * For your convenience, the params $filename may be an array of file.
+     *
+     * @param string|array $filename Filenames
+     * @param array        $deps     Optional. Dependences array
+     * @param null         $version  Optional. Default plugin version
+     * @param bool         $footer   Optional. Load on footer. Default true
+     */
+    public function js($filename, $deps = [], $version = null, $footer = true)
+    {
+        $filenames = (array) $filename;
+
+        foreach ($filenames as $file) {
+            wp_enqueue_script($this->slug . Str::slug($file),
+                WPBannerize()->js . '/' . $file,
+                (array) $deps,
+                $version??$this->Version,
+                $footer
+            );
+        }
     }
 
     /*
@@ -484,7 +530,7 @@ class Plugin extends Container implements PluginContract
                 // icon
                 $icon = $menu['icon'];
                 if (isset($menu['icon']) && !empty($menu['icon']) && 'dashicons' != substr($menu['icon'], 0, 9)) {
-                    $icon = $this->getImagesAttribute() . '/' . $menu['icon'];
+                    $icon = $this->images . '/' . $menu['icon'];
                 }
 
                 $firstMenu = true;
@@ -638,6 +684,7 @@ class Plugin extends Container implements PluginContract
 
             return $hook;
         }
+
         return null;
     }
 
