@@ -20,7 +20,7 @@ class BonesCommandLine
     /**
      * WP Bones version
      */
-    const VERSION = '0.9.21';
+    const VERSION = '0.9.22';
 
     /**
      * Plugin name.
@@ -426,7 +426,8 @@ class BonesCommandLine
 
         // remove all composer
         $files = array_filter(array_map(function ($e) {
-            if (false !== strpos($e, "node_modules")) {
+            if (false !== strpos($e, "node_modules") ||
+                false !== strpos($e, "vendor/wpbones/wpbones/src/Console/bin/bones")) {
                 return false;
             }
 
@@ -439,7 +440,6 @@ class BonesCommandLine
             'composer.json',
             'readme.txt',
         ]);
-
 
         // change namespace
         foreach ($files as $file) {
