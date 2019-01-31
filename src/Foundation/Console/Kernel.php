@@ -38,9 +38,9 @@ class Kernel
 
       foreach ( $commands as $key => $command ) {
         $name = $command->command;
-        $name .= str_repeat( ' ', 22 - strlen( $name ) );
+        $name .= str_repeat( ' ', 23 - strlen( $name ) );
         $description = $command->description;
-        $this->line( "  {$name} {$description}" );
+        $this->line( " {$name} {$description}" );
       }
     }
   }

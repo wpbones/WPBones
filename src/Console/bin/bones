@@ -20,7 +20,7 @@ class BonesCommandLine
     /**
      * WP Bones version
      */
-    const VERSION = '0.9.22';
+    const VERSION = '0.9.23';
 
     /**
      * Plugin name.
@@ -234,9 +234,9 @@ class BonesCommandLine
         $this->line(" require                 Install a WP Bones package");
         $this->line(" tinker                  Interact with your application");
         $this->line(" update                  Update the Framework");
-        $this->line("migrate");
+        $this->info("migrate");
         $this->line(" migrate:create          Create a new Migration");
-        $this->line("make");
+        $this->info("make");
         $this->line(" make:ajax               Create a new Ajax Service Provider");
         $this->line(" make:controller         Create a new Controller");
         $this->line(" make:console            Create a new Bones command");
