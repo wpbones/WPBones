@@ -8,7 +8,6 @@ if (version_compare(PHP_VERSION, WPBONES_MINIMAL_PHP_VERSION) < 0) {
     echo "\n\033[38;5;82m\t" . 'You must run with PHP version ' . WPBONES_MINIMAL_PHP_VERSION . ' or greather';
     echo "\033[0m\n\n";
     exit;
-
 }
 
 /**
@@ -20,7 +19,7 @@ class BonesCommandLine
     /**
      * WP Bones version
      */
-    const VERSION = '0.9.23';
+    const VERSION = '0.9.30';
 
     /**
      * Plugin name.
@@ -177,11 +176,8 @@ class BonesCommandLine
     public function boot()
     {
         if ($this->command('rename')) {
-
             $this->rename($this->arguments(1));
-
         } else {
-
             $this->loadWordPress();
 
             $this->loadKernel();
@@ -213,7 +209,6 @@ class BonesCommandLine
 
     protected function help()
     {
-
         echo '
   o       o o--o      o--o
   |       | |   |     |   |
@@ -237,14 +232,15 @@ class BonesCommandLine
         $this->info("migrate");
         $this->line(" migrate:create          Create a new Migration");
         $this->info("make");
-        $this->line(" make:ajax               Create a new Ajax Service Provider");
-        $this->line(" make:controller         Create a new Controller");
+        $this->line(" make:ajax               Create a new Ajax service provider class");
+        $this->line(" make:controller         Create a new controller class");
         $this->line(" make:console            Create a new Bones command");
-        $this->line(" make:cpt                Create a new Custom Post Type Service Provider");
-        $this->line(" make:ctt                Create a new Custom Taxonomy Type Service Provider");
-        $this->line(" make:shortcode          Create a new Shortcode Service Provider");
-        $this->line(" make:provider           Create a new Service Provider");
-        $this->line(" make:widget             Create a new Widget Service Provider");
+        $this->line(" make:cpt                Create a new Custom Post Type service provider class");
+        $this->line(" make:ctt                Create a new Custom Taxonomy Type service provider class");
+        $this->line(" make:shortcode          Create a new Shortcode service provider class");
+        $this->line(" make:provider           Create a new service provider class");
+        $this->line(" make:widget             Create a new Widget service provider class");
+        $this->line(" make:model              Create a new database model class");
 
         if ($this->kernel && $this->kernel->hasCommands()) {
             $this->info("Extensions");
@@ -268,7 +264,6 @@ class BonesCommandLine
 
     protected function ask($str, $default = '')
     {
-
         echo "\n\e[38;5;88m$str" . (empty($default) ? "" : " (default: {$default})") . "\e[0m ";
 
         $handle = fopen("php://stdin", "r");
@@ -443,7 +438,6 @@ class BonesCommandLine
 
         // change namespace
         foreach ($files as $file) {
-
             $this->line("Loading and process {$file}...");
 
             $content = file_get_contents($file);
@@ -492,7 +486,6 @@ class BonesCommandLine
         }
 
         $this->update();
-
     }
 
     protected function update()
@@ -596,7 +589,6 @@ class BonesCommandLine
         $eval = $this->ask(">>>");
 
         try {
-
             if ($eval == 'exit') {
                 exit;
             }
@@ -620,7 +612,6 @@ class BonesCommandLine
         $this->info("Delete folder... {$path}");
 
         array_map(function ($file) {
-
             if (is_dir($file)) {
                 $this->deleteDirectory($file);
             } else {
@@ -628,7 +619,6 @@ class BonesCommandLine
 
                 @unlink($file);
             }
-
         }, glob("{$path}/" . '{,.}[!.,!..]*', GLOB_MARK | GLOB_BRACE));
 
         @rmdir("{$path}");
@@ -656,7 +646,7 @@ class BonesCommandLine
         // Loop through the folder
         $dir = dir($source);
 
-        while(false !== $entry = $dir->read()) {
+        while (false !== $entry = $dir->read()) {
 
             // files and folder to skip
             if ($entry === '.' || $entry === '..' || $this->skip("{$source}/{$entry}")) {
@@ -689,9 +679,11 @@ class BonesCommandLine
             return;
         }
 
-        $filename = sprintf('%s_create_%s_table.php',
+        $filename = sprintf(
+            '%s_create_%s_table.php',
             date('Y_m_d_His'),
-            strtolower($tablename));
+            strtolower($tablename)
+        );
 
         // previous namespace
         list($pluginName, $namespace) = explode(",", file_get_contents('namespace'));
@@ -704,7 +696,6 @@ class BonesCommandLine
         file_put_contents("database/migrations/{$filename}", $content);
 
         $this->line(" Created database/migrations/{$filename}");
-
     }
 
     protected function createCustomPostType($className)
@@ -748,7 +739,6 @@ class BonesCommandLine
         $this->line(" Created plugin/CustomPostTypes/{$filename}");
 
         $this->info("Remember to add {$className} in the config/plugin.php array in the 'custom_post_types' key.");
-
     }
 
     protected function createCustomTaxonomyType($className)
@@ -797,7 +787,6 @@ class BonesCommandLine
         $this->line(" Created plugin/CustomTaxonomyTypes/{$filename}");
 
         $this->info("Remember to add {$className} in the config/plugin.php array in the 'custom_taxonomy_types' key.");
-
     }
 
     protected function createController($className)
@@ -889,8 +878,6 @@ class BonesCommandLine
 
             $this->line(" Created plugin/Console/Kernel.php");
         }
-
-
     }
 
     protected function createShortcode($className)
@@ -921,7 +908,6 @@ class BonesCommandLine
         $this->line(" Created plugin/Shortcodes/{$filename}");
 
         $this->info("Remember to add {$className} in the config/plugin.php array in the 'shortcodes' key.");
-
     }
 
     protected function createProvider($className)
@@ -1005,8 +991,6 @@ class BonesCommandLine
             return;
         }
 
-        $filename = sprintf('%s.php', $className);
-
         // previous namespace
         list($pluginName, $namespace) = explode(",", file_get_contents('namespace'));
 
@@ -1026,6 +1010,52 @@ class BonesCommandLine
         $this->line(" Created plugin/Ajax/{$filename}");
 
         $this->info("Remember to add {$className} in the config/plugin.php array in the 'ajax' key.");
+    }
+
+    protected function createModel($className)
+    {
+        // help
+        if (empty($className) || $className == '--help') {
+            $this->info('Use php bones make:model <ClassName>');
+
+            return;
+        }
+
+        // previous namespace
+        list($pluginName, $namespace) = explode(",", file_get_contents('namespace'));
+
+        // get additional path
+        $path = $namespacePath = '';
+        if (false !== strpos($className, '/')) {
+            $parts         = explode('/', $className);
+            $className     = array_pop($parts);
+            $path          = implode('/', $parts) . '/';
+            $namespacePath = '\\' . implode('\\', $parts);
+        }
+
+        // create the table
+        $table = strtolower($className) . 's';
+
+        // get the stub
+        $content = file_get_contents("vendor/wpbones/wpbones/src/Console/stubs/model.stub");
+        $content = str_replace('{Namespace}', $namespace, $content);
+        $content = str_replace('{ClassName}', $className, $content);
+        $content = str_replace('{Table}', $table, $content);
+
+        if (!empty($path)) {
+            $content = str_replace('{Path}', $namespacePath, $content);
+            mkdir("plugin/Http/Controllers/{$path}", 0777, true);
+        } else {
+            $content = str_replace('{Path}', '', $content);
+        }
+
+        $filename = sprintf('%s.php', $className);
+
+        file_put_contents("plugin/Http/Controllers/{$path}{$filename}", $content);
+
+        $this->line(" Created plugin/Http/Controllers/{$path}{$filename}");
+
+        $this->optimize();
 
     }
 
@@ -1088,6 +1118,8 @@ class BonesCommandLine
         } // make:widget {className}
         elseif ($this->command('make:widget')) {
             $this->createWidget($this->arguments(1));
+        } elseif ($this->command('make:model')) {
+            $this->createModel($this->arguments(1));
         } else {
             $extended = false;
 

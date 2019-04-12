@@ -2,6 +2,7 @@
 
 namespace WPKirk\WPBones\Foundation;
 
+use Illuminate\Database\Capsule\Manager as Capsule;
 use WPKirk\WPBones\Container\Container;
 use WPKirk\WPBones\Contracts\Foundation\Plugin as PluginContract;
 use WPKirk\WPBones\Database\WordPressOption;
@@ -23,52 +24,44 @@ class Plugin extends Container implements PluginContract
      * @var static
      */
     protected static $instance;
-
-    /**
-     * Buld in __FILE__ relative plugin.
-     *
-     * @var string
-     */
-    protected $file;
-
-    /**
-     * The base path for the plugin installation.
-     *
-     * @var string
-     */
-    protected $basePath;
-
-    /**
-     * The base uri for the plugin installation.
-     *
-     * @var string
-     */
-    protected $baseUri;
-
-    /**
-     * Internal use where store the plugin data.
-     *
-     * @var array
-     */
-    protected $pluginData = [];
-
-    /**
-     * A key value pairs array with the list of providers.
-     *
-     * @var array
-     */
-    protected $provides = [];
-
-    private $_options = null;
-
-    private $_request = null;
-
     /**
      * The slug of this plugin.
      *
      * @var string
      */
     public $slug = '';
+    /**
+     * Buld in __FILE__ relative plugin.
+     *
+     * @var string
+     */
+    protected $file;
+    /**
+     * The base path for the plugin installation.
+     *
+     * @var string
+     */
+    protected $basePath;
+    /**
+     * The base uri for the plugin installation.
+     *
+     * @var string
+     */
+    protected $baseUri;
+    /**
+     * Internal use where store the plugin data.
+     *
+     * @var array
+     */
+    protected $pluginData = [];
+    /**
+     * A key value pairs array with the list of providers.
+     *
+     * @var array
+     */
+    protected $provides = [];
+    private $_options = null;
+    private $_request = null;
 
     public function __construct($basePath)
     {
@@ -77,20 +70,10 @@ class Plugin extends Container implements PluginContract
         $this->boot();
     }
 
-    public function __get($name)
-    {
-        $method = 'get' . Str::studly($name) . 'Attribute';
-        if (method_exists($this, $method)) {
-            return $this->{$method}();
-        }
-
-        if (in_array($name, array_keys($this->pluginData))) {
-            return $this->pluginData[$name];
-        }
-    }
-
     public function boot()
     {
+        $this->initEloquent();
+
         // emule __FILE__
         $this->file = $this->basePath . '/index.php';
 
@@ -160,15 +143,6 @@ class Plugin extends Container implements PluginContract
 
     }
 
-    public function set_screen_option($status, $option, $value)
-    {
-        if (in_array($option, array_keys($this->config('plugin.screen_options', [])))) {
-            return $value;
-        }
-
-        return $status;
-    }
-
     protected function getOptionsAttribute()
     {
         if (is_null($this->_options)) {
@@ -192,26 +166,6 @@ class Plugin extends Container implements PluginContract
         return plugin_basename($this->file);
     }
 
-    /**
-     * Get the base path of the plugin installation.
-     *
-     * @return string
-     */
-    public function getBasePath()
-    {
-        return $this->basePath;
-    }
-
-    /**
-     * Return the absolute URL for the installation plugin.
-     *
-     * @return string
-     */
-    public function getBaseUri()
-    {
-        return $this->baseUri;
-    }
-
     protected function getCssAttribute()
     {
         return "{$this->baseUri}/public/css";
@@ -227,9 +181,25 @@ class Plugin extends Container implements PluginContract
         return "{$this->baseUri}/public/images";
     }
 
-    public function vendor($vendor = "wpbones")
+    public function __get($name)
     {
-        return "{$this->baseUri}/vendor/{$vendor}";
+        $method = 'get' . Str::studly($name) . 'Attribute';
+        if (method_exists($this, $method)) {
+            return $this->{$method}();
+        }
+
+        if (in_array($name, array_keys($this->pluginData))) {
+            return $this->pluginData[$name];
+        }
+    }
+
+    public function set_screen_option($status, $option, $value)
+    {
+        if (in_array($option, array_keys($this->config('plugin.screen_options', [])))) {
+            return $value;
+        }
+
+        return $status;
     }
 
     /**
@@ -237,8 +207,8 @@ class Plugin extends Container implements PluginContract
      *
      * If an array is passed as the key, we will assume you want to set an array of values.
      *
-     * @param  array|string $key
-     * @param  mixed        $default
+     * @param array|string $key
+     * @param mixed        $default
      *
      * @return mixed
      */
@@ -277,10 +247,35 @@ class Plugin extends Container implements PluginContract
     }
 
     /**
+     * Get the base path of the plugin installation.
+     *
+     * @return string
+     */
+    public function getBasePath()
+    {
+        return $this->basePath;
+    }
+
+    /**
+     * Return the absolute URL for the installation plugin.
+     *
+     * @return string
+     */
+    public function getBaseUri()
+    {
+        return $this->baseUri;
+    }
+
+    public function vendor($vendor = "wpbones")
+    {
+        return "{$this->baseUri}/vendor/{$vendor}";
+    }
+
+    /**
      * Gets the value of an environment variable. Supports boolean, empty and null.
      *
-     * @param  string $key
-     * @param  mixed  $default
+     * @param string $key
+     * @param mixed  $default
      *
      * @return mixed
      */
@@ -304,25 +299,6 @@ class Plugin extends Container implements PluginContract
 
         return $view;
 
-    }
-
-    /**
-     * Return TRUE if an Ajax called
-     *
-     * @return bool
-     */
-    public function isAjax()
-    {
-        if (defined('DOING_AJAX')) {
-            return true;
-        }
-        if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) &&
-            strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest'
-        ) {
-            return true;
-        }
-
-        return false;
     }
 
     public function getPageUrl($pageSlug)
@@ -385,15 +361,6 @@ class Plugin extends Container implements PluginContract
         }
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | WordPress actions & filter
-    |--------------------------------------------------------------------------
-    |
-    | When a plugin starts we will use some useful actions and filters.
-    |
-    */
-
     /**
      * Called when a plugin is activate; `register_activation_hook()`
      *
@@ -420,6 +387,48 @@ class Plugin extends Container implements PluginContract
                 $instance = new $className;
             }
         }
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | WordPress actions & filter
+    |--------------------------------------------------------------------------
+    |
+    | When a plugin starts we will use some useful actions and filters.
+    |
+    */
+
+    /**
+     * Return the list of classes in a PHP file.
+     *
+     * @param string $filename A PHP Filename file.
+     *
+     * @return array|bool
+     */
+    private function getFileClasses($filename)
+    {
+        $code = file_get_contents($filename);
+
+        if (empty($code)) {
+            return false;
+        }
+
+        $classes = [];
+        $tokens  = token_get_all($code);
+        $count   = count($tokens);
+        for ($i = 2; $i < $count; $i++) {
+            if ($tokens[$i - 2][0] == T_CLASS
+                && $tokens[$i - 1][0] == T_WHITESPACE
+                && $tokens[$i][0] == T_STRING
+            ) {
+
+                $class_name = $tokens[$i][1];
+                $classes[]  = $class_name;
+            }
+        }
+
+        return $classes;
+
     }
 
     /**
@@ -501,6 +510,25 @@ class Plugin extends Container implements PluginContract
                 }
             }
         }
+    }
+
+    /**
+     * Return TRUE if an Ajax called
+     *
+     * @return bool
+     */
+    public function isAjax()
+    {
+        if (defined('DOING_AJAX')) {
+            return true;
+        }
+        if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) &&
+            strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest'
+        ) {
+            return true;
+        }
+
+        return false;
     }
 
     public function log()
@@ -627,20 +655,6 @@ class Plugin extends Container implements PluginContract
         }
     }
 
-    public function widgets_init()
-    {
-        global $wp_widget_factory;
-
-        $init = include "{$this->basePath}/config/plugin.php";
-
-        if (isset($init['widgets']) && is_array($init['widgets']) && !empty($init['widgets'])) {
-            foreach ($init['widgets'] as $className) {
-                //register_widget( $className );
-                $wp_widget_factory->widgets[$className] = new $className($this);
-            }
-        }
-    }
-
     // -- private
 
     private function getCallableHook($routes)
@@ -688,37 +702,46 @@ class Plugin extends Container implements PluginContract
         return null;
     }
 
-    /**
-     * Return the list of classes in a PHP file.
-     *
-     * @param string $filename A PHP Filename file.
-     *
-     * @return array|bool
-     */
-    private function getFileClasses($filename)
+    public function widgets_init()
     {
-        $code = file_get_contents($filename);
+        global $wp_widget_factory;
 
-        if (empty($code)) {
-            return false;
-        }
+        $init = include "{$this->basePath}/config/plugin.php";
 
-        $classes = [];
-        $tokens  = token_get_all($code);
-        $count   = count($tokens);
-        for ($i = 2; $i < $count; $i++) {
-            if ($tokens[$i - 2][0] == T_CLASS
-                && $tokens[$i - 1][0] == T_WHITESPACE
-                && $tokens[$i][0] == T_STRING
-            ) {
-
-                $class_name = $tokens[$i][1];
-                $classes[]  = $class_name;
+        if (isset($init['widgets']) && is_array($init['widgets']) && !empty($init['widgets'])) {
+            foreach ($init['widgets'] as $className) {
+                //register_widget( $className );
+                $wp_widget_factory->widgets[$className] = new $className($this);
             }
         }
+    }
 
-        return $classes;
+    private function initEloquent()
+    {
 
+        $capsule = new Capsule;
+
+        $capsule->addConnection([
+            'driver' => 'mysql',
+            'host' => 'localhost',
+            'database' => DB_NAME,
+            'username' => DB_USER,
+            'password' => DB_PASSWORD,
+            'charset' => 'utf8',
+            'collation' => 'utf8_unicode_ci',
+            'prefix' => '',
+        ]);
+
+        // Set the event dispatcher used by Eloquent models... (optional)
+        // use Illuminate\Events\Dispatcher;
+        // use Illuminate\Container\Container;
+        // $capsule->setEventDispatcher(new Dispatcher(new Container));
+
+        // Make this Capsule instance available globally via static methods... (optional)
+        $capsule->setAsGlobal();
+
+        // Setup the Eloquent ORM... (optional; unless you've used setEventDispatcher())
+        $capsule->bootEloquent();
     }
 
 }
