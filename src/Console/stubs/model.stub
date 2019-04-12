@@ -13,15 +13,15 @@ class {ClassName} extends Model
      */
     protected $table = '{Table}';
 
-/**
- * Get the table associated with the model.
- *
- * @return string
- */
-public function getTable()
-{
-    global $wpdb;
+    /**
+     * Get the table associated with the model.
+     *
+     * @return string
+     */
+    public function getTable()
+    {
+        global $wpdb;
 
-    return $wpdb->prefix . parent::getTable();
-}
+        return $wpdb->prefix . parent::getTable();
+    }
 }
