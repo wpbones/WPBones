@@ -353,7 +353,7 @@ class Plugin extends Container implements PluginContract
 
         foreach ($filenames as $file) {
             wp_enqueue_script($this->slug . Str::slug($file),
-                WPBannerize()->js . '/' . $file,
+                WPKirk()->js . '/' . $file,
                 (array) $deps,
                 $version??$this->Version,
                 $footer

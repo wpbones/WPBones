@@ -152,7 +152,7 @@ class Str
      * @param  string $end
      * @return string
      */
-    public static function limit(string $value, int $limit = 100, string $end = '...'): string
+    public static function limit(string $value,  $limit = 100, string $end = '...'): string
     {
         if (mb_strwidth($value, 'UTF-8') <= $limit) {
             return $value;
@@ -192,7 +192,7 @@ class Str
     }
 
     /**
-     * Parse a Class@method style callback into class and method.
+     * Parse a "Class@method" style callback into class and method.
      *
      * @param  string $callback
      * @param  string $default
@@ -206,8 +206,9 @@ class Str
     /**
      * Generate a more truly "random" alpha-numeric string.
      *
-     * @param  int $length
+     * @param int $length
      * @return string
+     * @throws \Exception
      */
     public static function random(int $length = 16): string
     {
@@ -227,9 +228,10 @@ class Str
     /**
      * Generate a more truly "random" bytes.
      *
-     * @param  int $length
+     * @param int $length
      * @return string
      *
+     * @throws \Exception
      * @deprecated since version 5.2. Use random_bytes instead.
      */
     public static function randomBytes($length = 16)

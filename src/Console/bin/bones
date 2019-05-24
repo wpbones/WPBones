@@ -19,7 +19,7 @@ class BonesCommandLine
     /**
      * WP Bones version
      */
-    const VERSION = '0.9.30';
+    const VERSION = '0.9.50';
 
     /**
      * Plugin name.
@@ -503,6 +503,8 @@ class BonesCommandLine
 
     protected function deploy($path)
     {
+        $this->info("\nStarting deploy ¯\_(ツ)_/¯\n");
+
         $path = rtrim($path, '/');
 
         if (empty($path)) {
@@ -516,6 +518,11 @@ class BonesCommandLine
         }
 
         if (!empty($path)) {
+            // run yarn production
+            $this->info('🕐 Build for production');
+            shell_exec('gulp production');
+            $this->info("\e[1A👍");
+
             // alternative method to customize the deploy
             @include 'deploy.php';
 
@@ -552,7 +559,9 @@ class BonesCommandLine
 
             $this->rootDeploy = __DIR__;
 
+            $this->info("🕐 Copying to {$path}");
             $this->xcopy(__DIR__, $path);
+            $this->info("\e[1A👍");
 
             /**
              * Fires when the console deploy is completed.
@@ -561,6 +570,8 @@ class BonesCommandLine
              * @param string $path  The deployed path.
              */
             do_action('wpbones_console_deployed', $this, $path);
+
+            $this->info("👏 Deploy Completed!");
         }
     }
 
@@ -609,16 +620,14 @@ class BonesCommandLine
     {
         $path = rtrim($path, '/');
 
-        $this->info("Delete folder... {$path}");
-
         array_map(function ($file) {
+
             if (is_dir($file)) {
                 $this->deleteDirectory($file);
             } else {
-                $this->info("Removing... {$file}");
-
                 @unlink($file);
             }
+
         }, glob("{$path}/" . '{,.}[!.,!..]*', GLOB_MARK | GLOB_BRACE));
 
         @rmdir("{$path}");
@@ -633,8 +642,6 @@ class BonesCommandLine
 
         // Simple copy for a file
         if (is_file($source)) {
-            $this->line("Copying... {$source} to {$dest}");
-
             return copy($source, $dest);
         }
 

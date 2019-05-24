@@ -27,8 +27,8 @@ abstract class ServiceProvider
     /**
      * Dynamically handle missing method calls.
      *
-     * @param  string $method
-     * @param  array  $parameters
+     * @param string $method
+     * @param array  $parameters
      */
     public function __call(string $method, $parameters)
     {
