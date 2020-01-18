@@ -2,7 +2,9 @@
 
 namespace WPKirk\WPBones\Support;
 
-if ( ! defined( 'ABSPATH' ) ) exit;
+if (!defined('ABSPATH')) {
+  exit;
+}
 
 abstract class Widget extends \WP_Widget
 {
@@ -30,7 +32,7 @@ abstract class Widget extends \WP_Widget
    *
    * @var array
    */
-  public $widget_options = [ ];
+  public $widget_options = [];
 
   /**
    * Optional. Passed to wp_register_widget_control()
@@ -40,7 +42,7 @@ abstract class Widget extends \WP_Widget
    *
    * @var array
    */
-  public $control_options = [ ];
+  public $control_options = [];
 
   /**
    * An instance of plugin.
@@ -49,23 +51,17 @@ abstract class Widget extends \WP_Widget
    */
   protected $plugin;
 
-    /**
-     * Return the view resource path. eg: "widget.form".
-     *
-     * @param $instance
-     * @return string
-     */
-  abstract public function viewForm( $instance );
-
   /**
-   * Return the view resource path. eg: "widget.demo".
+   * Widget constructor.
    *
-   * @param array $args     Display arguments including before_title, after_title, before_widget, and after_widget.
-   * @param array $instance The settings for the particular instance of the widget
-   *
-   * @return string
+   * @param string $plugin
    */
-  abstract public function viewWidget( $args, $instance );
+  public function __construct($plugin)
+  {
+    $this->plugin = $plugin;
+
+    parent::__construct($this->id_base, $this->name, $this->widget_options, $this->control_options);
+  }
 
   /**
    * Retrun a key pairs array with the default value for widget.
@@ -75,34 +71,36 @@ abstract class Widget extends \WP_Widget
   abstract public function defaults();
 
   /**
-   * Widget constructor.
-   *
-   * @param string $plugin
-   */
-  public function __construct( $plugin )
-  {
-    $this->plugin = $plugin;
-    
-    parent::__construct( $this->id_base, $this->name, $this->widget_options, $this->control_options );
-  }
-  
-  /**
    * Echo the widget content.
    * Subclasses should over-ride this function to generate their widget code.
    *
    * @param array $args     Display arguments including before_title, after_title, before_widget, and after_widget.
    * @param array $instance The settings for the particular instance of the widget
    */
-  public function widget( $args, $instance )
+  public function widget($args, $instance)
   {
-    extract( $args );
+    /**
+     * @var $before_widget
+     * @var $after_widget
+     */
+    extract($args);
 
     echo $before_widget;
 
-    $this->viewWidget( $args, $instance )->render();
+    $this->viewWidget($args, $instance)->render();
 
     echo $after_widget;
   }
+
+  /**
+   * Return the view resource path. eg: "widget.demo".
+   *
+   * @param array $args     Display arguments including before_title, after_title, before_widget, and after_widget.
+   * @param array $instance The settings for the particular instance of the widget
+   *
+   * @return string
+   */
+  abstract public function viewWidget($args, $instance);
 
   /**
    * Echo the settings update form
@@ -111,9 +109,17 @@ abstract class Widget extends \WP_Widget
    *
    * @return void
    */
-  public function form( $instance )
+  public function form($instance)
   {
-    echo $this->viewForm( $instance );
+    echo $this->viewForm($instance);
   }
-  
+
+  /**
+   * Return the view resource path. eg: "widget.form".
+   *
+   * @param $instance
+   * @return string
+   */
+  abstract public function viewForm($instance);
+
 }
