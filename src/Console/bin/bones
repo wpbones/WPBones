@@ -1,7 +1,7 @@
 #!/usr/bin/env php
 <?php
 
-define('WPBONES_MINIMAL_PHP_VERSION', "7.1");
+define('WPBONES_MINIMAL_PHP_VERSION', "7.2");
 
 if (version_compare(PHP_VERSION, WPBONES_MINIMAL_PHP_VERSION) < 0) {
     echo "\n\033[33;5;82mWarning!!\n";
@@ -19,7 +19,7 @@ class BonesCommandLine
     /**
      * WP Bones version
      */
-    const VERSION = '0.9.51';
+    const VERSION = '0.10.0';
 
     /**
      * Plugin name.
@@ -471,7 +471,7 @@ class BonesCommandLine
 
     protected function install($argv)
     {
-        // TODO check if the first time or if is time to install
+        // TODO: check if the first time or if is time to install
 
         if (!isset($argv[1]) || empty($argv[1])) {
             $name = $this->ask('Enter name of your plugin:');
@@ -621,13 +621,11 @@ class BonesCommandLine
         $path = rtrim($path, '/');
 
         array_map(function ($file) {
-
             if (is_dir($file)) {
                 $this->deleteDirectory($file);
             } else {
                 @unlink($file);
             }
-
         }, glob("{$path}/" . '{,.}[!.,!..]*', GLOB_MARK | GLOB_BRACE));
 
         @rmdir("{$path}");
@@ -1063,7 +1061,6 @@ class BonesCommandLine
         $this->line(" Created plugin/Http/Controllers/{$path}{$filename}");
 
         $this->optimize();
-
     }
 
     /**
