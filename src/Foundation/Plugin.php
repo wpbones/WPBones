@@ -140,7 +140,6 @@ class Plugin extends Container implements PluginContract
         static::$instance = $this;
 
         return $this;
-
     }
 
     protected function getOptionsAttribute()
@@ -229,10 +228,6 @@ class Plugin extends Container implements PluginContract
             return $array;
         }
 
-        if (isset($array[$key])) {
-            return $array[$key];
-        }
-
         unset($parts[0]);
 
         foreach ($parts as $segment) {
@@ -294,11 +289,9 @@ class Plugin extends Container implements PluginContract
      */
     public function view($key = null, $data = null)
     {
-
         $view = new View($this, $key, $data);
 
         return $view;
-
     }
 
     public function getPageUrl($pageSlug)
@@ -329,7 +322,8 @@ class Plugin extends Container implements PluginContract
         $filenames = (array) $filename;
 
         foreach ($filenames as $file) {
-            wp_enqueue_style($this->slug . Str::slug($file),
+            wp_enqueue_style(
+                $this->slug . Str::slug($file),
                 $this->css . '/' . $file,
                 (array) $deps,
                 $version??$this->Version
@@ -352,7 +346,8 @@ class Plugin extends Container implements PluginContract
         $filenames = (array) $filename;
 
         foreach ($filenames as $file) {
-            wp_enqueue_script($this->slug . Str::slug($file),
+            wp_enqueue_script(
+                $this->slug . Str::slug($file),
                 WPKirk()->js . '/' . $file,
                 (array) $deps,
                 $version??$this->Version,
@@ -421,14 +416,12 @@ class Plugin extends Container implements PluginContract
                 && $tokens[$i - 1][0] == T_WHITESPACE
                 && $tokens[$i][0] == T_STRING
             ) {
-
                 $class_name = $tokens[$i][1];
                 $classes[]  = $class_name;
             }
         }
 
         return $classes;
-
     }
 
     /**
@@ -546,7 +539,6 @@ class Plugin extends Container implements PluginContract
         $menus = include_once "{$this->basePath}/config/menus.php";
 
         if (!empty($menus) && is_array($menus)) {
-
             foreach ($menus as $topLevelSlug => $menu) {
 
                 // sanitize array keys
@@ -570,7 +562,6 @@ class Plugin extends Container implements PluginContract
                 }
 
                 foreach ($menu['items'] as $key => $subMenu) {
-
                     if (is_null($subMenu)) {
                         continue;
                     }
@@ -606,26 +597,30 @@ class Plugin extends Container implements PluginContract
                     if (isset($subMenu['route']['load'])) {
                         list($controller, $method) = explode('@', $subMenu['route']['load']);
 
-                        add_action("load-{$subMenuHook}",
+                        add_action(
+                            "load-{$subMenuHook}",
                             function () use ($controller, $method) {
                                 $className = "WPKirk\\Http\\Controllers\\{$controller}";
                                 $instance  = new $className;
 
                                 return $instance->{$method}();
-                            });
+                            }
+                        );
                     }
 
                     if (isset($subMenu['route']['resource'])) {
                         $controller = $subMenu['route']['resource'];
 
-                        add_action("load-{$subMenuHook}",
+                        add_action(
+                            "load-{$subMenuHook}",
                             function () use ($controller) {
                                 $className = "WPKirk\\Http\\Controllers\\{$controller}";
                                 $instance  = new $className;
                                 if (method_exists($instance, 'load')) {
                                     return $instance->load();
                                 }
-                            });
+                            }
+                        );
                     }
                 }
             }
@@ -636,15 +631,12 @@ class Plugin extends Container implements PluginContract
 
         if (!empty($pages) && is_array($pages)) {
             foreach ($pages as $pageSlug => $page) {
-
                 $pageSlug                    = plugin_basename($pageSlug);
                 $admin_page_hooks[$pageSlug] = !isset($page['title']) ?: $page['title'];
                 $hookName                    = get_plugin_page_hookname($pageSlug, '');
 
                 if (!empty($hookName)) {
-
                     if ($hook = $this->getCallableHook($page['route'])) {
-
                         add_action($hookName, $hook);
 
                         $_registered_pages[$hookName] = true;
@@ -675,7 +667,6 @@ class Plugin extends Container implements PluginContract
             $method     = $methods[$verb];
         } // by single verb and controller@method
         else {
-
             if (isset($routes[$verb])) {
                 list($controller, $method) = explode('@', $routes[$verb]);
             } // default "get"
@@ -718,7 +709,6 @@ class Plugin extends Container implements PluginContract
 
     private function initEloquent()
     {
-
         $capsule = new Capsule;
 
         $capsule->addConnection([
@@ -743,5 +733,4 @@ class Plugin extends Container implements PluginContract
         // Setup the Eloquent ORM... (optional; unless you've used setEventDispatcher())
         $capsule->bootEloquent();
     }
-
 }
