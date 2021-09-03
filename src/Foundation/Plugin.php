@@ -2,7 +2,6 @@
 
 namespace WPKirk\WPBones\Foundation;
 
-use Illuminate\Database\Capsule\Manager as Capsule;
 use WPKirk\WPBones\Container\Container;
 use WPKirk\WPBones\Contracts\Foundation\Plugin as PluginContract;
 use WPKirk\WPBones\Database\WordPressOption;
@@ -72,6 +71,7 @@ class Plugin extends Container implements PluginContract
 
     public function boot()
     {
+        // init Eloquent out of box
         $this->initEloquent();
 
         // emule __FILE__
@@ -709,9 +709,10 @@ class Plugin extends Container implements PluginContract
 
     private function initEloquent()
     {
-        $capsule = new Capsule;
+        if (class_exists('\Illuminate\Database\Capsule\Manager')) {
+            $capsule = new \Illuminate\Database\Capsule\Manager;
 
-        $capsule->addConnection([
+            $capsule->addConnection([
             'driver' => 'mysql',
             'host' => DB_HOST,
             'database' => DB_NAME,
@@ -722,15 +723,16 @@ class Plugin extends Container implements PluginContract
             'prefix' => '',
         ]);
 
-        // Set the event dispatcher used by Eloquent models... (optional)
-        // use Illuminate\Events\Dispatcher;
-        // use Illuminate\Container\Container;
-        // $capsule->setEventDispatcher(new Dispatcher(new Container));
+            // Set the event dispatcher used by Eloquent models... (optional)
+            // use Illuminate\Events\Dispatcher;
+            // use Illuminate\Container\Container;
+            // $capsule->setEventDispatcher(new Dispatcher(new Container));
 
-        // Make this Capsule instance available globally via static methods... (optional)
-        $capsule->setAsGlobal();
+            // Make this Capsule instance available globally via static methods... (optional)
+            $capsule->setAsGlobal();
 
-        // Setup the Eloquent ORM... (optional; unless you've used setEventDispatcher())
-        $capsule->bootEloquent();
+            // Setup the Eloquent ORM... (optional; unless you've used setEventDispatcher())
+            $capsule->bootEloquent();
+        }
     }
 }
