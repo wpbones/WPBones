@@ -19,7 +19,7 @@ class BonesCommandLine
     /**
      * WP Bones version
      */
-    const VERSION = '0.11.0';
+    const VERSION = '0.11.1';
 
     /**
      * Plugin name.
@@ -518,6 +518,12 @@ class BonesCommandLine
         }
 
         if (!empty($path)) {
+
+            // first of all delete previous path
+            $this->info("🕐 Delete folder {$path}");
+            $this->deleteDirectory($path);
+            $this->info("\033[1A👍");
+
             // run yarn production
             $this->info('🕐 Build for production');
             shell_exec('gulp production');
