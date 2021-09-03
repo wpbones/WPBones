@@ -26,6 +26,28 @@
                     <form action="#" method="GET">
                 <select id="version-switcher" name="version">
                                             <option value="../../../../0.8.35/index.html" data-version="0.8.35">0.8.35</option>
+                                            <option value="../../../../0.8.36/index.html" data-version="0.8.36">0.8.36</option>
+                                            <option value="../../../../0.8.37/index.html" data-version="0.8.37">0.8.37</option>
+                                            <option value="../../../../0.8.38/index.html" data-version="0.8.38">0.8.38</option>
+                                            <option value="../../../../0.9.0/index.html" data-version="0.9.0">0.9.0</option>
+                                            <option value="../../../../0.9.1/index.html" data-version="0.9.1">0.9.1</option>
+                                            <option value="../../../../0.9.2/index.html" data-version="0.9.2">0.9.2</option>
+                                            <option value="../../../../0.9.3/index.html" data-version="0.9.3">0.9.3</option>
+                                            <option value="../../../../0.9.4/index.html" data-version="0.9.4">0.9.4</option>
+                                            <option value="../../../../0.9.5/index.html" data-version="0.9.5">0.9.5</option>
+                                            <option value="../../../../0.9.6/index.html" data-version="0.9.6">0.9.6</option>
+                                            <option value="../../../../0.9.7/index.html" data-version="0.9.7">0.9.7</option>
+                                            <option value="../../../../0.9.8/index.html" data-version="0.9.8">0.9.8</option>
+                                            <option value="../../../../0.9.9/index.html" data-version="0.9.9">0.9.9</option>
+                                            <option value="../../../../0.9.10/index.html" data-version="0.9.10">0.9.10</option>
+                                            <option value="../../../../0.9.11/index.html" data-version="0.9.11">0.9.11</option>
+                                            <option value="../../../../0.9.12/index.html" data-version="0.9.12">0.9.12</option>
+                                            <option value="../../../../0.9.22/index.html" data-version="0.9.22">0.9.22</option>
+                                            <option value="../../../../0.9.23/index.html" data-version="0.9.23">0.9.23</option>
+                                            <option value="../../../../0.9.30/index.html" data-version="0.9.30">0.9.30</option>
+                                            <option value="../../../../0.9.50/index.html" data-version="0.9.50">0.9.50</option>
+                                            <option value="../../../../0.9.51/index.html" data-version="0.9.51">0.9.51</option>
+                                            <option value="../../../../0.10.0/index.html" data-version="0.10.0">0.10.0</option>
                                             <option value="../../../../master/index.html" data-version="master">master branch</option>
                                             <option value="../../../../develop/index.html" data-version="develop">develop branch</option>
                                     </select>
@@ -147,22 +169,12 @@ unique.</td>
             <div class="container-fluid underlined">
                     <div class="row">
                 <div class="col-md-2 type">
-                    string
+                    
                 </div>
                 <div class="col-md-8 type">
-                    <a href="#method_viewForm">viewForm</a>($instance)
+                    <a href="#method___construct">__construct</a>(string $plugin)
         
-                                            <p>Return the view resource path. eg: "widget.form".</p>                </div>
-                <div class="col-md-2"></div>
-            </div>
-                    <div class="row">
-                <div class="col-md-2 type">
-                    string
-                </div>
-                <div class="col-md-8 type">
-                    <a href="#method_viewWidget">viewWidget</a>(array $args, array $instance)
-        
-                                            <p>Return the view resource path. eg: "widget.demo".</p>                </div>
+                                            <p>Widget constructor.</p>                </div>
                 <div class="col-md-2"></div>
             </div>
                     <div class="row">
@@ -180,19 +192,19 @@ unique.</td>
                     
                 </div>
                 <div class="col-md-8 type">
-                    <a href="#method___construct">__construct</a>(string $plugin)
+                    <a href="#method_widget">widget</a>(array $args, array $instance)
         
-                                            <p>Widget constructor.</p>                </div>
+                                            <p>Echo the widget content.</p>                </div>
                 <div class="col-md-2"></div>
             </div>
                     <div class="row">
                 <div class="col-md-2 type">
-                    
+                    string
                 </div>
                 <div class="col-md-8 type">
-                    <a href="#method_widget">widget</a>(array $args, array $instance)
+                    <a href="#method_viewWidget">viewWidget</a>(array $args, array $instance)
         
-                                            <p>Echo the widget content.</p>                </div>
+                                            <p>Return the view resource path. eg: "widget.demo".</p>                </div>
                 <div class="col-md-2"></div>
             </div>
                     <div class="row">
@@ -205,6 +217,16 @@ unique.</td>
                                             <p>Echo the settings update form</p>                </div>
                 <div class="col-md-2"></div>
             </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    string
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_viewForm">viewForm</a>($instance)
+        
+                                            <p>Return the view resource path. eg: "widget.form".</p>                </div>
+                <div class="col-md-2"></div>
+            </div>
             </div>
 
 
@@ -212,10 +234,10 @@ unique.</td>
 
             <div id="method-details">
                     <div class="method-item">
-                    <h3 id="method_viewForm">
-        <div class="location">at         line 57</div>
-        <code>    abstract                string
-    <strong>viewForm</strong>($instance)
+                    <h3 id="method___construct">
+        <div class="location">at         line 59</div>
+        <code>                    
+    <strong>__construct</strong>(string $plugin)
         </code>
     </h3>
     <div class="details">
@@ -223,24 +245,45 @@ unique.</td>
     
 
                     <div class="method-description">
-                                    <p>Return the view resource path. eg: "widget.form".</p>                                                </div>
+                                    <p>Widget constructor.</p>                                                </div>
                 <div class="tags">
                             <h4>Parameters</h4>
 
                     <table class="table table-condensed">
                     <tr>
-                <td></td>
-                <td>$instance</td>
+                <td>string</td>
+                <td>$plugin</td>
                 <td></td>
             </tr>
             </table>
 
             
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_defaults">
+        <div class="location">at         line 71</div>
+        <code>    abstract                array
+    <strong>defaults</strong>()
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                    <div class="method-description">
+                                    <p>Retrun a key pairs array with the default value for widget.</p>                                                </div>
+                <div class="tags">
+            
                             <h4>Return Value</h4>
 
                     <table class="table table-condensed">
         <tr>
-            <td>string</td>
+            <td>array</td>
             <td></td>
         </tr>
     </table>
@@ -252,8 +295,44 @@ unique.</td>
 
             </div>
                     <div class="method-item">
+                    <h3 id="method_widget">
+        <div class="location">at         line 80</div>
+        <code>                    
+    <strong>widget</strong>(array $args, array $instance)
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                    <div class="method-description">
+                                    <p>Echo the widget content.</p>                    <p>Subclasses should over-ride this function to generate their widget code.</p>                            </div>
+                <div class="tags">
+                            <h4>Parameters</h4>
+
+                    <table class="table table-condensed">
+                    <tr>
+                <td>array</td>
+                <td>$args</td>
+                <td>Display arguments including before_title, after_title, before_widget, and after_widget.</td>
+            </tr>
+                    <tr>
+                <td>array</td>
+                <td>$instance</td>
+                <td>The settings for the particular instance of the widget</td>
+            </tr>
+            </table>
+
+            
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
                     <h3 id="method_viewWidget">
-        <div class="location">at         line 67</div>
+        <div class="location">at         line 103</div>
         <code>    abstract                string
     <strong>viewWidget</strong>(array $args, array $instance)
         </code>
@@ -297,105 +376,8 @@ unique.</td>
 
             </div>
                     <div class="method-item">
-                    <h3 id="method_defaults">
-        <div class="location">at         line 74</div>
-        <code>    abstract                array
-    <strong>defaults</strong>()
-        </code>
-    </h3>
-    <div class="details">
-            
-    
-
-                    <div class="method-description">
-                                    <p>Retrun a key pairs array with the default value for widget.</p>                                                </div>
-                <div class="tags">
-            
-                            <h4>Return Value</h4>
-
-                    <table class="table table-condensed">
-        <tr>
-            <td>array</td>
-            <td></td>
-        </tr>
-    </table>
-
-            
-            
-                    </div>
-    </div>
-
-            </div>
-                    <div class="method-item">
-                    <h3 id="method___construct">
-        <div class="location">at         line 81</div>
-        <code>                    
-    <strong>__construct</strong>(string $plugin)
-        </code>
-    </h3>
-    <div class="details">
-            
-    
-
-                    <div class="method-description">
-                                    <p>Widget constructor.</p>                                                </div>
-                <div class="tags">
-                            <h4>Parameters</h4>
-
-                    <table class="table table-condensed">
-                    <tr>
-                <td>string</td>
-                <td>$plugin</td>
-                <td></td>
-            </tr>
-            </table>
-
-            
-            
-            
-                    </div>
-    </div>
-
-            </div>
-                    <div class="method-item">
-                    <h3 id="method_widget">
-        <div class="location">at         line 95</div>
-        <code>                    
-    <strong>widget</strong>(array $args, array $instance)
-        </code>
-    </h3>
-    <div class="details">
-            
-    
-
-                    <div class="method-description">
-                                    <p>Echo the widget content.</p>                    <p>Subclasses should over-ride this function to generate their widget code.</p>                            </div>
-                <div class="tags">
-                            <h4>Parameters</h4>
-
-                    <table class="table table-condensed">
-                    <tr>
-                <td>array</td>
-                <td>$args</td>
-                <td>Display arguments including before_title, after_title, before_widget, and after_widget.</td>
-            </tr>
-                    <tr>
-                <td>array</td>
-                <td>$instance</td>
-                <td>The settings for the particular instance of the widget</td>
-            </tr>
-            </table>
-
-            
-            
-            
-                    </div>
-    </div>
-
-            </div>
-                    <div class="method-item">
                     <h3 id="method_form">
-        <div class="location">at         line 113</div>
+        <div class="location">at         line 112</div>
         <code>                    void
     <strong>form</strong>(array $instance)
         </code>
@@ -423,6 +405,46 @@ unique.</td>
                     <table class="table table-condensed">
         <tr>
             <td>void</td>
+            <td></td>
+        </tr>
+    </table>
+
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_viewForm">
+        <div class="location">at         line 123</div>
+        <code>    abstract                string
+    <strong>viewForm</strong>($instance)
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                    <div class="method-description">
+                                    <p>Return the view resource path. eg: "widget.form".</p>                                                </div>
+                <div class="tags">
+                            <h4>Parameters</h4>
+
+                    <table class="table table-condensed">
+                    <tr>
+                <td></td>
+                <td>$instance</td>
+                <td></td>
+            </tr>
+            </table>
+
+            
+                            <h4>Return Value</h4>
+
+                    <table class="table table-condensed">
+        <tr>
+            <td>string</td>
             <td></td>
         </tr>
     </table>

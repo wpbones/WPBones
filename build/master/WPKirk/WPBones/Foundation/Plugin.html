@@ -30,6 +30,24 @@
                                             <option value="../../../../0.8.37/index.html" data-version="0.8.37">0.8.37</option>
                                             <option value="../../../../0.8.38/index.html" data-version="0.8.38">0.8.38</option>
                                             <option value="../../../../0.9.0/index.html" data-version="0.9.0">0.9.0</option>
+                                            <option value="../../../../0.9.1/index.html" data-version="0.9.1">0.9.1</option>
+                                            <option value="../../../../0.9.2/index.html" data-version="0.9.2">0.9.2</option>
+                                            <option value="../../../../0.9.3/index.html" data-version="0.9.3">0.9.3</option>
+                                            <option value="../../../../0.9.4/index.html" data-version="0.9.4">0.9.4</option>
+                                            <option value="../../../../0.9.5/index.html" data-version="0.9.5">0.9.5</option>
+                                            <option value="../../../../0.9.6/index.html" data-version="0.9.6">0.9.6</option>
+                                            <option value="../../../../0.9.7/index.html" data-version="0.9.7">0.9.7</option>
+                                            <option value="../../../../0.9.8/index.html" data-version="0.9.8">0.9.8</option>
+                                            <option value="../../../../0.9.9/index.html" data-version="0.9.9">0.9.9</option>
+                                            <option value="../../../../0.9.10/index.html" data-version="0.9.10">0.9.10</option>
+                                            <option value="../../../../0.9.11/index.html" data-version="0.9.11">0.9.11</option>
+                                            <option value="../../../../0.9.12/index.html" data-version="0.9.12">0.9.12</option>
+                                            <option value="../../../../0.9.22/index.html" data-version="0.9.22">0.9.22</option>
+                                            <option value="../../../../0.9.23/index.html" data-version="0.9.23">0.9.23</option>
+                                            <option value="../../../../0.9.30/index.html" data-version="0.9.30">0.9.30</option>
+                                            <option value="../../../../0.9.50/index.html" data-version="0.9.50">0.9.50</option>
+                                            <option value="../../../../0.9.51/index.html" data-version="0.9.51">0.9.51</option>
+                                            <option value="../../../../0.10.0/index.html" data-version="0.10.0">0.10.0</option>
                                             <option value="../../../../master/index.html" data-version="master">master branch</option>
                                             <option value="../../../../develop/index.html" data-version="develop">develop branch</option>
                                     </select>
@@ -112,6 +130,14 @@
                 <td></td>
             </tr>
                     <tr>
+                <td class="type" id="property_slug">
+                                                                                string
+                </td>
+                <td>$slug</td>
+                <td class="last">The slug of this plugin.</td>
+                <td></td>
+            </tr>
+                    <tr>
                 <td class="type" id="property_file">
                                         protected                                        string
                 </td>
@@ -151,14 +177,6 @@
                 <td class="last">A key value pairs array with the list of providers.</td>
                 <td></td>
             </tr>
-                    <tr>
-                <td class="type" id="property_slug">
-                                                                                string
-                </td>
-                <td>$slug</td>
-                <td class="last">The slug of this plugin.</td>
-                <td></td>
-            </tr>
             </table>
 
     
@@ -181,29 +199,7 @@
                     
                 </div>
                 <div class="col-md-8 type">
-                    <a href="#method___get">__get</a>($name)
-        
-                                            <p class="no-description">No description</p>
-                                    </div>
-                <div class="col-md-2"></div>
-            </div>
-                    <div class="row">
-                <div class="col-md-2 type">
-                    
-                </div>
-                <div class="col-md-8 type">
                     <a href="#method_boot">boot</a>()
-        
-                                            <p class="no-description">No description</p>
-                                    </div>
-                <div class="col-md-2"></div>
-            </div>
-                    <div class="row">
-                <div class="col-md-2 type">
-                    
-                </div>
-                <div class="col-md-8 type">
-                    <a href="#method_set_screen_option">set_screen_option</a>($status, $option, $value)
         
                                             <p class="no-description">No description</p>
                                     </div>
@@ -244,26 +240,6 @@
             </div>
                     <div class="row">
                 <div class="col-md-2 type">
-                    string
-                </div>
-                <div class="col-md-8 type">
-                    <a href="#method_getBasePath">getBasePath</a>()
-        
-                                            <p>Get the base path of the plugin installation.</p>                </div>
-                <div class="col-md-2"></div>
-            </div>
-                    <div class="row">
-                <div class="col-md-2 type">
-                    string
-                </div>
-                <div class="col-md-8 type">
-                    <a href="#method_getBaseUri">getBaseUri</a>()
-        
-                                            <p>Return the absolute URL for the installation plugin.</p>                </div>
-                <div class="col-md-2"></div>
-            </div>
-                    <div class="row">
-                <div class="col-md-2 type">
                     
                 </div>
                 <div class="col-md-8 type">
@@ -300,7 +276,18 @@
                     
                 </div>
                 <div class="col-md-8 type">
-                    <a href="#method_vendor">vendor</a>($vendor = &quot;wpbones&quot;)
+                    <a href="#method___get">__get</a>($name)
+        
+                                            <p class="no-description">No description</p>
+                                    </div>
+                <div class="col-md-2"></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_set_screen_option">set_screen_option</a>($status, $option, $value)
         
                                             <p class="no-description">No description</p>
                                     </div>
@@ -314,6 +301,37 @@
                     <a href="#method_config">config</a>(array|string $key = null, mixed $default = null)
         
                                             <p>Get / set the specified configuration value.</p>                </div>
+                <div class="col-md-2"></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    string
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_getBasePath">getBasePath</a>()
+        
+                                            <p>Get the base path of the plugin installation.</p>                </div>
+                <div class="col-md-2"></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    string
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_getBaseUri">getBaseUri</a>()
+        
+                                            <p>Return the absolute URL for the installation plugin.</p>                </div>
+                <div class="col-md-2"></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_vendor">vendor</a>($vendor = &quot;wpbones&quot;)
+        
+                                            <p class="no-description">No description</p>
+                                    </div>
                 <div class="col-md-2"></div>
             </div>
                     <div class="row">
@@ -338,16 +356,6 @@
             </div>
                     <div class="row">
                 <div class="col-md-2 type">
-                    bool
-                </div>
-                <div class="col-md-8 type">
-                    <a href="#method_isAjax">isAjax</a>()
-        
-                                            <p>Return TRUE if an Ajax called</p>                </div>
-                <div class="col-md-2"></div>
-            </div>
-                    <div class="row">
-                <div class="col-md-2 type">
                     
                 </div>
                 <div class="col-md-8 type">
@@ -366,6 +374,26 @@
         
                                             <p class="no-description">No description</p>
                                     </div>
+                <div class="col-md-2"></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_css">css</a>(string|array $filename, array $deps = [], null $version = null)
+        
+                                            <p>Helper method to load (enqueue) styles.</p>                </div>
+                <div class="col-md-2"></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_js">js</a>(string|array $filename, array $deps = [], null $version = null, bool $footer = true)
+        
+                                            <p>Helper method to load (enqueue) styles.</p>                </div>
                 <div class="col-md-2"></div>
             </div>
                     <div class="row">
@@ -396,6 +424,16 @@
                     <a href="#method_init">init</a>()
         
                                             <p>Fires after WordPress has finished loading but before any headers are sent.</p>                </div>
+                <div class="col-md-2"></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    bool
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_isAjax">isAjax</a>()
+        
+                                            <p>Return TRUE if an Ajax called</p>                </div>
                 <div class="col-md-2"></div>
             </div>
                     <div class="row">
@@ -438,7 +476,7 @@
             <div id="method-details">
                     <div class="method-item">
                     <h3 id="method___construct">
-        <div class="location">at         line 73</div>
+        <div class="location">at         line 66</div>
         <code>                    
     <strong>__construct</strong>($basePath)
         </code>
@@ -466,8 +504,141 @@
 
             </div>
                     <div class="method-item">
+                    <h3 id="method_boot">
+        <div class="location">at         line 73</div>
+        <code>                    
+    <strong>boot</strong>()
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                <div class="tags">
+            
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_getOptionsAttribute">
+        <div class="location">at         line 145</div>
+        <code>            protected        
+    <strong>getOptionsAttribute</strong>()
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                <div class="tags">
+            
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_getRequestAttribute">
+        <div class="location">at         line 154</div>
+        <code>            protected        
+    <strong>getRequestAttribute</strong>()
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                <div class="tags">
+            
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_getPluginBasenameAttribute">
+        <div class="location">at         line 163</div>
+        <code>            protected        
+    <strong>getPluginBasenameAttribute</strong>()
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                <div class="tags">
+            
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_getCssAttribute">
+        <div class="location">at         line 168</div>
+        <code>            protected        
+    <strong>getCssAttribute</strong>()
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                <div class="tags">
+            
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_getJsAttribute">
+        <div class="location">at         line 173</div>
+        <code>            protected        
+    <strong>getJsAttribute</strong>()
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                <div class="tags">
+            
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_getImagesAttribute">
+        <div class="location">at         line 178</div>
+        <code>            protected        
+    <strong>getImagesAttribute</strong>()
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                <div class="tags">
+            
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
                     <h3 id="method___get">
-        <div class="location">at         line 80</div>
+        <div class="location">at         line 183</div>
         <code>                    
     <strong>__get</strong>($name)
         </code>
@@ -495,27 +666,8 @@
 
             </div>
                     <div class="method-item">
-                    <h3 id="method_boot">
-        <div class="location">at         line 94</div>
-        <code>                    
-    <strong>boot</strong>()
-        </code>
-    </h3>
-    <div class="details">
-            
-    
-
-                <div class="tags">
-            
-            
-            
-                    </div>
-    </div>
-
-            </div>
-                    <div class="method-item">
                     <h3 id="method_set_screen_option">
-        <div class="location">at         line 165</div>
+        <div class="location">at         line 195</div>
         <code>                    
     <strong>set_screen_option</strong>($status, $option, $value)
         </code>
@@ -553,211 +705,8 @@
 
             </div>
                     <div class="method-item">
-                    <h3 id="method_getOptionsAttribute">
-        <div class="location">at         line 174</div>
-        <code>                    
-    <strong>getOptionsAttribute</strong>()
-        </code>
-    </h3>
-    <div class="details">
-            
-    
-
-                <div class="tags">
-            
-            
-            
-                    </div>
-    </div>
-
-            </div>
-                    <div class="method-item">
-                    <h3 id="method_getRequestAttribute">
-        <div class="location">at         line 183</div>
-        <code>                    
-    <strong>getRequestAttribute</strong>()
-        </code>
-    </h3>
-    <div class="details">
-            
-    
-
-                <div class="tags">
-            
-            
-            
-                    </div>
-    </div>
-
-            </div>
-                    <div class="method-item">
-                    <h3 id="method_getPluginBasenameAttribute">
-        <div class="location">at         line 192</div>
-        <code>                    
-    <strong>getPluginBasenameAttribute</strong>()
-        </code>
-    </h3>
-    <div class="details">
-            
-    
-
-                <div class="tags">
-            
-            
-            
-                    </div>
-    </div>
-
-            </div>
-                    <div class="method-item">
-                    <h3 id="method_getBasePath">
-        <div class="location">at         line 202</div>
-        <code>                    string
-    <strong>getBasePath</strong>()
-        </code>
-    </h3>
-    <div class="details">
-            
-    
-
-                    <div class="method-description">
-                                    <p>Get the base path of the plugin installation.</p>                                                </div>
-                <div class="tags">
-            
-                            <h4>Return Value</h4>
-
-                    <table class="table table-condensed">
-        <tr>
-            <td>string</td>
-            <td></td>
-        </tr>
-    </table>
-
-            
-            
-                    </div>
-    </div>
-
-            </div>
-                    <div class="method-item">
-                    <h3 id="method_getBaseUri">
-        <div class="location">at         line 212</div>
-        <code>                    string
-    <strong>getBaseUri</strong>()
-        </code>
-    </h3>
-    <div class="details">
-            
-    
-
-                    <div class="method-description">
-                                    <p>Return the absolute URL for the installation plugin.</p>                                                </div>
-                <div class="tags">
-            
-                            <h4>Return Value</h4>
-
-                    <table class="table table-condensed">
-        <tr>
-            <td>string</td>
-            <td></td>
-        </tr>
-    </table>
-
-            
-            
-                    </div>
-    </div>
-
-            </div>
-                    <div class="method-item">
-                    <h3 id="method_getCssAttribute">
-        <div class="location">at         line 217</div>
-        <code>                    
-    <strong>getCssAttribute</strong>()
-        </code>
-    </h3>
-    <div class="details">
-            
-    
-
-                <div class="tags">
-            
-            
-            
-                    </div>
-    </div>
-
-            </div>
-                    <div class="method-item">
-                    <h3 id="method_getJsAttribute">
-        <div class="location">at         line 222</div>
-        <code>                    
-    <strong>getJsAttribute</strong>()
-        </code>
-    </h3>
-    <div class="details">
-            
-    
-
-                <div class="tags">
-            
-            
-            
-                    </div>
-    </div>
-
-            </div>
-                    <div class="method-item">
-                    <h3 id="method_getImagesAttribute">
-        <div class="location">at         line 227</div>
-        <code>                    
-    <strong>getImagesAttribute</strong>()
-        </code>
-    </h3>
-    <div class="details">
-            
-    
-
-                <div class="tags">
-            
-            
-            
-                    </div>
-    </div>
-
-            </div>
-                    <div class="method-item">
-                    <h3 id="method_vendor">
-        <div class="location">at         line 232</div>
-        <code>                    
-    <strong>vendor</strong>($vendor = &quot;wpbones&quot;)
-        </code>
-    </h3>
-    <div class="details">
-            
-    
-
-                <div class="tags">
-                            <h4>Parameters</h4>
-
-                    <table class="table table-condensed">
-                    <tr>
-                <td></td>
-                <td>$vendor</td>
-                <td></td>
-            </tr>
-            </table>
-
-            
-            
-            
-                    </div>
-    </div>
-
-            </div>
-                    <div class="method-item">
                     <h3 id="method_config">
-        <div class="location">at         line 247</div>
+        <div class="location">at         line 214</div>
         <code>                    mixed
     <strong>config</strong>(array|string $key = null, mixed $default = null)
         </code>
@@ -801,8 +750,97 @@
 
             </div>
                     <div class="method-item">
+                    <h3 id="method_getBasePath">
+        <div class="location">at         line 249</div>
+        <code>                    string
+    <strong>getBasePath</strong>()
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                    <div class="method-description">
+                                    <p>Get the base path of the plugin installation.</p>                                                </div>
+                <div class="tags">
+            
+                            <h4>Return Value</h4>
+
+                    <table class="table table-condensed">
+        <tr>
+            <td>string</td>
+            <td></td>
+        </tr>
+    </table>
+
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_getBaseUri">
+        <div class="location">at         line 259</div>
+        <code>                    string
+    <strong>getBaseUri</strong>()
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                    <div class="method-description">
+                                    <p>Return the absolute URL for the installation plugin.</p>                                                </div>
+                <div class="tags">
+            
+                            <h4>Return Value</h4>
+
+                    <table class="table table-condensed">
+        <tr>
+            <td>string</td>
+            <td></td>
+        </tr>
+    </table>
+
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_vendor">
+        <div class="location">at         line 264</div>
+        <code>                    
+    <strong>vendor</strong>($vendor = &quot;wpbones&quot;)
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                <div class="tags">
+                            <h4>Parameters</h4>
+
+                    <table class="table table-condensed">
+                    <tr>
+                <td></td>
+                <td>$vendor</td>
+                <td></td>
+            </tr>
+            </table>
+
+            
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
                     <h3 id="method_env">
-        <div class="location">at         line 289</div>
+        <div class="location">at         line 277</div>
         <code>                    mixed
     <strong>env</strong>(string $key, mixed $default = null)
         </code>
@@ -847,7 +885,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_view">
-        <div class="location">at         line 302</div>
+        <div class="location">at         line 290</div>
         <code>                    <a href="../../../WPKirk/WPBones/View/View.html"><abbr title="WPKirk\WPBones\View\View">View</abbr></a>
     <strong>view</strong>(null $key = null, null $data = null)
         </code>
@@ -891,38 +929,8 @@
 
             </div>
                     <div class="method-item">
-                    <h3 id="method_isAjax">
-        <div class="location">at         line 316</div>
-        <code>                    bool
-    <strong>isAjax</strong>()
-        </code>
-    </h3>
-    <div class="details">
-            
-    
-
-                    <div class="method-description">
-                                    <p>Return TRUE if an Ajax called</p>                                                </div>
-                <div class="tags">
-            
-                            <h4>Return Value</h4>
-
-                    <table class="table table-condensed">
-        <tr>
-            <td>bool</td>
-            <td></td>
-        </tr>
-    </table>
-
-            
-            
-                    </div>
-    </div>
-
-            </div>
-                    <div class="method-item">
                     <h3 id="method_getPageUrl">
-        <div class="location">at         line 330</div>
+        <div class="location">at         line 297</div>
         <code>                    
     <strong>getPageUrl</strong>($pageSlug)
         </code>
@@ -951,7 +959,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_provider">
-        <div class="location">at         line 335</div>
+        <div class="location">at         line 302</div>
         <code>                    
     <strong>provider</strong>($name)
         </code>
@@ -979,8 +987,95 @@
 
             </div>
                     <div class="method-item">
+                    <h3 id="method_css">
+        <div class="location">at         line 320</div>
+        <code>                    
+    <strong>css</strong>(string|array $filename, array $deps = [], null $version = null)
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                    <div class="method-description">
+                                    <p>Helper method to load (enqueue) styles.</p>                    <p>For your convenience, the params $filename may be an array of file.</p>                            </div>
+                <div class="tags">
+                            <h4>Parameters</h4>
+
+                    <table class="table table-condensed">
+                    <tr>
+                <td>string|array</td>
+                <td>$filename</td>
+                <td>Filename</td>
+            </tr>
+                    <tr>
+                <td>array</td>
+                <td>$deps</td>
+                <td>Optional. Dependences array</td>
+            </tr>
+                    <tr>
+                <td>null</td>
+                <td>$version</td>
+                <td>Optional. Default plugin version</td>
+            </tr>
+            </table>
+
+            
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_js">
+        <div class="location">at         line 344</div>
+        <code>                    
+    <strong>js</strong>(string|array $filename, array $deps = [], null $version = null, bool $footer = true)
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                    <div class="method-description">
+                                    <p>Helper method to load (enqueue) styles.</p>                    <p>For your convenience, the params $filename may be an array of file.</p>                            </div>
+                <div class="tags">
+                            <h4>Parameters</h4>
+
+                    <table class="table table-condensed">
+                    <tr>
+                <td>string|array</td>
+                <td>$filename</td>
+                <td>Filenames</td>
+            </tr>
+                    <tr>
+                <td>array</td>
+                <td>$deps</td>
+                <td>Optional. Dependences array</td>
+            </tr>
+                    <tr>
+                <td>null</td>
+                <td>$version</td>
+                <td>Optional. Default plugin version</td>
+            </tr>
+                    <tr>
+                <td>bool</td>
+                <td>$footer</td>
+                <td>Optional. Load on footer. Default true</td>
+            </tr>
+            </table>
+
+            
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
                     <h3 id="method_activation">
-        <div class="location">at         line 361</div>
+        <div class="location">at         line 363</div>
         <code>                    
     <strong>activation</strong>()
         </code>
@@ -1001,7 +1096,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_deactivation">
-        <div class="location">at         line 389</div>
+        <div class="location">at         line 431</div>
         <code>                    
     <strong>deactivation</strong>()
         </code>
@@ -1022,7 +1117,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_init">
-        <div class="location">at         line 404</div>
+        <div class="location">at         line 446</div>
         <code>                    
     <strong>init</strong>()
         </code>
@@ -1046,8 +1141,38 @@ themselves on it for all sorts of reasons (e.g. they need a user, a taxonomy, et
 
             </div>
                     <div class="method-item">
+                    <h3 id="method_isAjax">
+        <div class="location">at         line 513</div>
+        <code>                    bool
+    <strong>isAjax</strong>()
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                    <div class="method-description">
+                                    <p>Return TRUE if an Ajax called</p>                                                </div>
+                <div class="tags">
+            
+                            <h4>Return Value</h4>
+
+                    <table class="table table-condensed">
+        <tr>
+            <td>bool</td>
+            <td></td>
+        </tr>
+    </table>
+
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
                     <h3 id="method_log">
-        <div class="location">at         line 466</div>
+        <div class="location">at         line 527</div>
         <code>                    
     <strong>log</strong>()
         </code>
@@ -1066,7 +1191,7 @@ themselves on it for all sorts of reasons (e.g. they need a user, a taxonomy, et
             </div>
                     <div class="method-item">
                     <h3 id="method_admin_menu">
-        <div class="location">at         line 474</div>
+        <div class="location">at         line 535</div>
         <code>                    
     <strong>admin_menu</strong>()
         </code>
@@ -1087,7 +1212,7 @@ themselves on it for all sorts of reasons (e.g. they need a user, a taxonomy, et
             </div>
                     <div class="method-item">
                     <h3 id="method_widgets_init">
-        <div class="location">at         line 587</div>
+        <div class="location">at         line 696</div>
         <code>                    
     <strong>widgets_init</strong>()
         </code>

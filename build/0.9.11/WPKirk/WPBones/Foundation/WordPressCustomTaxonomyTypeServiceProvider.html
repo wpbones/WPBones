@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="robots" content="index, follow, all" />
+    <title>WPKirk\WPBones\Foundation\WordPressCustomTaxonomyTypeServiceProvider | WP Bones API</title>
+
+            <link rel="stylesheet" type="text/css" href="../../../css/bootstrap.min.css">
+        <link rel="stylesheet" type="text/css" href="../../../css/bootstrap-theme.min.css">
+        <link rel="stylesheet" type="text/css" href="../../../css/sami.css">
+        <script src="../../../js/jquery-1.11.1.min.js"></script>
+        <script src="../../../js/bootstrap.min.js"></script>
+        <script src="../../../js/typeahead.min.js"></script>
+        <script src="../../../sami.js"></script>
+        <meta name="MobileOptimized" content="width">
+        <meta name="HandheldFriendly" content="true">
+        <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+    
+    
+    </head>
+
+    <body id="class" data-name="class:WPKirk_WPBones_Foundation_WordPressCustomTaxonomyTypeServiceProvider" data-root-path="../../../">
+            <div id="content">
+        <div id="left-column">
+                <div id="control-panel">
+                    <form action="#" method="GET">
+                <select id="version-switcher" name="version">
+                                            <option value="../../../../0.8.35/index.html" data-version="0.8.35">0.8.35</option>
+                                            <option value="../../../../master/index.html" data-version="master">master branch</option>
+                                            <option value="../../../../develop/index.html" data-version="develop">develop branch</option>
+                                    </select>
+            </form>
+                <script>
+            $('option[data-version="'+window.projectVersion+'"]').prop('selected', true);
+        </script>
+        <form id="search-form" action="../../../search.html" method="GET">
+            <span class="glyphicon glyphicon-search"></span>
+            <input name="search"
+                   class="typeahead form-control"
+                   type="search"
+                   placeholder="Search">
+        </form>
+    </div>
+
+                <div id="api-tree"></div>
+
+        </div>
+        <div id="right-column">
+                <nav id="site-nav" class="navbar navbar-default" role="navigation">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-elements">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="../../../index.html">WP Bones API</a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar-elements">
+                <ul class="nav navbar-nav">
+                    <li><a href="../../../classes.html">Classes</a></li>
+                                            <li><a href="../../../namespaces.html">Namespaces</a></li>
+                                        <li><a href="../../../interfaces.html">Interfaces</a></li>
+                    <li><a href="../../../traits.html">Traits</a></li>
+                    <li><a href="../../../doc-index.html">Index</a></li>
+                    <li><a href="../../../search.html">Search</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+                        <div class="namespace-breadcrumbs">
+            <ol class="breadcrumb">
+                <li><span class="label label-default">class</span></li>
+                        <li><a href="../../../WPKirk.html">WPKirk</a></li><li class="backslash">\</li><li><a href="../../../WPKirk/WPBones.html">WPBones</a></li><li class="backslash">\</li><li><a href="../../../WPKirk/WPBones/Foundation.html">Foundation</a></li><li class="backslash">\</li><li>WordPressCustomTaxonomyTypeServiceProvider</li>
+            </ol>
+        </div>
+                <div id="page-content">
+                
+    <div class="page-header">
+        <h1>
+            WordPressCustomTaxonomyTypeServiceProvider
+                
+        </h1>
+    </div>
+
+    <p>    class
+    <strong>WordPressCustomTaxonomyTypeServiceProvider</strong>        extends <a href="../../../WPKirk/WPBones/Support/ServiceProvider.html"><abbr title="WPKirk\WPBones\Support\ServiceProvider">ServiceProvider</abbr></a>
+</p>
+
+        
+    
+
+    
+    
+    
+            <h2>Properties</h2>
+
+            <table class="table table-condensed">
+                    <tr>
+                <td class="type" id="property_id">
+                                        protected                                        string
+                </td>
+                <td>$id</td>
+                <td class="last">Taxonomy key, must not exceed 32 characters.</td>
+                <td></td>
+            </tr>
+                    <tr>
+                <td class="type" id="property_name">
+                                        protected                                        
+                </td>
+                <td>$name</td>
+                <td class="last"></td>
+                <td></td>
+            </tr>
+                    <tr>
+                <td class="type" id="property_plural">
+                                        protected                                        
+                </td>
+                <td>$plural</td>
+                <td class="last"></td>
+                <td></td>
+            </tr>
+                    <tr>
+                <td class="type" id="property_objectType">
+                                        protected                                        string
+                </td>
+                <td>$objectType</td>
+                <td class="last">The custpm post type id.</td>
+                <td></td>
+            </tr>
+                    <tr>
+                <td class="type" id="property_label">
+                                        protected                                        string
+                </td>
+                <td>$label</td>
+                <td class="last">Name of the taxonomy shown in the menu. Usually plural. If not set, labels['name'] will be used.</td>
+                <td></td>
+            </tr>
+                    <tr>
+                <td class="type" id="property_labels">
+                                        protected                                        array
+                </td>
+                <td>$labels</td>
+                <td class="last">An array of labels for this taxonomy.</td>
+                <td></td>
+            </tr>
+                    <tr>
+                <td class="type" id="property_description">
+                                        protected                                        string
+                </td>
+                <td>$description</td>
+                <td class="last">A short descriptive summary of what the taxonomy is for. Defaults to blank.</td>
+                <td></td>
+            </tr>
+                    <tr>
+                <td class="type" id="property_public">
+                                        protected                                        bool
+                </td>
+                <td>$public</td>
+                <td class="last">If the taxonomy should be publicly queryable; //@TODO not implemented.</td>
+                <td></td>
+            </tr>
+                    <tr>
+                <td class="type" id="property_hierarchical">
+                                        protected                                        bool
+                </td>
+                <td>$hierarchical</td>
+                <td class="last">Whether the taxonomy is hierarchical (e.g. category). Defaults to false.</td>
+                <td></td>
+            </tr>
+                    <tr>
+                <td class="type" id="property_showUI">
+                                        protected                                        bool
+                </td>
+                <td>$showUI</td>
+                <td class="last">Whether to generate a default UI for managing this taxonomy in the admin.</td>
+                <td></td>
+            </tr>
+                    <tr>
+                <td class="type" id="property_showInMenu">
+                                        protected                                        bool
+                </td>
+                <td>$showInMenu</td>
+                <td class="last">Whether to show the taxonomy in the admin menu.</td>
+                <td></td>
+            </tr>
+                    <tr>
+                <td class="type" id="property_showInNavMenus">
+                                        protected                                        bool
+                </td>
+                <td>$showInNavMenus</td>
+                <td class="last">Makes this taxonomy available for selection in navigation menus.</td>
+                <td></td>
+            </tr>
+                    <tr>
+                <td class="type" id="property_showTagcloud">
+                                        protected                                        bool
+                </td>
+                <td>$showTagcloud</td>
+                <td class="last">Whether to list the taxonomy in the Tag Cloud Widget.</td>
+                <td></td>
+            </tr>
+                    <tr>
+                <td class="type" id="property_showInQuickEdit">
+                                        protected                                        bool
+                </td>
+                <td>$showInQuickEdit</td>
+                <td class="last">Whether to show the taxonomy in the quick/bulk edit panel.</td>
+                <td></td>
+            </tr>
+                    <tr>
+                <td class="type" id="property_showAdminColumn">
+                                        protected                                        bool
+                </td>
+                <td>$showAdminColumn</td>
+                <td class="last">Whether to display a column for the taxonomy on its post type listing screens.</td>
+                <td></td>
+            </tr>
+                    <tr>
+                <td class="type" id="property_metaBoxCb">
+                                        protected                                        null
+                </td>
+                <td>$metaBoxCb</td>
+                <td class="last">Provide a callback function for the meta box display.</td>
+                <td></td>
+            </tr>
+                    <tr>
+                <td class="type" id="property_capabilities">
+                                        protected                                        array
+                </td>
+                <td>$capabilities</td>
+                <td class="last">Array of capabilities for this taxonomy. You can see accepted values in this function.</td>
+                <td></td>
+            </tr>
+                    <tr>
+                <td class="type" id="property_rewrite">
+                                        protected                                        array
+                </td>
+                <td>$rewrite</td>
+                <td class="last">Triggers the handling of rewrites for this taxonomy. Defaults to true, using $taxonomy as slug.</td>
+                <td></td>
+            </tr>
+                    <tr>
+                <td class="type" id="property_slug">
+                                        protected                                        string
+                </td>
+                <td>$slug</td>
+                <td class="last">Customize the permastruct slug. Defaults to $taxonomy key</td>
+                <td></td>
+            </tr>
+                    <tr>
+                <td class="type" id="property_withFront">
+                                        protected                                        bool
+                </td>
+                <td>$withFront</td>
+                <td class="last">Should the permastruct be prepended with WP_Rewrite::$front. Defaults to true.</td>
+                <td></td>
+            </tr>
+                    <tr>
+                <td class="type" id="property_rewriteHierarchical">
+                                        protected                                        bool
+                </td>
+                <td>$rewriteHierarchical</td>
+                <td class="last">Either hierarchical rewrite tag or not. Defaults to false.</td>
+                <td></td>
+            </tr>
+                    <tr>
+                <td class="type" id="property_epMask">
+                                        protected                                        int
+                </td>
+                <td>$epMask</td>
+                <td class="last">Assign an endpoint mask.</td>
+                <td></td>
+            </tr>
+                    <tr>
+                <td class="type" id="property_queryVar">
+                                        protected                                        string
+                </td>
+                <td>$queryVar</td>
+                <td class="last">Sets the query_var key for this taxonomy. Defaults to $taxonomy key
+If false, a taxonomy cannot be loaded at ?{query_var}={term_slug}
+If specified as a string, the query ?{query_var_string}={term_slug} will be valid.</td>
+                <td></td>
+            </tr>
+                    <tr>
+                <td class="type" id="property_updateCountCallback">
+                                        protected                                        string
+                </td>
+                <td>$updateCountCallback</td>
+                <td class="last">Works much like a hook, in that it will be called when the count is updated.</td>
+                <td></td>
+            </tr>
+            </table>
+
+    
+            <h2>Methods</h2>
+
+            <div class="container-fluid underlined">
+                    <div class="row">
+                <div class="col-md-2 type">
+                    void
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_register">register</a>()
+        
+                                            <p>Register the service provider.</p>                </div>
+                <div class="col-md-2"></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    mixed
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method___call">__call</a>(string $method, array $parameters)
+        
+                                            <p>Dynamically handle missing method calls.</p>                </div>
+                <div class="col-md-2"><small>from&nbsp;<a href="../../../WPKirk/WPBones/Support/ServiceProvider.html#method___call"><abbr title="WPKirk\WPBones\Support\ServiceProvider">ServiceProvider</abbr></a></small></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_boot">boot</a>()
+        
+                                            <p>You may override this method in order to register your own actions and filters.</p>                </div>
+                <div class="col-md-2"></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    array
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_args">args</a>()
+        
+                                            <p>Return the default args.</p>                </div>
+                <div class="col-md-2"></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    array
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_rewrite">rewrite</a>()
+        
+                                            <p>Return defaults rewrite.</p>                </div>
+                <div class="col-md-2"></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    array
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_labels">labels</a>()
+        
+                                            <p>Return defaults labels.</p>                </div>
+                <div class="col-md-2"></div>
+            </div>
+            </div>
+
+
+        <h2>Details</h2>
+
+            <div id="method-details">
+                    <div class="method-item">
+                    <h3 id="method_register">
+        <div class="location">at         line 204</div>
+        <code>                    void
+    <strong>register</strong>()
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                    <div class="method-description">
+                                    <p>Register the service provider.</p>                                                </div>
+                <div class="tags">
+            
+                            <h4>Return Value</h4>
+
+                    <table class="table table-condensed">
+        <tr>
+            <td>void</td>
+            <td></td>
+        </tr>
+    </table>
+
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method___call">
+        <div class="location">in <a href="../../../WPKirk/WPBones/Support/ServiceProvider.html#method___call"><abbr title="WPKirk\WPBones\Support\ServiceProvider">ServiceProvider</abbr></a> at         line 23</div>
+        <code>                    mixed
+    <strong>__call</strong>(string $method, array $parameters)
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                    <div class="method-description">
+                                    <p>Dynamically handle missing method calls.</p>                                                </div>
+                <div class="tags">
+                            <h4>Parameters</h4>
+
+                    <table class="table table-condensed">
+                    <tr>
+                <td>string</td>
+                <td>$method</td>
+                <td></td>
+            </tr>
+                    <tr>
+                <td>array</td>
+                <td>$parameters</td>
+                <td></td>
+            </tr>
+            </table>
+
+            
+                            <h4>Return Value</h4>
+
+                    <table class="table table-condensed">
+        <tr>
+            <td>mixed</td>
+            <td></td>
+        </tr>
+    </table>
+
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_boot">
+        <div class="location">at         line 217</div>
+        <code>                    
+    <strong>boot</strong>()
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                    <div class="method-description">
+                                    <p>You may override this method in order to register your own actions and filters.</p>                                                </div>
+                <div class="tags">
+            
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_args">
+        <div class="location">at         line 228</div>
+        <code>            protected        array
+    <strong>args</strong>()
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                    <div class="method-description">
+                                    <p>Return the default args.</p>                                                </div>
+                <div class="tags">
+            
+                            <h4>Return Value</h4>
+
+                    <table class="table table-condensed">
+        <tr>
+            <td>array</td>
+            <td></td>
+        </tr>
+    </table>
+
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_rewrite">
+        <div class="location">at         line 262</div>
+        <code>            protected        array
+    <strong>rewrite</strong>()
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                    <div class="method-description">
+                                    <p>Return defaults rewrite.</p>                    <p>'slug' => string Customize the permastruct slug. Defaults to $taxonomy key
+'with_front' => bool Should the permastruct be prepended with WP_Rewrite::$front. Defaults to true.
+'hierarchical' => bool Either hierarchical rewrite tag or not. Defaults to false.
+'ep_mask' => const Assign an endpoint mask.
+If not specified, defaults to EP_NONE.</p>                            </div>
+                <div class="tags">
+            
+                            <h4>Return Value</h4>
+
+                    <table class="table table-condensed">
+        <tr>
+            <td>array</td>
+            <td></td>
+        </tr>
+    </table>
+
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_labels">
+        <div class="location">at         line 281</div>
+        <code>            protected        array
+    <strong>labels</strong>()
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                    <div class="method-description">
+                                    <p>Return defaults labels.</p>                                                </div>
+                <div class="tags">
+            
+                            <h4>Return Value</h4>
+
+                    <table class="table table-condensed">
+        <tr>
+            <td>array</td>
+            <td></td>
+        </tr>
+    </table>
+
+            
+            
+                    </div>
+    </div>
+
+            </div>
+            </div>
+
+    
+            </div>
+                <div id="footer">
+        Generated by <a href="http://sami.sensiolabs.org/">Sami, the API Documentation Generator</a>.
+    </div>
+
+        </div>
+    </div>
+    </body>
+
+</html>

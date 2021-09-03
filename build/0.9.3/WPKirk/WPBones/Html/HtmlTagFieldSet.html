@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="robots" content="index, follow, all" />
+    <title>WPKirk\WPBones\Html\HtmlTagFieldSet | WP Bones API</title>
+
+            <link rel="stylesheet" type="text/css" href="../../../css/bootstrap.min.css">
+        <link rel="stylesheet" type="text/css" href="../../../css/bootstrap-theme.min.css">
+        <link rel="stylesheet" type="text/css" href="../../../css/sami.css">
+        <script src="../../../js/jquery-1.11.1.min.js"></script>
+        <script src="../../../js/bootstrap.min.js"></script>
+        <script src="../../../js/typeahead.min.js"></script>
+        <script src="../../../sami.js"></script>
+        <meta name="MobileOptimized" content="width">
+        <meta name="HandheldFriendly" content="true">
+        <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+    
+    
+    </head>
+
+    <body id="class" data-name="class:WPKirk_WPBones_Html_HtmlTagFieldSet" data-root-path="../../../">
+            <div id="content">
+        <div id="left-column">
+                <div id="control-panel">
+                    <form action="#" method="GET">
+                <select id="version-switcher" name="version">
+                                            <option value="../../../../0.8.35/index.html" data-version="0.8.35">0.8.35</option>
+                                            <option value="../../../../master/index.html" data-version="master">master branch</option>
+                                            <option value="../../../../develop/index.html" data-version="develop">develop branch</option>
+                                    </select>
+            </form>
+                <script>
+            $('option[data-version="'+window.projectVersion+'"]').prop('selected', true);
+        </script>
+        <form id="search-form" action="../../../search.html" method="GET">
+            <span class="glyphicon glyphicon-search"></span>
+            <input name="search"
+                   class="typeahead form-control"
+                   type="search"
+                   placeholder="Search">
+        </form>
+    </div>
+
+                <div id="api-tree"></div>
+
+        </div>
+        <div id="right-column">
+                <nav id="site-nav" class="navbar navbar-default" role="navigation">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-elements">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="../../../index.html">WP Bones API</a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar-elements">
+                <ul class="nav navbar-nav">
+                    <li><a href="../../../classes.html">Classes</a></li>
+                                            <li><a href="../../../namespaces.html">Namespaces</a></li>
+                                        <li><a href="../../../interfaces.html">Interfaces</a></li>
+                    <li><a href="../../../traits.html">Traits</a></li>
+                    <li><a href="../../../doc-index.html">Index</a></li>
+                    <li><a href="../../../search.html">Search</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+                        <div class="namespace-breadcrumbs">
+            <ol class="breadcrumb">
+                <li><span class="label label-default">class</span></li>
+                        <li><a href="../../../WPKirk.html">WPKirk</a></li><li class="backslash">\</li><li><a href="../../../WPKirk/WPBones.html">WPBones</a></li><li class="backslash">\</li><li><a href="../../../WPKirk/WPBones/Html.html">Html</a></li><li class="backslash">\</li><li>HtmlTagFieldSet</li>
+            </ol>
+        </div>
+                <div id="page-content">
+                
+    <div class="page-header">
+        <h1>
+            HtmlTagFieldSet
+                
+        </h1>
+    </div>
+
+    <p>    class
+    <strong>HtmlTagFieldSet</strong>        extends <a href="../../../WPKirk/WPBones/Html/HtmlTag.html"><abbr title="WPKirk\WPBones\Html\HtmlTag">HtmlTag</abbr></a>
+</p>
+
+        
+    
+
+    
+    
+    
+            <h2>Properties</h2>
+
+            <table class="table table-condensed">
+                    <tr>
+                <td class="type" id="property_globalAttributes">
+                                        protected                                        array
+                </td>
+                <td>$globalAttributes</td>
+                <td class="last">Global common HTML tag attributes.</td>
+                <td><small>from&nbsp;<a href="../../../WPKirk/WPBones/Html/HtmlTag.html#property_globalAttributes"><abbr title="WPKirk\WPBones\Html\HtmlTag">HtmlTag</abbr></a></small></td>
+            </tr>
+                    <tr>
+                <td class="type" id="property_attributes">
+                                        protected                                        array
+                </td>
+                <td>$attributes</td>
+                <td class="last">Attributes.</td>
+                <td></td>
+            </tr>
+                    <tr>
+                <td class="type" id="property_guardedAttributes">
+                                        protected                                        array
+                </td>
+                <td>$guardedAttributes</td>
+                <td class="last">Callable fluent HTML tag attributes but not formatted.</td>
+                <td><small>from&nbsp;<a href="../../../WPKirk/WPBones/Html/HtmlTag.html#property_guardedAttributes"><abbr title="WPKirk\WPBones\Html\HtmlTag">HtmlTag</abbr></a></small></td>
+            </tr>
+                    <tr>
+                <td class="type" id="property_markup">
+                                        protected                                        array
+                </td>
+                <td>$markup</td>
+                <td class="last">Html Tag markup, open and close.</td>
+                <td></td>
+            </tr>
+                    <tr>
+                <td class="type" id="property_content">
+                                        protected                                        string
+                </td>
+                <td>$content</td>
+                <td class="last">This is the content of a Html tag, suc as</p>
+
+<div>{content}</div>
+</td>
+                <td><small>from&nbsp;<a href="../../../WPKirk/WPBones/Html/HtmlTag.html#property_content"><abbr title="WPKirk\WPBones\Html\HtmlTag">HtmlTag</abbr></a></small></td>
+            </tr>
+            </table>
+
+    
+            <h2>Methods</h2>
+
+            <div class="container-fluid underlined">
+                    <div class="row">
+                <div class="col-md-2 type">
+                    
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_getAttributesAttribute">getAttributesAttribute</a>()
+        
+                                            <p class="no-description">No description</p>
+                                    </div>
+                <div class="col-md-2"><small>from&nbsp;<a href="../../../WPKirk/WPBones/Html/HtmlTag.html#method_getAttributesAttribute"><abbr title="WPKirk\WPBones\Html\HtmlTag">HtmlTag</abbr></a></small></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_attributes">attributes</a>($values)
+        
+                                            <p class="no-description">No description</p>
+                                    </div>
+                <div class="col-md-2"><small>from&nbsp;<a href="../../../WPKirk/WPBones/Html/HtmlTag.html#method_attributes"><abbr title="WPKirk\WPBones\Html\HtmlTag">HtmlTag</abbr></a></small></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_formatAttributes">formatAttributes</a>()
+        
+                                            <p class="no-description">No description</p>
+                                    </div>
+                <div class="col-md-2"><small>from&nbsp;<a href="../../../WPKirk/WPBones/Html/HtmlTag.html#method_formatAttributes"><abbr title="WPKirk\WPBones\Html\HtmlTag">HtmlTag</abbr></a></small></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_formatGlobalAttributes">formatGlobalAttributes</a>()
+        
+                                            <p class="no-description">No description</p>
+                                    </div>
+                <div class="col-md-2"><small>from&nbsp;<a href="../../../WPKirk/WPBones/Html/HtmlTag.html#method_formatGlobalAttributes"><abbr title="WPKirk\WPBones\Html\HtmlTag">HtmlTag</abbr></a></small></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_getStyleAttribute">getStyleAttribute</a>()
+        
+                                            <p class="no-description">No description</p>
+                                    </div>
+                <div class="col-md-2"><small>from&nbsp;<a href="../../../WPKirk/WPBones/Html/HtmlTag.html#method_getStyleAttribute"><abbr title="WPKirk\WPBones\Html\HtmlTag">HtmlTag</abbr></a></small></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_style">style</a>()
+        
+                                            <p class="no-description">No description</p>
+                                    </div>
+                <div class="col-md-2"><small>from&nbsp;<a href="../../../WPKirk/WPBones/Html/HtmlTag.html#method_style"><abbr title="WPKirk\WPBones\Html\HtmlTag">HtmlTag</abbr></a></small></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_data">data</a>()
+        
+                                            <p class="no-description">No description</p>
+                                    </div>
+                <div class="col-md-2"><small>from&nbsp;<a href="../../../WPKirk/WPBones/Html/HtmlTag.html#method_data"><abbr title="WPKirk\WPBones\Html\HtmlTag">HtmlTag</abbr></a></small></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_getDataAttribute">getDataAttribute</a>()
+        
+                                            <p class="no-description">No description</p>
+                                    </div>
+                <div class="col-md-2"><small>from&nbsp;<a href="../../../WPKirk/WPBones/Html/HtmlTag.html#method_getDataAttribute"><abbr title="WPKirk\WPBones\Html\HtmlTag">HtmlTag</abbr></a></small></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_formatDataAttributes">formatDataAttributes</a>()
+        
+                                            <p class="no-description">No description</p>
+                                    </div>
+                <div class="col-md-2"><small>from&nbsp;<a href="../../../WPKirk/WPBones/Html/HtmlTag.html#method_formatDataAttributes"><abbr title="WPKirk\WPBones\Html\HtmlTag">HtmlTag</abbr></a></small></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_getClassAttribute">getClassAttribute</a>()
+        
+                                            <p class="no-description">No description</p>
+                                    </div>
+                <div class="col-md-2"><small>from&nbsp;<a href="../../../WPKirk/WPBones/Html/HtmlTag.html#method_getClassAttribute"><abbr title="WPKirk\WPBones\Html\HtmlTag">HtmlTag</abbr></a></small></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_setClassAttribute">setClassAttribute</a>($value)
+        
+                                            <p class="no-description">No description</p>
+                                    </div>
+                <div class="col-md-2"><small>from&nbsp;<a href="../../../WPKirk/WPBones/Html/HtmlTag.html#method_setClassAttribute"><abbr title="WPKirk\WPBones\Html\HtmlTag">HtmlTag</abbr></a></small></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_getAcceptcharsetAttribute">getAcceptcharsetAttribute</a>()
+        
+                                            <p class="no-description">No description</p>
+                                    </div>
+                <div class="col-md-2"><small>from&nbsp;<a href="../../../WPKirk/WPBones/Html/HtmlTag.html#method_getAcceptcharsetAttribute"><abbr title="WPKirk\WPBones\Html\HtmlTag">HtmlTag</abbr></a></small></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_setAcceptcharsetAttribute">setAcceptcharsetAttribute</a>($value)
+        
+                                            <p class="no-description">No description</p>
+                                    </div>
+                <div class="col-md-2"><small>from&nbsp;<a href="../../../WPKirk/WPBones/Html/HtmlTag.html#method_setAcceptcharsetAttribute"><abbr title="WPKirk\WPBones\Html\HtmlTag">HtmlTag</abbr></a></small></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method___construct">__construct</a>(array $arguments = [])
+        
+                                            <p>HtmlTag constructor.</p>                </div>
+                <div class="col-md-2"><small>from&nbsp;<a href="../../../WPKirk/WPBones/Html/HtmlTag.html#method___construct"><abbr title="WPKirk\WPBones\Html\HtmlTag">HtmlTag</abbr></a></small></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method___get">__get</a>($name)
+        
+                                            <p class="no-description">No description</p>
+                                    </div>
+                <div class="col-md-2"><small>from&nbsp;<a href="../../../WPKirk/WPBones/Html/HtmlTag.html#method___get"><abbr title="WPKirk\WPBones\Html\HtmlTag">HtmlTag</abbr></a></small></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method___set">__set</a>($name, $value)
+        
+                                            <p class="no-description">No description</p>
+                                    </div>
+                <div class="col-md-2"><small>from&nbsp;<a href="../../../WPKirk/WPBones/Html/HtmlTag.html#method___set"><abbr title="WPKirk\WPBones\Html\HtmlTag">HtmlTag</abbr></a></small></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    string
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method___toString">__toString</a>()
+        
+                                            <p>Get the string rappresentation of the tag.</p>                </div>
+                <div class="col-md-2"><small>from&nbsp;<a href="../../../WPKirk/WPBones/Html/HtmlTag.html#method___toString"><abbr title="WPKirk\WPBones\Html\HtmlTag">HtmlTag</abbr></a></small></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method___call">__call</a>($name, $arguments)
+        
+                                            <p class="no-description">No description</p>
+                                    </div>
+                <div class="col-md-2"><small>from&nbsp;<a href="../../../WPKirk/WPBones/Html/HtmlTag.html#method___call"><abbr title="WPKirk\WPBones\Html\HtmlTag">HtmlTag</abbr></a></small></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    string
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_html">html</a>()
+        
+                                            <p>Get the HTML output.</p>                </div>
+                <div class="col-md-2"><small>from&nbsp;<a href="../../../WPKirk/WPBones/Html/HtmlTag.html#method_html"><abbr title="WPKirk\WPBones\Html\HtmlTag">HtmlTag</abbr></a></small></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_render">render</a>()
+        
+                                            <p>Display the HTML output.</p>                </div>
+                <div class="col-md-2"><small>from&nbsp;<a href="../../../WPKirk/WPBones/Html/HtmlTag.html#method_render"><abbr title="WPKirk\WPBones\Html\HtmlTag">HtmlTag</abbr></a></small></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_beforeOpenTag">beforeOpenTag</a>()
+        
+                                            <p class="no-description">No description</p>
+                                    </div>
+                <div class="col-md-2"><small>from&nbsp;<a href="../../../WPKirk/WPBones/Html/HtmlTag.html#method_beforeOpenTag"><abbr title="WPKirk\WPBones\Html\HtmlTag">HtmlTag</abbr></a></small></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_afterCloseTag">afterCloseTag</a>()
+        
+                                            <p class="no-description">No description</p>
+                                    </div>
+                <div class="col-md-2"><small>from&nbsp;<a href="../../../WPKirk/WPBones/Html/HtmlTag.html#method_afterCloseTag"><abbr title="WPKirk\WPBones\Html\HtmlTag">HtmlTag</abbr></a></small></div>
+            </div>
+            </div>
+
+
+        <h2>Details</h2>
+
+            <div id="method-details">
+                    <div class="method-item">
+                    <h3 id="method_getAttributesAttribute">
+        <div class="location">in <a href="../../../WPKirk/WPBones/Html/HtmlTag.html#method_getAttributesAttribute"><abbr title="WPKirk\WPBones\Html\HtmlTag">HtmlTag</abbr></a> at         line 83</div>
+        <code>            protected        
+    <strong>getAttributesAttribute</strong>()
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                <div class="tags">
+            
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_attributes">
+        <div class="location">in <a href="../../../WPKirk/WPBones/Html/HtmlTag.html#method_attributes"><abbr title="WPKirk\WPBones\Html\HtmlTag">HtmlTag</abbr></a> at         line 88</div>
+        <code>                    
+    <strong>attributes</strong>($values)
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                <div class="tags">
+                            <h4>Parameters</h4>
+
+                    <table class="table table-condensed">
+                    <tr>
+                <td></td>
+                <td>$values</td>
+                <td></td>
+            </tr>
+            </table>
+
+            
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_formatAttributes">
+        <div class="location">in <a href="../../../WPKirk/WPBones/Html/HtmlTag.html#method_formatAttributes"><abbr title="WPKirk\WPBones\Html\HtmlTag">HtmlTag</abbr></a> at         line 100</div>
+        <code>                    
+    <strong>formatAttributes</strong>()
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                <div class="tags">
+            
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_formatGlobalAttributes">
+        <div class="location">in <a href="../../../WPKirk/WPBones/Html/HtmlTag.html#method_formatGlobalAttributes"><abbr title="WPKirk\WPBones\Html\HtmlTag">HtmlTag</abbr></a> at         line 113</div>
+        <code>                    
+    <strong>formatGlobalAttributes</strong>()
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                <div class="tags">
+            
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_getStyleAttribute">
+        <div class="location">in <a href="../../../WPKirk/WPBones/Html/HtmlTag.html#method_getStyleAttribute"><abbr title="WPKirk\WPBones\Html\HtmlTag">HtmlTag</abbr></a> at         line 126</div>
+        <code>            protected        
+    <strong>getStyleAttribute</strong>()
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                <div class="tags">
+            
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_style">
+        <div class="location">in <a href="../../../WPKirk/WPBones/Html/HtmlTag.html#method_style"><abbr title="WPKirk\WPBones\Html\HtmlTag">HtmlTag</abbr></a> at         line 143</div>
+        <code>                    
+    <strong>style</strong>()
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                <div class="tags">
+            
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_data">
+        <div class="location">in <a href="../../../WPKirk/WPBones/Html/HtmlTag.html#method_data"><abbr title="WPKirk\WPBones\Html\HtmlTag">HtmlTag</abbr></a> at         line 167</div>
+        <code>                    
+    <strong>data</strong>()
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                <div class="tags">
+            
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_getDataAttribute">
+        <div class="location">in <a href="../../../WPKirk/WPBones/Html/HtmlTag.html#method_getDataAttribute"><abbr title="WPKirk\WPBones\Html\HtmlTag">HtmlTag</abbr></a> at         line 185</div>
+        <code>                    
+    <strong>getDataAttribute</strong>()
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                <div class="tags">
+            
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_formatDataAttributes">
+        <div class="location">in <a href="../../../WPKirk/WPBones/Html/HtmlTag.html#method_formatDataAttributes"><abbr title="WPKirk\WPBones\Html\HtmlTag">HtmlTag</abbr></a> at         line 189</div>
+        <code>                    
+    <strong>formatDataAttributes</strong>()
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                <div class="tags">
+            
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_getClassAttribute">
+        <div class="location">in <a href="../../../WPKirk/WPBones/Html/HtmlTag.html#method_getClassAttribute"><abbr title="WPKirk\WPBones\Html\HtmlTag">HtmlTag</abbr></a> at         line 211</div>
+        <code>            protected        
+    <strong>getClassAttribute</strong>()
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                <div class="tags">
+            
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_setClassAttribute">
+        <div class="location">in <a href="../../../WPKirk/WPBones/Html/HtmlTag.html#method_setClassAttribute"><abbr title="WPKirk\WPBones\Html\HtmlTag">HtmlTag</abbr></a> at         line 216</div>
+        <code>            protected        
+    <strong>setClassAttribute</strong>($value)
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                <div class="tags">
+                            <h4>Parameters</h4>
+
+                    <table class="table table-condensed">
+                    <tr>
+                <td></td>
+                <td>$value</td>
+                <td></td>
+            </tr>
+            </table>
+
+            
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_getAcceptcharsetAttribute">
+        <div class="location">in <a href="../../../WPKirk/WPBones/Html/HtmlTag.html#method_getAcceptcharsetAttribute"><abbr title="WPKirk\WPBones\Html\HtmlTag">HtmlTag</abbr></a> at         line 225</div>
+        <code>            protected        
+    <strong>getAcceptcharsetAttribute</strong>()
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                <div class="tags">
+            
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_setAcceptcharsetAttribute">
+        <div class="location">in <a href="../../../WPKirk/WPBones/Html/HtmlTag.html#method_setAcceptcharsetAttribute"><abbr title="WPKirk\WPBones\Html\HtmlTag">HtmlTag</abbr></a> at         line 230</div>
+        <code>            protected        
+    <strong>setAcceptcharsetAttribute</strong>($value)
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                <div class="tags">
+                            <h4>Parameters</h4>
+
+                    <table class="table table-condensed">
+                    <tr>
+                <td></td>
+                <td>$value</td>
+                <td></td>
+            </tr>
+            </table>
+
+            
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method___construct">
+        <div class="location">in <a href="../../../WPKirk/WPBones/Html/HtmlTag.html#method___construct"><abbr title="WPKirk\WPBones\Html\HtmlTag">HtmlTag</abbr></a> at         line 248</div>
+        <code>                    
+    <strong>__construct</strong>(array $arguments = [])
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                    <div class="method-description">
+                                    <p>HtmlTag constructor.</p>                                                </div>
+                <div class="tags">
+                            <h4>Parameters</h4>
+
+                    <table class="table table-condensed">
+                    <tr>
+                <td>array</td>
+                <td>$arguments</td>
+                <td></td>
+            </tr>
+            </table>
+
+            
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method___get">
+        <div class="location">in <a href="../../../WPKirk/WPBones/Html/HtmlTag.html#method___get"><abbr title="WPKirk\WPBones\Html\HtmlTag">HtmlTag</abbr></a> at         line 273</div>
+        <code>                    
+    <strong>__get</strong>($name)
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                <div class="tags">
+                            <h4>Parameters</h4>
+
+                    <table class="table table-condensed">
+                    <tr>
+                <td></td>
+                <td>$name</td>
+                <td></td>
+            </tr>
+            </table>
+
+            
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method___set">
+        <div class="location">in <a href="../../../WPKirk/WPBones/Html/HtmlTag.html#method___set"><abbr title="WPKirk\WPBones\Html\HtmlTag">HtmlTag</abbr></a> at         line 293</div>
+        <code>                    
+    <strong>__set</strong>($name, $value)
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                <div class="tags">
+                            <h4>Parameters</h4>
+
+                    <table class="table table-condensed">
+                    <tr>
+                <td></td>
+                <td>$name</td>
+                <td></td>
+            </tr>
+                    <tr>
+                <td></td>
+                <td>$value</td>
+                <td></td>
+            </tr>
+            </table>
+
+            
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method___toString">
+        <div class="location">in <a href="../../../WPKirk/WPBones/Html/HtmlTag.html#method___toString"><abbr title="WPKirk\WPBones\Html\HtmlTag">HtmlTag</abbr></a> at         line 318</div>
+        <code>                    string
+    <strong>__toString</strong>()
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                    <div class="method-description">
+                                    <p>Get the string rappresentation of the tag.</p>                                                </div>
+                <div class="tags">
+            
+                            <h4>Return Value</h4>
+
+                    <table class="table table-condensed">
+        <tr>
+            <td>string</td>
+            <td></td>
+        </tr>
+    </table>
+
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method___call">
+        <div class="location">in <a href="../../../WPKirk/WPBones/Html/HtmlTag.html#method___call"><abbr title="WPKirk\WPBones\Html\HtmlTag">HtmlTag</abbr></a> at         line 323</div>
+        <code>                    
+    <strong>__call</strong>($name, $arguments)
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                <div class="tags">
+                            <h4>Parameters</h4>
+
+                    <table class="table table-condensed">
+                    <tr>
+                <td></td>
+                <td>$name</td>
+                <td></td>
+            </tr>
+                    <tr>
+                <td></td>
+                <td>$arguments</td>
+                <td></td>
+            </tr>
+            </table>
+
+            
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_html">
+        <div class="location">in <a href="../../../WPKirk/WPBones/Html/HtmlTag.html#method_html"><abbr title="WPKirk\WPBones\Html\HtmlTag">HtmlTag</abbr></a> at         line 347</div>
+        <code>                    string
+    <strong>html</strong>()
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                    <div class="method-description">
+                                    <p>Get the HTML output.</p>                                                </div>
+                <div class="tags">
+            
+                            <h4>Return Value</h4>
+
+                    <table class="table table-condensed">
+        <tr>
+            <td>string</td>
+            <td></td>
+        </tr>
+    </table>
+
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_render">
+        <div class="location">in <a href="../../../WPKirk/WPBones/Html/HtmlTag.html#method_render"><abbr title="WPKirk\WPBones\Html\HtmlTag">HtmlTag</abbr></a> at         line 381</div>
+        <code>                    
+    <strong>render</strong>()
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                    <div class="method-description">
+                                    <p>Display the HTML output.</p>                                                </div>
+                <div class="tags">
+            
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_beforeOpenTag">
+        <div class="location">in <a href="../../../WPKirk/WPBones/Html/HtmlTag.html#method_beforeOpenTag"><abbr title="WPKirk\WPBones\Html\HtmlTag">HtmlTag</abbr></a> at         line 387</div>
+        <code>            protected        
+    <strong>beforeOpenTag</strong>()
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                <div class="tags">
+            
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_afterCloseTag">
+        <div class="location">in <a href="../../../WPKirk/WPBones/Html/HtmlTag.html#method_afterCloseTag"><abbr title="WPKirk\WPBones\Html\HtmlTag">HtmlTag</abbr></a> at         line 392</div>
+        <code>            protected        
+    <strong>afterCloseTag</strong>()
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                <div class="tags">
+            
+            
+            
+                    </div>
+    </div>
+
+            </div>
+            </div>
+
+    
+            </div>
+                <div id="footer">
+        Generated by <a href="http://sami.sensiolabs.org/">Sami, the API Documentation Generator</a>.
+    </div>
+
+        </div>
+    </div>
+    </body>
+
+</html>

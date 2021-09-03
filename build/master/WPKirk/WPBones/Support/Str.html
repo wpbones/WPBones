@@ -26,6 +26,28 @@
                     <form action="#" method="GET">
                 <select id="version-switcher" name="version">
                                             <option value="../../../../0.8.35/index.html" data-version="0.8.35">0.8.35</option>
+                                            <option value="../../../../0.8.36/index.html" data-version="0.8.36">0.8.36</option>
+                                            <option value="../../../../0.8.37/index.html" data-version="0.8.37">0.8.37</option>
+                                            <option value="../../../../0.8.38/index.html" data-version="0.8.38">0.8.38</option>
+                                            <option value="../../../../0.9.0/index.html" data-version="0.9.0">0.9.0</option>
+                                            <option value="../../../../0.9.1/index.html" data-version="0.9.1">0.9.1</option>
+                                            <option value="../../../../0.9.2/index.html" data-version="0.9.2">0.9.2</option>
+                                            <option value="../../../../0.9.3/index.html" data-version="0.9.3">0.9.3</option>
+                                            <option value="../../../../0.9.4/index.html" data-version="0.9.4">0.9.4</option>
+                                            <option value="../../../../0.9.5/index.html" data-version="0.9.5">0.9.5</option>
+                                            <option value="../../../../0.9.6/index.html" data-version="0.9.6">0.9.6</option>
+                                            <option value="../../../../0.9.7/index.html" data-version="0.9.7">0.9.7</option>
+                                            <option value="../../../../0.9.8/index.html" data-version="0.9.8">0.9.8</option>
+                                            <option value="../../../../0.9.9/index.html" data-version="0.9.9">0.9.9</option>
+                                            <option value="../../../../0.9.10/index.html" data-version="0.9.10">0.9.10</option>
+                                            <option value="../../../../0.9.11/index.html" data-version="0.9.11">0.9.11</option>
+                                            <option value="../../../../0.9.12/index.html" data-version="0.9.12">0.9.12</option>
+                                            <option value="../../../../0.9.22/index.html" data-version="0.9.22">0.9.22</option>
+                                            <option value="../../../../0.9.23/index.html" data-version="0.9.23">0.9.23</option>
+                                            <option value="../../../../0.9.30/index.html" data-version="0.9.30">0.9.30</option>
+                                            <option value="../../../../0.9.50/index.html" data-version="0.9.50">0.9.50</option>
+                                            <option value="../../../../0.9.51/index.html" data-version="0.9.51">0.9.51</option>
+                                            <option value="../../../../0.10.0/index.html" data-version="0.10.0">0.10.0</option>
                                             <option value="../../../../master/index.html" data-version="master">master branch</option>
                                             <option value="../../../../develop/index.html" data-version="develop">develop branch</option>
                                     </select>
@@ -170,7 +192,7 @@
             </div>
                     <div class="row">
                 <div class="col-md-2 type">
-                    static&nbsp;string
+                    static&nbsp;bool
                 </div>
                 <div class="col-md-8 type">
                     <a href="#method_finish">finish</a>(string $value, string $cap)
@@ -235,7 +257,7 @@
                 <div class="col-md-8 type">
                     <a href="#method_parseCallback">parseCallback</a>(string $callback, string $default)
         
-                                            <p>Parse a Class@method style callback into class and method.</p>                </div>
+                                            <p>Parse a "Class@method" style callback into class and method.</p>                </div>
                 <div class="col-md-2"></div>
             </div>
                     <div class="row">
@@ -363,7 +385,7 @@
                     static&nbsp;string
                 </div>
                 <div class="col-md-8 type">
-                    <a href="#method_substr">substr</a>(string $string, int $start, int|null $length = null)
+                    <a href="#method_substr">substr</a>(string $string, int $start, int $length = null)
         
                                             <p>Returns the portion of string specified by the start and length parameters.</p>                </div>
                 <div class="col-md-2"></div>
@@ -396,7 +418,7 @@
             <div id="method-details">
                     <div class="method-item">
                     <h3 id="method_ascii">
-        <div class="location">at         line 36</div>
+        <div class="location">at         line 39</div>
         <code>        static            string
     <strong>ascii</strong>(string $value)
         </code>
@@ -436,7 +458,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_camel">
-        <div class="location">at         line 51</div>
+        <div class="location">at         line 54</div>
         <code>        static            string
     <strong>camel</strong>(string $value)
         </code>
@@ -476,7 +498,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_contains">
-        <div class="location">at         line 67</div>
+        <div class="location">at         line 70</div>
         <code>        static            bool
     <strong>contains</strong>(string $haystack, string|array $needles)
         </code>
@@ -521,7 +543,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_endsWith">
-        <div class="location">at         line 85</div>
+        <div class="location">at         line 88</div>
         <code>        static            bool
     <strong>endsWith</strong>(string $haystack, string|array $needles)
         </code>
@@ -566,8 +588,8 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_finish">
-        <div class="location">at         line 103</div>
-        <code>        static            string
+        <div class="location">at         line 106</div>
+        <code>        static            bool
     <strong>finish</strong>(string $value, string $cap)
         </code>
     </h3>
@@ -598,7 +620,7 @@
 
                     <table class="table table-condensed">
         <tr>
-            <td>string</td>
+            <td>bool</td>
             <td></td>
         </tr>
     </table>
@@ -611,7 +633,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_is">
-        <div class="location">at         line 117</div>
+        <div class="location">at         line 120</div>
         <code>        static            bool
     <strong>is</strong>(string $pattern, string $value)
         </code>
@@ -656,7 +678,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_length">
-        <div class="location">at         line 139</div>
+        <div class="location">at         line 142</div>
         <code>        static            int
     <strong>length</strong>(string $value)
         </code>
@@ -696,7 +718,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_limit">
-        <div class="location">at         line 152</div>
+        <div class="location">at         line 155</div>
         <code>        static            string
     <strong>limit</strong>(string $value, int $limit = 100, string $end = &#039;...&#039;)
         </code>
@@ -746,7 +768,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_lower">
-        <div class="location">at         line 167</div>
+        <div class="location">at         line 170</div>
         <code>        static            string
     <strong>lower</strong>(string $value)
         </code>
@@ -786,7 +808,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_words">
-        <div class="location">at         line 180</div>
+        <div class="location">at         line 183</div>
         <code>        static            string
     <strong>words</strong>(string $value, int $words = 100, string $end = &#039;...&#039;)
         </code>
@@ -836,7 +858,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_parseCallback">
-        <div class="location">at         line 198</div>
+        <div class="location">at         line 201</div>
         <code>        static            array
     <strong>parseCallback</strong>(string $callback, string $default)
         </code>
@@ -846,7 +868,7 @@
     
 
                     <div class="method-description">
-                                    <p>Parse a Class@method style callback into class and method.</p>                                                </div>
+                                    <p>Parse a "Class@method" style callback into class and method.</p>                                                </div>
                 <div class="tags">
                             <h4>Parameters</h4>
 
@@ -881,7 +903,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_random">
-        <div class="location">at         line 209</div>
+        <div class="location">at         line 213</div>
         <code>        static            string
     <strong>random</strong>(int $length = 16)
         </code>
@@ -914,6 +936,15 @@
     </table>
 
             
+                            <h4>Exceptions</h4>
+
+                    <table class="table table-condensed">
+                    <tr>
+                <td><a target="_blank" href="http://php.net/Exception">Exception</a></td>
+                <td></td>
+            </tr>
+            </table>
+
             
                     </div>
     </div>
@@ -921,7 +952,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_randomBytes">
-        <div class="location">at         line 232</div>
+        <div class="location">at         line 237</div>
         <code>        static            string
     <strong>randomBytes</strong>(int $length = 16)
         <small><sup><span class="label label-danger">deprecated</span></sup></small></code>
@@ -961,6 +992,15 @@
     </table>
 
             
+                            <h4>Exceptions</h4>
+
+                    <table class="table table-condensed">
+                    <tr>
+                <td><a target="_blank" href="http://php.net/Exception">Exception</a></td>
+                <td></td>
+            </tr>
+            </table>
+
             
                     </div>
     </div>
@@ -968,7 +1008,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_quickRandom">
-        <div class="location">at         line 245</div>
+        <div class="location">at         line 250</div>
         <code>        static            string
     <strong>quickRandom</strong>(int $length = 16)
         </code>
@@ -1008,7 +1048,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_equals">
-        <div class="location">at         line 265</div>
+        <div class="location">at         line 270</div>
         <code>        static            bool
     <strong>equals</strong>(string $knownString, string $userInput)
         <small><sup><span class="label label-danger">deprecated</span></sup></small></code>
@@ -1062,7 +1102,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_replaceFirst">
-        <div class="location">at         line 278</div>
+        <div class="location">at         line 283</div>
         <code>        static            string
     <strong>replaceFirst</strong>(string $search, string $replace, string $subject)
         </code>
@@ -1112,7 +1152,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_replaceLast">
-        <div class="location">at         line 297</div>
+        <div class="location">at         line 302</div>
         <code>        static            string
     <strong>replaceLast</strong>(string $search, string $replace, string $subject)
         </code>
@@ -1162,7 +1202,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_upper">
-        <div class="location">at         line 314</div>
+        <div class="location">at         line 319</div>
         <code>        static            string
     <strong>upper</strong>(string $value)
         </code>
@@ -1202,7 +1242,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_title">
-        <div class="location">at         line 325</div>
+        <div class="location">at         line 330</div>
         <code>        static            string
     <strong>title</strong>(string $value)
         </code>
@@ -1242,7 +1282,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_slug">
-        <div class="location">at         line 337</div>
+        <div class="location">at         line 342</div>
         <code>        static            string
     <strong>slug</strong>(string $title, string $separator = &#039;-&#039;)
         </code>
@@ -1287,7 +1327,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_snake">
-        <div class="location">at         line 362</div>
+        <div class="location">at         line 367</div>
         <code>        static            string
     <strong>snake</strong>(string $value, string $delimiter = &#039;_&#039;)
         </code>
@@ -1332,7 +1372,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_startsWith">
-        <div class="location">at         line 386</div>
+        <div class="location">at         line 391</div>
         <code>        static            bool
     <strong>startsWith</strong>(string $haystack, string|array $needles)
         </code>
@@ -1377,7 +1417,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_studly">
-        <div class="location">at         line 403</div>
+        <div class="location">at         line 408</div>
         <code>        static            string
     <strong>studly</strong>(string $value)
         </code>
@@ -1417,9 +1457,9 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_substr">
-        <div class="location">at         line 424</div>
+        <div class="location">at         line 429</div>
         <code>        static            string
-    <strong>substr</strong>(string $string, int $start, int|null $length = null)
+    <strong>substr</strong>(string $string, int $start, int $length = null)
         </code>
     </h3>
     <div class="details">
@@ -1443,7 +1483,7 @@
                 <td></td>
             </tr>
                     <tr>
-                <td>int|null</td>
+                <td>int</td>
                 <td>$length</td>
                 <td></td>
             </tr>
@@ -1467,7 +1507,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_ucfirst">
-        <div class="location">at         line 435</div>
+        <div class="location">at         line 440</div>
         <code>        static            string
     <strong>ucfirst</strong>(string $string)
         </code>
@@ -1507,7 +1547,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_charsArray">
-        <div class="location">at         line 449</div>
+        <div class="location">at         line 454</div>
         <code>        static    protected        array
     <strong>charsArray</strong>()
         </code>
