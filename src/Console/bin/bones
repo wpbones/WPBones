@@ -19,7 +19,7 @@ class BonesCommandLine
     /**
      * WP Bones version
      */
-    const VERSION = '0.11.1';
+    const VERSION = '0.11.2';
 
     /**
      * Plugin name.
@@ -169,7 +169,7 @@ class BonesCommandLine
     }
 
     /**
-     * This is a special bootstrap in order to avoid the WordPress and kernel envirnment
+     * This is a special bootstrap in order to avoid the WordPress and kernel environment
      * when we have to rename the plugin and vendor structure.
      *
      */

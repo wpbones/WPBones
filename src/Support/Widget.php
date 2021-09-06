@@ -64,7 +64,7 @@ abstract class Widget extends \WP_Widget
   }
 
   /**
-   * Retrun a key pairs array with the default value for widget.
+   * Return a key pairs array with the default value for widget.
    *
    * @return array
    */

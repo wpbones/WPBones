@@ -16,7 +16,7 @@ abstract class Controller
     private $_request = null;
 
     /**
-     * Ths method is executed by add_action( 'load-{}' )
+     * This method is executed by add_action( 'load-{}' )
      *
      */
     public function load()
@@ -41,7 +41,7 @@ abstract class Controller
     }
 
     /**
-     * Redirect the browser to a localtion. If the header has been sent, then a Javascript and meta refresh will
+     * Redirect the browser to a location. If the header has been sent, then a Javascript and meta refresh will
      * inserted into the page.
      *
      * @param string $location

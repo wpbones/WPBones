@@ -196,10 +196,6 @@ class WordPressOption implements \ArrayAccess
     return $this->get( $offset );
   }
 
-
-
-
-
   /**
    * Delete a branch/single option by path.
    *
@@ -345,7 +341,7 @@ class WordPressOption implements \ArrayAccess
       }
     }
 
-    // serach for delete
+    // search for delete
     foreach ( $result as $key => $value ) {
       if ( ! is_numeric( $key ) && ! isset( $lastVersion[ $key ] ) ) {
         unset( $result[ $key ] );

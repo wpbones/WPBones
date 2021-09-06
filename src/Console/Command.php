@@ -6,7 +6,6 @@ use WPKirk\WPBones\Support\Str;
 
 abstract class Command
 {
-
     protected $signature;
 
     protected $options = [];
@@ -51,7 +50,6 @@ abstract class Command
      */
     protected function ask(string $str, string $default = ''): string
     {
-
         echo "\n\e[38;5;88m$str" . (empty($default) ? "" : " (default: {$default})") . "\e[0m ";
 
         $handle = fopen("php://stdin", "r");
@@ -115,7 +113,6 @@ abstract class Command
             $option = $this->options[$sanitizeOption];
 
             if (isset($option['param']) && $option['param']) {
-
                 $argv = $this->argv;
 
                 foreach ($argv as $argument) {

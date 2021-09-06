@@ -139,7 +139,6 @@ class View
      */
     public function render($asHTML = false)
     {
-
         if (! $this->container->isAjax()) {
             $this->admin_enqueue_scripts();
             $this->admin_print_styles();
@@ -166,7 +165,6 @@ class View
 
             // include view
             include $this->container->getBasePath() . '/resources/views/' . $this->filename();
-
         };
 
         if ($this->container->isAjax() || $asHTML) {
@@ -265,5 +263,4 @@ class View
 
         return $this;
     }
-
 }
