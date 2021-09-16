@@ -14,7 +14,7 @@ class Route
      *
      * @var array
      */
-    static $menu = [];
+    public static $menu = [];
 
     /**
      * Set the right route path.
@@ -25,5 +25,4 @@ class Route
     {
         self::$menu[] = $path;
     }
-
 }
