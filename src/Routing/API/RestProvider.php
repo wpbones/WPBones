@@ -9,6 +9,11 @@ if (! defined('ABSPATH')) {
 use WPKirk\WPBones\Support\ServiceProvider;
 use \WPKirk\WPBones\Routing\API\Route;
 
+/**
+ * This provider is used to register all API routes.
+ * We are going to scan the plugin folder /api to search all vendor/version/routes.
+ * 
+ */
 class RestProvider extends ServiceProvider
 {
     protected $routes = [];

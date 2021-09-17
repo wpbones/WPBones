@@ -6,7 +6,9 @@ if (! defined('ABSPATH')) {
     exit;
 }
 
-
+/**
+ * You'll use this class to create a route.
+ */
 class Route
 {
     protected static $vendor;
@@ -29,7 +31,7 @@ class Route
      * Internal used to build the callback when we're using "@" syntax.
      * Or a callable function.
      */
-    private static function callback($callback)
+    private static function callback($callback, $vendor)
     {
         if (is_callable($callback)) {
             return $callback;
@@ -39,30 +41,30 @@ class Route
 
             /**
              * In args you'll find the WP_REST_Request object.
-             * 
+             *
              *  // You can access parameters via direct array access on the object:
              *  $param = $request['some_param'];
-             *  
+             *
              *  // Or via the helper method:
              *  $param = $request->get_param( 'some_param' );
-             *  
+             *
              *  // You can get the combined, merged set of parameters:
              *  $parameters = $request->get_params();
-             *  
+             *
              *  // The individual sets of parameters are also available, if needed:
              *  $parameters = $request->get_url_params();
              *  $parameters = $request->get_query_params();
              *  $parameters = $request->get_body_params();
              *  $parameters = $request->get_json_params();
              *  $parameters = $request->get_default_params();
-             *  
+             *
              *  // Uploads aren't merged in, but can be accessed separately:
              *  $parameters = $request->get_file_params();
              */
 
-            return function ($args = null) use ($callback) {
+            return function ($args = null) use ($callback, $vendor) {
                 list($controller, $method) = explode('@', $callback);
-                $instance  = new $controller;
+                $instance  = new $controller($args, $vendor);
                 return $instance->{$method}($args);
             };
         }
@@ -79,7 +81,7 @@ class Route
                     foreach ($route as $route_name => $route_args) {
                         register_rest_route($vendor, $route_name, [
                         'methods' => strtoupper($method),
-                        'callback' => self::callback($route_args['callback']),
+                        'callback' => self::callback($route_args['callback'], $vendor),
                      ]);
                     }
                 }
