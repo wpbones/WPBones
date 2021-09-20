@@ -10,6 +10,8 @@ use WPKirk\WPBones\Foundation\Log\LogServiceProvider;
 use WPKirk\WPBones\Support\Str;
 use WPKirk\WPBones\View\View;
 use WPKirk\WPBones\Routing\API\RestProvider;
+use WPKirk\WPBones\Routing\AdminMenuProvider;
+use WPKirk\WPBones\Routing\AdminRouteProvider;
 
 if (!defined('ABSPATH')) {
     exit;
@@ -72,12 +74,6 @@ class Plugin extends Container implements PluginContract
 
     public function boot()
     {
-        // init Eloquent out of box
-        $this->initEloquent();
-
-        // init api
-        $this->initApi();
-
         // emule __FILE__
         $this->file = $this->basePath . '/index.php';
 
@@ -128,6 +124,15 @@ class Plugin extends Container implements PluginContract
          */
 
         // register_uninstall_hook( $file, array( $this, 'uninstall' ) );
+
+        // Log
+        $this->provides['Log'] = (new LogServiceProvider($this))->register();
+
+        // init Eloquent out of box
+        $this->initEloquent();
+
+        // init api
+        $this->initApi();
 
         // Fires after WordPress has finished loading but before any headers are sent.
         add_action('init', [$this, 'init']);
@@ -449,63 +454,48 @@ class Plugin extends Container implements PluginContract
      */
     public function init()
     {
-        $init = include "{$this->basePath}/config/plugin.php";
+        // Here we are going to init Service Providers
 
-        if (is_array($init)) {
-
-            // Here we are going to init Service Providers
-
-            // Log
-            $object = new LogServiceProvider($this);
+        // Custom post types Service Provider
+        $custom_post_types = $this->config('plugin.custom_post_types', []);
+        foreach ($custom_post_types as $className) {
+            $object = new $className($this);
             $object->register();
-            $this->provides['Log'] = $object;
+            $this->provides[$className] = $object;
+        }
 
-            // Custom post types Service Provider
-            if (isset($init['custom_post_types']) && !empty($init['custom_post_types'])) {
-                foreach ($init['custom_post_types'] as $className) {
-                    $object = new $className($this);
-                    $object->register();
-                    $this->provides[$className] = $object;
-                }
-            }
+        // Custom taxonomy type Service Provider
+        $custom_taxonomy_types = $this->config('plugin.custom_taxonomy_types', []);
+        foreach ($custom_taxonomy_types as $className) {
+            $object = new $className($this);
+            $object->register();
+            $this->provides[$className] = $object;
+        }
 
-            // Custom taxonomy type Service Provider
-            if (isset($init['custom_taxonomy_types']) && !empty($init['custom_taxonomy_types'])) {
-                foreach ($init['custom_taxonomy_types'] as $className) {
-                    $object = new $className($this);
-                    $object->register();
-                    $this->provides[$className] = $object;
-                }
-            }
+        // Shortcodes Service Provider
+        $shortcodes = $this->config('plugin.shortcodes', []);
+        foreach ($shortcodes as $className) {
+            $object = new $className($this);
+            $object->register();
+            $this->provides[$className] = $object;
+        }
 
-            // Shortcodes Service Provider
-            if (isset($init['shortcodes']) && !empty($init['shortcodes'])) {
-                foreach ($init['shortcodes'] as $className) {
-                    $object = new $className($this);
-                    $object->register();
-                    $this->provides[$className] = $object;
-                }
+        // Ajax Service Provider
+        if ($this->isAjax()) {
+            $ajax = $this->config('plugin.ajax', []);
+            foreach ($ajax as $className) {
+                $object = new $className($this);
+                $object->register();
+                $this->provides[$className] = $object;
             }
+        }
 
-            // Ajax Service Provider
-            if ($this->isAjax()) {
-                if (isset($init['ajax']) && !empty($init['ajax'])) {
-                    foreach ($init['ajax'] as $className) {
-                        $object = new $className($this);
-                        $object->register();
-                        $this->provides[$className] = $object;
-                    }
-                }
-            }
-
-            // Custom service provider
-            if (isset($init['providers']) && !empty($init['providers'])) {
-                foreach ($init['providers'] as $className) {
-                    $object = new $className($this);
-                    $object->register();
-                    $this->provides[$className] = $object;
-                }
-            }
+        // Custom service provider
+        $providers = $this->config('plugin.providers', []);
+        foreach ($providers as $className) {
+            $object = new $className($this);
+            $object->register();
+            $this->provides[$className] = $object;
         }
     }
 
@@ -538,122 +528,28 @@ class Plugin extends Container implements PluginContract
      */
     public function admin_menu()
     {
-        global $admin_page_hooks, $_registered_pages, $_parent_pages;
+        // register the admin menu
+        (new AdminMenuProvider($this))->register();
 
-        $menus = include_once "{$this->basePath}/config/menus.php";
+        // regster the admin custom pages
+        (new AdminRouteProvider($this))->register();
+    }
 
-        if (!empty($menus) && is_array($menus)) {
-            foreach ($menus as $topLevelSlug => $menu) {
+    public function widgets_init()
+    {
+        global $wp_widget_factory;
 
-                // sanitize array keys
-                $menu['position']   = isset($menu['position']) ? $menu['position'] : null;
-                $menu['capability'] = isset($menu['capability']) ? $menu['capability'] : 'read';
-                $menu['icon']       = isset($menu['icon']) ? $menu['icon'] : '';
-                $menu['page_title'] = isset($menu['page_title']) ? $menu['page_title'] : $menu['menu_title'];
+        $widgets =  $this->config('plugin.widgets', []);
 
-                // icon
-                $icon = $menu['icon'];
-                if (isset($menu['icon']) && !empty($menu['icon']) && 'dashicons' != substr($menu['icon'], 0, 9)) {
-                    $icon = $this->images . '/' . $menu['icon'];
-                }
-
-                $firstMenu = true;
-
-                if (substr($topLevelSlug, 0, 8) !== 'edit.php') {
-                    add_menu_page($menu['page_title'], $menu['menu_title'], $menu['capability'], $topLevelSlug, '', $icon, $menu['position']);
-                } else {
-                    $firstMenu = false;
-                }
-
-                foreach ($menu['items'] as $key => $subMenu) {
-                    if (is_null($subMenu)) {
-                        continue;
-                    }
-
-                    // index 0
-                    if (empty($key)) {
-                        $key = '0';
-                    }
-
-                    // sanitize array keys
-                    $subMenu['capability'] = isset($subMenu['capability']) ? $subMenu['capability'] : $menu['capability'];
-                    $subMenu['page_title'] = isset($subMenu['page_title']) ? $subMenu['page_title'] : $subMenu['menu_title'];
-
-                    // key could be a number
-                    $key = str_replace('-', "_", sanitize_title($key));
-
-                    $array     = explode('\\', __NAMESPACE__);
-                    $namespace = sanitize_title($array[0]);
-
-                    // submenu slug
-                    $submenuSlug = "{$namespace}_{$key}";
-
-                    if ($firstMenu) {
-                        $firstMenu   = false;
-                        $submenuSlug = $topLevelSlug;
-                    }
-
-                    // get hook
-                    $hook = $this->getCallableHook($subMenu['route']);
-
-                    $subMenuHook = add_submenu_page($topLevelSlug, $subMenu['page_title'], $subMenu['menu_title'], $subMenu['capability'], $submenuSlug, $hook);
-
-                    if (isset($subMenu['route']['load'])) {
-                        list($controller, $method) = explode('@', $subMenu['route']['load']);
-
-                        add_action(
-                            "load-{$subMenuHook}",
-                            function () use ($controller, $method) {
-                                $className = "WPKirk\\Http\\Controllers\\{$controller}";
-                                $instance  = new $className;
-
-                                return $instance->{$method}();
-                            }
-                        );
-                    }
-
-                    if (isset($subMenu['route']['resource'])) {
-                        $controller = $subMenu['route']['resource'];
-
-                        add_action(
-                            "load-{$subMenuHook}",
-                            function () use ($controller) {
-                                $className = "WPKirk\\Http\\Controllers\\{$controller}";
-                                $instance  = new $className;
-                                if (method_exists($instance, 'load')) {
-                                    return $instance->load();
-                                }
-                            }
-                        );
-                    }
-                }
-            }
-        }
-
-        // custom hidden pages
-        $pages = include_once "{$this->basePath}/config/routes.php";
-
-        if (!empty($pages) && is_array($pages)) {
-            foreach ($pages as $pageSlug => $page) {
-                $pageSlug                    = plugin_basename($pageSlug);
-                $admin_page_hooks[$pageSlug] = !isset($page['title']) ?: $page['title'];
-                $hookName                    = get_plugin_page_hookname($pageSlug, '');
-
-                if (!empty($hookName)) {
-                    if ($hook = $this->getCallableHook($page['route'])) {
-                        add_action($hookName, $hook);
-
-                        $_registered_pages[$hookName] = true;
-                        $_parent_pages[$pageSlug]     = false;
-                    }
-                }
-            }
+        foreach ($widgets as $className) {
+            //register_widget( $className );
+            $wp_widget_factory->widgets[$className] = new $className($this);
         }
     }
 
     // -- private
 
-    private function getCallableHook($routes)
+    public function getCallableHook($routes)
     {
         // get the http request verb
         $verb = $this->request->method;
@@ -697,19 +593,7 @@ class Plugin extends Container implements PluginContract
         return null;
     }
 
-    public function widgets_init()
-    {
-        global $wp_widget_factory;
 
-        $init = include "{$this->basePath}/config/plugin.php";
-
-        if (isset($init['widgets']) && is_array($init['widgets']) && !empty($init['widgets'])) {
-            foreach ($init['widgets'] as $className) {
-                //register_widget( $className );
-                $wp_widget_factory->widgets[$className] = new $className($this);
-            }
-        }
-    }
 
     private function initEloquent()
     {
@@ -740,58 +624,6 @@ class Plugin extends Container implements PluginContract
         }
     }
 
-    public function determine_current_user($user)
-    {
-        global $wp_json_basic_auth_error;
-    
-        $wp_json_basic_auth_error = null;
-    
-        // Don't authenticate twice
-        if (! empty($user)) {
-            return $user;
-        }
-    
-        // Check that we're trying to authenticate
-        if (!isset($_SERVER['PHP_AUTH_USER'])) {
-            return $user;
-        }
-    
-        $username = $_SERVER['PHP_AUTH_USER'];
-        $password = $_SERVER['PHP_AUTH_PW'];
-    
-        /**
-         * In multi-site, wp_authenticate_spam_check filter is run on authentication. This filter calls
-         * get_currentuserinfo which in turn calls the determine_current_user filter. This leads to infinite
-         * recursion and a stack overflow unless the current function is removed from the determine_current_user
-         * filter during authentication.
-         */
-        remove_filter('determine_current_user', [$this, 'determine_current_user'], 20);
-    
-        $user = wp_authenticate($username, $password);
-    
-        add_filter('determine_current_user', [$this, 'determine_current_user'], 20);
-    
-        if (is_wp_error($user)) {
-            $wp_json_basic_auth_error = $user;
-            return null;
-        }
-    
-        $wp_json_basic_auth_error = true;
-    
-        return $user->ID;
-    }
-
-    public function rest_authentication_errors($error)
-    {
-        // Passthrough other errors
-        if (! empty($error)) {
-            return $error;
-        }
-    
-        global $wp_json_basic_auth_error;
-    
-        return $wp_json_basic_auth_error;
-    }
 
     private function initApi()
     {
