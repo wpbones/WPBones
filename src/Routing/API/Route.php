@@ -79,10 +79,10 @@ class Route
             foreach (self::$apis as $vendor => $api) {
                 foreach ($api as $method => $route) {
                     foreach ($route as $route_name => $route_args) {
-                        register_rest_route($vendor, $route_name, [
+                        register_rest_route($vendor, $route_name, ([
                         'methods' => strtoupper($method),
-                        'callback' => self::callback($route_args['callback'], $vendor),
-                     ]);
+                        'callback' => self::callback($route_args['callback'], $vendor)
+                     ] + $route_args['options']));
                     }
                 }
             }
@@ -101,7 +101,7 @@ class Route
 
             self::$apis[self::$vendor][$method][$path] = [
                 'callback' => $callback,
-                'options' => $options
+                'options' => $options ?? []
             ];
         }
     }

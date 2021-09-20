@@ -740,9 +740,86 @@ class Plugin extends Container implements PluginContract
         }
     }
 
+    public function determine_current_user($user)
+    {
+        global $wp_json_basic_auth_error;
+    
+        $wp_json_basic_auth_error = null;
+    
+        // Don't authenticate twice
+        if (! empty($user)) {
+            return $user;
+        }
+    
+        // Check that we're trying to authenticate
+        if (!isset($_SERVER['PHP_AUTH_USER'])) {
+            return $user;
+        }
+    
+        $username = $_SERVER['PHP_AUTH_USER'];
+        $password = $_SERVER['PHP_AUTH_PW'];
+    
+        /**
+         * In multi-site, wp_authenticate_spam_check filter is run on authentication. This filter calls
+         * get_currentuserinfo which in turn calls the determine_current_user filter. This leads to infinite
+         * recursion and a stack overflow unless the current function is removed from the determine_current_user
+         * filter during authentication.
+         */
+        remove_filter('determine_current_user', [$this, 'determine_current_user'], 20);
+    
+        $user = wp_authenticate($username, $password);
+    
+        add_filter('determine_current_user', [$this, 'determine_current_user'], 20);
+    
+        if (is_wp_error($user)) {
+            $wp_json_basic_auth_error = $user;
+            return null;
+        }
+    
+        $wp_json_basic_auth_error = true;
+    
+        return $user->ID;
+    }
+
+    public function rest_authentication_errors($error)
+    {
+        // Passthrough other errors
+        if (! empty($error)) {
+            return $error;
+        }
+    
+        global $wp_json_basic_auth_error;
+    
+        return $wp_json_basic_auth_error;
+    }
+
     private function initApi()
     {
-        (new RestProvider($this))->register();
+        $rest_api = @include_once "{$this->basePath}/config/rest-api.php";
+
+        if (!empty($rest_api) && is_array($rest_api)) {
+            if (isset($rest_api['auth']) && isset($rest_api['auth']['basic']) && true === $rest_api['auth']['basic']) {
+                add_filter('determine_current_user', [$this, 'determine_current_user'], 20);
+                add_filter('rest_authentication_errors', [$this, 'rest_authentication_errors']);
+            }
+            
+            if (isset($rest_api['custom']) && true === $rest_api['custom']['enabled']) {
+                (new RestProvider($this))->register();
+            }
+        }
+
+        add_action('rest_api_init', function () {
+            register_rest_route('jon/v1', '/permission', array(
+              'methods' => 'GET',
+              'callback' => function () {
+                  return "OK";
+              },
+              'permission_callback' => function () {
+                  return current_user_can('edit_posts');
+                  ;
+              }
+            ));
+        });
 
         // add_action('rest_api_init', function () {
         //     register_rest_route('jon/v1', '/example', [
