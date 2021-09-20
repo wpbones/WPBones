@@ -795,18 +795,11 @@ class Plugin extends Container implements PluginContract
 
     private function initApi()
     {
-        $rest_api = @include_once "{$this->basePath}/config/rest-api.php";
+        (new RestProvider($this))->register();
 
-        if (!empty($rest_api) && is_array($rest_api)) {
-            if (isset($rest_api['auth']) && isset($rest_api['auth']['basic']) && true === $rest_api['auth']['basic']) {
-                add_filter('determine_current_user', [$this, 'determine_current_user'], 20);
-                add_filter('rest_authentication_errors', [$this, 'rest_authentication_errors']);
-            }
-            
-            if (isset($rest_api['custom']) && true === $rest_api['custom']['enabled']) {
-                (new RestProvider($this))->register();
-            }
-        }
+
+
+        // --- TEST BELOW ---
 
         add_action('rest_api_init', function () {
             register_rest_route('jon/v1', '/permission', array(
