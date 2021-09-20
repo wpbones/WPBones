@@ -115,7 +115,7 @@ class LogServiceProvider extends ServiceProvider
 
     public function register()
     {
-        //
+        return $this;
     }
 
     /**
@@ -139,7 +139,6 @@ class LogServiceProvider extends ServiceProvider
 
             return call_user_func_array([$this, 'write'], $args);
         }
-
     }
 
     /**
