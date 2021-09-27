@@ -2,10 +2,12 @@
 
 namespace WPKirk\WPBones\Console;
 
-use WPKirk\WPBones\Support\Str;
+use WPKirk\WPBones\Support\Traits\HasAttributes;
 
 abstract class Command
 {
+    use HasAttributes;
+
     protected $signature;
 
     protected $options = [];
@@ -17,6 +19,7 @@ abstract class Command
     public $context;
 
     public $command;
+
 
     /**
      * Display a colored line in the console.
@@ -180,37 +183,6 @@ abstract class Command
     public function setArgvAttribute($value)
     {
         $this->argv = $value;
-    }
-
-    /**
-     * Return the value of the method `get{Name}Attribute`.
-     *
-     * @param string $name Usually the protected property name.
-     *
-     * @return mixed
-     */
-    public function __get(string $name)
-    {
-        $method = 'get' . Str::studly($name) . 'Attribute';
-        if (method_exists($this, $method)) {
-            return $this->{$method}();
-        }
-
-        return null;
-    }
-
-    /**
-     * Set the value of the method `set{Name}Attribute`.
-     *
-     * @param string $name Usually the protected property name.
-     * @param mixed  $value
-     */
-    public function __set($name, $value)
-    {
-        $method = 'set' . Str::studly($name) . 'Attribute';
-        if (method_exists($this, $method)) {
-            $this->{$method}($value);
-        }
     }
 
     abstract public function handle();

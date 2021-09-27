@@ -12,6 +12,7 @@ use WPKirk\WPBones\View\View;
 use WPKirk\WPBones\Routing\API\RestProvider;
 use WPKirk\WPBones\Routing\AdminMenuProvider;
 use WPKirk\WPBones\Routing\AdminRouteProvider;
+use WPKirk\WPBones\Support\Traits\HasAttributes;
 
 if (!defined('ABSPATH')) {
     exit;
@@ -19,6 +20,7 @@ if (!defined('ABSPATH')) {
 
 class Plugin extends Container implements PluginContract
 {
+    use HasAttributes;
 
     /**
      * The current globally available container (if any).
@@ -191,9 +193,8 @@ class Plugin extends Container implements PluginContract
 
     public function __get($name)
     {
-        $method = 'get' . Str::studly($name) . 'Attribute';
-        if (method_exists($this, $method)) {
-            return $this->{$method}();
+        if ($this->hasGetMutator($name)) {
+            return $this->mutateAttribute($name);
         }
 
         if (in_array($name, array_keys($this->pluginData))) {

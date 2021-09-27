@@ -4,7 +4,7 @@ namespace WPKirk\WPBones\Foundation;
 
 use WPKirk\WPBones\Support\ServiceProvider;
 use WPKirk\WPBones\Foundation\Http\Request;
-use WPKirk\WPBones\Support\Str;
+use WPKirk\WPBones\Support\Traits\HasAttributes;
 
 if (! defined('ABSPATH')) {
     exit;
@@ -12,13 +12,14 @@ if (! defined('ABSPATH')) {
 
 abstract class WordPressAjaxServiceProvider extends ServiceProvider
 {
+    use HasAttributes;
 
-  /**
-   * List of the ajax actions executed by both logged and not logged users.
-   * Here you will used a methods list.
-   *
-   * @var array
-   */
+    /**
+     * List of the ajax actions executed by both logged and not logged users.
+     * Here you will used a methods list.
+     *
+     * @var array
+     */
     protected $trusted = [ ];
 
     /**
@@ -78,13 +79,5 @@ abstract class WordPressAjaxServiceProvider extends ServiceProvider
         }
 
         return $this->_request;
-    }
-
-    public function __get($name)
-    {
-        $method = 'get' . Str::studly($name) . 'Attribute';
-        if (method_exists($this, $method)) {
-            return $this->{$method}();
-        }
     }
 }

@@ -4,7 +4,7 @@ namespace WPKirk\WPBones\Routing;
 
 use WPKirk\WPBones\View\View;
 use WPKirk\WPBones\Foundation\Http\Request;
-use WPKirk\WPBones\Support\Str;
+use WPKirk\WPBones\Support\Traits\HasAttributes;
 
 if (! defined('ABSPATH')) {
     exit;
@@ -12,6 +12,7 @@ if (! defined('ABSPATH')) {
 
 abstract class Controller
 {
+    use HasAttributes;
 
     private $_request = null;
 
@@ -21,23 +22,6 @@ abstract class Controller
      */
     public function load()
     {
-    }
-
-    /**
-     * Get a method/attribute if exists.
-     *
-     * @param string $name
-     *
-     * @return mixed
-     */
-    public function __get(string $name)
-    {
-        $method = 'get' . Str::studly($name) . 'Attribute';
-        if (method_exists($this, $method)) {
-            return $this->{$method}();
-        }
-
-        return null;
     }
 
     /**
@@ -57,7 +41,6 @@ abstract class Controller
         }
 
         if (headers_sent()) {
-
             echo '<script type="text/javascript">';
             echo 'window.location.href="' . $location . '";';
             echo '</script>';
@@ -65,7 +48,6 @@ abstract class Controller
             echo '<meta http-equiv="refresh" content="0;url=' . $location . '" />';
             echo '</noscript>';
             exit();
-
         }
 
         wp_redirect($location);
@@ -102,5 +84,4 @@ abstract class Controller
 
         return $this->_request;
     }
-
 }
