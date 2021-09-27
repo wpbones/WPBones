@@ -569,11 +569,11 @@ class Plugin extends Container implements PluginContract
         } // by single verb and controller@method
         else {
             if (isset($routes[$verb])) {
-                list($controller, $method) = explode('@', $routes[$verb]);
+                [$controller, $method] = Str::parseCallback($routes[$verb]);
             } // default "get"
             else {
                 if (isset($routes['get'])) {
-                    list($controller, $method) = explode('@', $routes['get']);
+                    [$controller, $method] = Str::parseCallback($routes['get']);
                 }
             }
         }

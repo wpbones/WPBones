@@ -7,6 +7,7 @@ if (! defined('ABSPATH')) {
 }
 
 use WPKirk\WPBones\Support\ServiceProvider;
+use WPKirk\WPBones\Support\Str;
 
 class AdminMenuProvider extends ServiceProvider
 {
@@ -76,17 +77,19 @@ class AdminMenuProvider extends ServiceProvider
                     $subMenuHook = add_submenu_page($topLevelSlug, $subMenu['page_title'], $subMenu['menu_title'], $subMenu['capability'], $submenuSlug, $hook);
 
                     if (isset($subMenu['route']['load'])) {
-                        list($controller, $method) = explode('@', $subMenu['route']['load']);
+                        [$controller, $method] = Str::parseCallback($subMenu['route']['load']);
 
-                        add_action(
-                            "load-{$subMenuHook}",
-                            function () use ($controller, $method) {
-                                $className = "WPKirk\\Http\\Controllers\\{$controller}";
-                                $instance  = new $className;
+                        if (class_exists($controller) && method_exists($controller, $method)) {
+                            add_action(
+                                "load-{$subMenuHook}",
+                                function () use ($controller, $method) {
+                                    $className = "WPKirk\\Http\\Controllers\\{$controller}";
+                                    $instance  = new $className;
 
-                                return $instance->{$method}();
-                            }
-                        );
+                                    return $instance->{$method}();
+                                }
+                            );
+                        }
                     }
 
                     if (isset($subMenu['route']['resource'])) {

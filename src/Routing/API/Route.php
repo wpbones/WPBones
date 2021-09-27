@@ -6,6 +6,8 @@ if (! defined('ABSPATH')) {
     exit;
 }
 
+use WPKirk\WPBones\Support\Str;
+
 /**
  * You'll use this class to create a route.
  */
@@ -37,37 +39,36 @@ class Route
             return $callback;
         }
 
-        if (is_string($callback) && strpos($callback, '@') !== false) {
+        /**
+         * In args you'll find the WP_REST_Request object.
+         *
+         *  // You can access parameters via direct array access on the object:
+         *  $param = $request['some_param'];
+         *
+         *  // Or via the helper method:
+         *  $param = $request->get_param( 'some_param' );
+         *
+         *  // You can get the combined, merged set of parameters:
+         *  $parameters = $request->get_params();
+         *
+         *  // The individual sets of parameters are also available, if needed:
+         *  $parameters = $request->get_url_params();
+         *  $parameters = $request->get_query_params();
+         *  $parameters = $request->get_body_params();
+         *  $parameters = $request->get_json_params();
+         *  $parameters = $request->get_default_params();
+         *
+         *  // Uploads aren't merged in, but can be accessed separately:
+         *  $parameters = $request->get_file_params();
+         */
 
-            /**
-             * In args you'll find the WP_REST_Request object.
-             *
-             *  // You can access parameters via direct array access on the object:
-             *  $param = $request['some_param'];
-             *
-             *  // Or via the helper method:
-             *  $param = $request->get_param( 'some_param' );
-             *
-             *  // You can get the combined, merged set of parameters:
-             *  $parameters = $request->get_params();
-             *
-             *  // The individual sets of parameters are also available, if needed:
-             *  $parameters = $request->get_url_params();
-             *  $parameters = $request->get_query_params();
-             *  $parameters = $request->get_body_params();
-             *  $parameters = $request->get_json_params();
-             *  $parameters = $request->get_default_params();
-             *
-             *  // Uploads aren't merged in, but can be accessed separately:
-             *  $parameters = $request->get_file_params();
-             */
-
-            return function ($args = null) use ($callback, $vendor) {
-                list($controller, $method) = explode('@', $callback);
+        return function ($args = null) use ($callback, $vendor) {
+            [$controller, $method] = Str::parseCallback($callback);
+            if (class_exists($controller) && method_exists($controller, $method)) {
                 $instance  = new $controller($args, $vendor);
                 return $instance->{$method}($args);
-            };
-        }
+            }
+        };
     }
 
     /**

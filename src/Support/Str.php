@@ -152,7 +152,7 @@ class Str
      * @param  string $end
      * @return string
      */
-    public static function limit(string $value,  $limit = 100, string $end = '...'): string
+    public static function limit(string $value, $limit = 100, string $end = '...'): string
     {
         if (mb_strwidth($value, 'UTF-8') <= $limit) {
             return $value;
@@ -198,7 +198,7 @@ class Str
      * @param  string $default
      * @return array
      */
-    public static function parseCallback(string $callback, string $default)
+    public static function parseCallback(string $callback, string $default = "")
     {
         return static::contains($callback, '@') ? explode('@', $callback, 2) : [$callback, $default];
     }
@@ -214,7 +214,7 @@ class Str
     {
         $string = '';
 
-        while(($len = static::length($string)) < $length) {
+        while (($len = static::length($string)) < $length) {
             $size = $length - $len;
 
             $bytes = random_bytes($size);
