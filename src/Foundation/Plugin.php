@@ -93,13 +93,13 @@ class Plugin extends Container implements PluginContract
           Author = "Giovambattista Fazioli"
           AuthorName = "Giovambattista Fazioli"
           AuthorURI = "http://undolog.com"
-          Description = "WP Kirk is a WP Bones boilperate plugin"
+          Description = "WPKirk is a WP Bones boilperate plugin"
           DomainPath = "localization"
-          Name = "WP Kirk"
+          Name = "WPKirk"
           Network = false
           PluginURI = "http://undolog.com"
-          TextDomain = "wp-kirk"
-          Title = "WP Kirk"
+          TextDomain = "wpkirk"
+          Title = "WPKirk"
           Version = "1.0.0"
 
          */
@@ -108,7 +108,7 @@ class Plugin extends Container implements PluginContract
         $this->slug = str_replace('-', '_', sanitize_title($this->pluginData['Name'])) . '_slug';
 
         // Load text domain
-        load_plugin_textdomain("wp-kirk", false, trailingslashit(basename($this->basePath)) . $this->pluginData['DomainPath']);
+        load_plugin_textdomain("wpkirk", false, trailingslashit(basename($this->basePath)) . $this->pluginData['DomainPath']);
 
         // Activation & Deactivation Hook
         register_activation_hook($this->file, [$this, 'activation']);
@@ -651,7 +651,7 @@ class Plugin extends Container implements PluginContract
         //     register_rest_route('jon/v1', '/example', [
         //       'methods' => ['GET', 'POST'],
         //       'callback' => function () {
-        //           return wp_send_json(["description" => "Hello, from WP Kirk API"]);
+        //           return wp_send_json(["description" => "Hello, from WPKirk API"]);
         //       },
         //      ]);
         // });

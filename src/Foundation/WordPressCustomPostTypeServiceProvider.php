@@ -221,7 +221,7 @@ abstract class WordPressCustomPostTypeServiceProvider extends ServiceProvider
      *
      * @var string
      */
-    protected $slug = "wp_kirk_slug";
+    protected $slug = "wpkirk_slug";
 
     /**
      * Should the permastruct be prepended with WP_Rewrite::$front. Defaults to true.
@@ -260,7 +260,7 @@ abstract class WordPressCustomPostTypeServiceProvider extends ServiceProvider
      *
      * @var string
      */
-    protected $queryVar = 'wp_kirk_vars';
+    protected $queryVar = 'wpkirk_vars';
 
     /**
      * Allows this post type to be exported. Defaults to true.

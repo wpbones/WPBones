@@ -23,7 +23,7 @@
 </p>
 
 WP Bones is a framework for [WordPress](http://wordpress.org) written with [composer](https://getcomposer.org/).
-You can use [WP Kirk](https://github.com/wpbones/WPKirk) repo as a boilerplate to create a plugin.
+You can use [WPKirk](https://github.com/wpbones/WPKirk) repo as a boilerplate to create a plugin.
 
 As you know, WordPress doesn't support composer. So, I have used a little trick to fix this issue.
 
@@ -50,7 +50,7 @@ You'll find the [complete docs here](https://github.com/wpbones/WPBones/wiki).
 
 ## Boilerplate
 
-You may start from [WP Kirk](https://github.com/wpbones/WPKirk) repo as a boilerplate to create a WP Bones WordPress plugin.
+You may start from [WPKirk](https://github.com/wpbones/WPKirk) repo as a boilerplate to create a WP Bones WordPress plugin.
 
 ## I love Laravel
 
