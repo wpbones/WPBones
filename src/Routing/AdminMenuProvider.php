@@ -79,15 +79,17 @@ class AdminMenuProvider extends ServiceProvider
                     if (isset($subMenu['route']['load'])) {
                         [$controller, $method] = Str::parseCallback($subMenu['route']['load']);
 
-                        add_action(
-                            "load-{$subMenuHook}",
-                            function () use ($controller, $method) {
-                                $className = "WPKirk\\Http\\Controllers\\{$controller}";
-                                $instance  = new $className;
+                        if (class_exists($controller) && method_exists($controller, $method)) {
+                            add_action(
+                                "load-{$subMenuHook}",
+                                function () use ($controller, $method) {
+                                    $className = "WPKirk\\Http\\Controllers\\{$controller}";
+                                    $instance  = new $className;
 
-                                return $instance->{$method}();
-                            }
-                        );
+                                    return $instance->{$method}();
+                                }
+                            );
+                        }
                     }
 
                     if (isset($subMenu['route']['resource'])) {
