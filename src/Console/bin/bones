@@ -13,15 +13,16 @@
 namespace Bones\SemVer\Exceptions {
 
     use Exception;
-    
+
     class InvalidVersionException extends Exception
     {
     }
 }
+
 namespace Bones\SemVer\Traits {
 
     use Bones\SemVer\Version;
-    
+
     trait Comparable
     {
         /**
@@ -35,30 +36,30 @@ namespace Bones\SemVer\Traits {
         {
             $v1 = [$version1->major, $version1->minor, $version1->patch];
             $v2 = [$version2->major, $version2->minor, $version2->patch];
-    
+
             $baseComparison = $v1 <=> $v2;
-    
+
             if ($baseComparison !== 0) {
                 return $baseComparison;
             }
-    
+
             if ($version1->preRelease !== null && $version2->preRelease === null) {
                 return -1;
             }
-    
+
             if ($version1->preRelease === null && $version2->preRelease !== null) {
                 return 1;
             }
-    
+
             $v1preReleaseParts = explode('.', $version1->preRelease ?? '');
             $v2preReleaseParts = explode('.', $version2->preRelease ?? '');
-    
+
             $preReleases1 = array_pad($v1preReleaseParts, count($v2preReleaseParts), null);
             $preReleases2 = array_pad($v2preReleaseParts, count($v1preReleaseParts), null);
-    
+
             return $preReleases1 <=> $preReleases2;
         }
-    
+
         /**
          * Check if this Version object is greater than another.
          *
@@ -71,7 +72,7 @@ namespace Bones\SemVer\Traits {
         {
             return self::compare($this, $version) > 0;
         }
-    
+
         /**
          * Check if this Version object is less than another.
          *
@@ -84,7 +85,7 @@ namespace Bones\SemVer\Traits {
         {
             return self::compare($this, $version) < 0;
         }
-    
+
         /**
          * Check if this Version object is equal to than another.
          *
@@ -97,7 +98,7 @@ namespace Bones\SemVer\Traits {
         {
             return self::compare($this, $version) === 0;
         }
-    
+
         /**
          * Check if this Version object is not equal to another.
          *
@@ -110,7 +111,7 @@ namespace Bones\SemVer\Traits {
         {
             return self::compare($this, $version) !== 0;
         }
-    
+
         /**
          * Check if this Version object is greater than or equal to another.
          *
@@ -123,7 +124,7 @@ namespace Bones\SemVer\Traits {
         {
             return self::compare($this, $version) >= 0;
         }
-    
+
         /**
          * Check if this Version object is less than or equal to another.
          *
@@ -137,8 +138,8 @@ namespace Bones\SemVer\Traits {
             return self::compare($this, $version) <= 0;
         }
     }
-    
-    
+
+
     trait Incrementable
     {
         /**
@@ -149,10 +150,10 @@ namespace Bones\SemVer\Traits {
         public function incrementMajor(): self
         {
             $this->setMajor($this->major + 1);
-    
+
             return $this;
         }
-    
+
         /**
          * Increment the minor version value by one.
          *
@@ -161,10 +162,10 @@ namespace Bones\SemVer\Traits {
         public function incrementMinor(): self
         {
             $this->setMinor($this->minor + 1);
-    
+
             return $this;
         }
-    
+
         /**
          * Increment the patch version value by one.
          *
@@ -173,17 +174,18 @@ namespace Bones\SemVer\Traits {
         public function incrementPatch(): self
         {
             $this->setPatch($this->patch + 1);
-    
+
             return $this;
         }
     }
 }
+
 namespace Bones\SemVer {
 
     use Bones\SemVer\Exceptions\InvalidVersionException;
     use Bones\SemVer\Traits\Comparable;
     use Bones\SemVer\Traits\Incrementable;
-    
+
     /**
      * @property int $major Major release number
      * @property int $minor Minor release number
@@ -195,22 +197,22 @@ namespace Bones\SemVer {
     {
         use Comparable;
         use Incrementable;
-    
+
         /** @var int Major release number */
         protected $major;
-    
+
         /** @var int Minor release number */
         protected $minor;
-    
+
         /** @var int Patch release number */
         protected $patch;
-    
+
         /** @var string|null Pre-release value */
         protected $preRelease;
-    
+
         /** @var string|null Build release value */
         protected $build;
-    
+
         /**
          * Class constructor, runs on object creation.
          *
@@ -222,7 +224,7 @@ namespace Bones\SemVer {
         {
             $this->setVersion($version);
         }
-    
+
         /**
          * Magic get method; provides access to version properties.
          *
@@ -234,7 +236,7 @@ namespace Bones\SemVer {
         {
             return $this->$property;
         }
-    
+
         /**
          * Magic toString method; allows object interaction as if it were a string.
          *
@@ -243,18 +245,18 @@ namespace Bones\SemVer {
         public function __toString(): string
         {
             $version = implode('.', [$this->major, $this->minor, $this->patch]);
-    
-            if (! empty($this->preRelease)) {
+
+            if (!empty($this->preRelease)) {
                 $version .= '-' . $this->preRelease;
             }
-    
-            if (! empty($this->build)) {
+
+            if (!empty($this->build)) {
                 $version .= '+' . $this->build;
             }
-    
+
             return $version;
         }
-    
+
         /**
          * Attempt to parse an incomplete version string.
          *
@@ -269,24 +271,24 @@ namespace Bones\SemVer {
         public static function parse(string $version): self
         {
             $semverRegex = '/^v?(?<major>\d+)(?:\.(?<minor>\d+)(?:\.(?<patch>\d+))?)?(?:-(?<pre_release>[0-9A-Za-z-.]+))?(?:\+(?<build>[0-9A-Za-z-.]+)?)?$/';
-    
-            if (! preg_match($semverRegex, $version, $matches)) {
+
+            if (!preg_match($semverRegex, $version, $matches)) {
                 throw new InvalidVersionException('Invalid semantic version string provided');
             }
-    
+
             $version = sprintf('%s.%s.%s', $matches['major'], $matches['minor'] ?? 0, $matches['patch'] ?? 0);
-    
-            if (! empty($matches['pre_release'])) {
+
+            if (!empty($matches['pre_release'])) {
                 $version .= '-' . $matches['pre_release'];
             }
-    
-            if (! empty($matches['build'])) {
+
+            if (!empty($matches['build'])) {
                 $version .= '+' . $matches['build'];
             }
-    
+
             return new self($version);
         }
-    
+
         /**
          * Set (override) the entire version value.
          *
@@ -299,20 +301,20 @@ namespace Bones\SemVer {
         public function setVersion(string $version): self
         {
             $semverRegex = '/^v?(?<major>\d+)\.(?<minor>\d+)\.(?<patch>\d+)(?:-(?<pre_release>[0-9A-Za-z-.]+))?(?:\+(?<build>[0-9A-Za-z-.]+)?)?$/';
-    
-            if (! preg_match($semverRegex, $version, $matches)) {
+
+            if (!preg_match($semverRegex, $version, $matches)) {
                 throw new InvalidVersionException('Invalid semantic version string provided');
             }
-    
+
             $this->major = (int) $matches['major'];
             $this->minor = (int) $matches['minor'];
             $this->patch = (int) $matches['patch'];
             $this->preRelease = $matches['pre_release'] ?? null;
             $this->build = $matches['build'] ?? null;
-    
+
             return $this;
         }
-    
+
         /**
          * Set the major version to a custom value.
          *
@@ -324,10 +326,10 @@ namespace Bones\SemVer {
         {
             $this->major = $value;
             $this->setMinor(0);
-    
+
             return $this;
         }
-    
+
         /**
          * Set the minor version to a custom value.
          *
@@ -339,10 +341,10 @@ namespace Bones\SemVer {
         {
             $this->minor = $value;
             $this->setPatch(0);
-    
+
             return $this;
         }
-    
+
         /**
          * Set the patch version to a custom value.
          *
@@ -355,10 +357,10 @@ namespace Bones\SemVer {
             $this->patch = $value;
             $this->setPreRelease(null);
             $this->setBuild(null);
-    
+
             return $this;
         }
-    
+
         /**
          * Set the pre-release string to a custom value.
          *
@@ -369,10 +371,10 @@ namespace Bones\SemVer {
         public function setPreRelease($value): self
         {
             $this->preRelease = $value;
-    
+
             return $this;
         }
-    
+
         /**
          * Set the build string to a custom value.
          *
@@ -383,10 +385,10 @@ namespace Bones\SemVer {
         public function setBuild($value): self
         {
             $this->build = $value;
-    
+
             return $this;
         }
-    
+
         /**
          * Get the version string prefixed with a custom string.
          *
@@ -412,11 +414,11 @@ namespace Bones\SemVer {
 */
 
 namespace Bones {
-    define('WPBONES_MINIMAL_PHP_VERSION', "7.2");
+    define('WPBONES_MINIMAL_PHP_VERSION', "7.3");
 
     use Bones\SemVer\Version;
 
-    if (! function_exists('semver')) {
+    if (!function_exists('semver')) {
         /**
          * Create a SemVer version object.
          *
@@ -441,24 +443,10 @@ namespace Bones {
     class BonesCommandLine
     {
 
-    /**
-     * WP Bones version
-     */
-        const VERSION = '0.12.0';
-
         /**
-         * Plugin name.
-         *
-         * @var string
+         * WP Bones version
          */
-        protected $plginName;
-
-        /**
-         * Plugin namespace.
-         *
-         * @var string
-         */
-        protected $namespace;
+        const VERSION = '1.0.0';
 
         /**
          * Used for additional kernel command.
@@ -483,12 +471,105 @@ namespace Bones {
 
         public function __construct()
         {
-            list($pluginName, $namespace) = explode(",", file_get_contents('namespace'));
-
-            $this->plginName = $pluginName;
-            $this->namespace = $namespace;
-
             $this->boot();
+        }
+
+        /**
+         * Return the current Plugin name and namespace defined in the namespace file.
+         *
+         * @return array
+         */
+        public function getPluginNameAndNamespace()
+        {
+            return explode(",", file_get_contents('namespace'));
+        }
+
+        /**
+         * Return the current Plugin name defined in the namespace file.
+         *
+         * @return string
+         */
+        public function getPluginName()
+        {
+            [$plugin_name] = $this->getPluginNameAndNamespace();
+
+            return $plugin_name;
+        }
+
+        /**
+         * Retrun the current Plugin namespace defined in the namespace file.
+         *
+         * @return string
+         */
+        public function getNamespace()
+        {
+            [$null, $namespace] = $this->getPluginNameAndNamespace();
+
+            return $namespace;
+        }
+
+        /**
+         * Return the sanitized plugin name.
+         *
+         * @return string
+         */
+        public function getSanitizePluginName($str = null)
+        {
+            if (is_null($str)) {
+                $str = $this->getPluginName();
+            }
+
+            return $this->sanitize($str);
+        }
+
+        /**
+         * Return the plugin id used for css, js, less and files.
+         * Currently it's the sanitized plugin name.
+         *
+         * @return string
+         */
+        public function getPluginId($str = null)
+        {
+            return $this->getSanitizePluginName($str);
+        }
+
+        /**
+         * Return the snake case plugin name.
+         *
+         * @return string
+         */
+        public function getSnakeCasePluginName($str = null)
+        {
+            $str = $this->getSanitizePluginName($str);
+            return str_replace('-', '_', $str);
+        }
+
+        /**
+         * Return the plugin slug.
+         */
+        public function getPluginSlug($str = null)
+        {
+            $str = $this->getSnakeCasePluginName($str);
+
+            return $str . '_slug';
+        }
+
+        /**
+         * Return the plugin vars.
+         */
+        public function getPluginVars($str = null)
+        {
+            $str = $this->getSnakeCasePluginName($str);
+
+            return $str . '_vars';
+        }
+
+        /**
+         * Return the defaulr plugin name and namespace.
+         */
+        protected function getDefaultPlaginNameAndNamespace()
+        {
+            return ['WP Kirk', 'WPKirk'];
         }
 
         /**
@@ -562,18 +643,19 @@ namespace Bones {
          * @param string $command Bones command to check.
          * @return bool
          */
-        protected function command($command)
+        protected function isCommand($command)
         {
             $arguments = $this->arguments();
 
-            return ($command === ($arguments[0]??""));
+            return ($command === ($arguments[0] ?? ""));
         }
 
         /**
          * Return the arguments after "php bones".
          *
-         * @param int $index Optional. Index of argument.
-         *                   If NULL will be returned the whole array.
+         * @param int $index Optional. Index of argument. 
+         * If NULL will be returned the whole array.
+         *                   
          * @return mixed|array
          */
         protected function arguments($index = null)
@@ -583,14 +665,43 @@ namespace Bones {
             // strip the application name
             array_shift($argv);
 
-            return $index ? ($argv[$index]??null) : $argv;
+            return $index ? ($argv[$index] ?? null) : $argv;
         }
 
-        protected function isHelp()
+        /**
+         * Return the params after "php bones [command]".
+         * 
+         * @param int $index Optional. Index of param. 
+         * If NULL will be returned the whole array.
+         * 
+         * @return array
+         */
+        protected function commandParams($index = null)
         {
-            $arguments = $this->arguments();
+            $params = $this->arguments();
 
-            return (empty($arguments) || $this->command('--help'));
+            // strip the command name
+            array_shift($params);
+
+            return $index ? ($params[$index] ?? null) : $params;
+        }
+
+        /**
+         * Commodity function to check if help has been requested.
+         * 
+         * @param string $str Optional. Command to check.
+         * 
+         * @return bool
+         */
+        protected function isHelp($str = null)
+        {
+            $params = $this->commandParams();
+
+            if (!is_null($str)) {
+                return (empty($str) || $str === '--help');
+            }
+
+            return (!empty($params[0]) && $params[0] === '--help');
         }
 
         /**
@@ -600,13 +711,31 @@ namespace Bones {
          */
         public function boot()
         {
-            if ($this->command('rename')) {
-                $this->rename($this->arguments(1));
-            } else {
+            $arguments = $this->arguments();
+
+            // we won't load the WordPress environment for the following commands
+            if (empty($arguments) || $this->isCommand('--help')) {
+                $this->help();
+            }
+            // rename 
+            elseif ($this->isCommand('rename')) {
+                $this->rename($this->commandParams());
+            }
+            // install
+            elseif ($this->isCommand('install')) {
+                $this->install($this->commandParams());
+            }
+            // Update
+            elseif ($this->isCommand('update')) {
+                $this->update();
+            }
+            // go ahead...
+            else {
                 $this->loadWordPress();
 
                 $this->loadKernel();
 
+                // handle the rest of the commands except rename
                 $this->handle();
             }
         }
@@ -632,6 +761,10 @@ namespace Bones {
         |
         */
 
+        /**
+         * Display the full help.
+         * 
+         */
         protected function help()
         {
             echo '
@@ -644,13 +777,15 @@ namespace Bones {
     ';
 
             $this->info("\nBones Version " . self::VERSION . "\n");
-            $this->info("Usage:\n");
-            $this->line(" command [options] [arguments]");
-            $this->info("\nAvailable commands:");
+            $this->info("Current plugin name and namespace:");
+            $this->line(" '{$this->getPluginName()}', '{$this->getNamespace()}'\n");
+            $this->info("Usage:");
+            $this->line(" command [options] [arguments]\n");
+            $this->info("Available commands:");
             $this->line(" deploy                  Create a deploy version");
             $this->line(" install                 Install a new WP Bones plugin");
             $this->line(" optimize                Run composer dump-autoload with -o option");
-            $this->line(" rename                  Set or change the plugin name");
+            $this->line(" rename                  Rename the plugin name and the namespace");
             $this->line(" require                 Install a WP Bones package");
             $this->line(" tinker                  Interact with your application");
             $this->line(" update                  Update the Framework");
@@ -676,12 +811,22 @@ namespace Bones {
             echo "\n\n";
         }
 
+        /**
+         * Commodity to display an message in the console.
+         * 
+         * @param string $str The message to display.
+         */
         protected function line($str)
         {
             echo "\033[38;5;82m" . $str;
             echo "\033[0m\n";
         }
 
+        /**
+         * Commodity to display an error message in the console.
+         * 
+         * @param string $str The message to display.
+         */
         protected function error($str)
         {
             echo "\033[41m\n";
@@ -689,12 +834,23 @@ namespace Bones {
             echo "\033[0m\n";
         }
 
+        /**
+         * Commodity to display a message in the console.
+         * 
+         * @param string $str The message to display.
+         */
         protected function info($str)
         {
             echo "\033[38;5;213m" . $str;
             echo "\033[0m\n";
         }
 
+        /**
+         * Get input from console
+         * 
+         * @param string $str The question to ask
+         * @param string $default The default value
+         */
         protected function ask($str, $default = '')
         {
             echo "\n\e[38;5;33m$str" . (empty($default) ? "" : " (default: {$default})") . "\e[0m ";
@@ -787,6 +943,9 @@ namespace Bones {
         |
         */
 
+        /**
+         * Return a kebalized version of the string
+         */
         protected function sanitize($title)
         {
             $title = strip_tags($title);
@@ -810,52 +969,90 @@ namespace Bones {
             return $title;
         }
 
-        protected function rename($pluginName = '')
+        /**
+         * This is the most important function of WP Bones.
+         * Here we will rename all occurrences of the plugin name and namespace.
+         * The default plugin name is 'WP Kirk' and the default namespace is 'WPKirk'.
+         * Here we will create also the slug used in the plugin.
+         *
+         * For example, if the plugin name is 'My WP Plugin'
+         *
+         * My WP Plugin          Name of plugin
+         * MyWPPlugin            Namespace, see [PSR-4 autoloading standard](http://www.php-fig.org/psr/psr-4/)
+         * my_wp_plugin_slug     Plugin slug
+         * my_wp_plugin_vars     Plugin vars used for CPT, taxonomy, etc.
+         * my-wp-plugin          Internal id used for css, js and less files
+         *
+         * As you can see we're going to create all namespace/id from the plugin name.
+         *
+         * @brief Rename the plugin
+         *
+         */
+        protected function rename($args)
         {
-            if (empty($pluginName)) {
-                // previous namespace
-                list($pluginName, $previousNamespace) = explode(",", file_get_contents('namespace'));
 
-                // sanitize namespace
-                $namespace          = str_replace(" ", "", $pluginName);
-                $previousPluginName = 'WP Kirk';
-                $previousNamespace  = 'WPKirk';
-            } else {
-                // sanitize namespace
-                $namespace = str_replace(' ', '', $pluginName);
+            if ($this->isHelp()) {
+                $this->info('Usage:');
+                $this->line(' php bones rename [options] <Plugin Name> <Namespace>');
+                $this->info('Available options:');
+                $this->line(' --reset                 Reset the plugin name and namespace');
+                $this->line(' --update                Rename after an update');
+                exit;
+            }
 
-                // previous namespace
-                list($previousPluginName, $previousNamespace) = explode(",", file_get_contents('namespace'));
+            $ask_continue = false;
 
-                // check the same?
-                if ($previousNamespace == $namespace) {
-                    $this->info("\nThe new namespace is equal. Nothing to change\n");
-                    exit(0);
+            // use the current plugin name and namespace from the namespace file
+            $search_plugin_name = $plugin_name = $this->getPluginName();
+            $search_namespace = $namespace = $this->getNamespace();
+
+            // ask plugin name and namespace from console
+            if (empty($args[0]) && empty($args[1])) {
+                $plugin_name = $this->ask('Plugin name:', $this->getPluginName());
+                $namespace = $this->ask('Namespace:', $this->getNamespace());
+                $ask_continue = true;
+            }
+
+            // Reset the plugin name and namespace to the original values
+            if (!empty($args[0]) && $args[0] === '--reset') {
+                [$plugin_name, $namespace] = $this->getDefaultPlaginNameAndNamespace();
+            }
+            // force namespace as WPKirk after a composer update 
+            elseif (!empty($args[0]) && $args[0] === '--update') {
+                [$search_plugin_name, $search_namespace] = $this->getDefaultPlaginNameAndNamespace();
+            }
+            // new plugin name, the namespace will be create from plugin name
+            elseif (!empty($args[0]) && empty($args[1])) {
+                [$plugin_name, $null] = $args;
+                $namespace = $plugin_name;
+                $ask_continue = true;
+            }
+            // new plugin name and namespace
+            elseif (!empty($args[0]) && !empty($args[1])) {
+                [$plugin_name, $namespace] = $args;
+            }
+
+            // sanitize the namespace
+            $namespace =  str_replace(" ", "", ucwords($namespace));
+
+            $this->info("\nThe new plugin name and namespace will be '{$plugin_name}', '{$namespace}'");
+
+            if ($ask_continue) {
+                $yesno = $this->ask("Continue (y/n)", 'n');
+
+                if (strtolower($yesno) != 'y') {
+                    return;
                 }
             }
 
-            // previous slug
-            $previousSlug = str_replace("-", "_", $this->sanitize($previousPluginName)) . "_slug";
-
-            // slug
-            $slug = str_replace("-", "_", $this->sanitize($pluginName)) . "_slug";
-
-            // previous vars
-            $previousVars = str_replace("-", "_", $this->sanitize($previousPluginName)) . "_vars";
-
-            // vars - used in custom post types service provider
-            $vars = str_replace("-", "_", $this->sanitize($pluginName)) . "_vars";
-
-            // previous css id
-            $previousCssId = $this->sanitize($previousPluginName);
-
-            // current css id
-            $currentCssId = $this->sanitize($pluginName);
-
-            // remove all composer
+            // start scan everything
             $files = array_filter(array_map(function ($e) {
-                if (false !== strpos($e, "node_modules") ||
-                false !== strpos($e, "vendor/wpbones/wpbones/src/Console/bin/bones")) {
+
+                // exclude node_modules and bones executable
+                if (
+                    false !== strpos($e, "node_modules") ||
+                    false !== strpos($e, "vendor/wpbones/wpbones/src/Console/bin/bones")
+                ) {
                     return false;
                 }
 
@@ -864,63 +1061,75 @@ namespace Bones {
 
             // merge
             $files = array_merge($files, [
-            'index.php',
-            'composer.json',
-            'readme.txt',
-        ]);
+                'index.php',
+                'composer.json',
+                'readme.txt',
+            ]);
 
             // change namespace
             foreach ($files as $file) {
                 $this->line("Loading and process {$file}...");
 
                 $content = file_get_contents($file);
-                $content = str_replace($previousNamespace, $namespace, $content);
-                $content = str_replace(strtoupper($previousNamespace), strtoupper($namespace), $content);
-                $content = str_replace($previousSlug, $slug, $content);
-                $content = str_replace($previousVars, $vars, $content);
-                $content = str_replace($previousPluginName, $pluginName, $content);
-                $content = str_replace($previousCssId, $currentCssId, $content);
+
+                // change namespace
+                $content = str_replace($search_namespace, $namespace, $content);
+
+                // change slug
+                $content = str_replace($this->getPluginSlug($search_plugin_name), $this->getPluginSlug($plugin_name), $content);
+
+                // change vars
+                $content = str_replace($this->getPluginVars($search_plugin_name), $this->getPluginVars($plugin_name), $content);
+
+                // change id
+                $content = str_replace($this->getPluginId($search_plugin_name), $this->getPluginId($plugin_name), $content);
+
+                // change plugin name just in index.php and readme.txt
+                if ($file === 'index.php' || $file === 'readme.txt') {
+                    $content = str_replace($search_plugin_name, $plugin_name, $content);
+                }
+
                 file_put_contents($file, $content);
             }
 
             foreach (glob('localization/*') as $file) {
-                $newFile = str_replace($previousCssId, $currentCssId, $file);
+                $newFile = str_replace($this->getPluginId($search_plugin_name), $this->getPluginId($plugin_name), $file);
                 rename($file, $newFile);
             }
 
             foreach (glob('resources/assets/js/*') as $file) {
-                $newFile = str_replace($previousCssId, $currentCssId, $file);
+                $newFile = str_replace($this->getPluginId($search_plugin_name), $this->getPluginId($plugin_name), $file);
                 rename($file, $newFile);
             }
 
             foreach (glob('resources/assets/less/*') as $file) {
-                $newFile = str_replace($previousCssId, $currentCssId, $file);
+                $newFile = str_replace($this->getPluginId($search_plugin_name), $this->getPluginId($plugin_name), $file);
                 rename($file, $newFile);
             }
 
-            // save new namespace
-            file_put_contents('namespace', "{$pluginName},{$namespace}");
+            // save new plugin name and namespace
+            file_put_contents('namespace', "{$plugin_name},{$namespace}");
         }
 
-        protected function install($argv)
+        /**
+         * Execute composer install
+         */
+        protected function install()
         {
-            // TODO: check if the first time or if is time to install
-
-            if (!isset($argv[1]) || empty($argv[1])) {
-                $name = $this->ask('Enter name of your plugin:');
-            } elseif (isset($argv[1]) && "--help" === $argv[1]) {
-                $this->line("\nUsage:");
-                $this->info("  install <plugin name>\n");
-                $this->line("Arguments:");
-                $this->info("  plugin name\tThe name of plugin. Add quotes if the plugin name containes spaces.");
-                exit(0);
-            } else {
-                $name = $argv[1];
+            if ($this->isHelp()) {
+                $this->line("Will run the composer install\n");
+                $this->info('Usage:');
+                $this->line(' php bones install');
+                exit;
             }
-
-            $this->update();
+            $this->line(`composer install`);
         }
 
+        /**
+         * Handle the plugin version by SemVer
+         * 
+         * 
+         */
         protected function version($argv)
         {
             $readme = file_get_contents('readme.txt');
@@ -943,7 +1152,7 @@ namespace Bones {
             $index_lines = explode("\n", $index);
             foreach ($index_lines as $line) {
 
-            // get the plugin version for wordpres comments
+                // get the plugin version for wordpres comments
                 if (preg_match('/^[ \t\/*#@]*Version:\s*(.*)$/i', $line, $matches)) {
                     $version_index_replace =  $matches[0];
 
@@ -959,9 +1168,9 @@ namespace Bones {
                 $this->error("\nWARNING:\n\nThe version in readme.txt and index.php are different.");
             }
 
-            if (!isset($argv[1]) || empty($argv[1])) {
+            if (!isset($argv[0]) || empty($argv[0])) {
                 $version = $this->ask('Enter new version of your plugin:');
-            } elseif (isset($argv[1]) && "--help" === $argv[1]) {
+            } elseif ($this->isHelp()) {
                 $this->line("\nUsage:");
                 $this->info("  version [plugin version]\n");
                 $this->line("Arguments:");
@@ -970,14 +1179,14 @@ namespace Bones {
                 $this->info("  [--minor]\tIncrement the x.minor.z of plugin.");
                 $this->info("  [--patch]\tIncrement the x.y.patch of plugin.");
                 exit(0);
-            } elseif (isset($argv[1]) && "--patch" === $argv[1]) {
+            } elseif (isset($argv[0]) && "--patch" === $argv[0]) {
                 $version = semver($version_index)->incrementPatch();
-            } elseif (isset($argv[1]) && "--minor" === $argv[1]) {
+            } elseif (isset($argv[0]) && "--minor" === $argv[0]) {
                 $version = semver($version_index)->incrementMinor();
-            } elseif (isset($argv[1]) && "--major" === $argv[1]) {
+            } elseif (isset($argv[0]) && "--major" === $argv[0]) {
                 $version = semver($version_index)->incrementMajor();
             } else {
-                $version = trim($argv[1]);
+                $version = trim($argv[0]);
             }
 
             if ($version === "") {
@@ -1012,19 +1221,26 @@ namespace Bones {
             $this->line("\nVersion is already {$version}");
         }
 
+        /**
+         * Execute composer update
+         */
         protected function update()
         {
-            // we have to remove previous version
-            //$res = `rm -rf vendor/`;
-            //$this->deleteDirectory('vendor');
-
+            if ($this->isHelp()) {
+                $this->line("Will run the composer update. Useful if there is a new version of WP Bones\n");
+                $this->info('Usage:');
+                $this->line(' php bones update');
+                exit;
+            }
             // update composer module
-            $res = `composer update`;
-
-            // rename as is it and execute composer
-            $this->rename();
+            $this->line(`composer update`);
         }
 
+        /**
+         * Create a deploy version of the plugin
+         * 
+         * @param string $path The path to the deploy version of the plugin
+         */
         protected function deploy($path)
         {
             $this->info("\nStarting deploy ¯\_(ツ)_/¯\n");
@@ -1043,7 +1259,7 @@ namespace Bones {
 
             if (!empty($path)) {
 
-            // first of all delete previous path
+                // first of all delete previous path
                 $this->info("🕐 Delete folder {$path}");
                 $this->deleteDirectory($path);
                 $this->info("\033[1A👍");
@@ -1058,27 +1274,27 @@ namespace Bones {
 
                 // files and folders to skip
                 $this->skipWhenDeploy = [
-                '/node_modules',
-                '/.git',
-                '/.gitignore',
-                '/.DS_Store',
-                '/.babelrc',
-                '/bones',
-                '/resources/assets',
-                '/deploy.php',
-                '/composer.json',
-                '/composer.lock',
-                '/namespace',
-                '/gulpfile.js',
-                '/package.json',
-                '/package-lock.json',
-                '/yarn.lock',
-                '/README.md',
-                '/webpack.mix.js',
-                '/webpack.config.js',
-                '/phpcs.xml.dist',
-                '/mix-manifest.json',
-            ];
+                    '/node_modules',
+                    '/.git',
+                    '/.gitignore',
+                    '/.DS_Store',
+                    '/.babelrc',
+                    '/bones',
+                    '/resources/assets',
+                    '/deploy.php',
+                    '/composer.json',
+                    '/composer.lock',
+                    '/namespace',
+                    '/gulpfile.js',
+                    '/package.json',
+                    '/package-lock.json',
+                    '/yarn.lock',
+                    '/README.md',
+                    '/webpack.mix.js',
+                    '/webpack.config.js',
+                    '/phpcs.xml.dist',
+                    '/mix-manifest.json',
+                ];
 
                 /**
                  * Filter the list of files and folders to skip during the deploy.
@@ -1105,26 +1321,35 @@ namespace Bones {
             }
         }
 
+        /**
+         * Alias composer dump-autoload
+         */
         protected function optimize()
         {
             $this->line(`composer dump-autoload -o`);
         }
 
+        /**
+         * Install a new composer package
+         * 
+         * @param string $package The composer package to install
+         */
         protected function requirePackage($package)
         {
-            // help
-            if (empty($package) || $package == '--help') {
+            if ($this->isHelp($package)) {
                 $this->info('Use php bones require <PackageName>');
-
-                return;
+                exit;
             }
 
             $this->line(`composer require {$package}`);
 
-            // rename as is it and execute composer
-            $this->rename();
+            // rename as it is
+            $this->rename(['--update']);
         }
 
+        /**
+         * Start a Tinker emulation
+         */
         protected function tinker()
         {
             $eval = $this->ask(">>>");
@@ -1146,6 +1371,11 @@ namespace Bones {
             }
         }
 
+        /**
+         * Delete a whole folder
+         * 
+         * @param string $path The path to the folder to delete
+         */
         public function deleteDirectory($path)
         {
             $path = rtrim($path, '/');
@@ -1161,6 +1391,13 @@ namespace Bones {
             @rmdir("{$path}");
         }
 
+        /**
+         * Copy a whole folder. Used by deploy()
+         * 
+         * @param string $source The source path
+         * @param string $dest The target path
+         * @param number $permissions The permissions to set
+         */
         protected function xcopy($source, $dest, $permissions = 0755)
         {
             // Check for symlinks
@@ -1183,7 +1420,7 @@ namespace Bones {
 
             while (false !== $entry = $dir->read()) {
 
-            // files and folder to skip
+                // files and folder to skip
                 if ($entry === '.' || $entry === '..' || $this->skip("{$source}/{$entry}")) {
                     continue;
                 }
@@ -1198,6 +1435,11 @@ namespace Bones {
             return true;
         }
 
+        /**
+         * Used to skip some files and folders during the deploy
+         * 
+         * @param string $value The file or folder to skip
+         */
         protected function skip($value)
         {
             $single = str_replace($this->rootDeploy, '', $value);
@@ -1205,10 +1447,15 @@ namespace Bones {
             return in_array($single, $this->skipWhenDeploy);
         }
 
+        /**
+         * Create a migrate file
+         * 
+         * @param string $table The table name
+         */
         protected function createMigrate($tablename)
         {
-            // help
-            if (empty($tablename) || $tablename == '--help') {
+
+            if ($this->isHelp($tablename)) {
                 $this->info('Use php bones migrate:make <Tablename>');
 
                 return;
@@ -1220,8 +1467,8 @@ namespace Bones {
                 strtolower($tablename)
             );
 
-            // previous namespace
-            list($pluginName, $namespace) = explode(",", file_get_contents('namespace'));
+            // current plugin name and namespace
+            $namespace = $this->getNamespace();
 
             // get the stub
             $content = file_get_contents("vendor/wpbones/wpbones/src/Console/stubs/migrate.stub");
@@ -1233,10 +1480,14 @@ namespace Bones {
             $this->line(" Created database/migrations/{$filename}");
         }
 
+        /**
+         * Create a Custom Post Type controller
+         * 
+         * @param string $className The class name
+         */
         protected function createCustomPostType($className)
         {
-            // help
-            if (empty($className) || $className == '--help') {
+            if ($this->isHelp($className)) {
                 $this->info('Use php bones make:cpt <ClassName>');
 
                 return;
@@ -1244,8 +1495,8 @@ namespace Bones {
 
             $filename = sprintf('%s.php', $className);
 
-            // previous namespace
-            list($pluginName, $namespace) = explode(",", file_get_contents('namespace'));
+            // current plugin name and namespace
+            [$pluginName, $namespace] = $this->getPluginNameAndNamespace();
 
             $slug = str_replace("-", "_", $this->sanitize($pluginName));
 
@@ -1276,10 +1527,15 @@ namespace Bones {
             $this->info("Remember to add {$className} in the config/plugin.php array in the 'custom_post_types' key.");
         }
 
+        /**
+         * Create a Custom Taxonomy controller
+         * 
+         * @param string $className The class name
+         */
         protected function createCustomTaxonomyType($className)
         {
-            // help
-            if (empty($className) || $className == '--help') {
+
+            if ($this->isHelp($className)) {
                 $this->info('Use php bones make:ctt <ClassName>');
 
                 return;
@@ -1287,10 +1543,10 @@ namespace Bones {
 
             $filename = sprintf('%s.php', $className);
 
-            // previous namespace
-            list($pluginName, $namespace) = explode(",", file_get_contents('namespace'));
+            // current plugin name and namespace
+            $namespace = $this->getNamespace();
 
-            $slug = str_replace("-", "_", $this->sanitize($pluginName));
+            $slug = $this->getPluginId();
 
             $id     = $this->ask("Enter a ID:", $slug);
             $name   = $this->ask("Enter the name:");
@@ -1324,17 +1580,22 @@ namespace Bones {
             $this->info("Remember to add {$className} in the config/plugin.php array in the 'custom_taxonomy_types' key.");
         }
 
+        /**
+         * Create a controller
+         * 
+         * @param string $className The class name
+         */
         protected function createController($className)
         {
-            // help
-            if (empty($className) || $className == '--help') {
+
+            if ($this->isHelp($className)) {
                 $this->info('Use php bones make:controller <ClassName>');
 
                 return;
             }
 
-            // previous namespace
-            list($pluginName, $namespace) = explode(",", file_get_contents('namespace'));
+            // current plugin name and namespace
+            $namespace = $this->getNamespace();
 
             // get additional path
             $path = $namespacePath = '';
@@ -1366,10 +1627,15 @@ namespace Bones {
             $this->optimize();
         }
 
+        /**
+         * Create a Command controller
+         * 
+         * @param string $className The class name
+         */
         protected function createCommand($className)
         {
-            // help
-            if (empty($className) || $className == '--help') {
+
+            if ($this->isHelp($className)) {
                 $this->info('Use php bones make:console <ClassName>');
 
                 return;
@@ -1377,8 +1643,8 @@ namespace Bones {
 
             $filename = sprintf('%s.php', $className);
 
-            // previous namespace
-            list($pluginName, $namespace) = explode(",", file_get_contents('namespace'));
+            // current plugin name and namespace
+            [$pluginName, $namespace] = $this->getPluginNameAndNamespace();
 
             $signature = str_replace("-", "", $this->sanitize($pluginName));
             $command   = str_replace("-", "", $this->sanitize($className));
@@ -1415,10 +1681,15 @@ namespace Bones {
             }
         }
 
+        /**
+         * Create a Shortcode controller
+         * 
+         * @param string $className The class name
+         */
         protected function createShortcode($className)
         {
-            // help
-            if (empty($className) || $className == '--help') {
+
+            if ($this->isHelp($className)) {
                 $this->info('Use php bones make:shortcode <ClassName>');
 
                 return;
@@ -1426,8 +1697,8 @@ namespace Bones {
 
             $filename = sprintf('%s.php', $className);
 
-            // previous namespace
-            list($pluginName, $namespace) = explode(",", file_get_contents('namespace'));
+            // current plugin name and namespace
+            $namespace = $this->getNamespace();
 
             // get the stub
             $content = file_get_contents("vendor/wpbones/wpbones/src/Console/stubs/shortcode.stub");
@@ -1445,10 +1716,15 @@ namespace Bones {
             $this->info("Remember to add {$className} in the config/plugin.php array in the 'shortcodes' key.");
         }
 
+        /**
+         * Create a Service Provider
+         * 
+         * @param string $className The class name
+         */
         protected function createProvider($className)
         {
-            // help
-            if (empty($className) || $className == '--help') {
+
+            if ($this->isHelp($className)) {
                 $this->info('Use php bones make:provider <ClassName>');
 
                 return;
@@ -1456,8 +1732,8 @@ namespace Bones {
 
             $filename = sprintf('%s.php', $className);
 
-            // previous namespace
-            list($pluginName, $namespace) = explode(",", file_get_contents('namespace'));
+            // current plugin name and namespace
+            $namespace = $this->getNamespace();
 
             // get the stub
             $content = file_get_contents("vendor/wpbones/wpbones/src/Console/stubs/provider.stub");
@@ -1473,10 +1749,15 @@ namespace Bones {
             $this->line(" Created plugin/Providers/{$filename}");
         }
 
+        /**
+         * Create a Widget controller
+         * 
+         * @param string $className The class name
+         */
         protected function createWidget($className)
         {
-            // help
-            if (empty($className) || $className == '--help') {
+
+            if ($this->isHelp($className)) {
                 $this->info('Use php bones make:widget <ClassName>');
 
                 return;
@@ -1484,10 +1765,10 @@ namespace Bones {
 
             $filename = sprintf('%s.php', $className);
 
-            // previous namespace
-            list($pluginName, $namespace) = explode(",", file_get_contents('namespace'));
+            // current plugin name and namespace
+            [$pluginName, $namespace] = $this->getPluginNameAndNamespace();
 
-            $slug = str_replace("-", "_", $this->sanitize($className));
+            $slug = $this->getPluginId();
 
             // get the stub
             $content = file_get_contents("vendor/wpbones/wpbones/src/Console/stubs/widget.stub");
@@ -1517,17 +1798,22 @@ namespace Bones {
             $this->info("Remember to add {$className} in the config/plugin.php array in the 'widgets' key.");
         }
 
+        /**
+         * Create a Ajax controller
+         * 
+         * @param string $className The class name
+         */
         protected function createAjax($className)
         {
-            // help
-            if (empty($className) || $className == '--help') {
+
+            if ($this->isHelp($className)) {
                 $this->info('Use php bones make:ajax <ClassName>');
 
                 return;
             }
 
-            // previous namespace
-            list($pluginName, $namespace) = explode(",", file_get_contents('namespace'));
+            // current plugin name and namespace
+            $namespace = $this->getNamespace();
 
             // get the stub
             $content = file_get_contents("vendor/wpbones/wpbones/src/Console/stubs/ajax.stub");
@@ -1547,17 +1833,22 @@ namespace Bones {
             $this->info("Remember to add {$className} in the config/plugin.php array in the 'ajax' key.");
         }
 
+        /**
+         * Create a database Model
+         * 
+         * @param string $className The class name
+         */
         protected function createModel($className)
         {
-            // help
-            if (empty($className) || $className == '--help') {
+
+            if ($this->isHelp($className)) {
                 $this->info('Use php bones make:model <ClassName>');
 
                 return;
             }
 
-            // previous namespace
-            list($pluginName, $namespace) = explode(",", file_get_contents('namespace'));
+            // current plugin name and namespace
+            $namespace = $this->getNamespace();
 
             // get additional path
             $path = $namespacePath = '';
@@ -1594,70 +1885,70 @@ namespace Bones {
         }
 
         /**
-         * Run subtask.
-         * Check argv from console and execute a task.
+         * Run subtask. Handle the php bones commands.
          *
          */
         protected function handle()
         {
-            $argv = $_SERVER['argv'];
-
-            // strip the application name
-            array_shift($argv);
-
-            if ($this->isHelp()) {
-                $this->help();
-            } // install
-            elseif ($this->command('install')) {
-                $this->install($this->arguments());
-            } // Update
-            elseif ($this->command('update')) {
-                $this->update();
-            } // Deploy
-            elseif ($this->command('deploy')) {
+            // deploy
+            if ($this->isCommand('deploy')) {
                 $this->deploy($this->arguments(1));
-            } // Optimize
-            elseif ($this->command('optimize')) {
+            }
+            // Optimize
+            elseif ($this->isCommand('optimize')) {
                 $this->optimize();
-            } // Tinker
-            elseif ($this->command('tinker')) {
+            }
+            // Tinker
+            elseif ($this->isCommand('tinker')) {
                 $this->tinker();
-            } // Require
-            elseif ($this->command('require')) {
-                $this->requirePackage($this->arguments(1));
-            } // Version
-            elseif ($this->command('version')) {
-                $this->version($this->arguments());
+            }
+            // Require
+            elseif ($this->isCommand('require')) {
+                $this->requirePackage($this->commandParams(0));
+            }
+            // Version
+            elseif ($this->isCommand('version')) {
+                $this->version($this->commandParams());
             }
             // migrate:create {table_name}
-            elseif ($this->command('migrate:create')) {
-                $this->createMigrate($this->arguments(1));
-            } // make:controller {controller_name}
-            elseif ($this->command('make:controller')) {
-                $this->createController($this->arguments(1));
-            } // make:console {command_name}
-            elseif ($this->command('make:console')) {
-                $this->createCommand($this->arguments(1));
-            } // make:cpy {className}
-            elseif ($this->command('make:cpt')) {
-                $this->createCustomPostType($this->arguments(1));
-            } // make:shortocde {className}
-            elseif ($this->command('make:shortcode')) {
-                $this->createShortcode($this->arguments(1));
-            } // make:provider {className}
-            elseif ($this->command('make:provider')) {
-                $this->createProvider($this->arguments(1));
-            } // make:ajax {className}
-            elseif ($this->command('make:ajax')) {
-                $this->createAjax($this->arguments(1));
-            } // make:ctt {className}
-            elseif ($this->command('make:ctt')) {
-                $this->createCustomTaxonomyType($this->arguments(1));
-            } // make:widget {className}
-            elseif ($this->command('make:widget')) {
-                $this->createWidget($this->arguments(1));
-            } elseif ($this->command('make:model')) {
-                $this->createModel($this->arguments(1));
+            elseif ($this->isCommand('migrate:create')) {
+                $this->createMigrate($this->commandParams(0));
+            }
+            // make:controller {controller_name}
+            elseif ($this->isCommand('make:controller')) {
+                $this->createController($this->commandParams(0));
+            }
+            // make:console {command_name}
+            elseif ($this->isCommand('make:console')) {
+                $this->createCommand($this->commandParams(0));
+            }
+            // make:cpt {className}
+            elseif ($this->isCommand('make:cpt')) {
+                $this->createCustomPostType($this->commandParams(0));
+            }
+            // make:shortcode {className}
+            elseif ($this->isCommand('make:shortcode')) {
+                $this->createShortcode($this->commandParams(0));
+            }
+            // make:provider {className}
+            elseif ($this->isCommand('make:provider')) {
+                $this->createProvider($this->commandParams(0));
+            }
+            // make:ajax {className}
+            elseif ($this->isCommand('make:ajax')) {
+                $this->createAjax($this->commandParams(0));
+            }
+            // make:ctt {className}
+            elseif ($this->isCommand('make:ctt')) {
+                $this->createCustomTaxonomyType($this->commandParams(0));
+            }
+            // make:widget {className}
+            elseif ($this->isCommand('make:widget')) {
+                $this->createWidget($this->commandParams(0));
+            }
+            // make:model {className}
+            elseif ($this->isCommand('make:model')) {
+                $this->createModel($this->commandParams(0));
             } else {
                 $extended = false;
 
