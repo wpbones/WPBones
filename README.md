@@ -33,7 +33,7 @@ You'll find the [complete docs here](https://github.com/wpbones/WPBones/wiki).
 
 ## Requirement
 
-* We recommend servers running version 7.2 or greater of PHP
+- We recommend servers running version 7.2 or greater of PHP
 
 ### Composer
 
@@ -63,7 +63,9 @@ Display help
 
 Change namespace
 
-    $ php bones namespace MyPluginName
+    $ php bones install
 
-The last command is very important. You can change the namespace in anytime. However, I suggest you to make this only the first time, when the plugin is inactive.
+The last command is very important. You can change either the plugin name or the namespace in anytime. However, I suggest you to make this only the first time, when the plugin is inactive.
 After changing of the namespace, you can start to develop you plugin. Your namespace will be `MyPluginName`.
+
+You will find further detail in the [Official WP Bones Documentation](https://github.com/wpbones/WPBones/wiki)
