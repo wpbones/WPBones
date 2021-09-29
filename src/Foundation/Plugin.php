@@ -98,7 +98,7 @@ class Plugin extends Container implements PluginContract
           Name = "WPKirk"
           Network = false
           PluginURI = "http://undolog.com"
-          TextDomain = "wpkirk"
+          TextDomain = "wp-kirk"
           Title = "WPKirk"
           Version = "1.0.0"
 
@@ -108,7 +108,7 @@ class Plugin extends Container implements PluginContract
         $this->slug = str_replace('-', '_', sanitize_title($this->pluginData['Name'])) . '_slug';
 
         // Load text domain
-        load_plugin_textdomain("wpkirk", false, trailingslashit(basename($this->basePath)) . $this->pluginData['DomainPath']);
+        load_plugin_textdomain("wp-kirk", false, trailingslashit(basename($this->basePath)) . $this->pluginData['DomainPath']);
 
         // Activation & Deactivation Hook
         register_activation_hook($this->file, [$this, 'activation']);
