@@ -74,13 +74,13 @@ abstract class HtmlTag
     private $_data = [];
 
     /*
-     |--------------------------------------------------------------------------
-     | Custom attributes
-     |--------------------------------------------------------------------------
-     |
-     | You can use the ::attributes to get all attributes or set you own attributes.
-     |
-     */
+    |--------------------------------------------------------------------------
+    | Custom attributes
+    |--------------------------------------------------------------------------
+    |
+    | You can use the ::attributes to get all attributes or set you own attributes.
+    |
+    */
     protected function getAttributesAttribute()
     {
         return $this->attributes;
@@ -90,8 +90,7 @@ abstract class HtmlTag
     {
         if (is_array($values)) {
             $this->attributes = array_merge($this->attributes, $values);
-        }
-        elseif (is_string($values) && func_num_args() > 1) {
+        } elseif (is_string($values) && func_num_args() > 1) {
             $this->attributes[$values] = func_get_arg(1);
         }
 
@@ -149,8 +148,7 @@ abstract class HtmlTag
             foreach ($args as $style) {
                 $stack[$style[0]] = $style[1];
             }
-        }
-        elseif (is_array(func_get_arg(0))) {
+        } elseif (is_array(func_get_arg(0))) {
             $stack = func_get_arg(0);
         }
 
@@ -172,8 +170,7 @@ abstract class HtmlTag
             foreach ($args as $data) {
                 $this->_data[$data[0]] = $data[1];
             }
-        }
-        elseif (is_array(func_get_arg(0))) {
+        } elseif (is_array(func_get_arg(0))) {
             foreach (func_get_arg(0) as $key => $value) {
                 $this->_data[$key] = $value;
             }
@@ -203,13 +200,13 @@ abstract class HtmlTag
     }
 
     /*
-     |--------------------------------------------------------------------------
-     | Special attributes
-     |--------------------------------------------------------------------------
-     |
-     | Here you'll find some special attributes.
-     |
-     */
+    |--------------------------------------------------------------------------
+    | Special attributes
+    |--------------------------------------------------------------------------
+    |
+    | Here you'll find some special attributes.
+    |
+    */
 
     protected function getClassAttribute()
     {
@@ -236,12 +233,12 @@ abstract class HtmlTag
     }
 
     /*
-     |--------------------------------------------------------------------------
-     | Common
-     |--------------------------------------------------------------------------
-     |
-     |
-     */
+    |--------------------------------------------------------------------------
+    | Common
+    |--------------------------------------------------------------------------
+    |
+    |
+    */
 
     /**
      * HtmlTag constructor.
@@ -255,19 +252,15 @@ abstract class HtmlTag
                 foreach ($arguments as $key => $value) {
                     if (in_array($key, array_keys($this->globalAttributes))) {
                         $this->globalAttributes[$key] = $value;
-                    }
-                    elseif (in_array($key, array_keys($this->attributes))) {
+                    } elseif (in_array($key, array_keys($this->attributes))) {
                         $this->attributes[$key] = $value;
-                    }
-                    elseif ('content' == $key) {
+                    } elseif ('content' == $key) {
                         $this->content = $value;
-                    }
-                    elseif ('class' == $key) {
+                    } elseif ('class' == $key) {
                         $this->class = $value;
                     }
                 }
-            }
-            elseif (is_string($arguments)) {
+            } elseif (is_string($arguments)) {
                 $this->content = $arguments;
             }
         }
@@ -325,14 +318,11 @@ abstract class HtmlTag
     {
         if (in_array($name, array_keys($this->globalAttributes))) {
             $this->globalAttributes[$name] = $arguments[0];
-        }
-        elseif (in_array($name, array_keys($this->attributes))) {
+        } elseif (in_array($name, array_keys($this->attributes))) {
             $this->attributes[$name] = $arguments[0];
-        }
-        elseif (in_array($name, array_keys($this->guardedAttributes))) {
+        } elseif (in_array($name, array_keys($this->guardedAttributes))) {
             $this->guardedAttributes[$name] = $arguments[0];
-        }
-        else {
+        } else {
             $this->__set($name, $arguments[0]);
         }
 
@@ -400,8 +390,7 @@ abstract class HtmlTag
         if ('/>' == $this->closeTag()) {
             echo $this->closeTag();
             echo $this->content;
-        }
-        else {
+        } else {
             echo '>';
             echo $this->content;
             echo $this->closeTag();

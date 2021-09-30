@@ -4,14 +4,14 @@ namespace WPKirk\WPBones\Html;
 
 class HtmlTagA extends HtmlTag
 {
-  /**
-   * Attributes.
-   *
-   * See http://www.w3schools.com/tags/default.asp for definitions
-   *
-   * @var array
-   */
-  protected $attributes = [
+    /**
+     * Attributes.
+     *
+     * See http://www.w3schools.com/tags/default.asp for definitions
+     *
+     * @var array
+     */
+    protected $attributes = [
     'charset'  => null,
     'coords'   => null,
     'href'     => null,
@@ -25,11 +25,10 @@ class HtmlTagA extends HtmlTag
     'type'     => null,
   ];
 
-  /**
-   * Html Tag markup, open and close.
-   *
-   * @var array
-   */
-  protected $markup = [ '<a', '</a>' ];
-
+    /**
+     * Html Tag markup, open and close.
+     *
+     * @var array
+     */
+    protected $markup = [ '<a', '</a>' ];
 }

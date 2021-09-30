@@ -4,8 +4,7 @@ namespace WPKirk\WPBones\Html;
 
 class Html
 {
-
-  protected static $htmlTags = [
+    protected static $htmlTags = [
     'a'        => '\WPKirk\WPBones\Html\HtmlTagA',
     'button'   => '\WPKirk\WPBones\Html\HtmlTagButton',
     'checkbox' => '\WPKirk\WPBones\Html\HtmlTagCheckbox',
@@ -20,12 +19,12 @@ class Html
     'textarea' => '\WPKirk\WPBones\Html\HtmlTagTextArea',
   ];
 
-  public static function __callStatic( $name, $arguments )
-  {
-    if ( in_array( $name, array_keys( self::$htmlTags ) ) ) {
-      $args = ( isset( $arguments[ 0 ] ) && ! is_null( $arguments[ 0 ] ) ) ? $arguments[ 0 ] : [];
+    public static function __callStatic($name, $arguments)
+    {
+        if (in_array($name, array_keys(self::$htmlTags))) {
+            $args = (isset($arguments[ 0 ]) && ! is_null($arguments[ 0 ])) ? $arguments[ 0 ] : [];
 
-      return new self::$htmlTags[ $name ]( $args );
+            return new self::$htmlTags[ $name ]($args);
+        }
     }
-  }
 }

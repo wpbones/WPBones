@@ -1,7 +1,14 @@
 #!/usr/bin/env php
 <?php
 
-/* |-------------------------------------------------------------------------- | SemVer |-------------------------------------------------------------------------- | | https://github.com/PHLAK/SemVer | */
+/*
+|--------------------------------------------------------------------------
+| SemVer
+|--------------------------------------------------------------------------
+|
+| https://github.com/PHLAK/SemVer
+|
+*/
 
 namespace Bones\SemVer\Exceptions {
 
@@ -397,7 +404,14 @@ namespace Bones\SemVer {
     }
 }
 
-/* |-------------------------------------------------------------------------- | Bones |-------------------------------------------------------------------------- | | | */
+/*
+|--------------------------------------------------------------------------
+| Bones
+|--------------------------------------------------------------------------
+|
+|
+|
+*/
 
 namespace Bones {
     define('WPBONES_MINIMAL_PHP_VERSION', "7.3");
@@ -432,7 +446,7 @@ namespace Bones {
         /**
          * WP Bones version
          */
-        const VERSION = '1.0.4';
+        const VERSION = '1.0.5';
 
         /**
          * Used for additional kernel command.
@@ -565,13 +579,13 @@ namespace Bones {
         protected function loadWordPress()
         {
             /*
-             |--------------------------------------------------------------------------
-             | Load WordPress
-             |--------------------------------------------------------------------------
-             |
-             | We have to load the WordPress environment.
-             |
-             */
+            |--------------------------------------------------------------------------
+            | Load WordPress
+            |--------------------------------------------------------------------------
+            |
+            | We have to load the WordPress environment.
+            |
+            */
             if (!file_exists(__DIR__ . '/../../../wp-load.php')) {
                 echo "\n\033[33;5;82mWarning!!\n";
                 echo "\n\033[38;5;82m\t" . 'You must be inside "wp-content/plugins/" folders';
@@ -582,16 +596,16 @@ namespace Bones {
             require __DIR__ . '/../../../wp-load.php';
 
             /*
-             |--------------------------------------------------------------------------
-             | Register The Auto Loader
-             |--------------------------------------------------------------------------
-             |
-             | Composer provides a convenient, automatically generated class loader
-             | for our application. We just need to utilize it! We'll require it
-             | into the script here so that we do not have to worry about the
-             | loading of any our classes "manually". Feels great to relax.
-             |
-             */
+            |--------------------------------------------------------------------------
+            | Register The Auto Loader
+            |--------------------------------------------------------------------------
+            |
+            | Composer provides a convenient, automatically generated class loader
+            | for our application. We just need to utilize it! We'll require it
+            | into the script here so that we do not have to worry about the
+            | loading of any our classes "manually". Feels great to relax.
+            |
+            */
 
             if (file_exists(__DIR__ . '/vendor/autoload.php')) {
                 require __DIR__ . '/vendor/autoload.php';
@@ -880,7 +894,7 @@ namespace Bones {
              * @param array  &$result Optional. Result array. Empty form first call
              *
              * @return array
-             * 
+             *
              * @suppress PHP0405
              */
             function _rglob($path, $match = '', &$result = [])
@@ -895,8 +909,7 @@ namespace Bones {
                             if ($continue) {
                                 _rglob($file, $match, $result);
                             }
-                        }
-                        elseif (!empty($match)) {
+                        } elseif (!empty($match)) {
                             $continue = true;
                             if (false == $continue) {
                                 break;
@@ -908,8 +921,7 @@ namespace Bones {
                                     $result[] = $regexp_result[0];
                                 }
                             }
-                        }
-                        else {
+                        } else {
                             $result[] = $file;
                         }
                     }
@@ -979,7 +991,6 @@ namespace Bones {
          */
         protected function rename($args)
         {
-
             if ($this->isHelp()) {
                 $this->info('Usage:');
                 $this->line(' php bones rename [options] <Plugin Name> <Namespace>');
@@ -1175,8 +1186,7 @@ namespace Bones {
 
             if (!isset($argv[0]) || empty($argv[0])) {
                 $version = $this->ask('Enter new version of your plugin:');
-            }
-            elseif ($this->isHelp()) {
+            } elseif ($this->isHelp()) {
                 $this->line("\nUsage:");
                 $this->info("  version [plugin version]\n");
                 $this->line("Arguments:");
@@ -1185,17 +1195,13 @@ namespace Bones {
                 $this->info("  [--minor]\tIncrement the x.minor.z of plugin.");
                 $this->info("  [--patch]\tIncrement the x.y.patch of plugin.\n");
                 exit(0);
-            }
-            elseif (isset($argv[0]) && "--patch" === $argv[0]) {
+            } elseif (isset($argv[0]) && "--patch" === $argv[0]) {
                 $version = semver($version_number_from_index_php)->incrementPatch();
-            }
-            elseif (isset($argv[0]) && "--minor" === $argv[0]) {
+            } elseif (isset($argv[0]) && "--minor" === $argv[0]) {
                 $version = semver($version_number_from_index_php)->incrementMinor();
-            }
-            elseif (isset($argv[0]) && "--major" === $argv[0]) {
+            } elseif (isset($argv[0]) && "--major" === $argv[0]) {
                 $version = semver($version_number_from_index_php)->incrementMajor();
-            }
-            else {
+            } else {
                 $version = trim($argv[0]);
             }
 
@@ -1263,8 +1269,7 @@ namespace Bones {
 
             if (empty($path)) {
                 $path = $this->ask('Enter the complete path of deploy:');
-            }
-            elseif ("--help" === $path) {
+            } elseif ("--help" === $path) {
                 $this->line("\nUsage:");
                 $this->info("  deploy <path>\n");
                 $this->line("Arguments:");
@@ -1379,11 +1384,9 @@ namespace Bones {
                 }
 
                 $this->line(eval($eval));
-            }
-            catch (\Exception $e) {
+            } catch (\Exception $e) {
                 $this->info(eval($e->getMessage()));
-            }
-            finally {
+            } finally {
                 $this->tinker();
             }
         }
@@ -1400,8 +1403,7 @@ namespace Bones {
             array_map(function ($file) {
                 if (is_dir($file)) {
                     $this->deleteDirectory($file);
-                }
-                else {
+                } else {
                     @unlink($file);
                 }
             }, glob("{$path}/" . '{,.}[!.,!..]*', GLOB_MARK | GLOB_BRACE));
@@ -1472,7 +1474,6 @@ namespace Bones {
          */
         protected function createMigrate($tablename)
         {
-
             if ($this->isHelp($tablename)) {
                 $this->info('Use php bones migrate:make <Tablename>');
 
@@ -1552,7 +1553,6 @@ namespace Bones {
          */
         protected function createCustomTaxonomyType($className)
         {
-
             if ($this->isHelp($className)) {
                 $this->info('Use php bones make:ctt <ClassName>');
 
@@ -1605,7 +1605,6 @@ namespace Bones {
          */
         protected function createController($className)
         {
-
             if ($this->isHelp($className)) {
                 $this->info('Use php bones make:controller <ClassName>');
 
@@ -1632,8 +1631,7 @@ namespace Bones {
             if (!empty($path)) {
                 $content = str_replace('{Path}', $namespacePath, $content);
                 mkdir("plugin/Http/Controllers/{$path}", 0777, true);
-            }
-            else {
+            } else {
                 $content = str_replace('{Path}', '', $content);
             }
 
@@ -1653,7 +1651,6 @@ namespace Bones {
          */
         protected function createCommand($className)
         {
-
             if ($this->isHelp($className)) {
                 $this->info('Use php bones make:console <ClassName>');
 
@@ -1689,8 +1686,7 @@ namespace Bones {
             // check if plugin/Console/Kernel.php already exists
             if (file_exists('plugin/Console/Kernel.php')) {
                 $this->info("Remember to add {$className} in the plugin/Console/Commands/Kernel.php property array \$commands");
-            }
-            else {
+            } else {
                 // get the stub
                 $content = file_get_contents("vendor/wpbones/wpbones/src/Console/stubs/kernel.stub");
                 $content = str_replace('{Namespace}', $namespace, $content);
@@ -1708,7 +1704,6 @@ namespace Bones {
          */
         protected function createShortcode($className)
         {
-
             if ($this->isHelp($className)) {
                 $this->info('Use php bones make:shortcode <ClassName>');
 
@@ -1743,7 +1738,6 @@ namespace Bones {
          */
         protected function createProvider($className)
         {
-
             if ($this->isHelp($className)) {
                 $this->info('Use php bones make:provider <ClassName>');
 
@@ -1776,7 +1770,6 @@ namespace Bones {
          */
         protected function createWidget($className)
         {
-
             if ($this->isHelp($className)) {
                 $this->info('Use php bones make:widget <ClassName>');
 
@@ -1825,7 +1818,6 @@ namespace Bones {
          */
         protected function createAjax($className)
         {
-
             if ($this->isHelp($className)) {
                 $this->info('Use php bones make:ajax <ClassName>');
 
@@ -1860,7 +1852,6 @@ namespace Bones {
          */
         protected function createModel($className)
         {
-
             if ($this->isHelp($className)) {
                 $this->info('Use php bones make:model <ClassName>');
 
@@ -1891,8 +1882,7 @@ namespace Bones {
             if (!empty($path)) {
                 $content = str_replace('{Path}', $namespacePath, $content);
                 mkdir("plugin/Http/Controllers/{$path}", 0777, true);
-            }
-            else {
+            } else {
                 $content = str_replace('{Path}', '', $content);
             }
 
@@ -1970,8 +1960,7 @@ namespace Bones {
             // make:model {className}
             elseif ($this->isCommand('make:model')) {
                 $this->createModel($this->commandParams(0));
-            }
-            else {
+            } else {
                 $extended = false;
 
                 if ($this->kernel) {
