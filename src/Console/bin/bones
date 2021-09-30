@@ -1,14 +1,7 @@
 #!/usr/bin/env php
 <?php
 
-/*
-|--------------------------------------------------------------------------
-| SemVer
-|--------------------------------------------------------------------------
-|
-| https://github.com/PHLAK/SemVer
-|
-*/
+/* |-------------------------------------------------------------------------- | SemVer |-------------------------------------------------------------------------- | | https://github.com/PHLAK/SemVer | */
 
 namespace Bones\SemVer\Exceptions {
 
@@ -306,9 +299,9 @@ namespace Bones\SemVer {
                 throw new InvalidVersionException('Invalid semantic version string provided');
             }
 
-            $this->major = (int) $matches['major'];
-            $this->minor = (int) $matches['minor'];
-            $this->patch = (int) $matches['patch'];
+            $this->major = (int)$matches['major'];
+            $this->minor = (int)$matches['minor'];
+            $this->patch = (int)$matches['patch'];
             $this->preRelease = $matches['pre_release'] ?? null;
             $this->build = $matches['build'] ?? null;
 
@@ -399,19 +392,12 @@ namespace Bones\SemVer {
          */
         public function prefix(string $prefix = 'v'): string
         {
-            return $prefix . (string) $this;
+            return $prefix . (string)$this;
         }
     }
 }
 
-/*
-|--------------------------------------------------------------------------
-| Bones
-|--------------------------------------------------------------------------
-|
-|
-|
-*/
+/* |-------------------------------------------------------------------------- | Bones |-------------------------------------------------------------------------- | | | */
 
 namespace Bones {
     define('WPBONES_MINIMAL_PHP_VERSION', "7.3");
@@ -446,7 +432,7 @@ namespace Bones {
         /**
          * WP Bones version
          */
-        const VERSION = '1.0.3';
+        const VERSION = '1.0.4';
 
         /**
          * Used for additional kernel command.
@@ -579,13 +565,13 @@ namespace Bones {
         protected function loadWordPress()
         {
             /*
-            |--------------------------------------------------------------------------
-            | Load WordPress
-            |--------------------------------------------------------------------------
-            |
-            | We have to load the WordPress environment.
-            |
-            */
+             |--------------------------------------------------------------------------
+             | Load WordPress
+             |--------------------------------------------------------------------------
+             |
+             | We have to load the WordPress environment.
+             |
+             */
             if (!file_exists(__DIR__ . '/../../../wp-load.php')) {
                 echo "\n\033[33;5;82mWarning!!\n";
                 echo "\n\033[38;5;82m\t" . 'You must be inside "wp-content/plugins/" folders';
@@ -596,27 +582,27 @@ namespace Bones {
             require __DIR__ . '/../../../wp-load.php';
 
             /*
-            |--------------------------------------------------------------------------
-            | Register The Auto Loader
-            |--------------------------------------------------------------------------
-            |
-            | Composer provides a convenient, automatically generated class loader
-            | for our application. We just need to utilize it! We'll require it
-            | into the script here so that we do not have to worry about the
-            | loading of any our classes "manually". Feels great to relax.
-            |
-            */
+             |--------------------------------------------------------------------------
+             | Register The Auto Loader
+             |--------------------------------------------------------------------------
+             |
+             | Composer provides a convenient, automatically generated class loader
+             | for our application. We just need to utilize it! We'll require it
+             | into the script here so that we do not have to worry about the
+             | loading of any our classes "manually". Feels great to relax.
+             |
+             */
 
             if (file_exists(__DIR__ . '/vendor/autoload.php')) {
                 require __DIR__ . '/vendor/autoload.php';
             }
 
             /*
-            |--------------------------------------------------------------------------
-            | Load this plugin env
-            |--------------------------------------------------------------------------
-            |
-            */
+             |--------------------------------------------------------------------------
+             | Load this plugin env
+             |--------------------------------------------------------------------------
+             |
+             */
 
             if (file_exists(__DIR__ . '/bootstrap/plugin.php')) {
                 $plugin = require_once __DIR__ . '/bootstrap/plugin.php';
@@ -629,7 +615,7 @@ namespace Bones {
          */
         protected function loadKernel()
         {
-            $kernelClass        = "{$this->namespace}\\Console\\Kernel";
+            $kernelClass = "{$this->namespace}\\Console\\Kernel";
             $WPBoneskernelClass = "{$this->namespace}\\WPBones\\Foundation\\Console\\Kernel";
 
             if (class_exists($WPBoneskernelClass) && class_exists($kernelClass)) {
@@ -743,7 +729,7 @@ namespace Bones {
         /**
          * Let's roll
          *
-         * @return \BonesCommandLine
+         * @return \Bones\BonesCommandLine
          */
         public static function run()
         {
@@ -753,13 +739,13 @@ namespace Bones {
         }
 
         /*
-        |--------------------------------------------------------------------------
-        | Internal useful function
-        |--------------------------------------------------------------------------
-        |
-        | Here you will find all internal methods
-        |
-        */
+         |--------------------------------------------------------------------------
+         | Internal useful function
+         |--------------------------------------------------------------------------
+         |
+         | Here you will find all internal methods
+         |
+         */
 
         /**
          * Display the full help.
@@ -856,7 +842,7 @@ namespace Bones {
             echo "\n\e[38;5;33m$str" . (empty($default) ? "" : " (default: {$default})") . "\e[0m ";
 
             $handle = fopen("php://stdin", "r");
-            $line   = fgets($handle);
+            $line = fgets($handle);
 
             fclose($handle);
 
@@ -894,6 +880,8 @@ namespace Bones {
              * @param array  &$result Optional. Result array. Empty form first call
              *
              * @return array
+             * 
+             * @suppress PHP0405
              */
             function _rglob($path, $match = '', &$result = [])
             {
@@ -907,20 +895,21 @@ namespace Bones {
                             if ($continue) {
                                 _rglob($file, $match, $result);
                             }
-                        } elseif (!empty($match)) {
+                        }
+                        elseif (!empty($match)) {
                             $continue = true;
                             if (false == $continue) {
                                 break;
                             }
                             $regexp_result = [];
-                            $error         = preg_match($match, $file, $regexp_result);
+                            $error = preg_match($match, $file, $regexp_result);
                             if (0 !== $error || false !== $error) {
-                                $regexp_result = true;
                                 if (!empty($regexp_result)) {
                                     $result[] = $regexp_result[0];
                                 }
                             }
-                        } else {
+                        }
+                        else {
                             $result[] = $file;
                         }
                     }
@@ -935,13 +924,13 @@ namespace Bones {
         }
 
         /*
-        |--------------------------------------------------------------------------
-        | Public task
-        |--------------------------------------------------------------------------
-        |
-        | Here you will find all tasks that a user can run from console.
-        |
-        */
+         |--------------------------------------------------------------------------
+         | Public task
+         |--------------------------------------------------------------------------
+         |
+         | Here you will find all tasks that a user can run from console.
+         |
+         */
 
         /**
          * Return a kebalized version of the string
@@ -1033,7 +1022,7 @@ namespace Bones {
             }
 
             // sanitize the namespace
-            $namespace =  str_replace(" ", "", ucwords($namespace));
+            $namespace = str_replace(" ", "", ucwords($namespace));
 
             $this->info("\nThe new plugin name and namespace will be '{$plugin_name}', '{$namespace}'");
 
@@ -1050,8 +1039,8 @@ namespace Bones {
 
                 // exclude node_modules and bones executable
                 if (
-                    false !== strpos($e, "node_modules") ||
-                    false !== strpos($e, "vendor/wpbones/wpbones/src/Console/bin/bones")
+                false !== strpos($e, "node_modules") ||
+                false !== strpos($e, "vendor/wpbones/wpbones/src/Console/bin/bones")
                 ) {
                     return false;
                 }
@@ -1186,7 +1175,8 @@ namespace Bones {
 
             if (!isset($argv[0]) || empty($argv[0])) {
                 $version = $this->ask('Enter new version of your plugin:');
-            } elseif ($this->isHelp()) {
+            }
+            elseif ($this->isHelp()) {
                 $this->line("\nUsage:");
                 $this->info("  version [plugin version]\n");
                 $this->line("Arguments:");
@@ -1195,13 +1185,17 @@ namespace Bones {
                 $this->info("  [--minor]\tIncrement the x.minor.z of plugin.");
                 $this->info("  [--patch]\tIncrement the x.y.patch of plugin.\n");
                 exit(0);
-            } elseif (isset($argv[0]) && "--patch" === $argv[0]) {
+            }
+            elseif (isset($argv[0]) && "--patch" === $argv[0]) {
                 $version = semver($version_number_from_index_php)->incrementPatch();
-            } elseif (isset($argv[0]) && "--minor" === $argv[0]) {
+            }
+            elseif (isset($argv[0]) && "--minor" === $argv[0]) {
                 $version = semver($version_number_from_index_php)->incrementMinor();
-            } elseif (isset($argv[0]) && "--major" === $argv[0]) {
+            }
+            elseif (isset($argv[0]) && "--major" === $argv[0]) {
                 $version = semver($version_number_from_index_php)->incrementMajor();
-            } else {
+            }
+            else {
                 $version = trim($argv[0]);
             }
 
@@ -1269,7 +1263,8 @@ namespace Bones {
 
             if (empty($path)) {
                 $path = $this->ask('Enter the complete path of deploy:');
-            } elseif ("--help" === $path) {
+            }
+            elseif ("--help" === $path) {
                 $this->line("\nUsage:");
                 $this->info("  deploy <path>\n");
                 $this->line("Arguments:");
@@ -1384,9 +1379,11 @@ namespace Bones {
                 }
 
                 $this->line(eval($eval));
-            } catch (\Exception $e) {
+            }
+            catch (\Exception $e) {
                 $this->info(eval($e->getMessage()));
-            } finally {
+            }
+            finally {
                 $this->tinker();
             }
         }
@@ -1403,7 +1400,8 @@ namespace Bones {
             array_map(function ($file) {
                 if (is_dir($file)) {
                     $this->deleteDirectory($file);
-                } else {
+                }
+                else {
                     @unlink($file);
                 }
             }, glob("{$path}/" . '{,.}[!.,!..]*', GLOB_MARK | GLOB_BRACE));
@@ -1520,8 +1518,8 @@ namespace Bones {
 
             $slug = str_replace("-", "_", $this->sanitize($pluginName));
 
-            $id     = $this->ask("Enter a ID:", $slug);
-            $name   = $this->ask("Enter the name:");
+            $id = $this->ask("Enter a ID:", $slug);
+            $name = $this->ask("Enter the name:");
             $plural = $this->ask("Enter the plural name:");
 
             if (empty($id)) {
@@ -1568,8 +1566,8 @@ namespace Bones {
 
             $slug = $this->getPluginId();
 
-            $id     = $this->ask("Enter a ID:", $slug);
-            $name   = $this->ask("Enter the name:");
+            $id = $this->ask("Enter a ID:", $slug);
+            $name = $this->ask("Enter the name:");
             $plural = $this->ask("Enter the plural name:");
 
             $this->line('The object type below refers to the id of your previous Custom Post Type');
@@ -1620,9 +1618,9 @@ namespace Bones {
             // get additional path
             $path = $namespacePath = '';
             if (false !== strpos($className, '/')) {
-                $parts         = explode('/', $className);
-                $className     = array_pop($parts);
-                $path          = implode('/', $parts) . '/';
+                $parts = explode('/', $className);
+                $className = array_pop($parts);
+                $path = implode('/', $parts) . '/';
                 $namespacePath = '\\' . implode('\\', $parts);
             }
 
@@ -1634,7 +1632,8 @@ namespace Bones {
             if (!empty($path)) {
                 $content = str_replace('{Path}', $namespacePath, $content);
                 mkdir("plugin/Http/Controllers/{$path}", 0777, true);
-            } else {
+            }
+            else {
                 $content = str_replace('{Path}', '', $content);
             }
 
@@ -1667,10 +1666,10 @@ namespace Bones {
             [$pluginName, $namespace] = $this->getPluginNameAndNamespace();
 
             $signature = str_replace("-", "", $this->sanitize($pluginName));
-            $command   = str_replace("-", "", $this->sanitize($className));
+            $command = str_replace("-", "", $this->sanitize($className));
 
             $signature = $this->ask("Enter a signature:", $signature);
-            $command   = $this->ask("Enter the command:", $command);
+            $command = $this->ask("Enter the command:", $command);
 
             // get the stub
             $content = file_get_contents("vendor/wpbones/wpbones/src/Console/stubs/command.stub");
@@ -1690,7 +1689,8 @@ namespace Bones {
             // check if plugin/Console/Kernel.php already exists
             if (file_exists('plugin/Console/Kernel.php')) {
                 $this->info("Remember to add {$className} in the plugin/Console/Commands/Kernel.php property array \$commands");
-            } else {
+            }
+            else {
                 // get the stub
                 $content = file_get_contents("vendor/wpbones/wpbones/src/Console/stubs/kernel.stub");
                 $content = str_replace('{Namespace}', $namespace, $content);
@@ -1873,9 +1873,9 @@ namespace Bones {
             // get additional path
             $path = $namespacePath = '';
             if (false !== strpos($className, '/')) {
-                $parts         = explode('/', $className);
-                $className     = array_pop($parts);
-                $path          = implode('/', $parts) . '/';
+                $parts = explode('/', $className);
+                $className = array_pop($parts);
+                $path = implode('/', $parts) . '/';
                 $namespacePath = '\\' . implode('\\', $parts);
             }
 
@@ -1891,7 +1891,8 @@ namespace Bones {
             if (!empty($path)) {
                 $content = str_replace('{Path}', $namespacePath, $content);
                 mkdir("plugin/Http/Controllers/{$path}", 0777, true);
-            } else {
+            }
+            else {
                 $content = str_replace('{Path}', '', $content);
             }
 
@@ -1969,7 +1970,8 @@ namespace Bones {
             // make:model {className}
             elseif ($this->isCommand('make:model')) {
                 $this->createModel($this->commandParams(0));
-            } else {
+            }
+            else {
                 $extended = false;
 
                 if ($this->kernel) {
