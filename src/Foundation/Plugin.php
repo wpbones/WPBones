@@ -90,18 +90,17 @@ class Plugin extends Container implements PluginContract
         /*
          * In $this->pluginData you'll find all WordPress
          *
-          Author = "Giovambattista Fazioli"
-          AuthorName = "Giovambattista Fazioli"
-          AuthorURI = "http://undolog.com"
-          Description = "WPKirk is a WP Bones boilperate plugin"
-          DomainPath = "localization"
-          Name = "WPKirk"
-          Network = false
-          PluginURI = "http://undolog.com"
-          TextDomain = "wp-kirk"
-          Title = "WPKirk"
-          Version = "1.0.0"
-
+         Author = "Giovambattista Fazioli"
+         AuthorName = "Giovambattista Fazioli"
+         AuthorURI = "http://undolog.com"
+         Description = "WPKirk is a WP Bones boilperate plugin"
+         DomainPath = "localization"
+         Name = "WPKirk"
+         Network = false
+         PluginURI = "http://undolog.com"
+         TextDomain = "wp-kirk"
+         Title = "WPKirk"
+         Version = "1.0.0"
          */
 
         // plugin slug
@@ -229,8 +228,8 @@ class Plugin extends Container implements PluginContract
 
         $parts = explode('.', $key);
 
-        $filename = "{$parts[ 0 ]}.php";
-        $key      = isset($parts[1]) ? $parts[1] : null;
+        $filename = "{$parts[0]}.php";
+        $key = isset($parts[1]) ? $parts[1] : null;
 
         $array = include "{$this->basePath}/config/{$filename}";
 
@@ -329,14 +328,14 @@ class Plugin extends Container implements PluginContract
      */
     public function css($filename, $deps = [], $version = null)
     {
-        $filenames = (array) $filename;
+        $filenames = (array)$filename;
 
         foreach ($filenames as $file) {
             wp_enqueue_style(
                 $this->slug . Str::slug($file),
                 $this->css . '/' . $file,
-                (array) $deps,
-                $version??$this->Version
+                (array)$deps,
+                $version ?? $this->Version
             );
         }
     }
@@ -353,14 +352,14 @@ class Plugin extends Container implements PluginContract
      */
     public function js($filename, $deps = [], $version = null, $footer = true)
     {
-        $filenames = (array) $filename;
+        $filenames = (array)$filename;
 
         foreach ($filenames as $file) {
             wp_enqueue_script(
                 $this->slug . Str::slug($file),
                 WPKirk()->js . '/' . $file,
-                (array) $deps,
-                $version??$this->Version,
+                (array)$deps,
+                $version ?? $this->Version,
                 $footer
             );
         }
@@ -395,13 +394,13 @@ class Plugin extends Container implements PluginContract
     }
 
     /*
-    |--------------------------------------------------------------------------
-    | WordPress actions & filter
-    |--------------------------------------------------------------------------
-    |
-    | When a plugin starts we will use some useful actions and filters.
-    |
-    */
+     |--------------------------------------------------------------------------
+     | WordPress actions & filter
+     |--------------------------------------------------------------------------
+     |
+     | When a plugin starts we will use some useful actions and filters.
+     |
+     */
 
     /**
      * Return the list of classes in a PHP file.
@@ -409,6 +408,8 @@ class Plugin extends Container implements PluginContract
      * @param string $filename A PHP Filename file.
      *
      * @return array|bool
+     * 
+     * @suppress PHP0415
      */
     private function getFileClasses($filename)
     {
@@ -419,15 +420,15 @@ class Plugin extends Container implements PluginContract
         }
 
         $classes = [];
-        $tokens  = token_get_all($code);
-        $count   = count($tokens);
+        $tokens = token_get_all($code);
+        $count = count($tokens);
         for ($i = 2; $i < $count; $i++) {
             if ($tokens[$i - 2][0] == T_CLASS
-                && $tokens[$i - 1][0] == T_WHITESPACE
-                && $tokens[$i][0] == T_STRING
+            && $tokens[$i - 1][0] == T_WHITESPACE
+            && $tokens[$i][0] == T_STRING
             ) {
                 $class_name = $tokens[$i][1];
-                $classes[]  = $class_name;
+                $classes[] = $class_name;
             }
         }
 
@@ -511,7 +512,7 @@ class Plugin extends Container implements PluginContract
             return true;
         }
         if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) &&
-            strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest'
+        strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest'
         ) {
             return true;
         }
@@ -540,7 +541,7 @@ class Plugin extends Container implements PluginContract
     {
         global $wp_widget_factory;
 
-        $widgets =  $this->config('plugin.widgets', []);
+        $widgets = $this->config('plugin.widgets', []);
 
         foreach ($widgets as $className) {
             //register_widget( $className );
@@ -565,7 +566,7 @@ class Plugin extends Container implements PluginContract
             ];
 
             $controller = $routes['resource'];
-            $method     = $methods[$verb];
+            $method = $methods[$verb];
         } // by single verb and controller@method
         else {
             if (isset($routes[$verb])) {
@@ -581,7 +582,7 @@ class Plugin extends Container implements PluginContract
         if (isset($controller) && isset($method)) {
             $hook = function () use ($controller, $method) {
                 $className = "WPKirk\\Http\\Controllers\\{$controller}";
-                $instance  = new $className;
+                $instance = new $className;
 
                 if (method_exists($instance, 'render')) {
                     return ($instance->render("{$method}"));
@@ -602,15 +603,15 @@ class Plugin extends Container implements PluginContract
             $capsule = new \Illuminate\Database\Capsule\Manager;
 
             $capsule->addConnection([
-            'driver' => 'mysql',
-            'host' => DB_HOST,
-            'database' => DB_NAME,
-            'username' => DB_USER,
-            'password' => DB_PASSWORD,
-            'charset' => 'utf8',
-            'collation' => 'utf8_unicode_ci',
-            'prefix' => '',
-        ]);
+                'driver' => 'mysql',
+                'host' => DB_HOST,
+                'database' => DB_NAME,
+                'username' => DB_USER,
+                'password' => DB_PASSWORD,
+                'charset' => 'utf8',
+                'collation' => 'utf8_unicode_ci',
+                'prefix' => '',
+            ]);
 
             // Set the event dispatcher used by Eloquent models... (optional)
             // use Illuminate\Events\Dispatcher;
@@ -636,68 +637,69 @@ class Plugin extends Container implements PluginContract
 
         add_action('rest_api_init', function () {
             register_rest_route('jon/v1', '/permission', array(
-              'methods' => 'GET',
-              'callback' => function () {
-                  return "OK";
-              },
-              'permission_callback' => function () {
-                  return current_user_can('edit_posts');
-                  ;
-              }
+                'methods' => 'GET',
+                'callback' => function () {
+                return "OK";
+            }
+                ,
+                'permission_callback' => function () {
+                return current_user_can('edit_posts');
+                ;
+            }
             ));
         });
 
-        // add_action('rest_api_init', function () {
-        //     register_rest_route('jon/v1', '/example', [
-        //       'methods' => ['GET', 'POST'],
-        //       'callback' => function () {
-        //           return wp_send_json(["description" => "Hello, from WPKirk API"]);
-        //       },
-        //      ]);
-        // });
+    // add_action('rest_api_init', function () {
+    //     register_rest_route('jon/v1', '/example', [
+    //       'methods' => ['GET', 'POST'],
+    //       'callback' => function () {
+    //           return wp_send_json(["description" => "Hello, from WPKirk API"]);
+    //       },
+    //      ]);
+    // });
 
-        // $api_path = $this->basePath . '/api';
+    // $api_path = $this->basePath . '/api';
 
-        // $api_folder_exists = file_exists($api_path);
+    // $api_folder_exists = file_exists($api_path);
 
-        // function dirToArray($dir)
-        // {
-        //     $contents = [];
+    // function dirToArray($dir)
+    // {
+    //     $contents = [];
 
-        //     foreach (scandir($dir) as $node) {
-        //         if ($node == '.' || $node == '..') {
-        //             continue;
-        //         }
-        //         if (is_dir($dir . '/' . $node)) {
-        //             $contents[$node] = dirToArray($dir . '/' . $node);
-        //         } else {
-        //             $contents = $node;
-        //         }
-        //     }
-        //     return $contents;
-        // }
+    //     foreach (scandir($dir) as $node) {
+    //         if ($node == '.' || $node == '..') {
+    //             continue;
+    //         }
+    //         if (is_dir($dir . '/' . $node)) {
+    //             $contents[$node] = dirToArray($dir . '/' . $node);
+    //         } else {
+    //             $contents = $node;
+    //         }
+    //     }
+    //     return $contents;
+    // }
 
-        // function array_flatten($array, $path = '')
-        // {
-        //     $result = [];
-            
-        //     foreach ($array as $key => $value) {
-        //         if (is_array($value)) {
-        //             $new = array_flatten($value, $path . $key . '/');
-        //             $result = array_merge($result, $new);
-        //         } else {
-        //             $result[$path.$key] = $value;
-        //         }
-        //     }
-        //     return $result;
-        // }
+    // function array_flatten($array, $path = '')
+    // {
+    //     $result = [];
 
-        // if ($api_folder_exists) {
-        //     $struct = dirToArray($api_path);
+    //     foreach ($array as $key => $value) {
+    //         if (is_array($value)) {
+    //             $new = array_flatten($value, $path . $key . '/');
+    //             $result = array_merge($result, $new);
+    //         } else {
+    //             $result[$path.$key] = $value;
+    //         }
+    //     }
+    //     return $result;
+    // }
 
-        //     $routes = array_flatten($struct);
+    // if ($api_folder_exists) {
+    //     $struct = dirToArray($api_path);
 
-        //     error_log(var_export($routes, true));
-        // }
+    //     $routes = array_flatten($struct);
+
+    //     error_log(var_export($routes, true));
+    // }
     }
 }

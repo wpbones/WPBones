@@ -16,41 +16,41 @@ abstract class HtmlTag
      * @var array
      */
     protected $globalAttributes = [
-    'accesskey'       => null,
-    'contenteditable' => null,
-    'contextmenu'     => null,
-    'dir'             => null,
-    'draggable'       => null,
-    'dropzone'        => null,
-    'hidden'          => null,
-    'id'              => null,
-    'lang'            => null,
-    'spellcheck'      => null,
-    'style'           => null,
-    'tabindex'        => null,
-    'title'           => null,
-  ];
+        'accesskey' => null,
+        'contenteditable' => null,
+        'contextmenu' => null,
+        'dir' => null,
+        'draggable' => null,
+        'dropzone' => null,
+        'hidden' => null,
+        'id' => null,
+        'lang' => null,
+        'spellcheck' => null,
+        'style' => null,
+        'tabindex' => null,
+        'title' => null,
+    ];
 
     /**
      * HTML tag attributes.
      *
      * @var array
      */
-    protected $attributes = [ ];
+    protected $attributes = [];
 
     /**
      * Callable fluent HTML tag attributes but not formatted.
      *
      * @var array
      */
-    protected $guardedAttributes = [ ];
+    protected $guardedAttributes = [];
 
     /**
      * HTML Tag markup, open and close.
      *
      * @var array
      */
-    protected $markup = [ ];
+    protected $markup = [];
 
     /**
      * This is the content of a Html tag, suc as <div>{content}</div>
@@ -64,23 +64,23 @@ abstract class HtmlTag
      *
      * @var array
      */
-    private $_class = [ ];
+    private $_class = [];
 
     /**
      * Data attribute stack.
      *
      * @var array
      */
-    private $_data = [ ];
+    private $_data = [];
 
     /*
-    |--------------------------------------------------------------------------
-    | Custom attributes
-    |--------------------------------------------------------------------------
-    |
-    | You can use the ::attributes to get all attributes or set you own attributes.
-    |
-    */
+     |--------------------------------------------------------------------------
+     | Custom attributes
+     |--------------------------------------------------------------------------
+     |
+     | You can use the ::attributes to get all attributes or set you own attributes.
+     |
+     */
     protected function getAttributesAttribute()
     {
         return $this->attributes;
@@ -90,8 +90,9 @@ abstract class HtmlTag
     {
         if (is_array($values)) {
             $this->attributes = array_merge($this->attributes, $values);
-        } elseif (is_string($values) && func_num_args() > 1) {
-            $this->attributes[ $values ] = func_get_arg(1);
+        }
+        elseif (is_string($values) && func_num_args() > 1) {
+            $this->attributes[$values] = func_get_arg(1);
         }
 
         return $this;
@@ -100,9 +101,9 @@ abstract class HtmlTag
     public function formatAttributes()
     {
         // html tag attributes
-        $stack = [ ];
+        $stack = [];
         foreach ($this->attributes as $attribute => $value) {
-            if (! is_null($value)) {
+            if (!is_null($value)) {
                 $stack[] = sprintf('%s="%s"', $attribute, htmlspecialchars(stripslashes($value)));
             }
         }
@@ -113,9 +114,9 @@ abstract class HtmlTag
     public function formatGlobalAttributes()
     {
         // global attributes
-        $stack = [ ];
+        $stack = [];
         foreach ($this->globalAttributes as $attribute => $value) {
-            if (! is_null($value)) {
+            if (!is_null($value)) {
                 $stack[] = sprintf('%s="%s"', $attribute, htmlspecialchars(stripslashes($value)));
             }
         }
@@ -125,16 +126,16 @@ abstract class HtmlTag
 
     protected function getStyleAttribute()
     {
-        if (empty($this->globalAttributes[ 'style' ])) {
+        if (empty($this->globalAttributes['style'])) {
             return '';
         }
 
-        $styles = explode(';', $this->globalAttributes[ 'style' ]);
+        $styles = explode(';', $this->globalAttributes['style']);
 
-        $stack = [ ];
+        $stack = [];
         foreach ($styles as $style) {
             list($key, $value) = explode(':', $style, 2);
-            $stack[ $key ] = $value;
+            $stack[$key] = $value;
         }
 
         return $stack;
@@ -143,22 +144,23 @@ abstract class HtmlTag
     public function style()
     {
         if (func_num_args() > 1) {
-            $stack = [ ];
-            $args  = array_chunk(func_get_args(), 2);
+            $stack = [];
+            $args = array_chunk(func_get_args(), 2);
             foreach ($args as $style) {
-                $stack[ $style[ 0 ] ] = $style[ 1 ];
+                $stack[$style[0]] = $style[1];
             }
-        } elseif (is_array(func_get_arg(0))) {
+        }
+        elseif (is_array(func_get_arg(0))) {
             $stack = func_get_arg(0);
         }
 
         // conver the array to styles, eg: "color:#fff;border:none;"
-        $styles = [ ];
+        $styles = [];
         foreach ($stack as $key => $value) {
             $styles[] = sprintf('%s:%s', $key, $value);
         }
 
-        $this->globalAttributes[ 'style' ] = implode(';', $styles);
+        $this->globalAttributes['style'] = implode(';', $styles);
 
         return $this;
     }
@@ -166,13 +168,14 @@ abstract class HtmlTag
     public function data()
     {
         if (func_num_args() > 1) {
-            $args  = array_chunk(func_get_args(), 2);
+            $args = array_chunk(func_get_args(), 2);
             foreach ($args as $data) {
-                $this->_data[ $data[ 0 ] ] = $data[ 1 ];
+                $this->_data[$data[0]] = $data[1];
             }
-        } elseif (is_array(func_get_arg(0))) {
+        }
+        elseif (is_array(func_get_arg(0))) {
             foreach (func_get_arg(0) as $key => $value) {
-                $this->_data[ $key ] =$value;
+                $this->_data[$key] = $value;
             }
         }
 
@@ -189,9 +192,9 @@ abstract class HtmlTag
     public function formatDataAttributes()
     {
         // data attributes
-        $stack = [ ];
+        $stack = [];
         foreach ($this->_data as $attribute => $value) {
-            if (! is_null($value)) {
+            if (!is_null($value)) {
                 $stack[] = sprintf('data-%s="%s"', $attribute, htmlspecialchars(stripslashes($value)));
             }
         }
@@ -200,13 +203,13 @@ abstract class HtmlTag
     }
 
     /*
-    |--------------------------------------------------------------------------
-    | Special attributes
-    |--------------------------------------------------------------------------
-    |
-    | Here you'll find some special attributes.
-    |
-    */
+     |--------------------------------------------------------------------------
+     | Special attributes
+     |--------------------------------------------------------------------------
+     |
+     | Here you'll find some special attributes.
+     |
+     */
 
     protected function getClassAttribute()
     {
@@ -224,43 +227,47 @@ abstract class HtmlTag
 
     protected function getAcceptcharsetAttribute()
     {
-        return $this->attributes[ 'accept-charset' ];
+        return $this->attributes['accept-charset'];
     }
 
     protected function setAcceptcharsetAttribute($value)
     {
-        $this->attributes[ 'accept-charset' ] = $value;
+        $this->attributes['accept-charset'] = $value;
     }
 
     /*
-    |--------------------------------------------------------------------------
-    | Common
-    |--------------------------------------------------------------------------
-    |
-    |
-    */
+     |--------------------------------------------------------------------------
+     | Common
+     |--------------------------------------------------------------------------
+     |
+     |
+     */
 
     /**
      * HtmlTag constructor.
      *
      * @param array $arguments
      */
-    public function __construct($arguments = [ ])
+    public function __construct($arguments = [])
     {
-        if (! empty($arguments)) {
+        if (!empty($arguments)) {
             if (is_array($arguments)) {
                 foreach ($arguments as $key => $value) {
                     if (in_array($key, array_keys($this->globalAttributes))) {
-                        $this->globalAttributes[ $key ] = $value;
-                    } elseif (in_array($key, array_keys($this->attributes))) {
-                        $this->attributes[ $key ] = $value;
-                    } elseif ('content' == $key) {
+                        $this->globalAttributes[$key] = $value;
+                    }
+                    elseif (in_array($key, array_keys($this->attributes))) {
+                        $this->attributes[$key] = $value;
+                    }
+                    elseif ('content' == $key) {
                         $this->content = $value;
-                    } elseif ('class' == $key) {
+                    }
+                    elseif ('class' == $key) {
                         $this->class = $value;
                     }
                 }
-            } elseif (is_string($arguments)) {
+            }
+            elseif (is_string($arguments)) {
                 $this->content = $arguments;
             }
         }
@@ -273,15 +280,15 @@ abstract class HtmlTag
         }
 
         if (in_array($name, array_keys($this->globalAttributes))) {
-            return is_null($this->globalAttributes[ $name ]) ? '' : $this->globalAttributes[ $name ];
+            return is_null($this->globalAttributes[$name]) ? '' : $this->globalAttributes[$name];
         }
 
         if (in_array($name, array_keys($this->attributes))) {
-            return is_null($this->attributes[ $name ]) ? '' : $this->attributes[ $name ];
+            return is_null($this->attributes[$name]) ? '' : $this->attributes[$name];
         }
 
         if (in_array($name, array_keys($this->guardedAttributes))) {
-            return is_null($this->guardedAttributes[ $name ]) ? '' : $this->guardedAttributes[ $name ];
+            return is_null($this->guardedAttributes[$name]) ? '' : $this->guardedAttributes[$name];
         }
     }
 
@@ -292,15 +299,15 @@ abstract class HtmlTag
         }
 
         if (in_array($name, array_keys($this->globalAttributes))) {
-            return $this->globalAttributes[ $name ] = $value;
+            return $this->globalAttributes[$name] = $value;
         }
 
         if (in_array($name, array_keys($this->attributes))) {
-            return $this->attributes[ $name ] = $value;
+            return $this->attributes[$name] = $value;
         }
 
         if (in_array($name, array_keys($this->guardedAttributes))) {
-            return $this->guardedAttributes[ $name ] = $value;
+            return $this->guardedAttributes[$name] = $value;
         }
     }
 
@@ -317,13 +324,16 @@ abstract class HtmlTag
     public function __call($name, $arguments)
     {
         if (in_array($name, array_keys($this->globalAttributes))) {
-            $this->globalAttributes[ $name ] = $arguments[ 0 ];
-        } elseif (in_array($name, array_keys($this->attributes))) {
-            $this->attributes[ $name ] = $arguments[ 0 ];
-        } elseif (in_array($name, array_keys($this->guardedAttributes))) {
-            $this->guardedAttributes[ $name ] = $arguments[ 0 ];
-        } else {
-            $this->__set($name, $arguments[ 0 ]);
+            $this->globalAttributes[$name] = $arguments[0];
+        }
+        elseif (in_array($name, array_keys($this->attributes))) {
+            $this->attributes[$name] = $arguments[0];
+        }
+        elseif (in_array($name, array_keys($this->guardedAttributes))) {
+            $this->guardedAttributes[$name] = $arguments[0];
+        }
+        else {
+            $this->__set($name, $arguments[0]);
         }
 
         return $this;
@@ -351,7 +361,7 @@ abstract class HtmlTag
         echo $this->formatDataAttributes();
 
         // class
-        if (! empty($this->_class)) {
+        if (!empty($this->_class)) {
             $this->echo_space(sprintf('class="%s"', implode(' ', $this->_class)));
         }
 
@@ -376,11 +386,13 @@ abstract class HtmlTag
     // You can override this method
     protected function beforeOpenTag()
     {
+        return '';
     }
 
     // You can override this method
     protected function afterCloseTag()
     {
+        return '';
     }
 
     private function closeTagWithContent()
@@ -388,7 +400,8 @@ abstract class HtmlTag
         if ('/>' == $this->closeTag()) {
             echo $this->closeTag();
             echo $this->content;
-        } else {
+        }
+        else {
             echo '>';
             echo $this->content;
             echo $this->closeTag();
@@ -397,12 +410,12 @@ abstract class HtmlTag
 
     private function openTag()
     {
-        return $this->markup[ 0 ];
+        return $this->markup[0];
     }
 
     private function closeTag()
     {
-        return $this->markup[ 1 ];
+        return $this->markup[1];
     }
 
     private function echo_space($value)

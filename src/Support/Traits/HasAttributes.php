@@ -17,7 +17,7 @@ trait HasAttributes
     {
         $method = 'get' . Str::studly($name) . 'Attribute';
         if (method_exists($this, $method)) {
-            return $this->{$method}();
+            return $this->{ $method}();
         }
 
         return null;
@@ -33,7 +33,7 @@ trait HasAttributes
     {
         $method = 'set' . Str::studly($name) . 'Attribute';
         if (method_exists($this, $method)) {
-            $this->{$method}($value);
+            $this->{ $method}($value);
         }
     }
 
@@ -46,7 +46,7 @@ trait HasAttributes
     {
         $method = 'isset' . Str::studly($name) . 'Attribute';
         if (method_exists($this, $method)) {
-            $this->{$method}($value);
+            $this->{ $method}();
         }
     }
 
@@ -59,7 +59,7 @@ trait HasAttributes
     {
         $method = 'unset' . Str::studly($name) . 'Attribute';
         if (method_exists($this, $method)) {
-            $this->{$method}($value);
+            $this->{ $method}();
         }
     }
 
@@ -82,7 +82,7 @@ trait HasAttributes
      */
     protected function mutateAttribute($key)
     {
-        return $this->{'get' . Str::studly($key) . 'Attribute'}();
+        return $this->{ 'get' . Str::studly($key) . 'Attribute'}();
     }
 
     /**
@@ -105,6 +105,6 @@ trait HasAttributes
      */
     protected function setMutatedAttributeValue($key, $value)
     {
-        return $this->{'set' . Str::studly($key) . 'Attribute'}($value);
+        return $this->{ 'set' . Str::studly($key) . 'Attribute'}($value);
     }
 }

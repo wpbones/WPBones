@@ -2,7 +2,8 @@
 
 namespace WPKirk\WPBones\Database;
 
-if ( ! defined( 'ABSPATH' ) ) exit;
+if (!defined('ABSPATH'))
+  exit;
 
 class WordPressOption implements \ArrayAccess
 {
@@ -29,14 +30,14 @@ class WordPressOption implements \ArrayAccess
   /**
    * An instance of Plugin class or null.
    *
-   * @var Plugin
+   * @var \WPKirk\WPBones\Foundation\Plugin
    */
   protected $plugin = null;
 
   /**
    * Option record.
    *
-   * @var array|null|object|void
+   * @var array|null|object
    */
   protected $row;
 
@@ -52,32 +53,32 @@ class WordPressOption implements \ArrayAccess
    *
    * @param $plugin
    */
-  public function __construct( $plugin = null )
+  public function __construct($plugin = null)
   {
     global $wpdb;
 
     $this->tableName = $wpdb->options;
 
-    if ( ! is_null( $plugin ) ) {
+    if (!is_null($plugin)) {
       $this->plugin = $plugin;
 
       // in $this->row you'll fond a stdClass with column/property
-      $this->row = $wpdb->get_row( "SELECT * FROM {$this->tableName} WHERE option_name='{$plugin->slug}'" );
+      $this->row = $wpdb->get_row("SELECT * FROM {$this->tableName} WHERE option_name='{$plugin->slug}'");
 
-      if ( is_null( $this->row ) ) {
+      if (is_null($this->row)) {
         $options = include $this->plugin->getBasePath() . '/config/options.php';
 
         $values = [
-          'option_name'  => $this->plugin->slug,
-          'option_value' => json_encode( $options )
+          'option_name' => $this->plugin->slug,
+          'option_value' => json_encode($options)
         ];
-        $result = $wpdb->insert( $this->tableName, $values );
+        $result = $wpdb->insert($this->tableName, $values);
 
-        $this->row = $wpdb->get_row( "SELECT * FROM {$this->tableName} WHERE option_name='{$plugin->slug}'" );
+        $this->row = $wpdb->get_row("SELECT * FROM {$this->tableName} WHERE option_name='{$plugin->slug}'");
       }
 
-      if ( isset( $this->row->option_value ) && ! empty( $this->row->option_value ) ) {
-        $this->_value = (array) json_decode( $this->row->option_value, true );
+      if (isset($this->row->option_value) && !empty($this->row->option_value)) {
+        $this->_value = (array)json_decode($this->row->option_value, true);
       }
     }
   }
@@ -89,7 +90,7 @@ class WordPressOption implements \ArrayAccess
    */
   public function __toString()
   {
-    return json_encode( $this->_value, JSON_PRETTY_PRINT );
+    return json_encode($this->_value, JSON_PRETTY_PRINT);
   }
 
   /**
@@ -97,7 +98,7 @@ class WordPressOption implements \ArrayAccess
    *
    * @return array
    */
-  public function toArray(  )
+  public function toArray()
   {
     return $this->_value;
   }
@@ -114,24 +115,24 @@ class WordPressOption implements \ArrayAccess
    *
    * @return array|mixed|string
    */
-  public function get( $path, $default = "" )
+  public function get($path, $default = "")
   {
-    $path = str_replace( '/', '.', $path );
-    $keys = explode( ".", $path );
+    $path = str_replace('/', '.', $path);
+    $keys = explode(".", $path);
 
     $current = $this->_value;
 
-    foreach ( $keys as $key ) {
+    foreach ($keys as $key) {
 
-      if ( ! isset( $current[ $key ] ) ) {
+      if (!isset($current[$key])) {
         return $default;
       }
 
-      if ( is_object( $current[ $key ] ) ) {
-        $current = (array) $current[ $key ];
+      if (is_object($current[$key])) {
+        $current = (array)$current[$key];
       }
       else {
-        $current = $current[ $key ];
+        $current = $current[$key];
       }
     }
 
@@ -147,53 +148,53 @@ class WordPressOption implements \ArrayAccess
    *
    * @return array|null
    */
-  public function set( $path, $value = null )
+  public function set($path, $value = null)
   {
-    if ( is_null( $value ) ) {
-      return $this->delete( $path );
+    if (is_null($value)) {
+      return $this->delete($path);
     }
 
-    $path = str_replace( '/', '.', $path );
-    $keys = explode( ".", $path );
+    $path = str_replace('/', '.', $path);
+    $keys = explode(".", $path);
 
     $copy = $this->_value;
 
-    $array = &$copy;
+    $array = & $copy;
 
-    foreach ( $keys as $key ) {
-      if ( ! isset( $array[ $key ] ) ) {
-        $array[ $key ] = '';
+    foreach ($keys as $key) {
+      if (!isset($array[$key])) {
+        $array[$key] = '';
       }
 
-      $array = &$array[ $key ];
+      $array = & $array[$key];
     }
 
     $array = $value;
 
-    $this->update( $copy );
+    $this->update($copy);
 
     return $value;
   }
 
 
-  public function offsetSet( $offset, $value )
+  public function offsetSet($offset, $value)
   {
-    $this->set( $offset, $value );
+    $this->set($offset, $value);
   }
 
-  public function offsetExists( $offset )
+  public function offsetExists($offset)
   {
-    return ! is_null( $this->get( $offset, null ) );
+    return !is_null($this->get($offset, null));
   }
 
-  public function offsetUnset( $offset )
+  public function offsetUnset($offset)
   {
-    $this->set( $offset );
+    $this->set($offset);
   }
 
-  public function offsetGet( $offset )
+  public function offsetGet($offset)
   {
-    return $this->get( $offset );
+    return $this->get($offset);
   }
 
   /**
@@ -203,35 +204,35 @@ class WordPressOption implements \ArrayAccess
    *
    * @return array
    */
-  public function delete( $path = '' )
+  public function delete($path = '')
   {
     global $wpdb;
 
-    if ( empty( $path ) ) {
+    if (empty($path)) {
       $this->_value = [];
     }
     else {
-      $path = str_replace( '/', '.', $path );
-      $keys = explode( ".", $path );
+      $path = str_replace('/', '.', $path);
+      $keys = explode(".", $path);
 
-      $lastKey = $keys[ count( $keys ) - 1 ];
+      $lastKey = $keys[count($keys) - 1];
 
-      $array = &$this->_value;
+      $array = & $this->_value;
 
-      foreach ( $keys as $key ) {
-        if ( $key == $lastKey ) {
-          unset( $array[ $key ] );
+      foreach ($keys as $key) {
+        if ($key == $lastKey) {
+          unset($array[$key]);
           break;
         }
-        $array = &$array[ $key ];
+        $array = & $array[$key];
       }
     }
 
     $values = [
-      'option_value' => json_encode( $this->_value )
+      'option_value' => json_encode($this->_value)
     ];
 
-    $result = $wpdb->update( $this->tableName, $values, [ 'option_name' => $this->plugin->slug ] );
+    $result = $wpdb->update($this->tableName, $values, ['option_name' => $this->plugin->slug]);
 
     return $this->_value;
   }
@@ -243,23 +244,23 @@ class WordPressOption implements \ArrayAccess
    *
    * @return false|int
    */
-  public function update( $options = [] )
+  public function update($options = [])
   {
     global $wpdb;
 
-    if ( is_null( $this->row ) ) {
+    if (is_null($this->row)) {
       return $this->reset();
     }
 
-    $mergeOptions = array_replace_recursive( $this->_value, $options );
+    $mergeOptions = array_replace_recursive($this->_value, $options);
 
     $values = [
-      'option_value' => json_encode( $mergeOptions )
+      'option_value' => json_encode($mergeOptions)
     ];
 
-    $result = $wpdb->update( $this->tableName, $values, [ 'option_name' => $this->plugin->slug ] );
+    $result = $wpdb->update($this->tableName, $values, ['option_name' => $this->plugin->slug]);
 
-    $this->_value = (array) json_decode( $values[ 'option_value' ], true );
+    $this->_value = (array)json_decode($values['option_value'], true);
 
     return $result;
 
@@ -274,21 +275,21 @@ class WordPressOption implements \ArrayAccess
   {
     global $wpdb;
 
-    if ( is_null( $this->row ) ) {
+    if (is_null($this->row)) {
       return $this->reset();
     }
 
     $options = include $this->plugin->getBasePath() . '/config/options.php';
 
-    $mergeOptions = $this->__delta( $options, $this->_value );
+    $mergeOptions = $this->__delta($options, $this->_value);
 
     $values = [
-      'option_value' => json_encode( $mergeOptions )
+      'option_value' => json_encode($mergeOptions)
     ];
 
-    $result = $wpdb->update( $this->tableName, $values, [ 'option_name' => $this->plugin->slug ] );
+    $result = $wpdb->update($this->tableName, $values, ['option_name' => $this->plugin->slug]);
 
-    $this->_value = (array) json_decode( $values[ 'option_value' ], true );
+    $this->_value = (array)json_decode($values['option_value'], true);
 
     return $result;
 
@@ -306,13 +307,13 @@ class WordPressOption implements \ArrayAccess
     $options = include $this->plugin->getBasePath() . '/config/options.php';
 
     $values = [
-      'option_name'  => $this->plugin->slug,
-      'option_value' => json_encode( $options )
+      'option_name' => $this->plugin->slug,
+      'option_value' => json_encode($options)
     ];
 
-    $result = $wpdb->update( $this->tableName, $values, [ 'option_name' => $this->plugin->slug ] );
+    $result = $wpdb->update($this->tableName, $values, ['option_name' => $this->plugin->slug]);
 
-    $this->_value = (array) json_decode( $values[ 'option_value' ], true );
+    $this->_value = (array)json_decode($values['option_value'], true);
 
     return $result;
 
@@ -328,23 +329,23 @@ class WordPressOption implements \ArrayAccess
    *
    * @return Object the delta Object tree
    */
-  private function __delta( array $lastVersion, &$result )
+  private function __delta(array $lastVersion, &$result)
   {
     // search for new
-    foreach ( $lastVersion as $key => $value ) {
-      if ( ! is_numeric( $key ) && ! isset( $result[ $key ] ) ) {
-        $result[ $key ] = $value;
+    foreach ($lastVersion as $key => $value) {
+      if (!is_numeric($key) && !isset($result[$key])) {
+        $result[$key] = $value;
       }
 
-      if ( is_array( $value ) && ! is_numeric( $key ) ) {
-        $result[ $key ] = $this->__delta( $lastVersion[ $key ], $result[ $key ] );
+      if (is_array($value) && !is_numeric($key)) {
+        $result[$key] = $this->__delta($lastVersion[$key], $result[$key]);
       }
     }
 
     // search for delete
-    foreach ( $result as $key => $value ) {
-      if ( ! is_numeric( $key ) && ! isset( $lastVersion[ $key ] ) ) {
-        unset( $result[ $key ] );
+    foreach ($result as $key => $value) {
+      if (!is_numeric($key) && !isset($lastVersion[$key])) {
+        unset($result[$key]);
       }
     }
 
