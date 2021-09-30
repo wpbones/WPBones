@@ -446,7 +446,7 @@ namespace Bones {
         /**
          * WP Bones version
          */
-        const VERSION = '1.0.0';
+        const VERSION = '1.0.3';
 
         /**
          * Used for additional kernel command.
@@ -497,7 +497,7 @@ namespace Bones {
         }
 
         /**
-         * Retrun the current Plugin namespace defined in the namespace file.
+         * Return the current Plugin namespace defined in the namespace file.
          *
          * @return string
          */
@@ -653,9 +653,9 @@ namespace Bones {
         /**
          * Return the arguments after "php bones".
          *
-         * @param int $index Optional. Index of argument. 
+         * @param int $index Optional. Index of argument.
          * If NULL will be returned the whole array.
-         *                   
+         *
          * @return mixed|array
          */
         protected function arguments($index = null)
@@ -670,10 +670,10 @@ namespace Bones {
 
         /**
          * Return the params after "php bones [command]".
-         * 
-         * @param int $index Optional. Index of param. 
+         *
+         * @param int $index Optional. Index of param.
          * If NULL will be returned the whole array.
-         * 
+         *
          * @return array
          */
         protected function commandParams($index = null)
@@ -688,9 +688,9 @@ namespace Bones {
 
         /**
          * Commodity function to check if help has been requested.
-         * 
+         *
          * @param string $str Optional. Command to check.
-         * 
+         *
          * @return bool
          */
         protected function isHelp($str = null)
@@ -717,7 +717,7 @@ namespace Bones {
             if (empty($arguments) || $this->isCommand('--help')) {
                 $this->help();
             }
-            // rename 
+            // rename
             elseif ($this->isCommand('rename')) {
                 $this->rename($this->commandParams());
             }
@@ -763,7 +763,7 @@ namespace Bones {
 
         /**
          * Display the full help.
-         * 
+         *
          */
         protected function help()
         {
@@ -813,7 +813,7 @@ namespace Bones {
 
         /**
          * Commodity to display an message in the console.
-         * 
+         *
          * @param string $str The message to display.
          */
         protected function line($str)
@@ -824,7 +824,7 @@ namespace Bones {
 
         /**
          * Commodity to display an error message in the console.
-         * 
+         *
          * @param string $str The message to display.
          */
         protected function error($str)
@@ -836,7 +836,7 @@ namespace Bones {
 
         /**
          * Commodity to display a message in the console.
-         * 
+         *
          * @param string $str The message to display.
          */
         protected function info($str)
@@ -847,7 +847,7 @@ namespace Bones {
 
         /**
          * Get input from console
-         * 
+         *
          * @param string $str The question to ask
          * @param string $default The default value
          */
@@ -1017,7 +1017,7 @@ namespace Bones {
             if (!empty($args[0]) && $args[0] === '--reset') {
                 [$plugin_name, $namespace] = $this->getDefaultPlaginNameAndNamespace();
             }
-            // force namespace as WPKirk after a composer update 
+            // force namespace as WPKirk after a composer update
             elseif (!empty($args[0]) && $args[0] === '--update') {
                 [$search_plugin_name, $search_namespace] = $this->getDefaultPlaginNameAndNamespace();
             }
@@ -1126,45 +1126,61 @@ namespace Bones {
         }
 
         /**
-         * Handle the plugin version by SemVer
-         * 
-         * 
+         * Handle the plugin version by SemVer.
+         * As you know we have to handle two different plugin version: the first one is the plugin version, the second one is the readme.txt version.
+         * This means that we are going to load and check both files.
+         * We have to check if the version are the same as well.
+         *
          */
         protected function version($argv)
         {
-            $readme = file_get_contents('readme.txt');
-            $index = file_get_contents('index.php');
+            // get all contents
+            $readme_txt_content = file_get_contents('readme.txt');
+            $index_php_content = file_get_contents('index.php');
 
-            $readme_lines = explode("\n", $readme);
-            foreach ($readme_lines as $line) {
+            // parse the readme.txt version
+            $lines = explode("\n", $readme_txt_content);
+            foreach ($lines as $line) {
                 if (preg_match('/^[ \t\/*#@]*Stable\s*(.*)$/i', $line, $matches)) {
-                    $version_readme_replace =  $matches[0];
 
+                    /**
+                     * The version is in the format of: Stable tag: 1.0.0
+                     */
+                    $stable_tag_version_from_readme_txt = $matches[0];
 
-                    // get just the version number
-                    $version_readme = preg_replace('/[^0-9.]/', '', $matches[1]);
+                    /**
+                     * The version is in the format of: 1.0.0
+                     */
+                    $version_number_from_readme_txt = preg_replace('/[^0-9.]/', '', $matches[1]);
 
-                    $this->line("\nreadme.txt > $version_readme ($version_readme_replace)");
+                    $this->line("\nreadme.txt > $version_number_from_readme_txt ($stable_tag_version_from_readme_txt)");
                     break;
                 }
             }
 
-            $index_lines = explode("\n", $index);
-            foreach ($index_lines as $line) {
+            // parse the index.php version
+            $lines = explode("\n", $index_php_content);
+            foreach ($lines as $line) {
 
-                // get the plugin version for wordpres comments
+                // get the plugin version for Wordpress comments
                 if (preg_match('/^[ \t\/*#@]*Version:\s*(.*)$/i', $line, $matches)) {
-                    $version_index_replace =  $matches[0];
 
-                    // get just the version number
-                    $version_index = preg_replace('/[^0-9.]/', '', $matches[1]);
+                    /**
+                     * The version is in the format of: * Version: 1.0.0
+                     */
+                    $version_string_from_index_php = $matches[0];
 
-                    $this->line("index.php  > {$version_index} ($version_index_replace)");
+                    /**
+                     * The version is in the format of: 1.0.0
+                     */
+                    $version_number_from_index_php = preg_replace('/[^0-9.]/', '', $matches[1]);
+
+                    $this->line("index.php  > {$version_number_from_index_php} ($version_string_from_index_php)");
                     break;
                 }
             }
 
-            if ($version_index != $version_readme) {
+            if ($version_number_from_index_php != $version_number_from_readme_txt) {
                 $this->error("\nWARNING:\n\nThe version in readme.txt and index.php are different.");
             }
 
@@ -1177,20 +1193,20 @@ namespace Bones {
                 $this->info("  [plugin version]\tThe version of plugin. Examples: '1', '2.0', 'v1', 'v1.2', 'v1-beta.4', 'v1.3+007'");
                 $this->info("  [--major]\tIncrement the major.y.z of plugin.");
                 $this->info("  [--minor]\tIncrement the x.minor.z of plugin.");
-                $this->info("  [--patch]\tIncrement the x.y.patch of plugin.");
+                $this->info("  [--patch]\tIncrement the x.y.patch of plugin.\n");
                 exit(0);
             } elseif (isset($argv[0]) && "--patch" === $argv[0]) {
-                $version = semver($version_index)->incrementPatch();
+                $version = semver($version_number_from_index_php)->incrementPatch();
             } elseif (isset($argv[0]) && "--minor" === $argv[0]) {
-                $version = semver($version_index)->incrementMinor();
+                $version = semver($version_number_from_index_php)->incrementMinor();
             } elseif (isset($argv[0]) && "--major" === $argv[0]) {
-                $version = semver($version_index)->incrementMajor();
+                $version = semver($version_number_from_index_php)->incrementMajor();
             } else {
                 $version = trim($argv[0]);
             }
 
             if ($version === "") {
-                $version = semver($version_index)->incrementPatch();
+                $version = semver($version_number_from_index_php)->incrementPatch();
             }
 
             $version = Version::parse($version);
@@ -1201,19 +1217,23 @@ namespace Bones {
                 return;
             }
 
-            if ($version != $version_index && $version != $version_readme) {
+            if ($version != $version_number_from_index_php || $version != $version_number_from_readme_txt) {
 
-                // replace version in readme.txt
-                $new_stable_tag = str_replace($version_readme, $version, $version_readme_replace);
-                $new_version_readme = str_replace($version_readme_replace, $new_stable_tag, $readme);
+                // We're going to change the "Stable tag: x.y.z" with "Stable tag: $version"
+                $new_stable_tag_version_for_readme_txt = str_replace($version_number_from_readme_txt, $version, $stable_tag_version_from_readme_txt);
 
-                file_put_contents('readme.txt', $new_version_readme);
+                // We're going to change the whole "readme.txt" file
+                $new_readme_txt_content = str_replace($stable_tag_version_from_readme_txt, $new_stable_tag_version_for_readme_txt, $readme_txt_content);
 
-                // replace version in index.php
-                $new_version = str_replace($version_index, $version, $version_index_replace);
-                $new_version_index = str_replace($version_index_replace, $new_version, $index);
+                file_put_contents('readme.txt', $new_readme_txt_content);
 
-                file_put_contents('index.php', $new_version_index);
+                // We're goinf to change the "* Version: x.y.z" with "* Version: $version"
+                $new_version_string_for_index_php = str_replace($version_number_from_index_php, $version, $version_string_from_index_php);
+
+                // We're going to change the whole "index.php" file
+                $new_index_php_content = str_replace($version_string_from_index_php, $new_version_string_for_index_php, $index_php_content);
+
+                file_put_contents('index.php', $new_index_php_content);
 
                 return $this->line("\nVersion updated to {$version}");
             }
@@ -1238,7 +1258,7 @@ namespace Bones {
 
         /**
          * Create a deploy version of the plugin
-         * 
+         *
          * @param string $path The path to the deploy version of the plugin
          */
         protected function deploy($path)
@@ -1331,7 +1351,7 @@ namespace Bones {
 
         /**
          * Install a new composer package
-         * 
+         *
          * @param string $package The composer package to install
          */
         protected function requirePackage($package)
@@ -1373,7 +1393,7 @@ namespace Bones {
 
         /**
          * Delete a whole folder
-         * 
+         *
          * @param string $path The path to the folder to delete
          */
         public function deleteDirectory($path)
@@ -1393,7 +1413,7 @@ namespace Bones {
 
         /**
          * Copy a whole folder. Used by deploy()
-         * 
+         *
          * @param string $source The source path
          * @param string $dest The target path
          * @param number $permissions The permissions to set
@@ -1437,7 +1457,7 @@ namespace Bones {
 
         /**
          * Used to skip some files and folders during the deploy
-         * 
+         *
          * @param string $value The file or folder to skip
          */
         protected function skip($value)
@@ -1449,7 +1469,7 @@ namespace Bones {
 
         /**
          * Create a migrate file
-         * 
+         *
          * @param string $table The table name
          */
         protected function createMigrate($tablename)
@@ -1482,7 +1502,7 @@ namespace Bones {
 
         /**
          * Create a Custom Post Type controller
-         * 
+         *
          * @param string $className The class name
          */
         protected function createCustomPostType($className)
@@ -1529,7 +1549,7 @@ namespace Bones {
 
         /**
          * Create a Custom Taxonomy controller
-         * 
+         *
          * @param string $className The class name
          */
         protected function createCustomTaxonomyType($className)
@@ -1582,7 +1602,7 @@ namespace Bones {
 
         /**
          * Create a controller
-         * 
+         *
          * @param string $className The class name
          */
         protected function createController($className)
@@ -1629,7 +1649,7 @@ namespace Bones {
 
         /**
          * Create a Command controller
-         * 
+         *
          * @param string $className The class name
          */
         protected function createCommand($className)
@@ -1683,7 +1703,7 @@ namespace Bones {
 
         /**
          * Create a Shortcode controller
-         * 
+         *
          * @param string $className The class name
          */
         protected function createShortcode($className)
@@ -1718,7 +1738,7 @@ namespace Bones {
 
         /**
          * Create a Service Provider
-         * 
+         *
          * @param string $className The class name
          */
         protected function createProvider($className)
@@ -1751,7 +1771,7 @@ namespace Bones {
 
         /**
          * Create a Widget controller
-         * 
+         *
          * @param string $className The class name
          */
         protected function createWidget($className)
@@ -1800,7 +1820,7 @@ namespace Bones {
 
         /**
          * Create a Ajax controller
-         * 
+         *
          * @param string $className The class name
          */
         protected function createAjax($className)
@@ -1835,7 +1855,7 @@ namespace Bones {
 
         /**
          * Create a database Model
-         * 
+         *
          * @param string $className The class name
          */
         protected function createModel($className)
