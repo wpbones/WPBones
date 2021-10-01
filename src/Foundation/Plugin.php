@@ -599,8 +599,9 @@ class Plugin extends Container implements PluginContract
 
     private function initEloquent()
     {
-        if (class_exists('\Illuminate\Database\Capsule\Manager')) {
-            $capsule = new \Illuminate\Database\Capsule\Manager;
+        $eloquent = '\Illuminate\Database\Capsule\Manager';
+        if (class_exists($eloquent)) {
+            $capsule = new $eloquent;
 
             $capsule->addConnection([
                 'driver' => 'mysql',
