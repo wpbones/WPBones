@@ -408,7 +408,7 @@ class Plugin extends Container implements PluginContract
      * @param string $filename A PHP Filename file.
      *
      * @return array|bool
-     * 
+     *
      * @suppress PHP0415
      */
     private function getFileClasses($filename)
@@ -630,76 +630,5 @@ class Plugin extends Container implements PluginContract
     private function initApi()
     {
         (new RestProvider($this))->register();
-
-
-
-        // --- TEST BELOW ---
-
-        add_action('rest_api_init', function () {
-            register_rest_route('jon/v1', '/permission', array(
-                'methods' => 'GET',
-                'callback' => function () {
-                return "OK";
-            }
-                ,
-                'permission_callback' => function () {
-                return current_user_can('edit_posts');
-                ;
-            }
-            ));
-        });
-
-    // add_action('rest_api_init', function () {
-    //     register_rest_route('jon/v1', '/example', [
-    //       'methods' => ['GET', 'POST'],
-    //       'callback' => function () {
-    //           return wp_send_json(["description" => "Hello, from WPKirk API"]);
-    //       },
-    //      ]);
-    // });
-
-    // $api_path = $this->basePath . '/api';
-
-    // $api_folder_exists = file_exists($api_path);
-
-    // function dirToArray($dir)
-    // {
-    //     $contents = [];
-
-    //     foreach (scandir($dir) as $node) {
-    //         if ($node == '.' || $node == '..') {
-    //             continue;
-    //         }
-    //         if (is_dir($dir . '/' . $node)) {
-    //             $contents[$node] = dirToArray($dir . '/' . $node);
-    //         } else {
-    //             $contents = $node;
-    //         }
-    //     }
-    //     return $contents;
-    // }
-
-    // function array_flatten($array, $path = '')
-    // {
-    //     $result = [];
-
-    //     foreach ($array as $key => $value) {
-    //         if (is_array($value)) {
-    //             $new = array_flatten($value, $path . $key . '/');
-    //             $result = array_merge($result, $new);
-    //         } else {
-    //             $result[$path.$key] = $value;
-    //         }
-    //     }
-    //     return $result;
-    // }
-
-    // if ($api_folder_exists) {
-    //     $struct = dirToArray($api_path);
-
-    //     $routes = array_flatten($struct);
-
-    //     error_log(var_export($routes, true));
-    // }
     }
 }
