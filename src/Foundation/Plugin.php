@@ -384,8 +384,17 @@ class Plugin extends Container implements PluginContract
             }
         }
 
-        // seeders
+        // TODO: We will remove this in the future due to wrong folder name
+        // REMOVE: This is for backward compatibility
+        // Below the correct folder name is `database/seeders`
         foreach (glob("{$this->basePath}/database/seeds/*.php") as $filename) {
+            include $filename;
+            foreach ($this->getFileClasses($filename) as $className) {
+                $instance = new $className;
+            }
+        }
+
+        foreach (glob("{$this->basePath}/database/seeders/*.php") as $filename) {
             include $filename;
             foreach ($this->getFileClasses($filename) as $className) {
                 $instance = new $className;

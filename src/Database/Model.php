@@ -3,6 +3,7 @@
 namespace WPKirk\WPBones\Database;
 
 use  WPKirk\WPBones\Database\Support\Collection;
+use ArrayObject;
 
 /**
  * The Database Model provides a base class for all database models.
@@ -11,11 +12,18 @@ use  WPKirk\WPBones\Database\Support\Collection;
  *
  * You should extend this class to create your own model.
  *
+ * TODO: Improve column as property
  *
+ * We have to improve the get column as property because a column can be
  *
+ * - 'foo_bar'
+ * - 'foo bar'
+ * - 'foo-bar'
+ *
+ * Of course, currently you will be able to get just $record->foo_bar
  */
 
-abstract class Model
+abstract class Model extends ArrayObject
 {
 
     /**
@@ -48,13 +56,6 @@ abstract class Model
     private $columns = [];
 
     /**
-     * The single row object.
-     *
-     * @var object
-     */
-    private $record;
-
-    /**
      * The collection of rows.
      *
      * @var \WPKirk\WPBones\Database\Support\Collection
@@ -73,18 +74,8 @@ abstract class Model
 
         // init a single record
         if (!is_null($record)) {
-            $this->setRecord($record);
+            parent::__construct($record, ArrayObject::ARRAY_AS_PROPS);
         }
-    }
-
-    /**
-     * Store the single record information.
-     *
-     * @param stdClass $record
-     */
-    private function setRecord($record)
-    {
-        $this->record = $record;
     }
 
     /*
@@ -106,7 +97,7 @@ abstract class Model
         $column_string = is_array($columns) ? implode(',', $columns) : implode(',', func_get_args());
 
         $sql = "SELECT $column_string FROM `{$this->getTableName()}`";
-        $results = $this->wpdb->get_results($sql);
+        $results = $this->wpdb->get_results($sql, ARRAY_A);
 
         /**
          *     [0] => stdClass Object
@@ -154,11 +145,18 @@ abstract class Model
      */
     public function __get($name)
     {
-        if (isset($this->record->{$name})) {
-            return $this->record->{$name};
+        error_log(print_r($name, true));
+
+        if (isset($this->offsetExists[$name])) {
+            return $this->offsetGet[$name];
         }
 
         return null;
+    }
+
+    public function __isset($index)
+    {
+        return $this->offsetExists($index);
     }
 
     /**
@@ -188,7 +186,17 @@ abstract class Model
      */
     public function __toString()
     {
-        return json_encode($this->record);
+        return json_encode($this);
+    }
+
+    /**
+     * Return a JSON pretty version of the collection.
+     *
+     * @return string
+     */
+    public function dump()
+    {
+        return json_encode(json_decode((string) $this), JSON_PRETTY_PRINT);
     }
      
 
@@ -290,16 +298,29 @@ abstract class Model
      |
      */
 
+    /**
+     * Get the table name.
+     *
+     * @return string
+     */
     protected function getTableName()
     {
         return $this->getWordPressTableName($this->table);
     }
 
+    /**
+     * Set the table name.
+     */
     protected function setTableName($table)
     {
         $this->table = $table;
     }
 
+    /**
+     * Return the WordPress database object.
+     *
+     * @return object
+     */
     protected function getWpdb()
     {
         return $this->wpdb;

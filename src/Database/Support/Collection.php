@@ -50,7 +50,7 @@ class Collection extends ArrayObject
             return json_decode((string) $e);
         }, $this->getArrayCopy());
 
-        error_log(print_r($array, true));
+        //error_log(print_r($array, true));
 
         return json_encode($array);
     }
