@@ -89,8 +89,6 @@ class DB extends ArrayObject
         'not similar to', 'not ilike', '~~*', '!~~*',
     ];
 
-    public static $instances = [];
-
     /**
      * The collection of rows.
      *
@@ -113,14 +111,6 @@ class DB extends ArrayObject
         }
     }
 
-    private static function getInstance($table)
-    {
-        if (!isset(self::$instances[$table])) {
-            self::$instances[$table] = new static(null,$table);
-        }
-        return self::$instances[$table];
-    }
-
     /*
     |--------------------------------------------------------------------------
     | Public methods
@@ -137,9 +127,7 @@ class DB extends ArrayObject
      */
     public static function table($table)
     {
-        $instance = self::getInstance($table);
-
-        return $instance ;
+        return new static(null,$table);
     }
 
     /**
@@ -156,9 +144,9 @@ class DB extends ArrayObject
                $this->getWhere() .
                $this->getOrderBy() .
                $this->getLimit() .
-                $this->getOffset() ;
+               $this->getOffset();
         
-        logger()->info($sql);
+        //logger()->info($sql);
                 
         $results = $this->wpdb->get_results($sql, ARRAY_A);
 
@@ -192,9 +180,94 @@ class DB extends ArrayObject
         return $this->collection;
     }
 
-    protected function get()
+    /**
+     * Insert one or more records.
+     *
+     * @param array $values The data to insert.
+     *
+     * @return int|array The inserted id.
+     */
+    protected function insert($values)
     {
-        return $this->all();
+        // here we can get a single or multiple array of values
+        if (count($values) !== count($values, COUNT_RECURSIVE)) {
+            $ids = [];
+            foreach ($values as $value) {
+                $ids[] = $this->insert($value);
+            }
+            return $ids;
+        }
+
+        $columns = array_keys($values);
+
+        [$columns, $values] = $this->getColumnsAndValues($values);
+
+        $sql = "INSERT INTO `{$this->getTableName()}` " .
+               "($columns) " .
+               "VALUES " .
+               "($values)";
+        
+
+        //logger()->info($sql);
+
+        $this->wpdb->query($sql);
+
+        return $this->wpdb->insert_id;
+    }
+
+    /**
+     * Truncate the table.
+     */
+    protected function truncate()
+    {
+        $sql = "TRUNCATE TABLE `{$this->getTableName()}`";
+        $this->wpdb->query($sql);
+        return $this;
+    }
+
+    protected function delete()
+    {
+        $sql = "DELETE " .
+               "FROM `{$this->getTableName()}`" .
+               $this->getWhere();
+
+        $this->wpdb->query($sql);
+        return $this;
+    }
+
+
+    /**
+     * Return a single record by usign the primary key.
+     */
+    protected function get($id = null)
+    {
+        if (is_null($id)) {
+            return $this->all();
+        }
+
+        $sql = "SELECT * " .
+               "FROM `{$this->getTableName()}`" .
+               $this->getWhereId($id);
+        
+        //logger()->info($sql);
+                
+        $result = $this->wpdb->get_row($sql, ARRAY_A);
+
+        /**
+         * Array
+         *  (
+         *      [log_id] => 3
+         *      [user_id] => 3
+         *      [activity] => running
+         *      [object_id] => 0
+         *      [object_type] => post
+         *      [activity_date] => 0000-00-00 00:00:00
+         *      [foo_bar] => 1
+         *      [foo-bar] => 2
+         *  )
+         */
+
+        return new static($result);
     }
 
     /**
@@ -205,10 +278,16 @@ class DB extends ArrayObject
     protected function where($column, $operator = null, $value = null, $boolean = 'and')
     {
         if (is_array($column)) {
-            foreach ($column as $value) {
-                [$column, $operator, $value] = $value;
-                $this->where($column, $operator, $value);
+            if (count($column) !== count($column, COUNT_RECURSIVE)) {
+                foreach ($column as $value) {
+                    [$c, $operator, $value] = $value;
+                    $this->where($c, $operator, $value);
+                }
+            } else {
+                [$c, $operator, $value] = $column;
+                $this->where($c, $operator, $value);
             }
+       
             return $this;
         }
 
@@ -220,8 +299,8 @@ class DB extends ArrayObject
 
         $this->wheres[] = compact('column', 'operator', 'value', 'boolean');
 
-        // error_log(print_r($this->wheres, true));
-        // error_log(print_r($this->getWhere(), true));
+        //error_log(print_r($this->wheres, true));
+        //error_log(print_r($this->getWhere(), true));
 
         return $this;
     }
@@ -238,59 +317,6 @@ class DB extends ArrayObject
         );
 
         return $this->where($column, $operator, $value, 'or');
-    }
-
-    protected function prepareValueAndOperator($value, $operator, $useDefault = false)
-    {
-        if ($useDefault) {
-            return [$operator, '='];
-        } elseif ($this->invalidOperatorAndValue($operator, $value)) {
-            throw new \InvalidArgumentException('Illegal operator and value combination.');
-        }
-
-        return [$value, $operator];
-    }
-
-    /**
-     * Return the "where" part of the query.
-     *
-     * @return string
-     */
-    protected function getWhere()
-    {
-        $where = ' WHERE 1 ';
-        if (!empty($this->wheres)) {
-            foreach ($this->wheres as $where_item) {
-                $where .= strtoupper($where_item['boolean']) . ' ' . $where_item['column'] . ' ' . $this->getWhereOperator($where_item['operator']) . ' ' . $this->getWhereValue($where_item['value']) . ' ';
-            }
-        }
-        return $where;
-    }
-
-    /**
-     * Return the operator for the where clause.
-     *
-     * @param  string $operator
-     */
-    protected function getWhereOperator($operator)
-    {
-        if (in_array(strtolower($operator), $this->operators, true)) {
-            return strtolower($operator);
-        }
-        return '=';
-    }
-
-    /**
-     * Return the right format for the where value.
-     *
-     * @param  string $value
-     */
-    protected function getWhereValue($value)
-    {
-        if (is_string($value)) {
-            return "'" . $value . "'";
-        }
-        return $value;
     }
 
     /**
@@ -327,7 +353,7 @@ class DB extends ArrayObject
 
     /*
      |--------------------------------------------------------------------------
-     | Magic methods
+     | Magic methods and Public
      |--------------------------------------------------------------------------
      |
      |
@@ -397,11 +423,63 @@ class DB extends ArrayObject
      */
 
     /**
-     * Retyurn the "order by" clause.
+     * Return column and value for the query.
+     *
+     * @param array $values
+     * @return array
+     */
+    private function getColumnsAndValues($values)
+    {
+        $columns = array_keys($values);
+        $columns_string = implode(',', $columns);
+        $values_string = implode(',', array_map(function ($value) {
+            return "'" . $this->wpdb->_real_escape($value) . "'";
+        }, $values));
+
+        return [$columns_string, $values_string];
+    }
+
+    /**
+     * Return the value and operator for the query.
+     *
+     * @param mixed $value
+     * @param string $operator
+     * @param bool $useDefault
+     *
+     * @return array
+     */
+    private function prepareValueAndOperator($value, $operator, $useDefault = false)
+    {
+        if ($useDefault) {
+            return [$operator, '='];
+        } elseif ($this->invalidOperatorAndValue($operator, $value)) {
+            throw new \InvalidArgumentException('Illegal operator and value combination.');
+        }
+
+        return [$value, $operator];
+    }
+
+    /**
+     * Return the "where" clause for the primary key.
+     *
+     * @param int $id
+     * @return string
+     */
+    private function getWhereId($id)
+    {
+        if (!empty($id)) {
+            return " WHERE `{$this->primaryKey}` = " . $id;
+        }
+
+        return '';
+    }
+
+    /**
+     * Return the "order by" clause.
      *
      * @return string
      */
-    protected function getOrderBy()
+    private function getOrderBy()
     {
         if (!empty($this->orders)) {
             $orders = [];
@@ -418,7 +496,7 @@ class DB extends ArrayObject
      *
      * @return string
      */
-    protected function getLimit()
+    private function getLimit()
     {
         if (!empty($this->limit)) {
             return ' LIMIT ' . $this->limit;
@@ -432,7 +510,7 @@ class DB extends ArrayObject
      *
      * @return string
      */
-    protected function getOffset()
+    private function getOffset()
     {
         if (!empty($this->offset)) {
             $offset =  max(0, (int) $this->offset);
@@ -445,6 +523,48 @@ class DB extends ArrayObject
         }
 
         return '';
+    }
+
+    /**
+     * Return the "where" part of the query.
+     *
+     * @return string
+     */
+    private function getWhere()
+    {
+        $where = ' WHERE 1 ';
+        if (!empty($this->wheres)) {
+            foreach ($this->wheres as $where_item) {
+                $where .= strtoupper($where_item['boolean']) . ' ' . $where_item['column'] . ' ' . $this->getWhereOperator($where_item['operator']) . ' ' . $this->getWhereValue($where_item['value']) . ' ';
+            }
+        }
+        return $where;
+    }
+
+    /**
+     * Return the operator for the where clause.
+     *
+     * @param  string $operator
+     */
+    private function getWhereOperator($operator)
+    {
+        if (in_array(strtolower($operator), $this->operators, true)) {
+            return strtolower($operator);
+        }
+        return '=';
+    }
+
+    /**
+     * Return the right format for the where value.
+     *
+     * @param  string $value
+     */
+    private function getWhereValue($value)
+    {
+        if (is_string($value)) {
+            return "'" . $value . "'";
+        }
+        return $value;
     }
 
 
