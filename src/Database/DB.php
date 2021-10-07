@@ -225,10 +225,28 @@ class DB extends ArrayObject
         return $this;
     }
 
+    /**
+     * Delete one or more records.
+     */
     protected function delete()
     {
         $sql = "DELETE " .
                "FROM `{$this->getTableName()}`" .
+               $this->getWhere();
+
+        $this->wpdb->query($sql);
+        return $this;
+    }
+
+    protected function update($values)
+    {
+        $set = implode(',', array_map(function ($key) use ($values) {
+            return "`$key` = " . (is_numeric($values[$key]) ? $values[$key] : "'$values[$key]'");
+        }, array_keys($values)));
+
+        
+        $sql = "UPDATE `{$this->getTableName()}` " .
+               "SET {$set}" .
                $this->getWhere();
 
         $this->wpdb->query($sql);
