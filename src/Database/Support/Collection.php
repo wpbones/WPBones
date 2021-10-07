@@ -26,7 +26,7 @@ class Collection extends ArrayObject
      */
     public function first()
     {
-        return $this->offsetGet(0);
+        return $this->offsetExists(0) ? $this->offsetGet(0) : $this;
     }
 
     /**
@@ -34,7 +34,8 @@ class Collection extends ArrayObject
      */
     public function last()
     {
-        return $this->offsetGet($this->count() - 1);
+        $index = $this->count() - 1;
+        return $this->offsetExists($index) ? $this->offsetGet($index) : $this;
     }
 
     /**
