@@ -9,22 +9,29 @@ use WPKirk\WPBones\Database\DB;
  *
  * @package WPKirk\WPBones\Database
  *
+ * @method static all()
  *
  */
 
 abstract class Model extends DB
 {
+    /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
+    protected $table;
 
     /**
-     * The primary key column name.
+     * The primary key for the model.
      *
      * @var string
      */
     protected $primaryKey = 'id';
 
-    public function __construct($record = null)
+    public function __construct()
     {
-        parent::__construct($record, $this->table);
+        parent::__construct($this->table, $this->primaryKey);
     }
 
     /**
