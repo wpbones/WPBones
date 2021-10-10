@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="robots" content="index, follow, all" />
+    <title>WPKirk\WPBones\Database\Support\Model | WP Bones API</title>
+
+            <link rel="stylesheet" type="text/css" href="../../../../css/bootstrap.min.css">
+        <link rel="stylesheet" type="text/css" href="../../../../css/bootstrap-theme.min.css">
+        <link rel="stylesheet" type="text/css" href="../../../../css/sami.css">
+        <script src="../../../../js/jquery-1.11.1.min.js"></script>
+        <script src="../../../../js/bootstrap.min.js"></script>
+        <script src="../../../../js/typeahead.min.js"></script>
+        <script src="../../../../sami.js"></script>
+        <meta name="MobileOptimized" content="width">
+        <meta name="HandheldFriendly" content="true">
+        <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+    
+    
+    </head>
+
+    <body id="class" data-name="class:WPKirk_WPBones_Database_Support_Model" data-root-path="../../../../">
+            <div id="content">
+        <div id="left-column">
+                <div id="control-panel">
+                    <form action="#" method="GET">
+                <select id="version-switcher" name="version">
+                                            <option value="../../../../../0.8.35/index.html" data-version="0.8.35">0.8.35</option>
+                                            <option value="../../../../../0.8.36/index.html" data-version="0.8.36">0.8.36</option>
+                                            <option value="../../../../../0.8.37/index.html" data-version="0.8.37">0.8.37</option>
+                                            <option value="../../../../../0.8.38/index.html" data-version="0.8.38">0.8.38</option>
+                                            <option value="../../../../../0.9.0/index.html" data-version="0.9.0">0.9.0</option>
+                                            <option value="../../../../../0.9.1/index.html" data-version="0.9.1">0.9.1</option>
+                                            <option value="../../../../../0.9.2/index.html" data-version="0.9.2">0.9.2</option>
+                                            <option value="../../../../../0.9.3/index.html" data-version="0.9.3">0.9.3</option>
+                                            <option value="../../../../../0.9.4/index.html" data-version="0.9.4">0.9.4</option>
+                                            <option value="../../../../../0.9.5/index.html" data-version="0.9.5">0.9.5</option>
+                                            <option value="../../../../../0.9.6/index.html" data-version="0.9.6">0.9.6</option>
+                                            <option value="../../../../../0.9.7/index.html" data-version="0.9.7">0.9.7</option>
+                                            <option value="../../../../../0.9.8/index.html" data-version="0.9.8">0.9.8</option>
+                                            <option value="../../../../../0.9.9/index.html" data-version="0.9.9">0.9.9</option>
+                                            <option value="../../../../../0.9.10/index.html" data-version="0.9.10">0.9.10</option>
+                                            <option value="../../../../../0.9.11/index.html" data-version="0.9.11">0.9.11</option>
+                                            <option value="../../../../../0.9.12/index.html" data-version="0.9.12">0.9.12</option>
+                                            <option value="../../../../../0.9.22/index.html" data-version="0.9.22">0.9.22</option>
+                                            <option value="../../../../../0.9.23/index.html" data-version="0.9.23">0.9.23</option>
+                                            <option value="../../../../../0.9.30/index.html" data-version="0.9.30">0.9.30</option>
+                                            <option value="../../../../../0.9.50/index.html" data-version="0.9.50">0.9.50</option>
+                                            <option value="../../../../../0.9.51/index.html" data-version="0.9.51">0.9.51</option>
+                                            <option value="../../../../../0.10.0/index.html" data-version="0.10.0">0.10.0</option>
+                                            <option value="../../../../../0.11.0/index.html" data-version="0.11.0">0.11.0</option>
+                                            <option value="../../../../../0.11.1/index.html" data-version="0.11.1">0.11.1</option>
+                                            <option value="../../../../../0.11.2/index.html" data-version="0.11.2">0.11.2</option>
+                                            <option value="../../../../../0.11.3/index.html" data-version="0.11.3">0.11.3</option>
+                                            <option value="../../../../../0.12.0/index.html" data-version="0.12.0">0.12.0</option>
+                                            <option value="../../../../../master/index.html" data-version="master">master branch</option>
+                                            <option value="../../../../../develop/index.html" data-version="develop">develop branch</option>
+                                    </select>
+            </form>
+                <script>
+            $('option[data-version="'+window.projectVersion+'"]').prop('selected', true);
+        </script>
+        <form id="search-form" action="../../../../search.html" method="GET">
+            <span class="glyphicon glyphicon-search"></span>
+            <input name="search"
+                   class="typeahead form-control"
+                   type="search"
+                   placeholder="Search">
+        </form>
+    </div>
+
+                <div id="api-tree"></div>
+
+        </div>
+        <div id="right-column">
+                <nav id="site-nav" class="navbar navbar-default" role="navigation">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-elements">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="../../../../index.html">WP Bones API</a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar-elements">
+                <ul class="nav navbar-nav">
+                    <li><a href="../../../../classes.html">Classes</a></li>
+                                            <li><a href="../../../../namespaces.html">Namespaces</a></li>
+                                        <li><a href="../../../../interfaces.html">Interfaces</a></li>
+                    <li><a href="../../../../traits.html">Traits</a></li>
+                    <li><a href="../../../../doc-index.html">Index</a></li>
+                    <li><a href="../../../../search.html">Search</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+                        <div class="namespace-breadcrumbs">
+            <ol class="breadcrumb">
+                <li><span class="label label-default">class</span></li>
+                        <li><a href="../../../../WPKirk.html">WPKirk</a></li><li class="backslash">\</li><li><a href="../../../../WPKirk/WPBones.html">WPBones</a></li><li class="backslash">\</li><li><a href="../../../../WPKirk/WPBones/Database.html">Database</a></li><li class="backslash">\</li><li><a href="../../../../WPKirk/WPBones/Database/Support.html">Support</a></li><li class="backslash">\</li><li>Model</li>
+            </ol>
+        </div>
+                <div id="page-content">
+                
+    <div class="page-header">
+        <h1>
+            Model
+                
+        </h1>
+    </div>
+
+    <p>    class
+    <strong>Model</strong>
+</p>
+
+        
+    
+
+    
+    
+    
+            <h2>Properties</h2>
+
+            <table class="table table-condensed">
+                    <tr>
+                <td class="type" id="property_queryBuilder">
+                                        protected                                        <a href="../../../../WPKirk/WPBones/Database/QueryBuilder.html"><abbr title="WPKirk\WPBones\Database\QueryBuilder">QueryBuilder</abbr></a>
+                </td>
+                <td>$queryBuilder</td>
+                <td class="last">The queryBuilder instance.</td>
+                <td></td>
+            </tr>
+                    <tr>
+                <td class="type" id="property_attributes">
+                                        protected                                        array
+                </td>
+                <td>$attributes</td>
+                <td class="last">A key-value array of attributes of the attributes.</td>
+                <td></td>
+            </tr>
+            </table>
+
+    
+            <h2>Methods</h2>
+
+            <div class="container-fluid underlined">
+                    <div class="row">
+                <div class="col-md-2 type">
+                    
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method___construct">__construct</a>($attributes, $queryBuilder)
+        
+                                            <p class="no-description">No description</p>
+                                    </div>
+                <div class="col-md-2"></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_delete">delete</a>()
+        
+                                            <p>Delete the attributes from the database.</p>                </div>
+                <div class="col-md-2"></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_update">update</a>($attributes = null)
+        
+                                            <p>Update the attributes in the database.</p>                </div>
+                <div class="col-md-2"></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_save">save</a>()
+        
+                                            <p>Save the attributes to the database.</p>                </div>
+                <div class="col-md-2"></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    string
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_getPrimaryKey">getPrimaryKey</a>()
+        
+                                            <p>Return the primary key name.</p>                </div>
+                <div class="col-md-2"></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    string
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_getPrimaryKeyValue">getPrimaryKeyValue</a>()
+        
+                                            <p>Return the primary key value.</p>                </div>
+                <div class="col-md-2"></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    <a href="../../../../WPKirk/WPBones/Database/QueryBuilder.html"><abbr title="WPKirk\WPBones\Database\QueryBuilder">QueryBuilder</abbr></a>
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_newQueryBuilder">newQueryBuilder</a>()
+        
+                                            <p>Create a new queryBuilder instance.</p>                </div>
+                <div class="col-md-2"></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    <a href="../../../../WPKirk/WPBones/Database/Support/Model.html"><abbr title="WPKirk\WPBones\Database\Support\Model">Model</abbr></a>
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_getParentModel">getParentModel</a>()
+        
+                                            <p>Return the parent model to be able ti use accessor and mutator methods.</p>                </div>
+                <div class="col-md-2"></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method___get">__get</a>($name)
+        
+                                            <p>Return the value of the given attribute.</p>                </div>
+                <div class="col-md-2"></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method___set">__set</a>($name, $value)
+        
+                                            <p>Set the value of the given attribute.</p>                </div>
+                <div class="col-md-2"></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    string
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method___toString">__toString</a>()
+        
+                                            <p>Return the JSON representation of the attributes.</p>                </div>
+                <div class="col-md-2"></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    string
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_dump">dump</a>()
+        
+                                            <p>Return a JSON pretty version of the attributes.</p>                </div>
+                <div class="col-md-2"></div>
+            </div>
+            </div>
+
+
+        <h2>Details</h2>
+
+            <div id="method-details">
+                    <div class="method-item">
+                    <h3 id="method___construct">
+        <div class="location">at         line 29</div>
+        <code>                    
+    <strong>__construct</strong>($attributes, $queryBuilder)
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                <div class="tags">
+                            <h4>Parameters</h4>
+
+                    <table class="table table-condensed">
+                    <tr>
+                <td></td>
+                <td>$attributes</td>
+                <td></td>
+            </tr>
+                    <tr>
+                <td></td>
+                <td>$queryBuilder</td>
+                <td></td>
+            </tr>
+            </table>
+
+            
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_delete">
+        <div class="location">at         line 46</div>
+        <code>                    
+    <strong>delete</strong>()
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                    <div class="method-description">
+                                    <p>Delete the attributes from the database.</p>                                                </div>
+                <div class="tags">
+            
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_update">
+        <div class="location">at         line 55</div>
+        <code>                    
+    <strong>update</strong>($attributes = null)
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                    <div class="method-description">
+                                    <p>Update the attributes in the database.</p>                                                </div>
+                <div class="tags">
+                            <h4>Parameters</h4>
+
+                    <table class="table table-condensed">
+                    <tr>
+                <td></td>
+                <td>$attributes</td>
+                <td></td>
+            </tr>
+            </table>
+
+            
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_save">
+        <div class="location">at         line 67</div>
+        <code>                    
+    <strong>save</strong>()
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                    <div class="method-description">
+                                    <p>Save the attributes to the database.</p>                    <p>It's an alias of update().</p>                            </div>
+                <div class="tags">
+            
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_getPrimaryKey">
+        <div class="location">at         line 84</div>
+        <code>            protected        string
+    <strong>getPrimaryKey</strong>()
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                    <div class="method-description">
+                                    <p>Return the primary key name.</p>                                                </div>
+                <div class="tags">
+            
+                            <h4>Return Value</h4>
+
+                    <table class="table table-condensed">
+        <tr>
+            <td>string</td>
+            <td></td>
+        </tr>
+    </table>
+
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_getPrimaryKeyValue">
+        <div class="location">at         line 93</div>
+        <code>            protected        string
+    <strong>getPrimaryKeyValue</strong>()
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                    <div class="method-description">
+                                    <p>Return the primary key value.</p>                                                </div>
+                <div class="tags">
+            
+                            <h4>Return Value</h4>
+
+                    <table class="table table-condensed">
+        <tr>
+            <td>string</td>
+            <td></td>
+        </tr>
+    </table>
+
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_newQueryBuilder">
+        <div class="location">at         line 103</div>
+        <code>            protected        <a href="../../../../WPKirk/WPBones/Database/QueryBuilder.html"><abbr title="WPKirk\WPBones\Database\QueryBuilder">QueryBuilder</abbr></a>
+    <strong>newQueryBuilder</strong>()
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                    <div class="method-description">
+                                    <p>Create a new queryBuilder instance.</p>                                                </div>
+                <div class="tags">
+            
+                            <h4>Return Value</h4>
+
+                    <table class="table table-condensed">
+        <tr>
+            <td><a href="../../../../WPKirk/WPBones/Database/QueryBuilder.html"><abbr title="WPKirk\WPBones\Database\QueryBuilder">QueryBuilder</abbr></a></td>
+            <td></td>
+        </tr>
+    </table>
+
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_getParentModel">
+        <div class="location">at         line 114</div>
+        <code>            protected        <a href="../../../../WPKirk/WPBones/Database/Support/Model.html"><abbr title="WPKirk\WPBones\Database\Support\Model">Model</abbr></a>
+    <strong>getParentModel</strong>()
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                    <div class="method-description">
+                                    <p>Return the parent model to be able ti use accessor and mutator methods.</p>                    <p>Here also we're goinf to inject the attributes to the model.</p>                            </div>
+                <div class="tags">
+            
+                            <h4>Return Value</h4>
+
+                    <table class="table table-condensed">
+        <tr>
+            <td><a href="../../../../WPKirk/WPBones/Database/Support/Model.html"><abbr title="WPKirk\WPBones\Database\Support\Model">Model</abbr></a></td>
+            <td></td>
+        </tr>
+    </table>
+
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method___get">
+        <div class="location">at         line 134</div>
+        <code>                    
+    <strong>__get</strong>($name)
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                    <div class="method-description">
+                                    <p>Return the value of the given attribute.</p>                                                </div>
+                <div class="tags">
+                            <h4>Parameters</h4>
+
+                    <table class="table table-condensed">
+                    <tr>
+                <td></td>
+                <td>$name</td>
+                <td></td>
+            </tr>
+            </table>
+
+            
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method___set">
+        <div class="location">at         line 158</div>
+        <code>                    
+    <strong>__set</strong>($name, $value)
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                    <div class="method-description">
+                                    <p>Set the value of the given attribute.</p>                                                </div>
+                <div class="tags">
+                            <h4>Parameters</h4>
+
+                    <table class="table table-condensed">
+                    <tr>
+                <td></td>
+                <td>$name</td>
+                <td></td>
+            </tr>
+                    <tr>
+                <td></td>
+                <td>$value</td>
+                <td></td>
+            </tr>
+            </table>
+
+            
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method___toString">
+        <div class="location">at         line 181</div>
+        <code>                    string
+    <strong>__toString</strong>()
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                    <div class="method-description">
+                                    <p>Return the JSON representation of the attributes.</p>                                                </div>
+                <div class="tags">
+            
+                            <h4>Return Value</h4>
+
+                    <table class="table table-condensed">
+        <tr>
+            <td>string</td>
+            <td></td>
+        </tr>
+    </table>
+
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_dump">
+        <div class="location">at         line 191</div>
+        <code>                    string
+    <strong>dump</strong>()
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                    <div class="method-description">
+                                    <p>Return a JSON pretty version of the attributes.</p>                                                </div>
+                <div class="tags">
+            
+                            <h4>Return Value</h4>
+
+                    <table class="table table-condensed">
+        <tr>
+            <td>string</td>
+            <td></td>
+        </tr>
+    </table>
+
+            
+            
+                    </div>
+    </div>
+
+            </div>
+            </div>
+
+    
+            </div>
+                <div id="footer">
+        Generated by <a href="http://sami.sensiolabs.org/">Sami, the API Documentation Generator</a>.
+    </div>
+
+        </div>
+    </div>
+    </body>
+
+</html>

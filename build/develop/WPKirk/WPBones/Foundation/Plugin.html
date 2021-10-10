@@ -48,6 +48,11 @@
                                             <option value="../../../../0.9.50/index.html" data-version="0.9.50">0.9.50</option>
                                             <option value="../../../../0.9.51/index.html" data-version="0.9.51">0.9.51</option>
                                             <option value="../../../../0.10.0/index.html" data-version="0.10.0">0.10.0</option>
+                                            <option value="../../../../0.11.0/index.html" data-version="0.11.0">0.11.0</option>
+                                            <option value="../../../../0.11.1/index.html" data-version="0.11.1">0.11.1</option>
+                                            <option value="../../../../0.11.2/index.html" data-version="0.11.2">0.11.2</option>
+                                            <option value="../../../../0.11.3/index.html" data-version="0.11.3">0.11.3</option>
+                                            <option value="../../../../0.12.0/index.html" data-version="0.12.0">0.12.0</option>
                                             <option value="../../../../master/index.html" data-version="master">master branch</option>
                                             <option value="../../../../develop/index.html" data-version="develop">develop branch</option>
                                     </select>
@@ -116,6 +121,20 @@
     
 
     
+            <h2>Traits</h2>
+
+        
+    <div class="container-fluid underlined">
+                    <div class="row">
+                <div class="col-md-6">
+                                            <a href="../../../WPKirk/WPBones/Support/Traits/HasAttributes.html"><abbr title="WPKirk\WPBones\Support\Traits\HasAttributes">HasAttributes</abbr></a>
+                                            
+                </div>
+                <div class="col-md-6">
+                    
+                </div>
+            </div>
+            </div>
     
     
             <h2>Properties</h2>
@@ -183,6 +202,87 @@
             <h2>Methods</h2>
 
             <div class="container-fluid underlined">
+                    <div class="row">
+                <div class="col-md-2 type">
+                    
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method___get">__get</a>($name)
+        
+                                            <p class="no-description">No description</p>
+                                    </div>
+                <div class="col-md-2"></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method___set">__set</a>(string $name, mixed $value)
+        
+                                            <p>Set the value of the method <code>set{Name}Attribute</code>.</p>                </div>
+                <div class="col-md-2"><small>from&nbsp;<a href="../../../WPKirk/WPBones/Support/Traits/HasAttributes.html#method___set"><abbr title="WPKirk\WPBones\Support\Traits\HasAttributes">HasAttributes</abbr></a></small></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method___isset">__isset</a>(string $name)
+        
+                                            <p>Extend the __isset method to check for the method <code>get{Name}Attribute</code>.</p>                </div>
+                <div class="col-md-2"><small>from&nbsp;<a href="../../../WPKirk/WPBones/Support/Traits/HasAttributes.html#method___isset"><abbr title="WPKirk\WPBones\Support\Traits\HasAttributes">HasAttributes</abbr></a></small></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method___unset">__unset</a>(string $name)
+        
+                                            <p>Extend the __unset method to check for the method <code>get{Name}Attribute</code>.</p>                </div>
+                <div class="col-md-2"><small>from&nbsp;<a href="../../../WPKirk/WPBones/Support/Traits/HasAttributes.html#method___unset"><abbr title="WPKirk\WPBones\Support\Traits\HasAttributes">HasAttributes</abbr></a></small></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    bool
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_hasGetMutator">hasGetMutator</a>(string $key)
+        
+                                            <p>Determine if a get mutator exists for an attribute.</p>                </div>
+                <div class="col-md-2"><small>from&nbsp;<a href="../../../WPKirk/WPBones/Support/Traits/HasAttributes.html#method_hasGetMutator"><abbr title="WPKirk\WPBones\Support\Traits\HasAttributes">HasAttributes</abbr></a></small></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    mixed
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_mutateAttribute">mutateAttribute</a>(string $key)
+        
+                                            <p>Get the value of an attribute using its mutator.</p>                </div>
+                <div class="col-md-2"><small>from&nbsp;<a href="../../../WPKirk/WPBones/Support/Traits/HasAttributes.html#method_mutateAttribute"><abbr title="WPKirk\WPBones\Support\Traits\HasAttributes">HasAttributes</abbr></a></small></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    bool
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_hasSetMutator">hasSetMutator</a>(string $key)
+        
+                                            <p>Determine if a set mutator exists for an attribute.</p>                </div>
+                <div class="col-md-2"><small>from&nbsp;<a href="../../../WPKirk/WPBones/Support/Traits/HasAttributes.html#method_hasSetMutator"><abbr title="WPKirk\WPBones\Support\Traits\HasAttributes">HasAttributes</abbr></a></small></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    mixed
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_setMutatedAttributeValue">setMutatedAttributeValue</a>(string $key, mixed $value)
+        
+                                            <p>Set the value of an attribute using its mutator.</p>                </div>
+                <div class="col-md-2"><small>from&nbsp;<a href="../../../WPKirk/WPBones/Support/Traits/HasAttributes.html#method_setMutatedAttributeValue"><abbr title="WPKirk\WPBones\Support\Traits\HasAttributes">HasAttributes</abbr></a></small></div>
+            </div>
                     <div class="row">
                 <div class="col-md-2 type">
                     
@@ -266,17 +366,6 @@
                 </div>
                 <div class="col-md-8 type">
                     <a href="#method_getImagesAttribute">getImagesAttribute</a>()
-        
-                                            <p class="no-description">No description</p>
-                                    </div>
-                <div class="col-md-2"></div>
-            </div>
-                    <div class="row">
-                <div class="col-md-2 type">
-                    
-                </div>
-                <div class="col-md-8 type">
-                    <a href="#method___get">__get</a>($name)
         
                                             <p class="no-description">No description</p>
                                     </div>
@@ -468,6 +557,17 @@
                                     </div>
                 <div class="col-md-2"></div>
             </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_getCallableHook">getCallableHook</a>($routes)
+        
+                                            <p class="no-description">No description</p>
+                                    </div>
+                <div class="col-md-2"></div>
+            </div>
             </div>
 
 
@@ -475,8 +575,300 @@
 
             <div id="method-details">
                     <div class="method-item">
+                    <h3 id="method___get">
+        <div class="location">at         line 194</div>
+        <code>                    
+    <strong>__get</strong>($name)
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                <div class="tags">
+                            <h4>Parameters</h4>
+
+                    <table class="table table-condensed">
+                    <tr>
+                <td></td>
+                <td>$name</td>
+                <td></td>
+            </tr>
+            </table>
+
+            
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method___set">
+        <div class="location">in <a href="../../../WPKirk/WPBones/Support/Traits/HasAttributes.html#method___set"><abbr title="WPKirk\WPBones\Support\Traits\HasAttributes">HasAttributes</abbr></a> at         line 32</div>
+        <code>                    
+    <strong>__set</strong>(string $name, mixed $value)
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                    <div class="method-description">
+                                    <p>Set the value of the method <code>set{Name}Attribute</code>.</p>                                                </div>
+                <div class="tags">
+                            <h4>Parameters</h4>
+
+                    <table class="table table-condensed">
+                    <tr>
+                <td>string</td>
+                <td>$name</td>
+                <td>Usually the protected property name.</td>
+            </tr>
+                    <tr>
+                <td>mixed</td>
+                <td>$value</td>
+                <td></td>
+            </tr>
+            </table>
+
+            
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method___isset">
+        <div class="location">in <a href="../../../WPKirk/WPBones/Support/Traits/HasAttributes.html#method___isset"><abbr title="WPKirk\WPBones\Support\Traits\HasAttributes">HasAttributes</abbr></a> at         line 45</div>
+        <code>                    
+    <strong>__isset</strong>(string $name)
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                    <div class="method-description">
+                                    <p>Extend the __isset method to check for the method <code>get{Name}Attribute</code>.</p>                                                </div>
+                <div class="tags">
+                            <h4>Parameters</h4>
+
+                    <table class="table table-condensed">
+                    <tr>
+                <td>string</td>
+                <td>$name</td>
+                <td>Usually the protected property name.</td>
+            </tr>
+            </table>
+
+            
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method___unset">
+        <div class="location">in <a href="../../../WPKirk/WPBones/Support/Traits/HasAttributes.html#method___unset"><abbr title="WPKirk\WPBones\Support\Traits\HasAttributes">HasAttributes</abbr></a> at         line 58</div>
+        <code>                    
+    <strong>__unset</strong>(string $name)
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                    <div class="method-description">
+                                    <p>Extend the __unset method to check for the method <code>get{Name}Attribute</code>.</p>                                                </div>
+                <div class="tags">
+                            <h4>Parameters</h4>
+
+                    <table class="table table-condensed">
+                    <tr>
+                <td>string</td>
+                <td>$name</td>
+                <td>Usually the protected property name.</td>
+            </tr>
+            </table>
+
+            
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_hasGetMutator">
+        <div class="location">in <a href="../../../WPKirk/WPBones/Support/Traits/HasAttributes.html#method_hasGetMutator"><abbr title="WPKirk\WPBones\Support\Traits\HasAttributes">HasAttributes</abbr></a> at         line 72</div>
+        <code>                    bool
+    <strong>hasGetMutator</strong>(string $key)
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                    <div class="method-description">
+                                    <p>Determine if a get mutator exists for an attribute.</p>                                                </div>
+                <div class="tags">
+                            <h4>Parameters</h4>
+
+                    <table class="table table-condensed">
+                    <tr>
+                <td>string</td>
+                <td>$key</td>
+                <td></td>
+            </tr>
+            </table>
+
+            
+                            <h4>Return Value</h4>
+
+                    <table class="table table-condensed">
+        <tr>
+            <td>bool</td>
+            <td></td>
+        </tr>
+    </table>
+
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_mutateAttribute">
+        <div class="location">in <a href="../../../WPKirk/WPBones/Support/Traits/HasAttributes.html#method_mutateAttribute"><abbr title="WPKirk\WPBones\Support\Traits\HasAttributes">HasAttributes</abbr></a> at         line 83</div>
+        <code>            protected        mixed
+    <strong>mutateAttribute</strong>(string $key)
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                    <div class="method-description">
+                                    <p>Get the value of an attribute using its mutator.</p>                                                </div>
+                <div class="tags">
+                            <h4>Parameters</h4>
+
+                    <table class="table table-condensed">
+                    <tr>
+                <td>string</td>
+                <td>$key</td>
+                <td></td>
+            </tr>
+            </table>
+
+            
+                            <h4>Return Value</h4>
+
+                    <table class="table table-condensed">
+        <tr>
+            <td>mixed</td>
+            <td></td>
+        </tr>
+    </table>
+
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_hasSetMutator">
+        <div class="location">in <a href="../../../WPKirk/WPBones/Support/Traits/HasAttributes.html#method_hasSetMutator"><abbr title="WPKirk\WPBones\Support\Traits\HasAttributes">HasAttributes</abbr></a> at         line 94</div>
+        <code>                    bool
+    <strong>hasSetMutator</strong>(string $key)
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                    <div class="method-description">
+                                    <p>Determine if a set mutator exists for an attribute.</p>                                                </div>
+                <div class="tags">
+                            <h4>Parameters</h4>
+
+                    <table class="table table-condensed">
+                    <tr>
+                <td>string</td>
+                <td>$key</td>
+                <td></td>
+            </tr>
+            </table>
+
+            
+                            <h4>Return Value</h4>
+
+                    <table class="table table-condensed">
+        <tr>
+            <td>bool</td>
+            <td></td>
+        </tr>
+    </table>
+
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_setMutatedAttributeValue">
+        <div class="location">in <a href="../../../WPKirk/WPBones/Support/Traits/HasAttributes.html#method_setMutatedAttributeValue"><abbr title="WPKirk\WPBones\Support\Traits\HasAttributes">HasAttributes</abbr></a> at         line 106</div>
+        <code>            protected        mixed
+    <strong>setMutatedAttributeValue</strong>(string $key, mixed $value)
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                    <div class="method-description">
+                                    <p>Set the value of an attribute using its mutator.</p>                                                </div>
+                <div class="tags">
+                            <h4>Parameters</h4>
+
+                    <table class="table table-condensed">
+                    <tr>
+                <td>string</td>
+                <td>$key</td>
+                <td></td>
+            </tr>
+                    <tr>
+                <td>mixed</td>
+                <td>$value</td>
+                <td></td>
+            </tr>
+            </table>
+
+            
+                            <h4>Return Value</h4>
+
+                    <table class="table table-condensed">
+        <tr>
+            <td>mixed</td>
+            <td></td>
+        </tr>
+    </table>
+
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
                     <h3 id="method___construct">
-        <div class="location">at         line 66</div>
+        <div class="location">at         line 70</div>
         <code>                    
     <strong>__construct</strong>($basePath)
         </code>
@@ -505,7 +897,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_boot">
-        <div class="location">at         line 73</div>
+        <div class="location">at         line 77</div>
         <code>                    
     <strong>boot</strong>()
         </code>
@@ -524,7 +916,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_getOptionsAttribute">
-        <div class="location">at         line 145</div>
+        <div class="location">at         line 156</div>
         <code>            protected        
     <strong>getOptionsAttribute</strong>()
         </code>
@@ -543,7 +935,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_getRequestAttribute">
-        <div class="location">at         line 154</div>
+        <div class="location">at         line 165</div>
         <code>            protected        
     <strong>getRequestAttribute</strong>()
         </code>
@@ -562,7 +954,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_getPluginBasenameAttribute">
-        <div class="location">at         line 163</div>
+        <div class="location">at         line 174</div>
         <code>            protected        
     <strong>getPluginBasenameAttribute</strong>()
         </code>
@@ -581,7 +973,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_getCssAttribute">
-        <div class="location">at         line 168</div>
+        <div class="location">at         line 179</div>
         <code>            protected        
     <strong>getCssAttribute</strong>()
         </code>
@@ -600,7 +992,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_getJsAttribute">
-        <div class="location">at         line 173</div>
+        <div class="location">at         line 184</div>
         <code>            protected        
     <strong>getJsAttribute</strong>()
         </code>
@@ -619,7 +1011,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_getImagesAttribute">
-        <div class="location">at         line 178</div>
+        <div class="location">at         line 189</div>
         <code>            protected        
     <strong>getImagesAttribute</strong>()
         </code>
@@ -637,37 +1029,8 @@
 
             </div>
                     <div class="method-item">
-                    <h3 id="method___get">
-        <div class="location">at         line 183</div>
-        <code>                    
-    <strong>__get</strong>($name)
-        </code>
-    </h3>
-    <div class="details">
-            
-    
-
-                <div class="tags">
-                            <h4>Parameters</h4>
-
-                    <table class="table table-condensed">
-                    <tr>
-                <td></td>
-                <td>$name</td>
-                <td></td>
-            </tr>
-            </table>
-
-            
-            
-            
-                    </div>
-    </div>
-
-            </div>
-                    <div class="method-item">
                     <h3 id="method_set_screen_option">
-        <div class="location">at         line 195</div>
+        <div class="location">at         line 205</div>
         <code>                    
     <strong>set_screen_option</strong>($status, $option, $value)
         </code>
@@ -706,7 +1069,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_config">
-        <div class="location">at         line 214</div>
+        <div class="location">at         line 224</div>
         <code>                    mixed
     <strong>config</strong>(array|string $key = null, mixed $default = null)
         </code>
@@ -751,7 +1114,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_getBasePath">
-        <div class="location">at         line 249</div>
+        <div class="location">at         line 259</div>
         <code>                    string
     <strong>getBasePath</strong>()
         </code>
@@ -781,7 +1144,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_getBaseUri">
-        <div class="location">at         line 259</div>
+        <div class="location">at         line 269</div>
         <code>                    string
     <strong>getBaseUri</strong>()
         </code>
@@ -811,7 +1174,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_vendor">
-        <div class="location">at         line 264</div>
+        <div class="location">at         line 274</div>
         <code>                    
     <strong>vendor</strong>($vendor = &quot;wpbones&quot;)
         </code>
@@ -840,7 +1203,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_env">
-        <div class="location">at         line 277</div>
+        <div class="location">at         line 287</div>
         <code>                    mixed
     <strong>env</strong>(string $key, mixed $default = null)
         </code>
@@ -885,7 +1248,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_view">
-        <div class="location">at         line 290</div>
+        <div class="location">at         line 300</div>
         <code>                    <a href="../../../WPKirk/WPBones/View/View.html"><abbr title="WPKirk\WPBones\View\View">View</abbr></a>
     <strong>view</strong>(null $key = null, null $data = null)
         </code>
@@ -930,7 +1293,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_getPageUrl">
-        <div class="location">at         line 297</div>
+        <div class="location">at         line 307</div>
         <code>                    
     <strong>getPageUrl</strong>($pageSlug)
         </code>
@@ -959,7 +1322,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_provider">
-        <div class="location">at         line 302</div>
+        <div class="location">at         line 312</div>
         <code>                    
     <strong>provider</strong>($name)
         </code>
@@ -988,7 +1351,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_css">
-        <div class="location">at         line 320</div>
+        <div class="location">at         line 330</div>
         <code>                    
     <strong>css</strong>(string|array $filename, array $deps = [], null $version = null)
         </code>
@@ -1029,7 +1392,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_js">
-        <div class="location">at         line 344</div>
+        <div class="location">at         line 354</div>
         <code>                    
     <strong>js</strong>(string|array $filename, array $deps = [], null $version = null, bool $footer = true)
         </code>
@@ -1075,7 +1438,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_activation">
-        <div class="location">at         line 363</div>
+        <div class="location">at         line 373</div>
         <code>                    
     <strong>activation</strong>()
         </code>
@@ -1096,7 +1459,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_deactivation">
-        <div class="location">at         line 431</div>
+        <div class="location">at         line 441</div>
         <code>                    
     <strong>deactivation</strong>()
         </code>
@@ -1117,7 +1480,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_init">
-        <div class="location">at         line 446</div>
+        <div class="location">at         line 456</div>
         <code>                    
     <strong>init</strong>()
         </code>
@@ -1142,7 +1505,7 @@ themselves on it for all sorts of reasons (e.g. they need a user, a taxonomy, et
             </div>
                     <div class="method-item">
                     <h3 id="method_isAjax">
-        <div class="location">at         line 513</div>
+        <div class="location">at         line 508</div>
         <code>                    bool
     <strong>isAjax</strong>()
         </code>
@@ -1172,7 +1535,7 @@ themselves on it for all sorts of reasons (e.g. they need a user, a taxonomy, et
             </div>
                     <div class="method-item">
                     <h3 id="method_log">
-        <div class="location">at         line 527</div>
+        <div class="location">at         line 522</div>
         <code>                    
     <strong>log</strong>()
         </code>
@@ -1191,7 +1554,7 @@ themselves on it for all sorts of reasons (e.g. they need a user, a taxonomy, et
             </div>
                     <div class="method-item">
                     <h3 id="method_admin_menu">
-        <div class="location">at         line 535</div>
+        <div class="location">at         line 530</div>
         <code>                    
     <strong>admin_menu</strong>()
         </code>
@@ -1212,7 +1575,7 @@ themselves on it for all sorts of reasons (e.g. they need a user, a taxonomy, et
             </div>
                     <div class="method-item">
                     <h3 id="method_widgets_init">
-        <div class="location">at         line 696</div>
+        <div class="location">at         line 539</div>
         <code>                    
     <strong>widgets_init</strong>()
         </code>
@@ -1222,6 +1585,35 @@ themselves on it for all sorts of reasons (e.g. they need a user, a taxonomy, et
     
 
                 <div class="tags">
+            
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_getCallableHook">
+        <div class="location">at         line 553</div>
+        <code>                    
+    <strong>getCallableHook</strong>($routes)
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                <div class="tags">
+                            <h4>Parameters</h4>
+
+                    <table class="table table-condensed">
+                    <tr>
+                <td></td>
+                <td>$routes</td>
+                <td></td>
+            </tr>
+            </table>
+
             
             
             

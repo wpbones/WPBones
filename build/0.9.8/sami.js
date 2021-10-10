@@ -1,5 +1,5 @@
 
-window.projectVersion = '0.9.7';
+window.projectVersion = '0.9.8';
 
 (function(root) {
 
