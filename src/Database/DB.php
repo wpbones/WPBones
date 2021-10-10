@@ -11,6 +11,11 @@ use WPKirk\WPBones\Database\QueryBuilder;
 
 class DB
 {
+    /**
+     * The query builder instance.
+     *
+     * @var \WPKirk\WPBones\Database\QueryBuilder
+     */
     protected $queryBuilder;
 
     public function __construct($table, $primaryKey = 'id')
@@ -62,6 +67,12 @@ class DB
     |
     */
 
+    /**
+     * Proxy method for the query builder.
+     *
+     * @param string $name The method name.
+     * @param array $arguments The method arguments.
+     */
     public function __call($name, $arguments)
     {
         // we're goinf to call the same queryBuilder methods

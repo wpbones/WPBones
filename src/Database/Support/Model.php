@@ -19,15 +19,16 @@ class Model
     protected $queryBuilder;
 
     /**
-     * A key-value array of attributes of the record.
+     * A key-value array of attributes of the attributes.
      *
      * @var array
      */
-    protected $record = [];
+    protected $attributes = [];
 
-    public function __construct($record, $queryBuilder)
+
+    public function __construct($attributes, $queryBuilder)
     {
-        $this->record = $record;
+        $this->attributes = $attributes;
         $this->queryBuilder = $queryBuilder;
     }
 
@@ -40,7 +41,7 @@ class Model
     */
 
     /**
-     * Delete the record from the database.
+     * Delete the attributes from the database.
      */
     public function delete()
     {
@@ -49,14 +50,23 @@ class Model
     }
 
     /**
-     * Update the record in the database.
+     * Update the attributes in the database.
      */
-    public function update($record = null)
+    public function update($attributes = null)
     {
-        $record = $record ?: $this->record;
+        $attributes = $attributes ?: $this->attributes;
 
         return $this->newQueryBuilder()
-        ->where($this->getPrimaryKey(), $this->getPrimaryKeyValue())->update($record);
+        ->where($this->getPrimaryKey(), $this->getPrimaryKeyValue())->update($attributes);
+    }
+
+    /**
+     * Save the attributes to the database.
+     * It's an alias of update().
+     */
+    public function save()
+    {
+        return $this->update();
     }
 
     /*
@@ -82,7 +92,7 @@ class Model
      */
     protected function getPrimaryKeyValue()
     {
-        return $this->record[$this->queryBuilder->getPrimaryKey()];
+        return $this->attributes[$this->queryBuilder->getPrimaryKey()];
     }
 
     /**
@@ -93,6 +103,20 @@ class Model
     protected function newQueryBuilder()
     {
         return new QueryBuilder($this->queryBuilder->getTable(), $this->queryBuilder->getPrimaryKey());
+    }
+
+    /**
+     * Return the parent model to be able ti use accessor and mutator methods.
+     * Here also we're goinf to inject the attributes to the model.
+     *
+     * @return Model
+     */
+    protected function getParentModel()
+    {
+        $model = $this->queryBuilder->getParentModel();
+        // inject the attributes atrributes to the model
+        $model->attributes = $this->attributes;
+        return $model;
     }
 
 
@@ -109,17 +133,17 @@ class Model
      */
     public function __get($name)
     {
-        $model = $this->queryBuilder->getParentModel();
+        $model = $this->getParentModel();
         $accessor = 'get' . Str::studly($name) . 'Attribute';
 
-        if (isset($this->record[$name])) {
+        if (isset($this->attributes[$name])) {
 
            // check if an accessor exists for this attribute
             if (method_exists($model, $accessor)) {
-                return $model->{$accessor}($this->record[$name]);
+                return $model->{$accessor}($this->attributes[$name]);
             }
 
-            return $this->record[$name];
+            return $this->attributes[$name];
         }
 
         // check if an accessor exists for this attribute
@@ -133,26 +157,39 @@ class Model
      */
     public function __set($name, $value)
     {
-        $this->record[$name] = $value;
+        $model = $model = $this->getParentModel();
+        $mutator = 'set' . Str::studly($name) . 'Attribute';
+
+        if (isset($this->attributes[$name])) {
+
+            // check if an accessor exists for this attribute
+            if (method_exists($model, $mutator)) {
+                $model->{$mutator}($value);
+
+                return $this->attributes = $model->attributes;
+            }
+        }
+
+        $this->attributes[$name] = $value;
     }
 
     /**
-     * Return the JSON representation of the record.
+     * Return the JSON representation of the attributes.
      *
      * @return string
      */
     public function __toString()
     {
-        return json_encode($this->record);
+        return json_encode($this->attributes);
     }
 
     /**
-     * Return a JSON pretty version of the record.
+     * Return a JSON pretty version of the attributes.
      *
      * @return string
      */
     public function dump()
     {
-        return json_encode($this->record, JSON_PRETTY_PRINT);
+        return json_encode($this->attributes, JSON_PRETTY_PRINT);
     }
 }
