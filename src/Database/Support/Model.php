@@ -3,6 +3,7 @@
 namespace WPKirk\WPBones\Database\Support;
 
 use WPKirk\WPBones\Database\QueryBuilder;
+use WPKirk\WPBones\Support\Str;
 
 if (!defined('ABSPATH')) {
     exit;
@@ -108,8 +109,22 @@ class Model
      */
     public function __get($name)
     {
+        $model = $this->queryBuilder->getParentModel();
+        $accessor = 'get' . Str::studly($name) . 'Attribute';
+
         if (isset($this->record[$name])) {
+
+           // check if an accessor exists for this attribute
+            if (method_exists($model, $accessor)) {
+                return $model->{$accessor}($this->record[$name]);
+            }
+
             return $this->record[$name];
+        }
+
+        // check if an accessor exists for this attribute
+        if (method_exists($model, $accessor)) {
+            return $model->{$accessor}($this);
         }
     }
 

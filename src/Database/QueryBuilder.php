@@ -94,6 +94,11 @@ class QueryBuilder
      */
     private $collection = [];
 
+    /**
+     * The parent model instance used for extends the Model class.
+     */
+    private $parentModel;
+
     public function __construct($table, $primaryKey = "id")
     {
         global $wpdb;
@@ -105,6 +110,16 @@ class QueryBuilder
         // init
         $this->getTableDescription();
     }
+
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Magic methods
+    |--------------------------------------------------------------------------
+    |
+    |
+    */
 
     /*
     |--------------------------------------------------------------------------
@@ -543,9 +558,7 @@ class QueryBuilder
                 "SET {$set} " .
                 $this->getWhere();
 
-        $this->query($sql);
-
-        return $this;
+        return $this->query($sql);
     }
 
     /**
@@ -557,8 +570,6 @@ class QueryBuilder
         $this->query($sql);
         return $this;
     }
-
-
 
     /*
      |--------------------------------------------------------------------------
@@ -929,5 +940,15 @@ class QueryBuilder
     public function getTableName()
     {
         return $this->getWordPressTableName($this->table);
+    }
+
+    public function getParentModel()
+    {
+        return $this->parentModel;
+    }
+
+    public function setParentModel($parentModel)
+    {
+        $this->parentModel = $parentModel;
     }
 }

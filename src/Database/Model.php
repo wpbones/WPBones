@@ -3,6 +3,7 @@
 namespace WPKirk\WPBones\Database;
 
 use WPKirk\WPBones\Database\DB;
+use WPKirk\WPBones\Support\Str;
 
 /**
  * The Database Model provides a base class for all database models.
@@ -31,8 +32,22 @@ abstract class Model extends DB
 
     public function __construct()
     {
+
+        // get the class name
+        $paths = explode('\\', get_called_class());
+        $class = array_pop($paths) ;
+        $this->table = $this->table ?: Str::snake($class);
+
         parent::__construct($this->table, $this->primaryKey);
     }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Magic methods
+    |--------------------------------------------------------------------------
+    |
+    |
+    */
 
     /**
      * We will this magic method to handle all statuc/instance methods.

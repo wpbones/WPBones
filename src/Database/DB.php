@@ -16,6 +16,7 @@ class DB
     public function __construct($table, $primaryKey = 'id')
     {
         $this->queryBuilder = new QueryBuilder($table, $primaryKey);
+        $this->queryBuilder->setParentModel($this);
     }
 
     /*
