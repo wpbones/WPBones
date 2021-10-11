@@ -1,0 +1,1977 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="robots" content="index, follow, all" />
+    <title>WPKirk\WPBones\Database\QueryBuilder | WP Bones API</title>
+
+            <link rel="stylesheet" type="text/css" href="../../../css/bootstrap.min.css">
+        <link rel="stylesheet" type="text/css" href="../../../css/bootstrap-theme.min.css">
+        <link rel="stylesheet" type="text/css" href="../../../css/sami.css">
+        <script src="../../../js/jquery-1.11.1.min.js"></script>
+        <script src="../../../js/bootstrap.min.js"></script>
+        <script src="../../../js/typeahead.min.js"></script>
+        <script src="../../../sami.js"></script>
+        <meta name="MobileOptimized" content="width">
+        <meta name="HandheldFriendly" content="true">
+        <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+    
+    
+    </head>
+
+    <body id="class" data-name="class:WPKirk_WPBones_Database_QueryBuilder" data-root-path="../../../">
+            <div id="content">
+        <div id="left-column">
+                <div id="control-panel">
+                    <form action="#" method="GET">
+                <select id="version-switcher" name="version">
+                                            <option value="../../../../0.8.35/index.html" data-version="0.8.35">0.8.35</option>
+                                            <option value="../../../../0.8.36/index.html" data-version="0.8.36">0.8.36</option>
+                                            <option value="../../../../0.8.37/index.html" data-version="0.8.37">0.8.37</option>
+                                            <option value="../../../../0.8.38/index.html" data-version="0.8.38">0.8.38</option>
+                                            <option value="../../../../0.9.0/index.html" data-version="0.9.0">0.9.0</option>
+                                            <option value="../../../../0.9.1/index.html" data-version="0.9.1">0.9.1</option>
+                                            <option value="../../../../0.9.2/index.html" data-version="0.9.2">0.9.2</option>
+                                            <option value="../../../../0.9.3/index.html" data-version="0.9.3">0.9.3</option>
+                                            <option value="../../../../0.9.4/index.html" data-version="0.9.4">0.9.4</option>
+                                            <option value="../../../../0.9.5/index.html" data-version="0.9.5">0.9.5</option>
+                                            <option value="../../../../0.9.6/index.html" data-version="0.9.6">0.9.6</option>
+                                            <option value="../../../../0.9.7/index.html" data-version="0.9.7">0.9.7</option>
+                                            <option value="../../../../0.9.8/index.html" data-version="0.9.8">0.9.8</option>
+                                            <option value="../../../../0.9.9/index.html" data-version="0.9.9">0.9.9</option>
+                                            <option value="../../../../0.9.10/index.html" data-version="0.9.10">0.9.10</option>
+                                            <option value="../../../../0.9.11/index.html" data-version="0.9.11">0.9.11</option>
+                                            <option value="../../../../0.9.12/index.html" data-version="0.9.12">0.9.12</option>
+                                            <option value="../../../../0.9.22/index.html" data-version="0.9.22">0.9.22</option>
+                                            <option value="../../../../0.9.23/index.html" data-version="0.9.23">0.9.23</option>
+                                            <option value="../../../../0.9.30/index.html" data-version="0.9.30">0.9.30</option>
+                                            <option value="../../../../0.9.50/index.html" data-version="0.9.50">0.9.50</option>
+                                            <option value="../../../../0.9.51/index.html" data-version="0.9.51">0.9.51</option>
+                                            <option value="../../../../0.10.0/index.html" data-version="0.10.0">0.10.0</option>
+                                            <option value="../../../../0.11.0/index.html" data-version="0.11.0">0.11.0</option>
+                                            <option value="../../../../0.11.1/index.html" data-version="0.11.1">0.11.1</option>
+                                            <option value="../../../../0.11.2/index.html" data-version="0.11.2">0.11.2</option>
+                                            <option value="../../../../0.11.3/index.html" data-version="0.11.3">0.11.3</option>
+                                            <option value="../../../../0.12.0/index.html" data-version="0.12.0">0.12.0</option>
+                                            <option value="../../../../master/index.html" data-version="master">master branch</option>
+                                            <option value="../../../../develop/index.html" data-version="develop">develop branch</option>
+                                    </select>
+            </form>
+                <script>
+            $('option[data-version="'+window.projectVersion+'"]').prop('selected', true);
+        </script>
+        <form id="search-form" action="../../../search.html" method="GET">
+            <span class="glyphicon glyphicon-search"></span>
+            <input name="search"
+                   class="typeahead form-control"
+                   type="search"
+                   placeholder="Search">
+        </form>
+    </div>
+
+                <div id="api-tree"></div>
+
+        </div>
+        <div id="right-column">
+                <nav id="site-nav" class="navbar navbar-default" role="navigation">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-elements">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="../../../index.html">WP Bones API</a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar-elements">
+                <ul class="nav navbar-nav">
+                    <li><a href="../../../classes.html">Classes</a></li>
+                                            <li><a href="../../../namespaces.html">Namespaces</a></li>
+                                        <li><a href="../../../interfaces.html">Interfaces</a></li>
+                    <li><a href="../../../traits.html">Traits</a></li>
+                    <li><a href="../../../doc-index.html">Index</a></li>
+                    <li><a href="../../../search.html">Search</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+                        <div class="namespace-breadcrumbs">
+            <ol class="breadcrumb">
+                <li><span class="label label-default">class</span></li>
+                        <li><a href="../../../WPKirk.html">WPKirk</a></li><li class="backslash">\</li><li><a href="../../../WPKirk/WPBones.html">WPBones</a></li><li class="backslash">\</li><li><a href="../../../WPKirk/WPBones/Database.html">Database</a></li><li class="backslash">\</li><li>QueryBuilder</li>
+            </ol>
+        </div>
+                <div id="page-content">
+                
+    <div class="page-header">
+        <h1>
+            QueryBuilder
+                
+        </h1>
+    </div>
+
+    <p>    class
+    <strong>QueryBuilder</strong>
+</p>
+
+        
+    
+
+            <div class="description">
+            <p>Class QueryBuilder</p>                                </div>
+    
+    
+    
+            <h2>Properties</h2>
+
+            <table class="table table-condensed">
+                    <tr>
+                <td class="type" id="property_table">
+                                        protected                                        string
+                </td>
+                <td>$table</td>
+                <td class="last">The database table name.</td>
+                <td></td>
+            </tr>
+                    <tr>
+                <td class="type" id="property_primaryKey">
+                                        protected                                        string
+                </td>
+                <td>$primaryKey</td>
+                <td class="last">The primary key column name.</td>
+                <td></td>
+            </tr>
+                    <tr>
+                <td class="type" id="property_wpdb">
+                                        protected                                        wpdb
+                </td>
+                <td>$wpdb</td>
+                <td class="last">The WordPress database object.</td>
+                <td></td>
+            </tr>
+            </table>
+
+    
+            <h2>Methods</h2>
+
+            <div class="container-fluid underlined">
+                    <div class="row">
+                <div class="col-md-2 type">
+                    
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method___construct">__construct</a>($table, $primaryKey = &quot;id&quot;)
+        
+                                            <p class="no-description">No description</p>
+                                    </div>
+                <div class="col-md-2"></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    <a href="../../../WPKirk/WPBones/Database/Support/Collection.html"><abbr title="WPKirk\WPBones\Database\Support\Collection">Collection</abbr></a>
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_all">all</a>($columns = [&#039;*&#039;])
+        
+                                            <p>Retrun a collection of all the records.</p>                </div>
+                <div class="col-md-2"></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    <a href="../../../WPKirk/WPBones/Database/Support/Collection.html"><abbr title="WPKirk\WPBones\Database\Support\Collection">Collection</abbr></a>
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_get">get</a>()
+        
+                                            <p>Return a collection of records that match the given where conditions.</p>                </div>
+                <div class="col-md-2"></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    <a href="../../../WPKirk/WPBones/Database/Support/Model.html"><abbr title="WPKirk\WPBones\Database\Support\Model">Model</abbr></a>
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_first">first</a>()
+        
+                                            <p>Return the first record that matches the given where conditions.</p>                </div>
+                <div class="col-md-2"></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    <a href="../../../WPKirk/WPBones/Database/Support/Model.html"><abbr title="WPKirk\WPBones\Database\Support\Model">Model</abbr></a>
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_last">last</a>()
+        
+                                            <p>Return the last record that matches the given where conditions.</p>                </div>
+                <div class="col-md-2"></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    <a href="../../../WPKirk/WPBones/Database/Support/Model.html"><abbr title="WPKirk\WPBones\Database\Support\Model">Model</abbr></a>
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_find">find</a>($id)
+        
+                                            <p>Return the record with the given id.</p>                </div>
+                <div class="col-md-2"></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_select">select</a>(array|string $columns = [])
+        
+                                            <p>Set the select columns for the query.</p>                </div>
+                <div class="col-md-2"></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    array
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_pluck">pluck</a>($column_name)
+        
+                                            <p>Return the the values of a single column.</p>                </div>
+                <div class="col-md-2"></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_delete">delete</a>()
+        
+                                            <p>Delete one or more records.</p>                </div>
+                <div class="col-md-2"></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_where">where</a>(string $column, string $operator = null, mixed $value = null, string $boolean = &#039;and&#039;)
+        
+                                            <p>Add a where condition to the query.</p>                </div>
+                <div class="col-md-2"></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_orWhere">orWhere</a>($column, $operator = null, $value = null, $boolean = &#039;or&#039;)
+        
+                                            <p>Add an "or where" condition to the query.</p>                </div>
+                <div class="col-md-2"></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_whereIn">whereIn</a>($column, $value, $boolean = &#039;and&#039;)
+        
+                                            <p>Add a where IN condition to the query.</p>                </div>
+                <div class="col-md-2"></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_orWhereIn">orWhereIn</a>($column, $value)
+        
+                                            <p>Add a where IN condition to the query.</p>                </div>
+                <div class="col-md-2"></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_whereNotIn">whereNotIn</a>($column, $value, $boolean = &#039;and&#039;)
+        
+                                            <p>Add a where NOT IN condition to the query.</p>                </div>
+                <div class="col-md-2"></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_orWhereNotIn">orWhereNotIn</a>($column, $value)
+        
+                                            <p>Add a where NOT IN condition to the query.</p>                </div>
+                <div class="col-md-2"></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_whereBetween">whereBetween</a>($column, $value, $boolean = &#039;and&#039;)
+        
+                                            <p>Add a where BETWEEN condition to the query.</p>                </div>
+                <div class="col-md-2"></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_orWhereBetween">orWhereBetween</a>($column, $value)
+        
+                                            <p>Add a where BETWEEN condition to the query.</p>                </div>
+                <div class="col-md-2"></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_whereNotBetween">whereNotBetween</a>($column, $value, $boolean = &#039;and&#039;)
+        
+                                            <p>Add a where NOT BETWEEN condition to the query.</p>                </div>
+                <div class="col-md-2"></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_orWhereNotBetween">orWhereNotBetween</a>($column, $value)
+        
+                                            <p>Add a where NOT BETWEEN condition to the query.</p>                </div>
+                <div class="col-md-2"></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_orderBy">orderBy</a>($column, $order = &#039;asc&#039;)
+        
+                                            <p>Set the "order by" clause for the query.</p>                </div>
+                <div class="col-md-2"></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_offset">offset</a>($value)
+        
+                                            <p>Set the offset "limit" clause for the query.</p>                </div>
+                <div class="col-md-2"></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_limit">limit</a>($value = 1)
+        
+                                            <p>Set the limit "limit" clause for the query.</p>                </div>
+                <div class="col-md-2"></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    mixed
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_value">value</a>($attribute)
+        
+                                            <p>Return a single column's value from the first result of the query.</p>                </div>
+                <div class="col-md-2"></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    int
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_count">count</a>()
+        
+                                            <p>Return the count of the records that match the given where conditions.</p>                </div>
+                <div class="col-md-2"></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    int|array
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_insert">insert</a>(array $values)
+        
+                                            <p>Insert one or more records.</p>                </div>
+                <div class="col-md-2"></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_update">update</a>(array $values)
+        
+                                            <p>Update one or more records.</p>                </div>
+                <div class="col-md-2"></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_truncate">truncate</a>()
+        
+                                            <p>Truncate the table.</p>                </div>
+                <div class="col-md-2"></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    bool
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_invalidOperatorAndValue">invalidOperatorAndValue</a>(string $operator, mixed $value)
+        
+                                            <p>Determine if the given operator and value combination is legal.</p>                </div>
+                <div class="col-md-2"></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    void
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_getTableDescription">getTableDescription</a>()
+        
+                                            <p>Get the table description.</p>                </div>
+                <div class="col-md-2"></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    string
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_getWordPressTableName">getWordPressTableName</a>($table)
+        
+                                            <p>Commodity method to get a WordPress table name.</p>                </div>
+                <div class="col-md-2"></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    array
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_getSQLResults">getSQLResults</a>($sql, $type = ARRAY_A)
+        
+                                            <p>Execute a wpdb->get_results() query.</p>                </div>
+                <div class="col-md-2"></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    mixed
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_query">query</a>($sql)
+        
+                                            <p>Execute a wpdb->query() query.</p>                </div>
+                <div class="col-md-2"></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    mixed
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_var">var</a>($sql)
+        
+                                            <p>Execute a wpdb->get_var() query.</p>                </div>
+                <div class="col-md-2"></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    string
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_getPrimaryKey">getPrimaryKey</a>()
+        
+                                            <p>Return the primary key.</p>                </div>
+                <div class="col-md-2"></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_setPrimaryKey">setPrimaryKey</a>($primaryKey)
+        
+                                            <p>Set the primary key.</p>                </div>
+                <div class="col-md-2"></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    string
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_getTable">getTable</a>()
+        
+                                            <p>Return the table name without the prefix.</p>                </div>
+                <div class="col-md-2"></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_setTable">setTable</a>(string $table)
+        
+                                            <p>Set the table name without the prefix.</p>                </div>
+                <div class="col-md-2"></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    string
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_getTableName">getTableName</a>()
+        
+                                            <p>Get the table name with the prefix.</p>                </div>
+                <div class="col-md-2"></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_getParentModel">getParentModel</a>()
+        
+                                            <p class="no-description">No description</p>
+                                    </div>
+                <div class="col-md-2"></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_setParentModel">setParentModel</a>($parentModel)
+        
+                                            <p class="no-description">No description</p>
+                                    </div>
+                <div class="col-md-2"></div>
+            </div>
+            </div>
+
+
+        <h2>Details</h2>
+
+            <div id="method-details">
+                    <div class="method-item">
+                    <h3 id="method___construct">
+        <div class="location">at         line 102</div>
+        <code>                    
+    <strong>__construct</strong>($table, $primaryKey = &quot;id&quot;)
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                <div class="tags">
+                            <h4>Parameters</h4>
+
+                    <table class="table table-condensed">
+                    <tr>
+                <td></td>
+                <td>$table</td>
+                <td></td>
+            </tr>
+                    <tr>
+                <td></td>
+                <td>$primaryKey</td>
+                <td></td>
+            </tr>
+            </table>
+
+            
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_all">
+        <div class="location">at         line 137</div>
+        <code>                    <a href="../../../WPKirk/WPBones/Database/Support/Collection.html"><abbr title="WPKirk\WPBones\Database\Support\Collection">Collection</abbr></a>
+    <strong>all</strong>($columns = [&#039;*&#039;])
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                    <div class="method-description">
+                                    <p>Retrun a collection of all the records.</p>                                                </div>
+                <div class="tags">
+                            <h4>Parameters</h4>
+
+                    <table class="table table-condensed">
+                    <tr>
+                <td></td>
+                <td>$columns</td>
+                <td></td>
+            </tr>
+            </table>
+
+            
+                            <h4>Return Value</h4>
+
+                    <table class="table table-condensed">
+        <tr>
+            <td><a href="../../../WPKirk/WPBones/Database/Support/Collection.html"><abbr title="WPKirk\WPBones\Database\Support\Collection">Collection</abbr></a></td>
+            <td></td>
+        </tr>
+    </table>
+
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_get">
+        <div class="location">at         line 185</div>
+        <code>                    <a href="../../../WPKirk/WPBones/Database/Support/Collection.html"><abbr title="WPKirk\WPBones\Database\Support\Collection">Collection</abbr></a>
+    <strong>get</strong>()
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                    <div class="method-description">
+                                    <p>Return a collection of records that match the given where conditions.</p>                                                </div>
+                <div class="tags">
+            
+                            <h4>Return Value</h4>
+
+                    <table class="table table-condensed">
+        <tr>
+            <td><a href="../../../WPKirk/WPBones/Database/Support/Collection.html"><abbr title="WPKirk\WPBones\Database\Support\Collection">Collection</abbr></a></td>
+            <td></td>
+        </tr>
+    </table>
+
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_first">
+        <div class="location">at         line 195</div>
+        <code>                    <a href="../../../WPKirk/WPBones/Database/Support/Model.html"><abbr title="WPKirk\WPBones\Database\Support\Model">Model</abbr></a>
+    <strong>first</strong>()
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                    <div class="method-description">
+                                    <p>Return the first record that matches the given where conditions.</p>                                                </div>
+                <div class="tags">
+            
+                            <h4>Return Value</h4>
+
+                    <table class="table table-condensed">
+        <tr>
+            <td><a href="../../../WPKirk/WPBones/Database/Support/Model.html"><abbr title="WPKirk\WPBones\Database\Support\Model">Model</abbr></a></td>
+            <td></td>
+        </tr>
+    </table>
+
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_last">
+        <div class="location">at         line 207</div>
+        <code>                    <a href="../../../WPKirk/WPBones/Database/Support/Model.html"><abbr title="WPKirk\WPBones\Database\Support\Model">Model</abbr></a>
+    <strong>last</strong>()
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                    <div class="method-description">
+                                    <p>Return the last record that matches the given where conditions.</p>                                                </div>
+                <div class="tags">
+            
+                            <h4>Return Value</h4>
+
+                    <table class="table table-condensed">
+        <tr>
+            <td><a href="../../../WPKirk/WPBones/Database/Support/Model.html"><abbr title="WPKirk\WPBones\Database\Support\Model">Model</abbr></a></td>
+            <td></td>
+        </tr>
+    </table>
+
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_find">
+        <div class="location">at         line 220</div>
+        <code>                    <a href="../../../WPKirk/WPBones/Database/Support/Model.html"><abbr title="WPKirk\WPBones\Database\Support\Model">Model</abbr></a>
+    <strong>find</strong>($id)
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                    <div class="method-description">
+                                    <p>Return the record with the given id.</p>                                                </div>
+                <div class="tags">
+                            <h4>Parameters</h4>
+
+                    <table class="table table-condensed">
+                    <tr>
+                <td></td>
+                <td>$id</td>
+                <td></td>
+            </tr>
+            </table>
+
+            
+                            <h4>Return Value</h4>
+
+                    <table class="table table-condensed">
+        <tr>
+            <td><a href="../../../WPKirk/WPBones/Database/Support/Model.html"><abbr title="WPKirk\WPBones\Database\Support\Model">Model</abbr></a></td>
+            <td></td>
+        </tr>
+    </table>
+
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_select">
+        <div class="location">at         line 231</div>
+        <code>                    
+    <strong>select</strong>(array|string $columns = [])
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                    <div class="method-description">
+                                    <p>Set the select columns for the query.</p>                                                </div>
+                <div class="tags">
+                            <h4>Parameters</h4>
+
+                    <table class="table table-condensed">
+                    <tr>
+                <td>array|string</td>
+                <td>$columns</td>
+                <td>The columns to select.</td>
+            </tr>
+            </table>
+
+            
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_pluck">
+        <div class="location">at         line 245</div>
+        <code>                    array
+    <strong>pluck</strong>($column_name)
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                    <div class="method-description">
+                                    <p>Return the the values of a single column.</p>                                                </div>
+                <div class="tags">
+                            <h4>Parameters</h4>
+
+                    <table class="table table-condensed">
+                    <tr>
+                <td></td>
+                <td>$column_name</td>
+                <td></td>
+            </tr>
+            </table>
+
+            
+                            <h4>Return Value</h4>
+
+                    <table class="table table-condensed">
+        <tr>
+            <td>array</td>
+            <td></td>
+        </tr>
+    </table>
+
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_delete">
+        <div class="location">at         line 260</div>
+        <code>                    
+    <strong>delete</strong>()
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                    <div class="method-description">
+                                    <p>Delete one or more records.</p>                                                </div>
+                <div class="tags">
+            
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_where">
+        <div class="location">at         line 280</div>
+        <code>                    
+    <strong>where</strong>(string $column, string $operator = null, mixed $value = null, string $boolean = &#039;and&#039;)
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                    <div class="method-description">
+                                    <p>Add a where condition to the query.</p>                                                </div>
+                <div class="tags">
+                            <h4>Parameters</h4>
+
+                    <table class="table table-condensed">
+                    <tr>
+                <td>string</td>
+                <td>$column</td>
+                <td>The column name.</td>
+            </tr>
+                    <tr>
+                <td>string</td>
+                <td>$operator</td>
+                <td>The operator.</td>
+            </tr>
+                    <tr>
+                <td>mixed</td>
+                <td>$value</td>
+                <td>The value.</td>
+            </tr>
+                    <tr>
+                <td>string</td>
+                <td>$boolean</td>
+                <td>The boolean operator.</td>
+            </tr>
+            </table>
+
+            
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_orWhere">
+        <div class="location">at         line 317</div>
+        <code>                    
+    <strong>orWhere</strong>($column, $operator = null, $value = null, $boolean = &#039;or&#039;)
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                    <div class="method-description">
+                                    <p>Add an "or where" condition to the query.</p>                                                </div>
+                <div class="tags">
+                            <h4>Parameters</h4>
+
+                    <table class="table table-condensed">
+                    <tr>
+                <td></td>
+                <td>$column</td>
+                <td></td>
+            </tr>
+                    <tr>
+                <td></td>
+                <td>$operator</td>
+                <td></td>
+            </tr>
+                    <tr>
+                <td></td>
+                <td>$value</td>
+                <td></td>
+            </tr>
+                    <tr>
+                <td></td>
+                <td>$boolean</td>
+                <td></td>
+            </tr>
+            </table>
+
+            
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_whereIn">
+        <div class="location">at         line 357</div>
+        <code>                    
+    <strong>whereIn</strong>($column, $value, $boolean = &#039;and&#039;)
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                    <div class="method-description">
+                                    <p>Add a where IN condition to the query.</p>                                                </div>
+                <div class="tags">
+                            <h4>Parameters</h4>
+
+                    <table class="table table-condensed">
+                    <tr>
+                <td></td>
+                <td>$column</td>
+                <td></td>
+            </tr>
+                    <tr>
+                <td></td>
+                <td>$value</td>
+                <td></td>
+            </tr>
+                    <tr>
+                <td></td>
+                <td>$boolean</td>
+                <td></td>
+            </tr>
+            </table>
+
+            
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_orWhereIn">
+        <div class="location">at         line 372</div>
+        <code>                    
+    <strong>orWhereIn</strong>($column, $value)
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                    <div class="method-description">
+                                    <p>Add a where IN condition to the query.</p>                                                </div>
+                <div class="tags">
+                            <h4>Parameters</h4>
+
+                    <table class="table table-condensed">
+                    <tr>
+                <td></td>
+                <td>$column</td>
+                <td></td>
+            </tr>
+                    <tr>
+                <td></td>
+                <td>$value</td>
+                <td></td>
+            </tr>
+            </table>
+
+            
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_whereNotIn">
+        <div class="location">at         line 383</div>
+        <code>                    
+    <strong>whereNotIn</strong>($column, $value, $boolean = &#039;and&#039;)
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                    <div class="method-description">
+                                    <p>Add a where NOT IN condition to the query.</p>                                                </div>
+                <div class="tags">
+                            <h4>Parameters</h4>
+
+                    <table class="table table-condensed">
+                    <tr>
+                <td></td>
+                <td>$column</td>
+                <td></td>
+            </tr>
+                    <tr>
+                <td></td>
+                <td>$value</td>
+                <td></td>
+            </tr>
+                    <tr>
+                <td></td>
+                <td>$boolean</td>
+                <td></td>
+            </tr>
+            </table>
+
+            
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_orWhereNotIn">
+        <div class="location">at         line 398</div>
+        <code>                    
+    <strong>orWhereNotIn</strong>($column, $value)
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                    <div class="method-description">
+                                    <p>Add a where NOT IN condition to the query.</p>                                                </div>
+                <div class="tags">
+                            <h4>Parameters</h4>
+
+                    <table class="table table-condensed">
+                    <tr>
+                <td></td>
+                <td>$column</td>
+                <td></td>
+            </tr>
+                    <tr>
+                <td></td>
+                <td>$value</td>
+                <td></td>
+            </tr>
+            </table>
+
+            
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_whereBetween">
+        <div class="location">at         line 409</div>
+        <code>                    
+    <strong>whereBetween</strong>($column, $value, $boolean = &#039;and&#039;)
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                    <div class="method-description">
+                                    <p>Add a where BETWEEN condition to the query.</p>                                                </div>
+                <div class="tags">
+                            <h4>Parameters</h4>
+
+                    <table class="table table-condensed">
+                    <tr>
+                <td></td>
+                <td>$column</td>
+                <td></td>
+            </tr>
+                    <tr>
+                <td></td>
+                <td>$value</td>
+                <td></td>
+            </tr>
+                    <tr>
+                <td></td>
+                <td>$boolean</td>
+                <td></td>
+            </tr>
+            </table>
+
+            
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_orWhereBetween">
+        <div class="location">at         line 424</div>
+        <code>                    
+    <strong>orWhereBetween</strong>($column, $value)
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                    <div class="method-description">
+                                    <p>Add a where BETWEEN condition to the query.</p>                                                </div>
+                <div class="tags">
+                            <h4>Parameters</h4>
+
+                    <table class="table table-condensed">
+                    <tr>
+                <td></td>
+                <td>$column</td>
+                <td></td>
+            </tr>
+                    <tr>
+                <td></td>
+                <td>$value</td>
+                <td></td>
+            </tr>
+            </table>
+
+            
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_whereNotBetween">
+        <div class="location">at         line 435</div>
+        <code>                    
+    <strong>whereNotBetween</strong>($column, $value, $boolean = &#039;and&#039;)
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                    <div class="method-description">
+                                    <p>Add a where NOT BETWEEN condition to the query.</p>                                                </div>
+                <div class="tags">
+                            <h4>Parameters</h4>
+
+                    <table class="table table-condensed">
+                    <tr>
+                <td></td>
+                <td>$column</td>
+                <td></td>
+            </tr>
+                    <tr>
+                <td></td>
+                <td>$value</td>
+                <td></td>
+            </tr>
+                    <tr>
+                <td></td>
+                <td>$boolean</td>
+                <td></td>
+            </tr>
+            </table>
+
+            
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_orWhereNotBetween">
+        <div class="location">at         line 450</div>
+        <code>                    
+    <strong>orWhereNotBetween</strong>($column, $value)
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                    <div class="method-description">
+                                    <p>Add a where NOT BETWEEN condition to the query.</p>                                                </div>
+                <div class="tags">
+                            <h4>Parameters</h4>
+
+                    <table class="table table-condensed">
+                    <tr>
+                <td></td>
+                <td>$column</td>
+                <td></td>
+            </tr>
+                    <tr>
+                <td></td>
+                <td>$value</td>
+                <td></td>
+            </tr>
+            </table>
+
+            
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_orderBy">
+        <div class="location">at         line 458</div>
+        <code>                    
+    <strong>orderBy</strong>($column, $order = &#039;asc&#039;)
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                    <div class="method-description">
+                                    <p>Set the "order by" clause for the query.</p>                                                </div>
+                <div class="tags">
+                            <h4>Parameters</h4>
+
+                    <table class="table table-condensed">
+                    <tr>
+                <td></td>
+                <td>$column</td>
+                <td></td>
+            </tr>
+                    <tr>
+                <td></td>
+                <td>$order</td>
+                <td></td>
+            </tr>
+            </table>
+
+            
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_offset">
+        <div class="location">at         line 470</div>
+        <code>                    
+    <strong>offset</strong>($value)
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                    <div class="method-description">
+                                    <p>Set the offset "limit" clause for the query.</p>                                                </div>
+                <div class="tags">
+                            <h4>Parameters</h4>
+
+                    <table class="table table-condensed">
+                    <tr>
+                <td></td>
+                <td>$value</td>
+                <td></td>
+            </tr>
+            </table>
+
+            
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_limit">
+        <div class="location">at         line 480</div>
+        <code>                    
+    <strong>limit</strong>($value = 1)
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                    <div class="method-description">
+                                    <p>Set the limit "limit" clause for the query.</p>                                                </div>
+                <div class="tags">
+                            <h4>Parameters</h4>
+
+                    <table class="table table-condensed">
+                    <tr>
+                <td></td>
+                <td>$value</td>
+                <td></td>
+            </tr>
+            </table>
+
+            
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_value">
+        <div class="location">at         line 492</div>
+        <code>                    mixed
+    <strong>value</strong>($attribute)
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                    <div class="method-description">
+                                    <p>Return a single column's value from the first result of the query.</p>                                                </div>
+                <div class="tags">
+                            <h4>Parameters</h4>
+
+                    <table class="table table-condensed">
+                    <tr>
+                <td></td>
+                <td>$attribute</td>
+                <td></td>
+            </tr>
+            </table>
+
+            
+                            <h4>Return Value</h4>
+
+                    <table class="table table-condensed">
+        <tr>
+            <td>mixed</td>
+            <td></td>
+        </tr>
+    </table>
+
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_count">
+        <div class="location">at         line 502</div>
+        <code>                    int
+    <strong>count</strong>()
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                    <div class="method-description">
+                                    <p>Return the count of the records that match the given where conditions.</p>                                                </div>
+                <div class="tags">
+            
+                            <h4>Return Value</h4>
+
+                    <table class="table table-condensed">
+        <tr>
+            <td>int</td>
+            <td></td>
+        </tr>
+    </table>
+
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_insert">
+        <div class="location">at         line 521</div>
+        <code>                    int|array
+    <strong>insert</strong>(array $values)
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                    <div class="method-description">
+                                    <p>Insert one or more records.</p>                                                </div>
+                <div class="tags">
+                            <h4>Parameters</h4>
+
+                    <table class="table table-condensed">
+                    <tr>
+                <td>array</td>
+                <td>$values</td>
+                <td>The data to insert.</td>
+            </tr>
+            </table>
+
+            
+                            <h4>Return Value</h4>
+
+                    <table class="table table-condensed">
+        <tr>
+            <td>int|array</td>
+            <td>The inserted id.</td>
+        </tr>
+    </table>
+
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_update">
+        <div class="location">at         line 551</div>
+        <code>                    
+    <strong>update</strong>(array $values)
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                    <div class="method-description">
+                                    <p>Update one or more records.</p>                                                </div>
+                <div class="tags">
+                            <h4>Parameters</h4>
+
+                    <table class="table table-condensed">
+                    <tr>
+                <td>array</td>
+                <td>$values</td>
+                <td>The data to update.</td>
+            </tr>
+            </table>
+
+            
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_truncate">
+        <div class="location">at         line 567</div>
+        <code>                    
+    <strong>truncate</strong>()
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                    <div class="method-description">
+                                    <p>Truncate the table.</p>                                                </div>
+                <div class="tags">
+            
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_invalidOperatorAndValue">
+        <div class="location">at         line 629</div>
+        <code>            protected        bool
+    <strong>invalidOperatorAndValue</strong>(string $operator, mixed $value)
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                    <div class="method-description">
+                                    <p>Determine if the given operator and value combination is legal.</p>                    <p>Prevents using Null values with invalid operators.</p>                            </div>
+                <div class="tags">
+                            <h4>Parameters</h4>
+
+                    <table class="table table-condensed">
+                    <tr>
+                <td>string</td>
+                <td>$operator</td>
+                <td></td>
+            </tr>
+                    <tr>
+                <td>mixed</td>
+                <td>$value</td>
+                <td></td>
+            </tr>
+            </table>
+
+            
+                            <h4>Return Value</h4>
+
+                    <table class="table table-condensed">
+        <tr>
+            <td>bool</td>
+            <td></td>
+        </tr>
+    </table>
+
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_getTableDescription">
+        <div class="location">at         line 758</div>
+        <code>            protected        void
+    <strong>getTableDescription</strong>()
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                    <div class="method-description">
+                                    <p>Get the table description.</p>                                                </div>
+                <div class="tags">
+            
+                            <h4>Return Value</h4>
+
+                    <table class="table table-condensed">
+        <tr>
+            <td>void</td>
+            <td></td>
+        </tr>
+    </table>
+
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_getWordPressTableName">
+        <div class="location">at         line 827</div>
+        <code>            protected        string
+    <strong>getWordPressTableName</strong>($table)
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                    <div class="method-description">
+                                    <p>Commodity method to get a WordPress table name.</p>                    <p>Here we're going to add the prefix to the table name.</p>                            </div>
+                <div class="tags">
+                            <h4>Parameters</h4>
+
+                    <table class="table table-condensed">
+                    <tr>
+                <td></td>
+                <td>$table</td>
+                <td></td>
+            </tr>
+            </table>
+
+            
+                            <h4>Return Value</h4>
+
+                    <table class="table table-condensed">
+        <tr>
+            <td>string</td>
+            <td></td>
+        </tr>
+    </table>
+
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_getSQLResults">
+        <div class="location">at         line 845</div>
+        <code>            protected        array
+    <strong>getSQLResults</strong>($sql, $type = ARRAY_A)
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                    <div class="method-description">
+                                    <p>Execute a wpdb->get_results() query.</p>                                                </div>
+                <div class="tags">
+                            <h4>Parameters</h4>
+
+                    <table class="table table-condensed">
+                    <tr>
+                <td></td>
+                <td>$sql</td>
+                <td></td>
+            </tr>
+                    <tr>
+                <td></td>
+                <td>$type</td>
+                <td></td>
+            </tr>
+            </table>
+
+            
+                            <h4>Return Value</h4>
+
+                    <table class="table table-condensed">
+        <tr>
+            <td>array</td>
+            <td></td>
+        </tr>
+    </table>
+
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_query">
+        <div class="location">at         line 861</div>
+        <code>            protected        mixed
+    <strong>query</strong>($sql)
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                    <div class="method-description">
+                                    <p>Execute a wpdb->query() query.</p>                                                </div>
+                <div class="tags">
+                            <h4>Parameters</h4>
+
+                    <table class="table table-condensed">
+                    <tr>
+                <td></td>
+                <td>$sql</td>
+                <td></td>
+            </tr>
+            </table>
+
+            
+                            <h4>Return Value</h4>
+
+                    <table class="table table-condensed">
+        <tr>
+            <td>mixed</td>
+            <td></td>
+        </tr>
+    </table>
+
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_var">
+        <div class="location">at         line 877</div>
+        <code>            protected        mixed
+    <strong>var</strong>($sql)
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                    <div class="method-description">
+                                    <p>Execute a wpdb->get_var() query.</p>                                                </div>
+                <div class="tags">
+                            <h4>Parameters</h4>
+
+                    <table class="table table-condensed">
+                    <tr>
+                <td></td>
+                <td>$sql</td>
+                <td></td>
+            </tr>
+            </table>
+
+            
+                            <h4>Return Value</h4>
+
+                    <table class="table table-condensed">
+        <tr>
+            <td>mixed</td>
+            <td></td>
+        </tr>
+    </table>
+
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_getPrimaryKey">
+        <div class="location">at         line 902</div>
+        <code>                    string
+    <strong>getPrimaryKey</strong>()
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                    <div class="method-description">
+                                    <p>Return the primary key.</p>                                                </div>
+                <div class="tags">
+            
+                            <h4>Return Value</h4>
+
+                    <table class="table table-condensed">
+        <tr>
+            <td>string</td>
+            <td></td>
+        </tr>
+    </table>
+
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_setPrimaryKey">
+        <div class="location">at         line 910</div>
+        <code>                    
+    <strong>setPrimaryKey</strong>($primaryKey)
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                    <div class="method-description">
+                                    <p>Set the primary key.</p>                                                </div>
+                <div class="tags">
+                            <h4>Parameters</h4>
+
+                    <table class="table table-condensed">
+                    <tr>
+                <td></td>
+                <td>$primaryKey</td>
+                <td></td>
+            </tr>
+            </table>
+
+            
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_getTable">
+        <div class="location">at         line 920</div>
+        <code>                    string
+    <strong>getTable</strong>()
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                    <div class="method-description">
+                                    <p>Return the table name without the prefix.</p>                                                </div>
+                <div class="tags">
+            
+                            <h4>Return Value</h4>
+
+                    <table class="table table-condensed">
+        <tr>
+            <td>string</td>
+            <td></td>
+        </tr>
+    </table>
+
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_setTable">
+        <div class="location">at         line 930</div>
+        <code>                    
+    <strong>setTable</strong>(string $table)
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                    <div class="method-description">
+                                    <p>Set the table name without the prefix.</p>                                                </div>
+                <div class="tags">
+                            <h4>Parameters</h4>
+
+                    <table class="table table-condensed">
+                    <tr>
+                <td>string</td>
+                <td>$table</td>
+                <td>The table name without the prefix.</td>
+            </tr>
+            </table>
+
+            
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_getTableName">
+        <div class="location">at         line 940</div>
+        <code>                    string
+    <strong>getTableName</strong>()
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                    <div class="method-description">
+                                    <p>Get the table name with the prefix.</p>                                                </div>
+                <div class="tags">
+            
+                            <h4>Return Value</h4>
+
+                    <table class="table table-condensed">
+        <tr>
+            <td>string</td>
+            <td></td>
+        </tr>
+    </table>
+
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_getParentModel">
+        <div class="location">at         line 945</div>
+        <code>                    
+    <strong>getParentModel</strong>()
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                <div class="tags">
+            
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_setParentModel">
+        <div class="location">at         line 950</div>
+        <code>                    
+    <strong>setParentModel</strong>($parentModel)
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                <div class="tags">
+                            <h4>Parameters</h4>
+
+                    <table class="table table-condensed">
+                    <tr>
+                <td></td>
+                <td>$parentModel</td>
+                <td></td>
+            </tr>
+            </table>
+
+            
+            
+            
+                    </div>
+    </div>
+
+            </div>
+            </div>
+
+    
+            </div>
+                <div id="footer">
+        Generated by <a href="http://sami.sensiolabs.org/">Sami, the API Documentation Generator</a>.
+    </div>
+
+        </div>
+    </div>
+    </body>
+
+</html>
