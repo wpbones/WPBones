@@ -2,6 +2,10 @@
 
 namespace {Namespace}\Shortcodes;
 
+if (! defined('ABSPATH')) {
+    exit;
+}
+
 use {Namespace}\WPBones\Foundation\WordPressShortcodesServiceProvider as ServiceProvider;
 
 class {ClassName} extends ServiceProvider

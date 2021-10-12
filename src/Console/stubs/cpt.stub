@@ -2,6 +2,10 @@
 
 namespace {Namespace}\CustomPostTypes;
 
+if (! defined('ABSPATH')) {
+    exit;
+}
+
 use {Namespace}\WPBones\Foundation\WordPressCustomPostTypeServiceProvider as ServiceProvider;
 
 class {ClassName} extends ServiceProvider

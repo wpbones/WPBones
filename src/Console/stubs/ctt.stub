@@ -2,6 +2,10 @@
 
 namespace {Namespace}\CustomTaxonomyTypes;
 
+if (! defined('ABSPATH')) {
+    exit;
+}
+
 use {Namespace}\WPBones\Foundation\WordPressCustomTaxonomyTypeServiceProvider as ServiceProvider;
 
 class {ClassName} extends ServiceProvider

@@ -2,6 +2,10 @@
 
 namespace {Namespace}\Http\Controllers{Path};
 
+if (! defined('ABSPATH')) {
+    exit;
+}
+
 use {Namespace}\Http\Controllers\Controller;
 
 class {ClassName} extends Controller

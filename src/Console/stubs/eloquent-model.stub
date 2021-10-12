@@ -1,0 +1,27 @@
+<?php
+
+namespace {Namespace}\Http\Controllers{Path};
+
+use Illuminate\Database\Eloquent\Model;
+
+class {ClassName} extends Model
+{
+    /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
+    protected $table = '{Table}';
+
+    /**
+     * Get the table associated with the model.
+     *
+     * @return string
+     */
+    public function getTable()
+    {
+        global $wpdb;
+
+        return $wpdb->prefix . preg_replace('/[[:<:]]' . $wpdb->prefix . '/', '', parent::getTable(), 1);
+    }
+}

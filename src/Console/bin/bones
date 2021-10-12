@@ -446,7 +446,7 @@ namespace Bones {
         /**
          * WP Bones version
          */
-        const VERSION = '1.0.5';
+        const VERSION = '1.1.0';
 
         /**
          * Used for additional kernel command.
@@ -683,7 +683,7 @@ namespace Bones {
             // strip the command name
             array_shift($params);
 
-            return $index ? ($params[$index] ?? null) : $params;
+            return !is_null($index) ? ($params[$index] ?? null) : $params;
         }
 
         /**
@@ -794,6 +794,7 @@ namespace Bones {
             $this->line(" migrate:create          Create a new Migration");
             $this->info("make");
             $this->line(" make:ajax               Create a new Ajax service provider class");
+            $this->line(" make:api                Create a new API controller class");
             $this->line(" make:controller         Create a new controller class");
             $this->line(" make:console            Create a new Bones command");
             $this->line(" make:cpt                Create a new Custom Post Type service provider class");
@@ -802,6 +803,7 @@ namespace Bones {
             $this->line(" make:provider           Create a new service provider class");
             $this->line(" make:widget             Create a new Widget service provider class");
             $this->line(" make:model              Create a new database model class");
+            $this->line(" make:eloquent-model     Create a new Eloquent database model class");
 
             if ($this->kernel && $this->kernel->hasCommands()) {
                 $this->info("Extensions");
@@ -1869,12 +1871,57 @@ namespace Bones {
                 $path = implode('/', $parts) . '/';
                 $namespacePath = '\\' . implode('\\', $parts);
             }
-
-            // create the table
-            $table = strtolower($className) . 's';
-
             // get the stub
             $content = file_get_contents("vendor/wpbones/wpbones/src/Console/stubs/model.stub");
+            $content = str_replace('{Namespace}', $namespace, $content);
+            $content = str_replace('{ClassName}', $className, $content);
+
+            if (!empty($path)) {
+                $content = str_replace('{Path}', $namespacePath, $content);
+                mkdir("plugin/Http/Controllers/{$path}", 0777, true);
+            } else {
+                $content = str_replace('{Path}', '', $content);
+            }
+
+            $filename = sprintf('%s.php', $className);
+
+            file_put_contents("plugin/Http/Controllers/{$path}{$filename}", $content);
+
+            $this->line(" Created plugin/Http/Controllers/{$path}{$filename}");
+
+            $this->optimize();
+        }
+
+        /**
+         * Create a Eloquent database Model
+         *
+         * @param string $className The class name
+         */
+        protected function createEloquentModel($className)
+        {
+            if ($this->isHelp($className)) {
+                $this->info('Use php bones make:eloquent-model <ClassName>');
+
+                return;
+            }
+
+            // current plugin name and namespace
+            $namespace = $this->getNamespace();
+
+            // get additional path
+            $path = $namespacePath = '';
+            if (false !== strpos($className, '/')) {
+                $parts = explode('/', $className);
+                $className = array_pop($parts);
+                $path = implode('/', $parts) . '/';
+                $namespacePath = '\\' . implode('\\', $parts);
+            }
+
+            // create the table
+            $table = strtolower($className);
+
+            // get the stub
+            $content = file_get_contents("vendor/wpbones/wpbones/src/Console/stubs/eloquent-model.stub");
             $content = str_replace('{Namespace}', $namespace, $content);
             $content = str_replace('{ClassName}', $className, $content);
             $content = str_replace('{Table}', $table, $content);
@@ -1891,6 +1938,52 @@ namespace Bones {
             file_put_contents("plugin/Http/Controllers/{$path}{$filename}", $content);
 
             $this->line(" Created plugin/Http/Controllers/{$path}{$filename}");
+
+            $this->optimize();
+        }
+
+        /**
+         * Create a API Controller
+         *
+         * @param string $className The class name
+         */
+        protected function createAPIController($className)
+        {
+            if ($this->isHelp($className)) {
+                $this->info('Use php bones make:api <ClassName>');
+
+                return;
+            }
+
+            // current plugin name and namespace
+            $namespace = $this->getNamespace();
+
+            // get additional path
+            $path = $namespacePath = '';
+            if (false !== strpos($className, '/')) {
+                $parts = explode('/', $className);
+                $className = array_pop($parts);
+                $path = implode('/', $parts) . '/';
+                $namespacePath = '\\' . implode('\\', $parts);
+            }
+
+            // get the stub
+            $content = file_get_contents("vendor/wpbones/wpbones/src/Console/stubs/api.stub");
+            $content = str_replace('{Namespace}', $namespace, $content);
+            $content = str_replace('{ClassName}', $className, $content);
+
+            if (!empty($path)) {
+                $content = str_replace('{Path}', $namespacePath, $content);
+                mkdir("plugin/API/{$path}", 0777, true);
+            } else {
+                $content = str_replace('{Path}', '', $content);
+            }
+
+            $filename = sprintf('%s.php', $className);
+
+            file_put_contents("plugin/API/{$path}{$filename}", $content);
+
+            $this->line(" Created plugin/API/{$path}{$filename}");
 
             $this->optimize();
         }
@@ -1960,7 +2053,17 @@ namespace Bones {
             // make:model {className}
             elseif ($this->isCommand('make:model')) {
                 $this->createModel($this->commandParams(0));
-            } else {
+            }
+            // make:eloquent-model {className}
+            elseif ($this->isCommand('make:eloquent-model')) {
+                $this->createEloquentModel($this->commandParams(0));
+            }
+            // make:api {className}
+            elseif ($this->isCommand('make:api')) {
+                $this->createAPIController($this->commandParams(0));
+            }
+            // else...
+            else {
                 $extended = false;
 
                 if ($this->kernel) {

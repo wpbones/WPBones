@@ -2,6 +2,10 @@
 
 namespace {Namespace}\Widgets;
 
+if (! defined('ABSPATH')) {
+    exit;
+}
+
 use {Namespace}\WPBones\Support\Widget;
 
 class {ClassName} extends Widget

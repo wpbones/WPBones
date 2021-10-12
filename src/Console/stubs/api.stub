@@ -6,9 +6,9 @@ if (! defined('ABSPATH')) {
     exit;
 }
 
-use {Namespace}\WPBones\Database\Model;
+use {Namespace}\WPBones\Routing\API\RestController;
 
-class {ClassName} extends Model
+class {ClassName} extends RestController
 {
 
 }

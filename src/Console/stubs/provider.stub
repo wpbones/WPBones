@@ -2,6 +2,10 @@
 
 namespace {Namespace}\Providers;
 
+if (! defined('ABSPATH')) {
+    exit;
+}
+
 use {Namespace}\WPBones\Support\ServiceProvider;
 
 class {ClassName} extends ServiceProvider
