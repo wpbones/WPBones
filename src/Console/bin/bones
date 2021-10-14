@@ -423,7 +423,7 @@ namespace Bones {
     /**
      * The WP Bones command line version.
      */
-    define('WPBONES_COMMAND_LINE_VERSION', "1.1.1");
+    define('WPBONES_COMMAND_LINE_VERSION', "1.1.2");
     
 
     use Bones\SemVer\Version;
@@ -665,8 +665,11 @@ namespace Bones {
          */
         protected function loadKernel()
         {
-            $kernelClass = "{$this->namespace}\\Console\\Kernel";
-            $WPBoneskernelClass = "{$this->namespace}\\WPBones\\Foundation\\Console\\Kernel";
+            // current plugin name and namespace
+            $namespace = $this->getNamespace();
+            
+            $kernelClass = "{$namespace}\\Console\\Kernel";
+            $WPBoneskernelClass = "{$namespace}\\WPBones\\Foundation\\Console\\Kernel";
 
             if (class_exists($WPBoneskernelClass) && class_exists($kernelClass)) {
                 $this->kernel = new $kernelClass;
@@ -1316,19 +1319,28 @@ namespace Bones {
             }
 
             if (!empty($path)) {
+                // alternative method to customize the deploy
+                @include 'deploy.php';
+
+                do_action('wpbones_console_deploy_start', $this, $path);
 
                 // first of all delete previous path
                 $this->info("🕐 Delete folder {$path}");
                 $this->deleteDirectory($path);
                 $this->info("\033[1A👍");
 
-                // run yarn production
-                $this->info('🕐 Build for production');
-                shell_exec('gulp production');
-                $this->info("\e[1A👍");
+                do_action('wpbones_console_deploy_before_compile_assets', $this, $path);
 
-                // alternative method to customize the deploy
-                @include 'deploy.php';
+                // run yarn production
+                $command = apply_filters('wpbones_console_deploy_gulp_production', 'gulp production');
+                
+                if ($command) {
+                    $this->info('🕐 Build for production');
+                    shell_exec($command);
+                    $this->info("\e[1A👍");
+                }
+
+                do_action('wpbones_console_deploy_after_compile_assets', $this, $path);
 
                 // files and folders to skip
                 $this->skipWhenDeploy = [
@@ -1359,7 +1371,7 @@ namespace Bones {
                  *
                  * @param array $array The files and folders are relative to the root of plugin.
                  */
-                $this->skipWhenDeploy = apply_filters('wpbones_console_deploy_skip', $this->skipWhenDeploy);
+                $this->skipWhenDeploy = apply_filters('wpbones_console_deploy_skip_folders', $this->skipWhenDeploy);
 
                 $this->rootDeploy = __DIR__;
 
@@ -1373,7 +1385,7 @@ namespace Bones {
                  * @param mixed  $bones This bones command instance.
                  * @param string $path  The deployed path.
                  */
-                do_action('wpbones_console_deployed', $this, $path);
+                do_action('wpbones_console_deploy_completed', $this, $path);
 
                 $this->info("👏 Deploy Completed!");
             }
