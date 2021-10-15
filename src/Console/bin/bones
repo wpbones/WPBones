@@ -423,7 +423,7 @@ namespace Bones {
     /**
      * The WP Bones command line version.
      */
-    define('WPBONES_COMMAND_LINE_VERSION', "1.1.2");
+    define('WPBONES_COMMAND_LINE_VERSION', "1.1.3");
     
 
     use Bones\SemVer\Version;
@@ -614,48 +614,64 @@ namespace Bones {
          */
         protected function loadWordPress()
         {
-            /*
-            |--------------------------------------------------------------------------
-            | Load WordPress
-            |--------------------------------------------------------------------------
-            |
-            | We have to load the WordPress environment.
-            |
-            */
-            if (!file_exists(__DIR__ . '/../../../wp-load.php')) {
+            try {
+                /*
+                |--------------------------------------------------------------------------
+                | Load WordPress
+                |--------------------------------------------------------------------------
+                |
+                | We have to load the WordPress environment.
+                |
+                */
+                if (!file_exists(__DIR__ . '/../../../wp-load.php')) {
+                    echo "\n\033[33;5;82mWarning!!\n";
+                    echo "\n\033[38;5;82m\t" . 'You must be inside "wp-content/plugins/" folders';
+                    echo "\033[0m\n\n";
+                    exit;
+                }
+
+                require __DIR__ . '/../../../wp-load.php';
+            } catch (\Exception $e) {
                 echo "\n\033[33;5;82mWarning!!\n";
-                echo "\n\033[38;5;82m\t" . 'You must be inside "wp-content/plugins/" folders';
+                echo "\n\033[38;5;82m\t" . 'Can\'t load WordPress';
                 echo "\033[0m\n\n";
-                exit;
             }
 
-            require __DIR__ . '/../../../wp-load.php';
+            try {
+                /*
+                |--------------------------------------------------------------------------
+                | Register The Auto Loader
+                |--------------------------------------------------------------------------
+                |
+                | Composer provides a convenient, automatically generated class loader
+                | for our application. We just need to utilize it! We'll require it
+                | into the script here so that we do not have to worry about the
+                | loading of any our classes "manually". Feels great to relax.
+                |
+                */
 
-            /*
-            |--------------------------------------------------------------------------
-            | Register The Auto Loader
-            |--------------------------------------------------------------------------
-            |
-            | Composer provides a convenient, automatically generated class loader
-            | for our application. We just need to utilize it! We'll require it
-            | into the script here so that we do not have to worry about the
-            | loading of any our classes "manually". Feels great to relax.
-            |
-            */
-
-            if (file_exists(__DIR__ . '/vendor/autoload.php')) {
-                require __DIR__ . '/vendor/autoload.php';
+                if (file_exists(__DIR__ . '/vendor/autoload.php')) {
+                    require __DIR__ . '/vendor/autoload.php';
+                }
+            } catch (\Exception $e) {
+                echo "\n\033[33;5;82mWarning!!\n";
+                echo "\n\033[38;5;82m\t" . 'Can\'t load Composer';
             }
 
-            /*
-             |--------------------------------------------------------------------------
-             | Load this plugin env
-             |--------------------------------------------------------------------------
-             |
-             */
+            try {
+                /*
+                 |--------------------------------------------------------------------------
+                 | Load this plugin env
+                 |--------------------------------------------------------------------------
+                 |
+                 */
 
-            if (file_exists(__DIR__ . '/bootstrap/plugin.php')) {
-                $plugin = require_once __DIR__ . '/bootstrap/plugin.php';
+                if (file_exists(__DIR__ . '/bootstrap/plugin.php')) {
+                    $plugin = require_once __DIR__ . '/bootstrap/plugin.php';
+                }
+            } catch (\Exception $e) {
+                echo "\n\033[33;5;82mWarning!!\n";
+                echo "\n\033[38;5;82m\t" . 'Can\'t load this plugin env';
             }
         }
 
@@ -671,8 +687,13 @@ namespace Bones {
             $kernelClass = "{$namespace}\\Console\\Kernel";
             $WPBoneskernelClass = "{$namespace}\\WPBones\\Foundation\\Console\\Kernel";
 
-            if (class_exists($WPBoneskernelClass) && class_exists($kernelClass)) {
-                $this->kernel = new $kernelClass;
+            try {
+                if (class_exists($WPBoneskernelClass) && class_exists($kernelClass)) {
+                    $this->kernel = new $kernelClass;
+                }
+            } catch (\Exception $e) {
+                echo "\n\033[33;5;82mWarning!!\n";
+                echo "\n\033[38;5;82m\t" . 'Can\'t load console kernel';
             }
         }
 
@@ -752,6 +773,12 @@ namespace Bones {
         {
             $arguments = $this->arguments();
 
+            // load the WordPress environment and the plugin
+            $this->loadWordPress();
+
+            // load the console kernel
+            $this->loadKernel();
+
             // we won't load the WordPress environment for the following commands
             if (empty($arguments) || $this->isCommand('--help')) {
                 $this->help();
@@ -770,10 +797,6 @@ namespace Bones {
             }
             // go ahead...
             else {
-                $this->loadWordPress();
-
-                $this->loadKernel();
-
                 // handle the rest of the commands except rename
                 $this->handle();
             }
