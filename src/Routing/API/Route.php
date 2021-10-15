@@ -100,9 +100,11 @@ class Route
         if (in_array($method, self::METHODS)) {
             @[$path, $callback, $options] = $args;
 
+            $options = array_merge(['permission_callback' => '__return_true'], $options ?? []);
+
             self::$apis[self::$vendor][$method][$path] = [
                 'callback' => $callback,
-                'options' => $options ?? []
+                'options' => $options
             ];
         }
     }
@@ -118,6 +120,8 @@ class Route
     public static function request($methods, $path, $callback, $options = [])
     {
         $methods = (array) $methods;
+
+        $options = array_merge(['permission_callback' => '__return_true'], $options);
 
         foreach ($methods as $method) {
             $method = strtolower($method);
