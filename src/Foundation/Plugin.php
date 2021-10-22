@@ -10,6 +10,7 @@ use WPKirk\WPBones\Foundation\Log\LogServiceProvider;
 use WPKirk\WPBones\Support\Str;
 use WPKirk\WPBones\View\View;
 use WPKirk\WPBones\Routing\API\RestProvider;
+use WPKirk\WPBones\Routing\Pages\PageProvider;
 use WPKirk\WPBones\Routing\AdminMenuProvider;
 use WPKirk\WPBones\Routing\AdminRouteProvider;
 use WPKirk\WPBones\Support\Traits\HasAttributes;
@@ -542,8 +543,11 @@ class Plugin extends Container implements PluginContract
         // register the admin menu
         (new AdminMenuProvider($this))->register();
 
-        // regster the admin custom pages
+        // register the admin custom pages
         (new AdminRouteProvider($this))->register();
+
+        // register the custom pages via folder
+        (new PageProvider($this))->register();
     }
 
     public function widgets_init()
