@@ -9,15 +9,20 @@ if (! defined('ABSPATH')) {
 use WPKirk\WPBones\Support\ServiceProvider;
 use WPKirk\WPBones\Support\Str;
 
+/**
+ * Class AdminMenuProvider
+ *
+ * This class is a service provider for the WP Bones framework.
+ * Here we're going to read the menu configuration file and register the menus.
+ *
+ * @package WPKirk\WPBones\Routing
+ */
+ 
 class AdminMenuProvider extends ServiceProvider
 {
-
-
     // register
     public function register()
     {
-        global $admin_page_hooks, $_registered_pages, $_parent_pages;
-
         $menus = include_once "{$this->plugin->getBasePath()}/config/menus.php";
 
         if (!empty($menus) && is_array($menus)) {
@@ -27,7 +32,7 @@ class AdminMenuProvider extends ServiceProvider
                 $menu['position']   = isset($menu['position']) ? $menu['position'] : null;
                 $menu['capability'] = isset($menu['capability']) ? $menu['capability'] : 'read';
                 $menu['icon']       = isset($menu['icon']) ? $menu['icon'] : '';
-                $menu['page_title'] = isset($menu['page_title']) ? $menu['page_title'] : $menu['menu_title'];
+                $menu['page_title'] = sanitize_title($menu['page_title'] ?: $menu['menu_title']);
 
                 // icon
                 $icon = $menu['icon'];

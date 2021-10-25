@@ -71,8 +71,6 @@ class PageProvider extends ServiceProvider
             $admin_folder = $folder . '/admin';
             $admin_folder_exists = file_exists($admin_folder);
 
-            error_log("admin_folder: " . $admin_folder);
-
             if ($admin_folder_exists) {
                 foreach (glob("{$admin_folder}/*.php") as $filename) {
                     include_once $filename;
@@ -80,17 +78,23 @@ class PageProvider extends ServiceProvider
                     $class = $this->getFileClasses($filename);
                     $page = new $class($this->plugin);
                     
-                    $pageSlug = plugin_basename(strtolower(str_replace('.php', '', basename($filename))));
+                    $page_slug = plugin_basename(strtolower(str_replace('.php', '', basename($filename))));
 
-                    $admin_page_hooks[$pageSlug] = $page->title();
-                    $hookName = get_plugin_page_hookname($pageSlug, '');
+                    $admin_page_hooks[$page_slug] = $page->title();
+                    $hookName = get_plugin_page_hookname($page_slug, '');
+
+                    add_action("load-toplevel_page_{$page_slug}", function () use ($page) {
+                        add_filter('admin_title', function () use ($page) {
+                            return $page->title();
+                        }, 99, 2);
+                    });
 
                     add_action($hookName, function () use ($page) {
                         echo $page->render();
                     });
 
                     $_registered_pages[$hookName] = true;
-                    $_parent_pages[$pageSlug] = false;
+                    $_parent_pages[$page_slug] = false;
                 }
             }
         }
