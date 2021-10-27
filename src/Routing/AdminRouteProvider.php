@@ -48,7 +48,5 @@ class AdminRouteProvider extends ServiceProvider
                 }
             }
         }
-
-        error_log(var_export($hookName, true));
     }
 }

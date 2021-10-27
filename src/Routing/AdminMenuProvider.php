@@ -29,10 +29,11 @@ class AdminMenuProvider extends ServiceProvider
             foreach ($menus as $topLevelSlug => $menu) {
 
                 // sanitize array keys
-                $menu['position']   = isset($menu['position']) ? $menu['position'] : null;
+                $menu['position'] = isset($menu['position']) ? $menu['position'] : null;
                 $menu['capability'] = isset($menu['capability']) ? $menu['capability'] : 'read';
-                $menu['icon']       = isset($menu['icon']) ? $menu['icon'] : '';
-                $menu['page_title'] = sanitize_title($menu['page_title'] ?: $menu['menu_title']);
+                $menu['icon'] = isset($menu['icon']) ? $menu['icon'] : '';
+                $page_title = isset($menu['page_title']) ? $menu['page_title'] : $menu['menu_title'];
+                $menu['page_title'] = sanitize_title($page_title);
 
                 // icon
                 $icon = $menu['icon'];

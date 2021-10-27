@@ -61,41 +61,34 @@ class PageProvider extends ServiceProvider
         global $admin_page_hooks, $_registered_pages, $_parent_pages;
 
         // the main path for the custom pages
-        $folder = $this->plugin->getBasePath() . '/pages';
+        $folder_pages = $this->plugin->getBasePath() . '/pages';
 
-        $folder_exists = file_exists($folder);
+        $folder_pages_exists = file_exists($folder_pages);
 
-        if ($folder_exists) {
+        if ($folder_pages_exists) {
+            foreach (glob("{$folder_pages}/*.php") as $filename) {
+                include_once $filename;
 
-            // register admin routes
-            $admin_folder = $folder . '/admin';
-            $admin_folder_exists = file_exists($admin_folder);
+                $class = $this->getFileClasses($filename);
+                $page = new $class($this->plugin);
+                
+                $page_slug = plugin_basename(strtolower(str_replace('.php', '', basename($filename))));
 
-            if ($admin_folder_exists) {
-                foreach (glob("{$admin_folder}/*.php") as $filename) {
-                    include_once $filename;
+                $admin_page_hooks[$page_slug] = $page->title();
+                $hookName = get_plugin_page_hookname($page_slug, '');
 
-                    $class = $this->getFileClasses($filename);
-                    $page = new $class($this->plugin);
-                    
-                    $page_slug = plugin_basename(strtolower(str_replace('.php', '', basename($filename))));
+                add_action("load-toplevel_page_{$page_slug}", function () use ($page) {
+                    add_filter('admin_title', function () use ($page) {
+                        return $page->title();
+                    }, 99, 2);
+                });
 
-                    $admin_page_hooks[$page_slug] = $page->title();
-                    $hookName = get_plugin_page_hookname($page_slug, '');
+                add_action($hookName, function () use ($page) {
+                    echo $page->render();
+                });
 
-                    add_action("load-toplevel_page_{$page_slug}", function () use ($page) {
-                        add_filter('admin_title', function () use ($page) {
-                            return $page->title();
-                        }, 99, 2);
-                    });
-
-                    add_action($hookName, function () use ($page) {
-                        echo $page->render();
-                    });
-
-                    $_registered_pages[$hookName] = true;
-                    $_parent_pages[$page_slug] = false;
-                }
+                $_registered_pages[$hookName] = true;
+                $_parent_pages[$page_slug] = false;
             }
         }
     }
