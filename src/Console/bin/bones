@@ -423,7 +423,7 @@ namespace Bones {
     /**
      * The WP Bones command line version.
      */
-    define('WPBONES_COMMAND_LINE_VERSION', "1.1.6");
+    define('WPBONES_COMMAND_LINE_VERSION', "1.1.7");
     
     use Bones\SemVer\Version;
 
@@ -754,9 +754,13 @@ namespace Bones {
          */
         protected function isHelp($str = null)
         {
-            $param = $str ?: $this->commandParams()[0];
+            if (!is_null($str)) {
+                return (empty($str) || $str === '--help');
+            }
 
-            return (empty($param) || $param === '--help');
+            $param = $this->commandParams()[0];
+
+            return (!empty($param) && $param === '--help');
         }
 
         /**
