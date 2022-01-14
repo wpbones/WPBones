@@ -37,9 +37,9 @@ class View
     /**
      * Create a new View.
      *
-     * @param mixed $container Usually a container/plugin.
-     * @param null  $key       Optional. This is the path of view.
-     * @param null  $data      Optional. Any data to pass to view.
+     * @param mixed  $container Usually a container/plugin.
+     * @param string $key       Optional. This is the path of view.
+     * @param mixed  $data      Optional. Any data to pass to view.
      */
     public function __construct($container, $key = null, $data = null)
     {
