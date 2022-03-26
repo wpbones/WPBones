@@ -452,6 +452,15 @@ class Plugin extends Container implements PluginContract
     public function deactivation()
     {
         $deactivation = include_once "{$this->basePath}/plugin/deactivation.php";
+        // migrations rollback
+        foreach (glob("{$this->basePath}/database/migrations/*.php") as $filename) {
+            include $filename;
+            foreach ($this->getFileClasses($filename) as $className) {
+                if (method_exists($className, 'down')) {
+                    $instance = (new $className)->down();
+                }
+            }
+        }
     }
 
     /**
