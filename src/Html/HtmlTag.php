@@ -6,409 +6,412 @@ use WPKirk\WPBones\Support\Traits\HasAttributes;
 
 abstract class HtmlTag
 {
-    use HasAttributes;
+  use HasAttributes;
 
-    /**
-     * Global common HTML tag attributes.
-     *
-     * See http://www.w3schools.com/tags/default.asp for definitions
-     *
-     * @var array
-     */
-    protected $globalAttributes = [
-        'accesskey' => null,
-        'contenteditable' => null,
-        'contextmenu' => null,
-        'dir' => null,
-        'draggable' => null,
-        'dropzone' => null,
-        'hidden' => null,
-        'id' => null,
-        'lang' => null,
-        'spellcheck' => null,
-        'style' => null,
-        'tabindex' => null,
-        'title' => null,
-    ];
+  /**
+   * Global common HTML tag attributes.
+   *
+   * See http://www.w3schools.com/tags/default.asp for definitions
+   *
+   * @var array
+   */
+  protected $globalAttributes = [
+    'accesskey'       => null,
+    'contenteditable' => null,
+    'contextmenu'     => null,
+    'dir'             => null,
+    'draggable'       => null,
+    'dropzone'        => null,
+    'hidden'          => null,
+    'id'              => null,
+    'lang'            => null,
+    'spellcheck'      => null,
+    'style'           => null,
+    'tabindex'        => null,
+    'title'           => null,
+  ];
 
-    /**
-     * HTML tag attributes.
-     *
-     * @var array
-     */
-    protected $attributes = [];
+  /**
+   * HTML tag attributes.
+   *
+   * @var array
+   */
+  protected $attributes = [];
 
-    /**
-     * Callable fluent HTML tag attributes but not formatted.
-     *
-     * @var array
-     */
-    protected $guardedAttributes = [];
+  /**
+   * Callable fluent HTML tag attributes but not formatted.
+   *
+   * @var array
+   */
+  protected $guardedAttributes = [];
 
-    /**
-     * HTML Tag markup, open and close.
-     *
-     * @var array
-     */
-    protected $markup = [];
+  /**
+   * HTML Tag markup, open and close.
+   *
+   * @var array
+   */
+  protected $markup = [];
 
-    /**
-     * This is the content of a Html tag, suc as <div>{content}</div>
-     *
-     * @var string
-     */
-    protected $content = '';
+  /**
+   * This is the content of a Html tag, suc as <div>{content}</div>
+   *
+   * @var string
+   */
+  protected $content = '';
 
-    /**
-     * Class attribute stack.
-     *
-     * @var array
-     */
-    private $_class = [];
+  /**
+   * Class attribute stack.
+   *
+   * @var array
+   */
+  private $_class = [];
 
-    /**
-     * Data attribute stack.
-     *
-     * @var array
-     */
-    private $_data = [];
+  /**
+   * Data attribute stack.
+   *
+   * @var array
+   */
+  private $_data = [];
 
-    /*
-    |--------------------------------------------------------------------------
-    | Custom attributes
-    |--------------------------------------------------------------------------
-    |
-    | You can use the ::attributes to get all attributes or set you own attributes.
-    |
-    */
-    protected function getAttributesAttribute()
-    {
-        return $this->attributes;
-    }
+  /*
+  |--------------------------------------------------------------------------
+  | Custom attributes
+  |--------------------------------------------------------------------------
+  |
+  | You can use the ::attributes to get all attributes or set you own attributes.
+  |
+  */
 
-    public function attributes($values)
-    {
-        if (is_array($values)) {
-            $this->attributes = array_merge($this->attributes, $values);
-        } elseif (is_string($values) && func_num_args() > 1) {
-            $this->attributes[$values] = func_get_arg(1);
+  /**
+   * HtmlTag constructor.
+   *
+   * @param array $arguments
+   */
+  public function __construct($arguments = [])
+  {
+    if (!empty($arguments)) {
+      if (is_array($arguments)) {
+        foreach ($arguments as $key => $value) {
+          if (in_array($key, array_keys($this->globalAttributes))) {
+            $this->globalAttributes[$key] = $value;
+          } elseif (in_array($key, array_keys($this->attributes))) {
+            $this->attributes[$key] = $value;
+          } elseif ('content' == $key) {
+            $this->content = $value;
+          } elseif ('class' == $key) {
+            $this->class = $value;
+          }
         }
+      } elseif (is_string($arguments)) {
+        $this->content = $arguments;
+      }
+    }
+  }
 
-        return $this;
+  protected function getAttributesAttribute(): array
+  {
+    return $this->attributes;
+  }
+
+  protected function getStyleAttribute()
+  {
+    if (empty($this->globalAttributes['style'])) {
+      return '';
     }
 
-    public function formatAttributes()
-    {
-        // html tag attributes
-        $stack = [];
-        foreach ($this->attributes as $attribute => $value) {
-            if (!is_null($value)) {
-                $stack[] = sprintf('%s="%s"', $attribute, htmlspecialchars(stripslashes($value)));
-            }
-        }
+    $styles = explode(';', $this->globalAttributes['style']);
 
-        return implode(' ', $stack) . ' ';
+    $stack = [];
+    foreach ($styles as $style) {
+      [$key, $value] = explode(':', $style, 2);
+      $stack[$key] = $value;
     }
 
-    public function formatGlobalAttributes()
-    {
-        // global attributes
-        $stack = [];
-        foreach ($this->globalAttributes as $attribute => $value) {
-            if (!is_null($value)) {
-                $stack[] = sprintf('%s="%s"', $attribute, htmlspecialchars(stripslashes($value)));
-            }
-        }
+    return $stack;
+  }
 
-        return implode(' ', $stack) . ' ';
+  protected function getClassAttribute()
+  {
+    return implode(' ', $this->_class);
+  }
+
+  protected function setClassAttribute($value)
+  {
+    if (is_string($value)) {
+      $value = explode(' ', $value);
     }
 
-    protected function getStyleAttribute()
-    {
-        if (empty($this->globalAttributes['style'])) {
-            return '';
-        }
+    $this->_class = array_unique(array_merge($this->_class, $value));
+  }
 
-        $styles = explode(';', $this->globalAttributes['style']);
+  protected function getAcceptcharsetAttribute()
+  {
+    return $this->attributes['accept-charset'];
+  }
 
-        $stack = [];
-        foreach ($styles as $style) {
-            list($key, $value) = explode(':', $style, 2);
-            $stack[$key] = $value;
-        }
+  protected function setAcceptcharsetAttribute($value)
+  {
+    $this->attributes['accept-charset'] = $value;
+  }
 
-        return $stack;
+  protected function afterCloseTag()
+  {
+    return '';
+  }
+
+  public function attributes($values)
+  {
+    if (is_array($values)) {
+      $this->attributes = array_merge($this->attributes, $values);
+    } elseif (is_string($values) && func_num_args() > 1) {
+      $this->attributes[$values] = func_get_arg(1);
     }
 
-    public function style()
-    {
-        if (func_num_args() > 1) {
-            $stack = [];
-            $args = array_chunk(func_get_args(), 2);
-            foreach ($args as $style) {
-                $stack[$style[0]] = $style[1];
-            }
-        } elseif (is_array(func_get_arg(0))) {
-            $stack = func_get_arg(0);
-        }
+    return $this;
+  }
 
-        // conver the array to styles, eg: "color:#fff;border:none;"
-        $styles = [];
-        foreach ($stack as $key => $value) {
-            $styles[] = sprintf('%s:%s', $key, $value);
-        }
+  /*
+  |--------------------------------------------------------------------------
+  | Special attributes
+  |--------------------------------------------------------------------------
+  |
+  | Here you'll find some special attributes.
+  |
+  */
 
-        $this->globalAttributes['style'] = implode(';', $styles);
-
-        return $this;
+  public function style()
+  {
+    if (func_num_args() > 1) {
+      $stack = [];
+      $args  = array_chunk(func_get_args(), 2);
+      foreach ($args as $style) {
+        $stack[$style[0]] = $style[1];
+      }
+    } elseif (is_array(func_get_arg(0))) {
+      $stack = func_get_arg(0);
     }
 
-    public function data()
-    {
-        if (func_num_args() > 1) {
-            $args = array_chunk(func_get_args(), 2);
-            foreach ($args as $data) {
-                $this->_data[$data[0]] = $data[1];
-            }
-        } elseif (is_array(func_get_arg(0))) {
-            foreach (func_get_arg(0) as $key => $value) {
-                $this->_data[$key] = $value;
-            }
-        }
-
-        $this->_data = array_unique($this->_data, SORT_REGULAR);
-
-        return $this;
+    // conver the array to styles, eg: "color:#fff;border:none;"
+    $styles = [];
+    foreach ($stack as $key => $value) {
+      $styles[] = sprintf('%s:%s', $key, $value);
     }
 
-    public function getDataAttribute()
-    {
-        return $this->_data;
+    $this->globalAttributes['style'] = implode(';', $styles);
+
+    return $this;
+  }
+
+  public function data()
+  {
+    if (func_num_args() > 1) {
+      $args = array_chunk(func_get_args(), 2);
+      foreach ($args as $data) {
+        $this->_data[$data[0]] = $data[1];
+      }
+    } elseif (is_array(func_get_arg(0))) {
+      foreach (func_get_arg(0) as $key => $value) {
+        $this->_data[$key] = $value;
+      }
     }
 
-    public function formatDataAttributes()
-    {
-        // data attributes
-        $stack = [];
-        foreach ($this->_data as $attribute => $value) {
-            if (!is_null($value)) {
-                $stack[] = sprintf('data-%s="%s"', $attribute, htmlspecialchars(stripslashes($value)));
-            }
-        }
+    $this->_data = array_unique($this->_data, SORT_REGULAR);
 
-        return implode(' ', $stack) . ' ';
+    return $this;
+  }
+
+  public function getDataAttribute()
+  {
+    return $this->_data;
+  }
+
+  public function __get($name)
+  {
+    if ($this->hasGetMutator($name)) {
+      return $this->mutateAttribute($name);
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Special attributes
-    |--------------------------------------------------------------------------
-    |
-    | Here you'll find some special attributes.
-    |
-    */
-
-    protected function getClassAttribute()
-    {
-        return implode(' ', $this->_class);
+    if (in_array($name, array_keys($this->globalAttributes))) {
+      return is_null($this->globalAttributes[$name]) ? '' : $this->globalAttributes[$name];
     }
 
-    protected function setClassAttribute($value)
-    {
-        if (is_string($value)) {
-            $value = explode(' ', $value);
-        }
-
-        $this->_class = array_unique(array_merge($this->_class, $value));
+    if (in_array($name, array_keys($this->attributes))) {
+      return is_null($this->attributes[$name]) ? '' : $this->attributes[$name];
     }
 
-    protected function getAcceptcharsetAttribute()
-    {
-        return $this->attributes['accept-charset'];
+    if (in_array($name, array_keys($this->guardedAttributes))) {
+      return is_null($this->guardedAttributes[$name]) ? '' : $this->guardedAttributes[$name];
+    }
+  }
+
+  /*
+  |--------------------------------------------------------------------------
+  | Common
+  |--------------------------------------------------------------------------
+  |
+  |
+  */
+
+  public function __set($name, $value)
+  {
+    if ($this->hasSetMutator($name)) {
+      return $this->setMutatedAttributeValue($name, $value);
     }
 
-    protected function setAcceptcharsetAttribute($value)
-    {
-        $this->attributes['accept-charset'] = $value;
+    if (in_array($name, array_keys($this->globalAttributes))) {
+      return $this->globalAttributes[$name] = $value;
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Common
-    |--------------------------------------------------------------------------
-    |
-    |
-    */
-
-    /**
-     * HtmlTag constructor.
-     *
-     * @param array $arguments
-     */
-    public function __construct($arguments = [])
-    {
-        if (!empty($arguments)) {
-            if (is_array($arguments)) {
-                foreach ($arguments as $key => $value) {
-                    if (in_array($key, array_keys($this->globalAttributes))) {
-                        $this->globalAttributes[$key] = $value;
-                    } elseif (in_array($key, array_keys($this->attributes))) {
-                        $this->attributes[$key] = $value;
-                    } elseif ('content' == $key) {
-                        $this->content = $value;
-                    } elseif ('class' == $key) {
-                        $this->class = $value;
-                    }
-                }
-            } elseif (is_string($arguments)) {
-                $this->content = $arguments;
-            }
-        }
+    if (in_array($name, array_keys($this->attributes))) {
+      return $this->attributes[$name] = $value;
     }
 
-    public function __get($name)
-    {
-        if ($this->hasGetMutator($name)) {
-            return $this->mutateAttribute($name);
-        }
+    if (in_array($name, array_keys($this->guardedAttributes))) {
+      return $this->guardedAttributes[$name] = $value;
+    }
+  }
 
-        if (in_array($name, array_keys($this->globalAttributes))) {
-            return is_null($this->globalAttributes[$name]) ? '' : $this->globalAttributes[$name];
-        }
+  /**
+   * Get the string rappresentation of the tag.
+   *
+   * @return string
+   */
+  public function __toString()
+  {
+    return $this->html();
+  }
 
-        if (in_array($name, array_keys($this->attributes))) {
-            return is_null($this->attributes[$name]) ? '' : $this->attributes[$name];
-        }
+  /**
+   * Get the HTML output.
+   *
+   * @return string
+   */
+  public function html()
+  {
+    ob_start();
 
-        if (in_array($name, array_keys($this->guardedAttributes))) {
-            return is_null($this->guardedAttributes[$name]) ? '' : $this->guardedAttributes[$name];
-        }
+    // before open tag
+    echo $this->beforeOpenTag();
+
+    // open tag
+    $this->echo_space($this->openTag());
+
+    echo $this->formatGlobalAttributes();
+
+    echo $this->formatAttributes();
+
+    echo $this->formatDataAttributes();
+
+    // class
+    if (!empty($this->_class)) {
+      $this->echo_space(sprintf('class="%s"', implode(' ', $this->_class)));
     }
 
-    public function __set($name, $value)
-    {
-        if ($this->hasSetMutator($name)) {
-            return $this->setMutatedAttributeValue($name, $value);
-        }
+    // close and put content content
+    $this->closeTagWithContent();
 
-        if (in_array($name, array_keys($this->globalAttributes))) {
-            return $this->globalAttributes[$name] = $value;
-        }
+    $html = ob_get_contents();
+    ob_end_clean();
 
-        if (in_array($name, array_keys($this->attributes))) {
-            return $this->attributes[$name] = $value;
-        }
+    return $html;
+  }
 
-        if (in_array($name, array_keys($this->guardedAttributes))) {
-            return $this->guardedAttributes[$name] = $value;
-        }
+  protected function beforeOpenTag()
+  {
+    return '';
+  }
+
+  private function echo_space($value)
+  {
+    echo $value . ' ';
+  }
+
+  private function openTag()
+  {
+    return $this->markup[0];
+  }
+
+  public function formatGlobalAttributes()
+  {
+    // global attributes
+    $stack = [];
+    foreach ($this->globalAttributes as $attribute => $value) {
+      if (!is_null($value)) {
+        $stack[] = sprintf('%s="%s"', $attribute, htmlspecialchars(stripslashes($value)));
+      }
     }
 
-    /**
-     * Get the string rappresentation of the tag.
-     *
-     * @return string
-     */
-    public function __toString()
-    {
-        return $this->html();
+    return implode(' ', $stack) . ' ';
+  }
+
+  // You can override this method
+
+  public function formatAttributes()
+  {
+    // html tag attributes
+    $stack = [];
+    foreach ($this->attributes as $attribute => $value) {
+      if (!is_null($value)) {
+        $stack[] = sprintf('%s="%s"', $attribute, htmlspecialchars(stripslashes($value)));
+      }
     }
 
-    public function __call($name, $arguments)
-    {
-        if (in_array($name, array_keys($this->globalAttributes))) {
-            $this->globalAttributes[$name] = $arguments[0];
-        } elseif (in_array($name, array_keys($this->attributes))) {
-            $this->attributes[$name] = $arguments[0];
-        } elseif (in_array($name, array_keys($this->guardedAttributes))) {
-            $this->guardedAttributes[$name] = $arguments[0];
-        } else {
-            $this->__set($name, $arguments[0]);
-        }
+    return implode(' ', $stack) . ' ';
+  }
 
-        return $this;
+  // You can override this method
+
+  public function formatDataAttributes()
+  {
+    // data attributes
+    $stack = [];
+    foreach ($this->_data as $attribute => $value) {
+      if (!is_null($value)) {
+        $stack[] = sprintf('data-%s="%s"', $attribute, htmlspecialchars(stripslashes($value)));
+      }
     }
 
-    /**
-     * Get the HTML output.
-     *
-     * @return string
-     */
-    public function html()
-    {
-        ob_start();
+    return implode(' ', $stack) . ' ';
+  }
 
-        // before open tag
-        echo $this->beforeOpenTag();
+  private function closeTagWithContent()
+  {
+    if ('/>' == $this->closeTag()) {
+      echo $this->closeTag();
+      echo $this->content;
+    } else {
+      echo '>';
+      echo $this->content;
+      echo $this->closeTag();
+    }
+  }
 
-        // open tag
-        $this->echo_space($this->openTag());
+  private function closeTag()
+  {
+    return $this->markup[1];
+  }
 
-        echo $this->formatGlobalAttributes();
-
-        echo $this->formatAttributes();
-
-        echo $this->formatDataAttributes();
-
-        // class
-        if (!empty($this->_class)) {
-            $this->echo_space(sprintf('class="%s"', implode(' ', $this->_class)));
-        }
-
-        // close and put content content
-        $this->closeTagWithContent();
-
-        $html = ob_get_contents();
-        ob_end_clean();
-
-        return $html;
+  public function __call($name, $arguments)
+  {
+    if (in_array($name, array_keys($this->globalAttributes))) {
+      $this->globalAttributes[$name] = $arguments[0];
+    } elseif (in_array($name, array_keys($this->attributes))) {
+      $this->attributes[$name] = $arguments[0];
+    } elseif (in_array($name, array_keys($this->guardedAttributes))) {
+      $this->guardedAttributes[$name] = $arguments[0];
+    } else {
+      $this->__set($name, $arguments[0]);
     }
 
-    /**
-     * Display the HTML output.
-     *
-     */
-    public function render()
-    {
-        echo $this->html();
-    }
+    return $this;
+  }
 
-    // You can override this method
-    protected function beforeOpenTag()
-    {
-        return '';
-    }
-
-    // You can override this method
-    protected function afterCloseTag()
-    {
-        return '';
-    }
-
-    private function closeTagWithContent()
-    {
-        if ('/>' == $this->closeTag()) {
-            echo $this->closeTag();
-            echo $this->content;
-        } else {
-            echo '>';
-            echo $this->content;
-            echo $this->closeTag();
-        }
-    }
-
-    private function openTag()
-    {
-        return $this->markup[0];
-    }
-
-    private function closeTag()
-    {
-        return $this->markup[1];
-    }
-
-    private function echo_space($value)
-    {
-        echo $value . ' ';
-    }
+  /**
+   * Display the HTML output.
+   *
+   */
+  public function render()
+  {
+    echo $this->html();
+  }
 }

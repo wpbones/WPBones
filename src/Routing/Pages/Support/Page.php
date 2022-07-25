@@ -2,8 +2,8 @@
 
 namespace WPKirk\WPBones\Routing\Pages\Support;
 
-if (! defined('ABSPATH')) {
-    exit;
+if (!defined('ABSPATH')) {
+  exit;
 }
 
 /**
@@ -16,24 +16,25 @@ if (! defined('ABSPATH')) {
  */
 abstract class Page
 {
-    /**
-     * The plugin instance.
-     */
-    protected $plugin;
+  /**
+   * The plugin instance.
+   */
+  protected $plugin;
 
-    public function __construct($plugin)
-    {
-        $this->plugin = $plugin;
-    }
+  public function __construct($plugin)
+  {
+    $this->plugin = $plugin;
+  }
 
-    /**
-     * Return the page title.
-     * @return string
-     */
-    abstract public function title();
+  /**
+   * Return the page title.
+   *
+   * @return string
+   */
+  abstract public function title(): string;
 
-    /**
-     * Render the page
-     */
-    abstract public function render();
+  /**
+   * Render the page
+   */
+  abstract public function render();
 }

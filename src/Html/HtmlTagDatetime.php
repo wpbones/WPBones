@@ -21,6 +21,9 @@ class HtmlTagDatetime extends HtmlTag
     'now'      => null,
   ];
 
+        /**
+         * @return mixed
+         */
     public function html()
     {
         ob_start();
@@ -48,7 +51,7 @@ class HtmlTagDatetime extends HtmlTag
         $minute = '';
         $value  = '';
 
-        if (! empty(wpbones_value($this->value))) {
+            if (!empty(wpbones_value($this->value))) {
             if ($this->value == 'now') {
                 $month  = date('n');
                 $day    = date('d');
@@ -65,7 +68,7 @@ class HtmlTagDatetime extends HtmlTag
                 $minute = date('i', $this->value);
             }
 
-            if (! is_numeric($this->value)) {
+                if (!is_numeric($this->value)) {
                 $month  = date('n', strtotime($this->value));
                 $day    = date('d', strtotime($this->value));
                 $year   = date('Y', strtotime($this->value));
@@ -76,8 +79,12 @@ class HtmlTagDatetime extends HtmlTag
             $value = sprintf('%s-%02d-%02d %02d:%02d:00', $year, $month, $day, $hour, $minute);
         }
 
-        $container = md5((time() . microtime() . uniqid())); ?>
+        $container = md5((time() . microtime() . uniqid()));?>
 <style>
+  .wpbones-input-datetime {
+    display: inline-flex;
+    align-items: center;
+  }
   .wp-bones-datetime-button {
     display: inline-block;
   }
@@ -96,37 +103,37 @@ class HtmlTagDatetime extends HtmlTag
     name="<?php echo $this->name ?>" />
   <select id="<?php echo $this->name ?>"
     name="<?php echo $this->name ?>_month">
-    <?php foreach ($months as $key => $value) : ?>
-    <option <?php selected($key, $month) ?> value="<?php echo $key ?>"><?php echo $value ?>
+    <?php foreach ($months as $key => $value): ?>
+    <option<?php selected($key, $month)?> value="<?php echo $key ?>"><?php echo $value ?>
     </option>
-    <?php endforeach; ?>
+    <?php endforeach;?>
   </select>
   <input name="<?php echo $this->name ?>_day"
     value="<?php echo $day ?>" data-type="day" size="2"
-    style="width: 3rem" type="number" min="1" max="31" />,
+    style="width: 3.3rem" type="number" min="1" max="31" />,
   <input name="<?php echo $this->name ?>_year"
     value="<?php echo $year ?>" data-type="year" size="2" min="1"
-    style="width: 4rem" type="number" /> @
+    style="width: 4.3rem" type="number" /> @
   <input name="<?php echo $this->name ?>_hour" size="2"
-    data-type="hour" style="width: 3rem" value="<?php echo $hour ?>"
+    data-type="hour" style="width: 3.3rem" value="<?php echo $hour ?>"
     min="0" max="23" type="number" /> :
   <input name="<?php echo $this->name ?>_minute" size="2"
-    data-type="minute" style="width: 3rem" min="0" max="59"
+    data-type="minute" style="width: 3.3rem" min="0" max="59"
     value="<?php echo $minute ?>" type="number" />
-  <?php if ($this->complete || $this->clear) : ?>
+  <?php if ($this->complete || $this->clear): ?>
   <span class="wp-bones-datetime-button wp-bones-datetime-clear-button">
     <a href="#">
       <i class="dashicons dashicons-dismiss"></i>
     </a>
   </span>
-  <?php endif; ?>
-  <?php if ($this->now) : ?>
+  <?php endif;?>
+<?php if ($this->now): ?>
   <span class="wp-bones-datetime-button wp-bones-datetime-now-button">
     <a href="#">
       <i class="dashicons dashicons-calendar-alt"></i>
     </a>
   </span>
-  <?php endif; ?>
+  <?php endif;?>
 </span>
 <script>
   (function($) {
@@ -154,7 +161,7 @@ class HtmlTagDatetime extends HtmlTag
         hour: $hour.val(),
         minute: $minute.val()
       },
-      complete = <?php echo empty(wpbones_value($this->complete)) ? "false" : "true"  ?> ;
+      complete =                                                                                                 <?php echo empty(wpbones_value($this->complete)) ? "false" : "true" ?> ;
 
     $hidden.on('wpbones.setdate', function(e, params) {
       var date = new Date((params * 1000));

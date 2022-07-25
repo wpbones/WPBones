@@ -2,46 +2,57 @@
 
 namespace WPKirk\WPBones\Database\Migrations;
 
-use WPKirk\WPBones\Support\Str;
+use WPKirk\WPBones\Database\DB;
 
 class Migration
 {
-    protected $charsetCollate = 'dummy_charset_collate';
-    protected $tablename      = 'dummy_table_name';
+  protected $charsetCollate = 'dummy_charset_collate';
 
-    /**
-     * Create a new Migration.
-     */
-    public function __construct()
-    {
-        global $wpdb;
+  /**
+   * The database table name with WordPress prefix.
+   * Usually, you should use the model name as the table name.
+   * It will be converted to lowercase and with the WordPress prefix.
+   *
+   * @var string
+   */
+  protected $tablename = 'dummy_table_name';
 
-        $this->charsetCollate = $wpdb->get_charset_collate();
-        $this->tablename      = $wpdb->prefix . Str::snake(Str::studly(get_called_class()));
+  /**
+   * Create a new Migration.
+   */
+  public function __construct()
+  {
+    global $wpdb;
 
-        $this->up();
-    }
+    $this->charsetCollate = $wpdb->get_charset_collate();
+    $this->tablename      = DB::getTableName($this->tablename);
 
+    error_log($this->tablename);
+
+    $this->up();
+  }
+
+  // You may override this method on plugin deactivation
+
+  public function up()
+  {
+    // You may override this method on plugin activation
+  }
+
+  // You may override this method on plugin deactivation
+
+  protected function tablename()
+  {
+  }
+
+  protected function create($sql)
+  {
+    require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+    dbDelta($sql);
+  }
+
+  public function down()
+  {
     // You may override this method on plugin deactivation
-    public function up()
-    {
-        // You may override this method on plugin activation
-    }
-
-    // You may override this method on plugin deactivation
-
-    protected function create($sql)
-    {
-        require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
-        dbDelta($sql);
-    }
-
-    protected function tablename()
-    {
-    }
-
-    public function down()
-    {
-        // You may override this method on plugin deactivation
-    }
+  }
 }
