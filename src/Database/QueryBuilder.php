@@ -104,7 +104,7 @@ class QueryBuilder
     global $wpdb;
 
     $this->wpdb       = $wpdb;
-    $this->table      = $table;
+    $this->table      = DB::getTableName($table);
     $this->primaryKey = $primaryKey;
 
     // init
