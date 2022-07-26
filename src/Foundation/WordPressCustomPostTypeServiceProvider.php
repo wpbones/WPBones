@@ -349,7 +349,7 @@ abstract class WordPressCustomPostTypeServiceProvider extends ServiceProvider
    *
    * @return array
    */
-  protected function labels()
+  protected function labels(): array
   {
     $defaults = [
       'name'               => $this->plural,
@@ -383,7 +383,7 @@ abstract class WordPressCustomPostTypeServiceProvider extends ServiceProvider
    *
    * @return array
    */
-  protected function supports()
+  protected function supports(): array
   {
     if (empty($this->supports)) {
       return [
@@ -454,7 +454,7 @@ abstract class WordPressCustomPostTypeServiceProvider extends ServiceProvider
   }
 
   /**
-   * This action is called when a post is save or updated. Use the `save_post_{post_type}` hook
+   * This action is called when a post is saved or updated. Use the `save_post_{post_type}` hook
    *
    * @brief Save/update post
    * @note  You DO NOT override this method, use `update()` instead

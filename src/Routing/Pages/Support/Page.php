@@ -31,7 +31,7 @@ abstract class Page
    *
    * @return string
    */
-  abstract public function title(): string;
+  abstract public function title();
 
   /**
    * Render the page

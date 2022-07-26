@@ -130,7 +130,7 @@ abstract class HtmlTag
     return $stack;
   }
 
-  protected function getClassAttribute()
+  protected function getClassAttribute(): string
   {
     return implode(' ', $this->_class);
   }
@@ -191,7 +191,7 @@ abstract class HtmlTag
       $stack = func_get_arg(0);
     }
 
-    // conver the array to styles, eg: "color:#fff;border:none;"
+    // convert the array to styles, eg: "color:#fff;border:none;"
     $styles = [];
     foreach ($stack as $key => $value) {
       $styles[] = sprintf('%s:%s', $key, $value);
@@ -272,7 +272,7 @@ abstract class HtmlTag
   }
 
   /**
-   * Get the string rappresentation of the tag.
+   * Get the string presentation of the tag.
    *
    * @return string
    */

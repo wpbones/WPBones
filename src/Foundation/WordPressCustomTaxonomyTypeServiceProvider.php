@@ -253,7 +253,7 @@ abstract class WordPressCustomTaxonomyTypeServiceProvider extends ServiceProvide
    *
    * @return array
    */
-  protected function labels()
+  protected function labels(): array
   {
     $defaults = [
       'name'                       => $this->plural,

@@ -205,5 +205,5 @@ abstract class Command
    *
    * @return void
    */
-  abstract public function handle(): void;
+  abstract public function handle();
 }

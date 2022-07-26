@@ -33,7 +33,7 @@ abstract class Widget extends WP_Widget
    *
    * @return array
    */
-  abstract public function defaults(): array;
+  abstract public function defaults();
 
   /**
    * Echo the widget content.
@@ -80,5 +80,5 @@ abstract class Widget extends WP_Widget
    * @param $instance
    * @return string
    */
-  abstract public function viewForm($instance): string;
+  abstract public function viewForm($instance);
 }
