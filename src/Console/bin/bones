@@ -897,7 +897,7 @@ namespace Bones {
         return (empty($str) || $str === '--help');
       }
 
-      $param = $this->commandParams()[0];
+      $param = $this->commandParams()[0]??null;
 
       return (!empty($param) && $param === '--help');
     }
