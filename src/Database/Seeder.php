@@ -2,6 +2,8 @@
 
 namespace WPKirk\WPBones\Database;
 
+use Exception;
+
 /**
  * Class Seeder
  *
@@ -18,7 +20,7 @@ abstract class Seeder
    *
    * @var string
    */
-  protected $tablename = 'dummy_table_name';
+  protected $tablename;
 
   /**
    * The WordPress database object.
@@ -34,12 +36,18 @@ abstract class Seeder
 
   /**
    * Run the database seeds.
+   *
+   * @throws \Exception
    */
   public function __construct()
   {
     global $wpdb;
 
     $this->wpdb = $wpdb;
+
+    if (empty($this->tablename)) {
+      throw new Exception('The tablename property is not set.');
+    }
 
     $this->tablename = DB::getTableName($this->tablename);
 
@@ -89,7 +97,8 @@ abstract class Seeder
   /**
    * Truncate a table.
    *
-   * @param string $tablename The table name.
+   * @param string $tablename Optional. The table name without the WordPress prefix.
+   *                          If not specified, the tablename property will be used.
    */
   protected function truncate($tablename = "")
   {
