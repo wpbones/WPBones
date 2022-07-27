@@ -423,7 +423,7 @@ namespace Bones {
   /**
    * The WP Bones command line version.
    */
-  define('WPBONES_COMMAND_LINE_VERSION', "1.2.3");
+  define('WPBONES_COMMAND_LINE_VERSION', "1.2.4");
 
   use Bones\SemVer\Version;
   use Exception;
@@ -442,7 +442,7 @@ namespace Bones {
 
   if (version_compare(PHP_VERSION, WPBONES_MINIMAL_PHP_VERSION) < 0) {
     echo "\n\033[33;5;82mWarning!!\n";
-    echo "\n\033[38;5;82m\t" . 'You must run with PHP version ' . WPBONES_MINIMAL_PHP_VERSION . ' or greather';
+    echo "\n\033[38;5;82m\t" . 'You must run with PHP version ' . WPBONES_MINIMAL_PHP_VERSION . ' or greater';
     echo "\033[0m\n\n";
     exit;
   }
@@ -724,7 +724,7 @@ namespace Bones {
     }
 
     /**
-     * Commodity to display an message in the console.
+     * Commodity to display a message in the console.
      *
      * @param string $str The message to display.
      */
@@ -1308,7 +1308,7 @@ namespace Bones {
         /**
          * Fires when the console deploy is completed.
          *
-         * @param mixed  $bones This bones command instance.
+         * @param mixed  $bones Bones command instance.
          * @param string $path  The deployed path.
          */
         do_action('wpbones_console_deploy_completed', $this, $path);
@@ -1453,6 +1453,7 @@ namespace Bones {
      * is the readme.txt version. This means that we are going to load and check both files. We have to check if the
      * version are the same as well.
      *
+     * @throws \Bones\SemVer\Exceptions\InvalidVersionException
      */
     protected function version($argv)
     {
@@ -1531,7 +1532,12 @@ namespace Bones {
         $version = semver($version_number_from_index_php)->incrementPatch();
       }
 
-      $version = Version::parse($version);
+      try {
+        $version = Version::parse($version);
+      } catch (\Bones\SemVer\Exceptions\InvalidVersionException $e) {
+        $this->error("\nERROR:\n\nThe version is not valid.\n");
+        exit(1);
+      }
 
       $yesno = $this->ask("The new version of your plugin will be {$version}, is it ok? (y/n)", 'n');
 
@@ -1598,7 +1604,6 @@ namespace Bones {
 
       // current plugin name and namespace
       $namespace = $this->getNamespace();
-
 
       // stubbing
       $content = $this->prepareStub('migrate', [
