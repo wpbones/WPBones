@@ -345,7 +345,7 @@ class WordPressOption implements ArrayAccess
 
     // search for delete
     foreach ($result as $key => $value) {
-      if (!is_numeric($key) && !isset($lastVersion[$key])) {
+      if (!is_numeric($key) && !array_key_exists($key, $lastVersion)) {
         unset($result[$key]);
       }
     }
