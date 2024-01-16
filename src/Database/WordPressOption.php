@@ -112,7 +112,7 @@ class WordPressOption implements ArrayAccess
     return $this->_value;
   }
 
-  public function offsetSet($offset, $value)
+  public function offsetSet(mixed $offset, mixed $value): void
   {
     $this->set($offset, $value);
   }
@@ -243,7 +243,7 @@ class WordPressOption implements ArrayAccess
     return $result;
   }
 
-  public function offsetExists($offset)
+  public function offsetExists(mixed $offset): bool
   {
     return !is_null($this->get($offset, null));
   }
@@ -282,12 +282,12 @@ class WordPressOption implements ArrayAccess
     return $current;
   }
 
-  public function offsetUnset($offset)
+  public function offsetUnset(mixed $offset):void 
   {
     $this->set($offset);
   }
 
-  public function offsetGet($offset)
+  public function offsetGet(mixed $offset): mixed 
   {
     return $this->get($offset);
   }

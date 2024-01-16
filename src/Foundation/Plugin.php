@@ -26,6 +26,7 @@ if (!defined('ABSPATH')) {
  *
  * @property WordPressOption $options
  * @property Request         $request
+ * @property string          $Version
  */
 class Plugin extends Container implements PluginContract
 {
@@ -34,7 +35,7 @@ class Plugin extends Container implements PluginContract
   /**
    * The current globally available container (if any).
    *
-   * @var static
+   * @var Plugin
    */
   protected static $instance;
   /**
