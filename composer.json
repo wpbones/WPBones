@@ -20,7 +20,8 @@
     "source": "https://github.com/wpbones/WPBones/"
   },
   "require": {
-    "php": ">=7.4"
+    "php": ">=7.4",
+    "eftec/bladeone": "^4.11"
   },
   "autoload": {
     "psr-4": {

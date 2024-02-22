@@ -2,6 +2,8 @@
 
 namespace WPKirk\WPBones\View;
 
+use eftec\bladeone\BladeOne;
+
 if (!defined('ABSPATH')) {
   exit;
 }
@@ -32,18 +34,28 @@ class View
   protected $styles  = [];
   protected $scripts = [];
 
+  protected BladeOne $blade;
+
   /**
    * Create a new View.
    *
-   * @param mixed  $container Usually a container/plugin.
-   * @param string $key       Optional. This is the path of view.
-   * @param mixed  $data      Optional. Any data to pass to view.
+   * @param mixed       $container Usually a container/plugin.
+   * @param string|null $key       Optional. This is the path of view.
+   * @param array       $data      Optional. Any data to pass to view.
    */
-  public function __construct($container, $key = null, $data = null)
+  public function __construct($container, string $key = null, array $data = [])
   {
     $this->container = $container;
     $this->key       = $key;
     $this->data      = $data;
+
+	$cache = $this->container->getBasePath() . '/.cache';
+	if (!file_exists($cache)) {
+		mkdir($cache, 0777, true);
+	}
+
+	//Initiate BladeOne
+	$this->blade = new BladeOne($this->container->getBasePath() . '/resources/views', $cache, BladeOne::MODE_AUTO);
   }
 
   /**
@@ -71,26 +83,37 @@ class View
       $this->wp_print_styles();
     }
 
-    $func = function () {
+	// Check if view exists as a blade file
+	if (file_exists($this->container->getBasePath() . '/resources/views/' . $this->filename()) && strpos($this->filename(), '.blade.php') !== false) {
+		// Inject the plugin instance into the view
+		$this->data['plugin'] = $this->container;
 
-      // make available Html as facade
-      if (!class_exists('WPKirk\Html')) {
-        class_alias('\WPKirk\WPBones\Html\Html', 'WPKirk\Html', true);
-      }
+		// Render the blade file
+		$func = function () {
+			echo $this->blade->run($this->filename(), $this->data);
+		};
+	} else {
+		// Keep the old way of rendering views for backward compatibility
+		$func = function() {
+			// make available Html as facade
+			if(!class_exists('WPKirk\Html')) {
+				class_alias('\WPKirk\WPBones\Html\Html', 'WPKirk\Html', true);
+			}
 
-      // make available plugin instance
-      $plugin = $this->container;
+			// make available plugin instance
+			$plugin = $this->container;
 
-      // make available passing params
-      if (!is_null($this->data) && is_array($this->data)) {
-        foreach ($this->data as $var) {
-          extract($var);
-        }
-      }
+			// make available passing params
+			if(!is_null($this->data) && is_array($this->data)) {
+				foreach($this->data as $var) {
+					extract($var);
+				}
+			}
 
-      // include view
-      include $this->container->getBasePath() . '/resources/views/' . $this->filename();
-    };
+			// include view
+			include $this->container->getBasePath() . '/resources/views/' . $this->filename();
+		};
+	}
 
     if ($this->container->isAjax() || $asHTML) {
       ob_start();
@@ -155,7 +178,15 @@ class View
    */
   protected function filename(): string
   {
-    return str_replace('.', '/', $this->key) . '.php';
+	  $exts = ['.blade.php', '.php'];
+	  foreach ($exts as $ext) {
+		  if (file_exists($this->container->getBasePath() . '/resources/views/' . str_replace('.', '/', $this->key) . $ext)) {
+			  return str_replace('.', '/', $this->key) . $ext;
+		  }
+	  }
+
+	  // If no file is found, return the first extension
+	  return str_replace('.', '/', $this->key) . '.php';
   }
 
   /**
