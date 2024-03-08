@@ -44,6 +44,14 @@ abstract class WordPressAjaxServiceProvider extends ServiceProvider
    */
   protected $notLogged = [];
 
+   /**
+   * The capability required to execute the action.
+   * Of course, this is only for logged-in users.
+   *
+   * @var string
+   */
+  protected $capability = '';
+
   private $_request = null;
 
   /**
@@ -65,9 +73,21 @@ abstract class WordPressAjaxServiceProvider extends ServiceProvider
     }
 
     foreach ($this->logged as $action) {
+      // if $this->capability is not empty, then use it
+      if (!empty($this->capability)) {
+        if (!current_user_can($this->capability)) {
+          $action = 'permissionDenied';
+        }
+      }
+
       add_action('wp_ajax_' . $action, [$this, $action]);
     }
   }
+
+  public function permissionDenied()
+  {
+    wp_send_json_error(__("You don't have permission to do this."));
+  }  
 
   /**
    * You may override this method in order to register your own actions and filters.
