@@ -1,6 +1,13 @@
 <p align="center">
-  <img src="https://github.com/wpbones/WPBones/wiki/images/wp-bones-logo-little.png" alt="WP Bones Logo" />
+  <img src="https://github.com/wpbones/WPBones/assets/432181/13e0e825-9b0d-44c2-a77d-1baad88a1070" alt="WP Bones Logo" />
 </p>
+
+## New Website and Docs
+
+Have a look at the new [WPBones website and documentation](https://wpbones.vercel.app).
+
+![image](https://github.com/wpbones/WPBones/assets/432181/24019b5a-212d-4a17-baf3-6b5617ffb4f2)
+
 
 <p align="center">
 
