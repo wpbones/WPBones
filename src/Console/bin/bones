@@ -944,7 +944,7 @@ namespace Bones {
         rename($file, $newFile);
       }
 
-      foreach (glob('resources/assets/less/*') as $file) {
+      foreach (glob('resources/assets/css/*') as $file) {
         $newFile = str_replace(
           $this->getPluginId($search_plugin_name),
           $this->getPluginId($plugin_name),

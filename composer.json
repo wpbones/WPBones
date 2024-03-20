@@ -1,6 +1,6 @@
 {
   "name": "wpbones/wpbones",
-  "version": "1.2.5",
+  "version": "1.2.6",
   "homepage": "https://wpbones.vercel.app",
   "type": "library",
   "description": "WordPress framework for Laravel developers",
