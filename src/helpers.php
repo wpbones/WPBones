@@ -3,7 +3,21 @@
 use WPKirk\WPBones\Support\Str;
 
 if (!defined('ABSPATH')) {
-  exit;
+  exit();
+}
+
+if (!function_exists('wpbones_esc_attr_n')) {
+  /**
+   * Return the escaped value of the given value.
+   *
+   * @param mixed $arg
+   *
+   * @return mixed
+   */
+  function wpbones_esc_attr_n(...$arg)
+  {
+    return esc_attr(_n(...$arg));
+  }
 }
 
 if (!function_exists('wpbones_value')) {

@@ -1,16 +1,25 @@
 {
   "name": "wpbones/wpbones",
   "version": "1.2.5",
-  "homepage": "https://github.com/wpbones/wpbones",
+  "homepage": "https://wpbones.vercel.app",
   "type": "library",
   "description": "WordPress framework for Laravel developers",
-  "keywords": ["wordpress", "laravel", "framework", "wpbones", "plugins", "themes"],
+  "keywords": [
+    "wordpress",
+    "laravel",
+    "framework",
+    "wpbones",
+    "plugins",
+    "themes"
+  ],
   "license": "GPL-3.0",
-  "authors": [{
-    "name": "Giovambattista Fazioli",
-    "email": "giovambattista.fazioli@gmail.com",
-    "homepage": "http://undolog.com"
-  }],
+  "authors": [
+    {
+      "name": "Giovambattista Fazioli",
+      "email": "giovambattista.fazioli@gmail.com",
+      "homepage": "http://undolog.com"
+    }
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/wpbones/wpbones"
@@ -26,8 +35,6 @@
     "psr-4": {
       "WPKirk\\WPBones\\": "src/"
     },
-    "files": [
-      "src/helpers.php"
-    ]
+    "files": ["src/helpers.php"]
   }
 }
