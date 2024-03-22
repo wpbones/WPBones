@@ -116,20 +116,12 @@ abstract class WordPressAjaxServiceProvider extends ServiceProvider
   {
     if (!empty($this->nonceKey) && !empty($this->nonceHash)) {
       if (!isset($_POST[$this->nonceKey])) {
-        wp_send_json_error(
-          __("You don't have permission to do this. The nonce is missing."),
-          403
-        );
+        wp_send_json_error(__("You don't have permission to do this. The nonce is missing."), 403);
         return false;
       }
 
-      if (
-        wp_verify_nonce($_POST[$this->nonceKey], $this->nonceHash) === false
-      ) {
-        wp_send_json_error(
-          __("You don't have permission to do this. The nonce is invalid."),
-          403
-        );
+      if (wp_verify_nonce($_POST[$this->nonceKey], $this->nonceHash) === false) {
+        wp_send_json_error(__("You don't have permission to do this. The nonce is invalid."), 403);
         return false;
       }
     }

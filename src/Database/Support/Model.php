@@ -6,7 +6,7 @@ use WPKirk\WPBones\Database\QueryBuilder;
 use WPKirk\WPBones\Support\Str;
 
 if (!defined('ABSPATH')) {
-  exit;
+  exit();
 }
 
 class Model
@@ -25,10 +25,9 @@ class Model
    */
   protected $attributes = [];
 
-
   public function __construct($attributes, $queryBuilder)
   {
-    $this->attributes   = $attributes;
+    $this->attributes = $attributes;
     $this->queryBuilder = $queryBuilder;
   }
 
@@ -45,8 +44,7 @@ class Model
    */
   public function delete(): QueryBuilder
   {
-    return $this->newQueryBuilder()
-                ->where($this->getPrimaryKey(), $this->getPrimaryKeyValue())->delete();
+    return $this->newQueryBuilder()->where($this->getPrimaryKey(), $this->getPrimaryKeyValue())->delete();
   }
 
   /**
@@ -103,8 +101,7 @@ class Model
   {
     $attributes = $attributes ?: $this->attributes;
 
-    return $this->newQueryBuilder()
-                ->where($this->getPrimaryKey(), $this->getPrimaryKeyValue())->update($attributes);
+    return $this->newQueryBuilder()->where($this->getPrimaryKey(), $this->getPrimaryKeyValue())->update($attributes);
   }
 
   /**
@@ -112,11 +109,10 @@ class Model
    */
   public function __get($name)
   {
-    $model    = $this->getParentModel();
+    $model = $this->getParentModel();
     $accessor = 'get' . Str::studly($name) . 'Attribute';
 
     if (isset($this->attributes[$name])) {
-
       // check if an accessor exists for this attribute
       if (method_exists($model, $accessor)) {
         return $model->{$accessor}($this->attributes[$name]);
@@ -131,7 +127,6 @@ class Model
     }
   }
 
-
   /*
   |--------------------------------------------------------------------------
   | Magic methods
@@ -145,11 +140,10 @@ class Model
    */
   public function __set($name, $value)
   {
-    $model   = $model = $this->getParentModel();
+    $model = $model = $this->getParentModel();
     $mutator = 'set' . Str::studly($name) . 'Attribute';
 
     if (isset($this->attributes[$name])) {
-
       // check if an accessor exists for this attribute
       if (method_exists($model, $mutator)) {
         $model->{$mutator}($value);

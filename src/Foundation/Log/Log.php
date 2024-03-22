@@ -2,35 +2,32 @@
 
 namespace WPKirk\WPBones\Foundation\Log;
 
-if (! defined('ABSPATH')) {
-    exit;
+if (!defined('ABSPATH')) {
+  exit();
 }
 
 class Log
 {
+  /**
+   * Singleton instance.
+   *
+   * @var null
+   */
+  private static $instance = null;
 
-    /**
-     * Singleton instance.
-     *
-     * @var null
-     */
-    private static $instance = null;
-
-    public static function getLog()
-    {
-        if (is_null(self::$instance)) {
-            self::$instance = WPKirk()->log();
-        }
-
-        return self::$instance;
+  public static function getLog()
+  {
+    if (is_null(self::$instance)) {
+      self::$instance = WPKirk()->log();
     }
 
-    public static function __callStatic($name, $arguments)
-    {
-        self::getLog();
+    return self::$instance;
+  }
 
-        return call_user_func_array([self::$instance, $name], $arguments);
+  public static function __callStatic($name, $arguments)
+  {
+    self::getLog();
 
-    }
-
+    return call_user_func_array([self::$instance, $name], $arguments);
+  }
 }

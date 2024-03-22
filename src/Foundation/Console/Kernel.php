@@ -4,16 +4,14 @@ namespace WPKirk\WPBones\Foundation\Console;
 
 class Kernel
 {
-
-  protected $commands = [
-  ];
+  protected $commands = [];
 
   private $instances = [];
 
   public function __construct()
   {
     foreach ($this->commands as $commandClass) {
-      $instance                                                = new $commandClass;
+      $instance = new $commandClass();
       $this->instances[$instance->context][$instance->command] = $instance;
     }
   }
@@ -29,7 +27,6 @@ class Kernel
     $commandConsole = $argv[0];
 
     foreach ($this->instances as $commands) {
-
       if (in_array($commandConsole, array_keys($commands))) {
         array_shift($argv);
         if (in_array('--help', $argv)) {
@@ -53,8 +50,8 @@ class Kernel
       }
 
       foreach ($commands as $key => $command) {
-        $name        = $command->command;
-        $name        .= str_repeat(' ', 23 - strlen($name));
+        $name = $command->command;
+        $name .= str_repeat(' ', 23 - strlen($name));
         $description = $command->description;
         $this->line(" {$name} {$description}");
       }

@@ -5,7 +5,7 @@ namespace WPKirk\WPBones\Database\Support;
 use ArrayObject;
 
 if (!defined('ABSPATH')) {
-  exit;
+  exit();
 }
 
 class Collection extends ArrayObject

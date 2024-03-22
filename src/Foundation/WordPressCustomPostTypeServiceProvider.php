@@ -6,12 +6,11 @@ use WPKirk\WPBones\Foundation\Http\Request;
 use WPKirk\WPBones\Support\ServiceProvider;
 
 if (!defined('ABSPATH')) {
-  exit;
+  exit();
 }
 
 abstract class WordPressCustomPostTypeServiceProvider extends ServiceProvider
 {
-
   /**
    * Post type key, must not exceed 20 characters.
    *
@@ -221,7 +220,7 @@ abstract class WordPressCustomPostTypeServiceProvider extends ServiceProvider
    *
    * @var string
    */
-  protected $slug = "wp_kirk_slug";
+  protected $slug = 'wp_kirk_slug';
 
   /**
    * Should the permastruct be prepended with WP_Rewrite::$front. Defaults to true.
@@ -317,29 +316,29 @@ abstract class WordPressCustomPostTypeServiceProvider extends ServiceProvider
   protected function args(): array
   {
     return [
-      'labels'               => $this->labels(),
-      'description'          => $this->description,
-      'public'               => $this->public,
-      'hierarchical'         => $this->hierarchical,
-      'exclude_from_search'  => $this->excludeFromSearch,
-      'publicly_queryable'   => $this->publiclyQueryable,
-      'show_ui'              => $this->showUI,
-      'show_in_menu'         => $this->showInMenu,
-      'show_in_nav_menus'    => $this->showInNavMenus,
-      'show_in_admin_bar'    => $this->showInAdminBar,
-      'menu_position'        => $this->menuPosition,
-      'menu_icon'            => $this->menuIcon,
-      'capability_type'      => $this->capabilityType,
-      'capabilities'         => $this->capabilities,
-      'map_meta_cap'         => $this->mapMetaCap,
-      'supports'             => $this->supports(),
+      'labels' => $this->labels(),
+      'description' => $this->description,
+      'public' => $this->public,
+      'hierarchical' => $this->hierarchical,
+      'exclude_from_search' => $this->excludeFromSearch,
+      'publicly_queryable' => $this->publiclyQueryable,
+      'show_ui' => $this->showUI,
+      'show_in_menu' => $this->showInMenu,
+      'show_in_nav_menus' => $this->showInNavMenus,
+      'show_in_admin_bar' => $this->showInAdminBar,
+      'menu_position' => $this->menuPosition,
+      'menu_icon' => $this->menuIcon,
+      'capability_type' => $this->capabilityType,
+      'capabilities' => $this->capabilities,
+      'map_meta_cap' => $this->mapMetaCap,
+      'supports' => $this->supports(),
       'register_meta_box_cb' => $this->registerMetaBoxCallback,
-      'taxonomies'           => $this->taxonomies,
-      'has_archive'          => $this->hasArchive,
-      'rewrite'              => $this->rewrite(),
-      'query_var'            => $this->queryVar,
-      'can_export'           => $this->canExport,
-      'delete_with_user'     => $this->deleteWithUser,
+      'taxonomies' => $this->taxonomies,
+      'has_archive' => $this->hasArchive,
+      'rewrite' => $this->rewrite(),
+      'query_var' => $this->queryVar,
+      'can_export' => $this->canExport,
+      'delete_with_user' => $this->deleteWithUser,
       //      '_builtin'             => $this->_builtin,
       //      '_edit_link'           => $this->_editLink,
     ];
@@ -353,30 +352,27 @@ abstract class WordPressCustomPostTypeServiceProvider extends ServiceProvider
   protected function labels(): array
   {
     $defaults = [
-      'name'               => $this->plural,
-      'singular_name'      => $this->name,
-      'menu_name'          => $this->name,
-      'name_admin_bar'     => $this->name,
-      'add_new'            => "Add {$this->name}",
-      'add_new_item'       => "Add New {$this->name}",
-      'edit_item'          => "Edit {$this->name}",
-      'new_item'           => "New {$this->name}",
-      'view_item'          => "View {$this->name}",
-      'search_items'       => "Search {$this->name}",
-      'not_found'          => "No {$this->name} found",
+      'name' => $this->plural,
+      'singular_name' => $this->name,
+      'menu_name' => $this->name,
+      'name_admin_bar' => $this->name,
+      'add_new' => "Add {$this->name}",
+      'add_new_item' => "Add New {$this->name}",
+      'edit_item' => "Edit {$this->name}",
+      'new_item' => "New {$this->name}",
+      'view_item' => "View {$this->name}",
+      'search_items' => "Search {$this->name}",
+      'not_found' => "No {$this->name} found",
       'not_found_in_trash' => "No {$this->name} found in trash",
-      'all_items'          => $this->plural,
-      'archive_title'      => $this->name,
-      'parent_item_colon'  => '',
+      'all_items' => $this->plural,
+      'archive_title' => $this->name,
+      'parent_item_colon' => '',
     ];
     if (empty($this->labels)) {
       return $defaults;
     }
 
-    return array_merge(
-      $defaults,
-      $this->labels
-    );
+    return array_merge($defaults, $this->labels);
   }
 
   /**
@@ -422,10 +418,10 @@ abstract class WordPressCustomPostTypeServiceProvider extends ServiceProvider
   {
     if (empty($this->rewrite)) {
       return [
-        'slug'       => $this->slug,
+        'slug' => $this->slug,
         'with_front' => $this->withFront,
-        'pages'      => $this->pages,
-        'ep_mask'    => $this->epMask,
+        'pages' => $this->pages,
+        'ep_mask' => $this->epMask,
       ];
     }
 
@@ -436,7 +432,6 @@ abstract class WordPressCustomPostTypeServiceProvider extends ServiceProvider
   {
     // admin hooks
     if (is_admin()) {
-
       // Hook save post
       add_action('save_post_' . $this->id, [$this, 'save_post'], 10, 2);
     }
@@ -451,7 +446,7 @@ abstract class WordPressCustomPostTypeServiceProvider extends ServiceProvider
   {
     global $post_type, $typenow;
 
-    return ($post_type === $this->id || $typenow === $this->id);
+    return $post_type === $this->id || $typenow === $this->id;
   }
 
   /**
@@ -467,17 +462,17 @@ abstract class WordPressCustomPostTypeServiceProvider extends ServiceProvider
    */
   public function save_post($post_id, $post = null)
   {
-
     // Do not save...
-    if ((defined('DOING_AUTOSAVE') && true === DOING_AUTOSAVE) ||
-        (defined('DOING_AJAX') && true === DOING_AJAX) ||
-        (defined('DOING_CRON') && true === DOING_CRON)
+    if (
+      (defined('DOING_AUTOSAVE') && true === DOING_AUTOSAVE) ||
+      (defined('DOING_AJAX') && true === DOING_AJAX) ||
+      (defined('DOING_CRON') && true === DOING_CRON)
     ) {
       return;
     }
 
     // Get post type information
-    $post_type        = get_post_type();
+    $post_type = get_post_type();
     $post_type_object = get_post_type_object($post_type);
 
     // Exit

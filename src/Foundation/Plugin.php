@@ -17,7 +17,7 @@ use WPKirk\WPBones\Support\Traits\HasAttributes;
 use WPKirk\WPBones\View\View;
 
 if (!defined('ABSPATH')) {
-  exit;
+  exit();
 }
 
 /**
@@ -38,45 +38,50 @@ class Plugin extends Container implements PluginContract
    * @var Plugin
    */
   protected static $instance;
+
   /**
    * The slug of this plugin.
    *
    * @var string
    */
   public $slug = '';
+
   /**
    * Build in __FILE__ relative plugin.
    *
    * @var string
    */
   protected $file;
+
   /**
    * The base path for the plugin installation.
    *
    * @var string
    */
   protected $basePath;
+
   /**
    * The base uri for the plugin installation.
    *
    * @var string
    */
   protected $baseUri;
+
   /**
    * Internal use where store the plugin data.
    *
    * @var array
    */
   protected $pluginData = [];
+
   /**
    * A key value pairs array with the list of providers.
    *
    * @var array
    */
   protected $provides = [];
-  private   $_options = null;
-  private   $_request = null;
-
+  private $_options = null;
+  private $_request = null;
 
   public function __construct($basePath)
   {
@@ -94,7 +99,7 @@ class Plugin extends Container implements PluginContract
 
     // Use WordPress get_plugin_data() function for auto retrieve plugin information.
     if (!function_exists('get_plugin_data')) {
-      require_once(ABSPATH . 'wp-admin/includes/plugin.php');
+      require_once ABSPATH . 'wp-admin/includes/plugin.php';
     }
     $this->pluginData = get_plugin_data($this->file, false);
 
@@ -118,7 +123,11 @@ class Plugin extends Container implements PluginContract
     $this->slug = str_replace('-', '_', sanitize_title($this->pluginData['Name'])) . '_slug';
 
     // Load text domain
-    load_plugin_textdomain("wp-kirk", false, trailingslashit(basename($this->basePath)) . $this->pluginData['DomainPath']);
+    load_plugin_textdomain(
+      'wp-kirk',
+      false,
+      trailingslashit(basename($this->basePath)) . $this->pluginData['DomainPath']
+    );
 
     // Activation & Deactivation Hook
     register_activation_hook($this->file, [$this, 'activation']);
@@ -167,17 +176,17 @@ class Plugin extends Container implements PluginContract
   {
     $eloquent = '\Illuminate\Database\Capsule\Manager';
     if (class_exists($eloquent)) {
-      $capsule = new $eloquent;
+      $capsule = new $eloquent();
 
       $capsule->addConnection([
-        'driver'    => 'mysql',
-        'host'      => DB_HOST,
-        'database'  => DB_NAME,
-        'username'  => DB_USER,
-        'password'  => DB_PASSWORD,
-        'charset'   => 'utf8',
+        'driver' => 'mysql',
+        'host' => DB_HOST,
+        'database' => DB_NAME,
+        'username' => DB_USER,
+        'password' => DB_PASSWORD,
+        'charset' => 'utf8',
         'collation' => 'utf8_unicode_ci',
-        'prefix'    => '',
+        'prefix' => '',
       ]);
 
       // Set the event dispatcher used by Eloquent models... (optional)
@@ -275,7 +284,7 @@ class Plugin extends Container implements PluginContract
     $parts = explode('.', $key);
 
     $filename = "{$parts[0]}.php";
-    $key      = $parts[1]??null;
+    $key = $parts[1] ?? null;
 
     $array = include "{$this->basePath}/config/{$filename}";
 
@@ -316,7 +325,7 @@ class Plugin extends Container implements PluginContract
     return $this->baseUri;
   }
 
-  public function vendor($vendor = "wpbones"): string
+  public function vendor($vendor = 'wpbones'): string
   {
     return "{$this->baseUri}/vendor/{$vendor}";
   }
@@ -381,7 +390,7 @@ class Plugin extends Container implements PluginContract
         $this->slug . Str::slug($file),
         $this->css . '/' . $file,
         (array) $deps,
-        $version??$this->Version
+        $version ?? $this->Version
       );
     }
   }
@@ -414,7 +423,7 @@ class Plugin extends Container implements PluginContract
         $this->slug . Str::slug($file),
         WPKirk()->js . '/' . $file,
         (array) $deps,
-        $version??$this->Version,
+        $version ?? $this->Version,
         $footer
       );
     }
@@ -459,15 +468,12 @@ class Plugin extends Container implements PluginContract
     }
 
     $classes = [];
-    $tokens  = token_get_all($code);
-    $count   = count($tokens);
+    $tokens = token_get_all($code);
+    $count = count($tokens);
     for ($i = 2; $i < $count; $i++) {
-      if ($tokens[$i - 2][0] == T_CLASS
-          && $tokens[$i - 1][0] == T_WHITESPACE
-          && $tokens[$i][0] == T_STRING
-      ) {
+      if ($tokens[$i - 2][0] == T_CLASS && $tokens[$i - 1][0] == T_WHITESPACE && $tokens[$i][0] == T_STRING) {
         $class_name = $tokens[$i][1];
-        $classes[]  = $class_name;
+        $classes[] = $class_name;
       }
     }
 
@@ -550,9 +556,7 @@ class Plugin extends Container implements PluginContract
     if (defined('DOING_AJAX')) {
       return true;
     }
-    if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) &&
-        strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest'
-    ) {
+    if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
       return true;
     }
 
@@ -606,20 +610,22 @@ class Plugin extends Container implements PluginContract
 
     if (isset($routes['resource'])) {
       $methods = [
-        'get'    => 'index',
-        'post'   => 'store',
-        'put'    => 'update',
-        'patch'  => 'update',
+        'get' => 'index',
+        'post' => 'store',
+        'put' => 'update',
+        'patch' => 'update',
         'delete' => 'destroy',
       ];
 
       $controller = $routes['resource'];
-      $method     = $methods[$verb];
-    } // by single verb and controller@method
+      $method = $methods[$verb];
+    }
+    // by single verb and controller@method
     else {
       if (isset($routes[$verb])) {
         [$controller, $method] = Str::parseCallback($routes[$verb]);
-      } // default "get"
+      }
+      // default "get"
       else {
         if (isset($routes['get'])) {
           [$controller, $method] = Str::parseCallback($routes['get']);
@@ -630,10 +636,10 @@ class Plugin extends Container implements PluginContract
     if (isset($controller) && isset($method)) {
       return function () use ($controller, $method) {
         $className = "WPKirk\\Http\\Controllers\\{$controller}";
-        $instance  = new $className;
+        $instance = new $className();
 
         if (method_exists($instance, 'render')) {
-          return ($instance->render("{$method}"));
+          return $instance->render("{$method}");
         }
       };
     }

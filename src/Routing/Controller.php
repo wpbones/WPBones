@@ -7,7 +7,7 @@ use WPKirk\WPBones\Support\Traits\HasAttributes;
 use WPKirk\WPBones\View\View;
 
 if (!defined('ABSPATH')) {
-  exit;
+  exit();
 }
 
 abstract class Controller
@@ -34,7 +34,7 @@ abstract class Controller
   public function redirect(string $location = '')
   {
     $args = array_filter(array_keys($_REQUEST), function ($e) {
-      return ($e !== 'page');
+      return $e !== 'page';
     });
 
     if (empty($location)) {

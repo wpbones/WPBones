@@ -57,8 +57,8 @@ class DB
     global $wpdb;
 
     $paths = explode('\\', $class);
-    $only  = array_pop($paths);
-    $name  = Str::snake(Str::studly($only));
+    $only = array_pop($paths);
+    $name = Str::snake(Str::studly($only));
 
     return Str::startsWith($name, $wpdb->prefix) ? $name : $wpdb->prefix . $name;
   }

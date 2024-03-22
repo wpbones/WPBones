@@ -31,7 +31,7 @@ class Migration
 
     $sql = "CREATE TABLE {$table} {$schema};";
 
-    require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+    require_once ABSPATH . 'wp-admin/includes/upgrade.php';
     dbDelta($sql);
   }
 

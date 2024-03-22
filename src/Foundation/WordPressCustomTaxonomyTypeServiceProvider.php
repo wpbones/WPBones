@@ -5,29 +5,27 @@ namespace WPKirk\WPBones\Foundation;
 use WPKirk\WPBones\Support\ServiceProvider;
 
 if (!defined('ABSPATH')) {
-  exit;
+  exit();
 }
 
 abstract class WordPressCustomTaxonomyTypeServiceProvider extends ServiceProvider
 {
-
   /**
    * Taxonomy key, must not exceed 32 characters.
    *
    * @var string
    */
-  protected $id = "wp_kirk_tax_id";
+  protected $id = 'wp_kirk_tax_id';
 
-  protected $name   = "Ship";
-  protected $plural = "Ships";
+  protected $name = 'Ship';
+  protected $plural = 'Ships';
 
   /**
    * The custom post type id.
    *
    * @var string
    */
-  protected $objectType = "";
-
+  protected $objectType = '';
 
   /**
    * Name of the taxonomy shown in the menu. Usually plural. If not set, labels['name'] will be used.
@@ -50,7 +48,7 @@ abstract class WordPressCustomTaxonomyTypeServiceProvider extends ServiceProvide
    *
    * @var string
    */
-  protected $description = "";
+  protected $description = '';
 
   /**
    * If the taxonomy should be publicly queryable; //@TODO not implemented.
@@ -152,7 +150,7 @@ abstract class WordPressCustomTaxonomyTypeServiceProvider extends ServiceProvide
    *
    * @var string
    */
-  protected $slug = "";
+  protected $slug = '';
 
   /**
    * Should the permastruct be prepended with WP_Rewrite::$front. Defaults to true.
@@ -175,7 +173,6 @@ abstract class WordPressCustomTaxonomyTypeServiceProvider extends ServiceProvide
    */
   protected $epMask = EP_NONE;
 
-
   /**
    * Sets the query_var key for this taxonomy. Defaults to $taxonomy key
    * If false, a taxonomy cannot be loaded at ?{query_var}={term_slug}
@@ -183,7 +180,7 @@ abstract class WordPressCustomTaxonomyTypeServiceProvider extends ServiceProvide
    *
    * @var string
    */
-  protected $queryVar = "";
+  protected $queryVar = '';
 
   /**
    * Works much like a hook, in that it will be called when the count is updated.
@@ -201,7 +198,6 @@ abstract class WordPressCustomTaxonomyTypeServiceProvider extends ServiceProvide
    * @var bool
    */
   //private $_builtin = true;
-
 
   public function register()
   {
@@ -221,7 +217,6 @@ abstract class WordPressCustomTaxonomyTypeServiceProvider extends ServiceProvide
     // You may override this method
   }
 
-
   /**
    * Return the default args.
    *
@@ -230,20 +225,20 @@ abstract class WordPressCustomTaxonomyTypeServiceProvider extends ServiceProvide
   protected function args(): array
   {
     return [
-      'labels'                => $this->labels(),
-      'description'           => $this->description,
-      'public'                => $this->public,
-      'hierarchical'          => $this->hierarchical,
-      'show_ui'               => $this->showUI,
-      'show_in_menu'          => $this->showInMenu,
-      'show_in_nav_menus'     => $this->showInNavMenus,
-      'show_tagcloud'         => $this->showTagcloud,
-      'show_in_quick_edit'    => $this->showInQuickEdit,
-      'show_admin_column'     => $this->showAdminColumn,
-      'meta_box_cb'           => $this->metaBoxCb,
-      'capabilities'          => $this->capabilities,
-      'rewrite'               => $this->rewrite(),
-      'query_var'             => $this->queryVar,
+      'labels' => $this->labels(),
+      'description' => $this->description,
+      'public' => $this->public,
+      'hierarchical' => $this->hierarchical,
+      'show_ui' => $this->showUI,
+      'show_in_menu' => $this->showInMenu,
+      'show_in_nav_menus' => $this->showInNavMenus,
+      'show_tagcloud' => $this->showTagcloud,
+      'show_in_quick_edit' => $this->showInQuickEdit,
+      'show_admin_column' => $this->showAdminColumn,
+      'meta_box_cb' => $this->metaBoxCb,
+      'capabilities' => $this->capabilities,
+      'rewrite' => $this->rewrite(),
+      'query_var' => $this->queryVar,
       'update_count_callback' => $this->updateCountCallback,
     ];
   }
@@ -256,30 +251,27 @@ abstract class WordPressCustomTaxonomyTypeServiceProvider extends ServiceProvide
   protected function labels(): array
   {
     $defaults = [
-      'name'                       => $this->plural,
-      'singular_name'              => "{$this->name} category",
-      'menu_name'                  => "{$this->name} categories",
-      'name_admin_bar'             => "{$this->name} category",
-      'search_items'               => "Search {$this->name} categories",
-      'popular_items'              => "Popular {$this->name} categories",
-      'all_items'                  => "All {$this->name} categories",
-      'edit_item'                  => "Edit {$this->name} category",
-      'view_item'                  => "View {$this->name} category",
-      'update_item'                => "Updated {$this->name} category",
-      'add_new_item'               => "Add new {$this->name} category",
-      'new_item_name'              => "New {$this->name} category name",
+      'name' => $this->plural,
+      'singular_name' => "{$this->name} category",
+      'menu_name' => "{$this->name} categories",
+      'name_admin_bar' => "{$this->name} category",
+      'search_items' => "Search {$this->name} categories",
+      'popular_items' => "Popular {$this->name} categories",
+      'all_items' => "All {$this->name} categories",
+      'edit_item' => "Edit {$this->name} category",
+      'view_item' => "View {$this->name} category",
+      'update_item' => "Updated {$this->name} category",
+      'add_new_item' => "Add new {$this->name} category",
+      'new_item_name' => "New {$this->name} category name",
       'separate_items_with_commas' => "Separate {$this->name} categories with comas",
-      'add_or_remove_items'        => "Add or remove {$this->name} categories",
-      'choose_from_most_used'      => "Choose from the most used {$this->name} categories",
+      'add_or_remove_items' => "Add or remove {$this->name} categories",
+      'choose_from_most_used' => "Choose from the most used {$this->name} categories",
     ];
     if (empty($this->labels)) {
       return $defaults;
     }
 
-    return array_merge(
-      $defaults,
-      $this->labels
-    );
+    return array_merge($defaults, $this->labels);
   }
 
   /**
@@ -297,10 +289,10 @@ abstract class WordPressCustomTaxonomyTypeServiceProvider extends ServiceProvide
   {
     if (empty($this->rewrite)) {
       return [
-        'slug'         => $this->id,
-        'with_front'   => $this->withFront,
+        'slug' => $this->id,
+        'with_front' => $this->withFront,
         'hierarchical' => $this->rewriteHierarchical,
-        'ep_mask'      => $this->epMask,
+        'ep_mask' => $this->epMask,
       ];
     }
 

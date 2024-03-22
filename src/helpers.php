@@ -6,20 +6,6 @@ if (!defined('ABSPATH')) {
   exit();
 }
 
-if (!function_exists('wpbones_esc_attr_n')) {
-  /**
-   * Return the escaped value of the given value.
-   *
-   * @param mixed $arg
-   *
-   * @return mixed
-   */
-  function wpbones_esc_attr_n(...$arg)
-  {
-    return esc_attr(_n(...$arg));
-  }
-}
-
 if (!function_exists('wpbones_value')) {
   /**
    * Return the default value of the given value.
@@ -34,8 +20,7 @@ if (!function_exists('wpbones_value')) {
   }
 }
 
-if (!function_exists("wpbones_env")) {
-
+if (!function_exists('wpbones_env')) {
   /**
    * Gets the value of an environment variable. Supports boolean, empty and null.
    *
@@ -46,7 +31,6 @@ if (!function_exists("wpbones_env")) {
    */
   function wpbones_env($key, $default = null)
   {
-
     $value = getenv($key);
 
     if ($value === false) {
@@ -80,7 +64,6 @@ if (!function_exists("wpbones_env")) {
 }
 
 if (!function_exists('wpbones_array_insert')) {
-
   /**
    * Insert a key => value into a second array to a specify index
    *
@@ -95,15 +78,14 @@ if (!function_exists('wpbones_array_insert')) {
    */
   function wpbones_array_insert($arr, $key, $val, $index = 0)
   {
-    $arrayEnd   = array_splice($arr, $index);
+    $arrayEnd = array_splice($arr, $index);
     $arrayStart = array_splice($arr, 0, $index);
 
-    return (array_merge($arrayStart, [$key => $val], $arrayEnd));
+    return array_merge($arrayStart, [$key => $val], $arrayEnd);
   }
 }
 
 if (!function_exists('wpbones_array_assoc_default')) {
-
   /**
    * Return a new associative array with $default values +/- $merge values.
    *
@@ -116,7 +98,6 @@ if (!function_exists('wpbones_array_assoc_default')) {
    */
   function wpbones_array_assoc_default($default, $merge): array
   {
-
     $add = [];
     $del = [];
 
@@ -135,7 +116,6 @@ if (!function_exists('wpbones_array_assoc_default')) {
 }
 
 if (!function_exists('wpbones_checked')) {
-
   /**
    * Commodity to extends checked() WordPress function with array check
    *
@@ -152,7 +132,6 @@ if (!function_exists('wpbones_checked')) {
         $current = $haystack = 1;
 
         return checked($haystack, $current, $echo);
-
       }
 
       return false;
@@ -163,7 +142,6 @@ if (!function_exists('wpbones_checked')) {
 }
 
 if (!function_exists('wpbones_selected')) {
-
   /**
    * Commodity to extends selected() WordPress function with array check
    *
@@ -190,7 +168,6 @@ if (!function_exists('wpbones_selected')) {
 }
 
 if (!function_exists('wpbones_is_true')) {
-
   /**
    * Utility to check if a value is true.
    *
@@ -205,7 +182,6 @@ if (!function_exists('wpbones_is_true')) {
 }
 
 if (!function_exists('wpbones_logger')) {
-
   /**
    * Utility to get an instance of Logger.
    */
@@ -220,7 +196,6 @@ if (!function_exists('wpbones_logger')) {
 }
 
 if (!function_exists('logger')) {
-
   /**
    * Utility to get an instance of Logger.
    */

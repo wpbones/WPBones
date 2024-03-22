@@ -3,12 +3,11 @@
 namespace WPKirk\WPBones\Routing;
 
 if (!defined('ABSPATH')) {
-  exit;
+  exit();
 }
 
 class Route
 {
-
   /**
    * Custom page routes list.
    *

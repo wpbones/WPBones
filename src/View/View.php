@@ -3,12 +3,11 @@
 namespace WPKirk\WPBones\View;
 
 if (!defined('ABSPATH')) {
-  exit;
+  exit();
 }
 
 class View
 {
-
   /**
    * A plugin instance container.
    */
@@ -21,7 +20,7 @@ class View
    *
    * @var array
    */
-  protected $adminStyles  = [];
+  protected $adminStyles = [];
   protected $adminScripts = [];
 
   /**
@@ -29,7 +28,7 @@ class View
    *
    * @var array
    */
-  protected $styles  = [];
+  protected $styles = [];
   protected $scripts = [];
 
   /**
@@ -42,8 +41,8 @@ class View
   public function __construct($container, $key = null, $data = null)
   {
     $this->container = $container;
-    $this->key       = $key;
-    $this->data      = $data;
+    $this->key = $key;
+    $this->data = $data;
   }
 
   /**
@@ -72,7 +71,6 @@ class View
     }
 
     $func = function () {
-
       // make available Html as facade
       if (!class_exists('WPKirk\Html')) {
         class_alias('\WPKirk\WPBones\Html\Html', 'WPKirk\Html', true);
@@ -107,7 +105,7 @@ class View
   protected function admin_enqueue_scripts()
   {
     if (!empty($this->adminScripts)) {
-      $minified = $this->container->config('plugin.minified', false) ? ".min" : '';
+      $minified = $this->container->config('plugin.minified', false) ? '.min' : '';
       foreach ($this->adminScripts as $script) {
         $src = $this->container->js . '/' . $script[0] . $minified . '.js';
         wp_enqueue_script($script[0], $src, $script[1], $script[2], true);
@@ -118,7 +116,7 @@ class View
   protected function admin_print_styles()
   {
     if (!empty($this->adminStyles)) {
-      $minified = $this->container->config('plugin.minified', false) ? ".min" : '';
+      $minified = $this->container->config('plugin.minified', false) ? '.min' : '';
       foreach ($this->adminStyles as $style) {
         $src = $this->container->css . '/' . $style[0] . $minified . '.css';
         wp_enqueue_style($style[0], $src, $style[1], $style[2]);
@@ -129,7 +127,7 @@ class View
   protected function wp_enqueue_scripts()
   {
     if (!empty($this->scripts)) {
-      $minified = $this->container->config('plugin.minified', false) ? ".min" : '';
+      $minified = $this->container->config('plugin.minified', false) ? '.min' : '';
       foreach ($this->scripts as $script) {
         $src = $this->container->js . '/' . $script[0] . $minified . '.js';
         wp_enqueue_script($script[0], $src, $script[1], $script[2], true);
@@ -140,7 +138,7 @@ class View
   protected function wp_print_styles()
   {
     if (!empty($this->styles)) {
-      $minified = $this->container->config('plugin.minified', false) ? ".min" : '';
+      $minified = $this->container->config('plugin.minified', false) ? '.min' : '';
       foreach ($this->styles as $style) {
         $src = $this->container->css . '/' . $style[0] . $minified . '.css';
         wp_enqueue_style($style[0], $src, $style[1], $style[2]);

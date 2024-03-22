@@ -7,7 +7,7 @@ use WP_REST_Request;
 use WP_REST_Response;
 
 if (!defined('ABSPATH')) {
-  exit;
+  exit();
 }
 
 /**
@@ -16,7 +16,6 @@ if (!defined('ABSPATH')) {
  */
 abstract class RestController
 {
-
   /**
    * The vendor name and path
    *
@@ -34,7 +33,7 @@ abstract class RestController
   public function __construct($request, $vendor)
   {
     $this->request = $request;
-    $this->vendor  = $vendor;
+    $this->vendor = $vendor;
   }
 
   /**

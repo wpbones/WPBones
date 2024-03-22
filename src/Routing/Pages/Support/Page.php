@@ -3,7 +3,7 @@
 namespace WPKirk\WPBones\Routing\Pages\Support;
 
 if (!defined('ABSPATH')) {
-  exit;
+  exit();
 }
 
 /**

@@ -5,9 +5,8 @@ namespace WPKirk\WPBones\Routing\API;
 use WP_REST_Controller;
 
 if (!defined('ABSPATH')) {
-  exit;
+  exit();
 }
-
 
 class WordPressRestController extends WP_REST_Controller
 {

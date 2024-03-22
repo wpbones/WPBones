@@ -39,7 +39,7 @@ abstract class Command
   public function __construct()
   {
     // get signature
-    $parts         = explode(":", $this->signature, 2);
+    $parts = explode(':', $this->signature, 2);
     $this->context = $parts[0];
 
     // get command
@@ -51,15 +51,15 @@ abstract class Command
         $tempOptions = $parts;
         array_shift($tempOptions);
         foreach ($tempOptions as $optionInfo) {
-          [$option, $description] = explode(":", $optionInfo);
+          [$option, $description] = explode(':', $optionInfo);
 
           // sanitize
-          $option      = trim($option);
-          $description = trim(rtrim($description, "}"));
+          $option = trim($option);
+          $description = trim(rtrim($description, '}'));
 
           // check "=" params
-          if (str_ends_with($option, "=")) {
-            $option                 = rtrim($option, "=");
+          if (str_ends_with($option, '=')) {
+            $option = rtrim($option, '=');
             $this->options[$option] = ['description' => $description, 'param' => true];
           } else {
             $this->options[$option] = ['description' => $description];
@@ -67,7 +67,7 @@ abstract class Command
         }
       }
     }
-    $this->command = trim(($this->context . ":" . $parts[0]));
+    $this->command = trim($this->context . ':' . $parts[0]);
   }
 
   /**
@@ -80,10 +80,10 @@ abstract class Command
    */
   protected function ask(string $str, string $default = ''): string
   {
-    echo "\n\e[38;5;88m$str" . (empty($default) ? "" : " (default: {$default})") . "\e[0m ";
+    echo "\n\e[38;5;88m$str" . (empty($default) ? '' : " (default: {$default})") . "\e[0m ";
 
-    $handle = fopen("php://stdin", "r");
-    $line   = fgets($handle);
+    $handle = fopen('php://stdin', 'r');
+    $line = fgets($handle);
 
     fclose($handle);
 
@@ -151,19 +151,19 @@ abstract class Command
    */
   public function displayHelp(): void
   {
-    $this->info("Usage:");
-    $this->line("  " . $this->command . " [options]");
+    $this->info('Usage:');
+    $this->line('  ' . $this->command . ' [options]');
     $this->info("\nOptions:");
 
     foreach ($this->options as $key => $value) {
       $column2 = $value['description'];
       if (isset($value['param'])) {
-        $column1 = $key . "[=value]";
+        $column1 = $key . '[=value]';
       } else {
         $column1 = $key;
       }
 
-      $column1 = $column1 . str_repeat(" ", (22 - strlen($column1)));
+      $column1 = $column1 . str_repeat(' ', 22 - strlen($column1));
 
       $this->line("  {$column1} {$column2}");
     }

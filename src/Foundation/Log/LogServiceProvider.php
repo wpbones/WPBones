@@ -5,12 +5,11 @@ namespace WPKirk\WPBones\Foundation\Log;
 use WPKirk\WPBones\Support\ServiceProvider;
 
 if (!defined('ABSPATH')) {
-  exit;
+  exit();
 }
 
 class LogServiceProvider extends ServiceProvider
 {
-
   /**
    * Log filename.
    *
@@ -46,13 +45,13 @@ class LogServiceProvider extends ServiceProvider
    * @var array
    */
   protected $levels = [
-    'debug'     => 'DEBUG',
-    'info'      => 'INFO',
-    'notice'    => 'NOTICE',
-    'warning'   => 'WARNING',
-    'error'     => 'ERROR',
-    'critical'  => 'CRITICAL',
-    'alert'     => 'ALERT',
+    'debug' => 'DEBUG',
+    'info' => 'INFO',
+    'notice' => 'NOTICE',
+    'warning' => 'WARNING',
+    'error' => 'ERROR',
+    'critical' => 'CRITICAL',
+    'alert' => 'ALERT',
     'emergency' => 'EMERGENCY',
   ];
 
@@ -62,16 +61,15 @@ class LogServiceProvider extends ServiceProvider
    * @var array
    */
   protected $colors = [
-    'debug'     => "\e[38;5;7m",
-    'info'      => "\e[38;5;4m",
-    'notice'    => "\e[38;5;3m",
-    'warning'   => "\e[38;5;211m",
-    'error'     => "\e[38;5;1m",
-    'critical'  => "\e[38;5;1m",
-    'alert'     => "\e[38;5;1m",
+    'debug' => "\e[38;5;7m",
+    'info' => "\e[38;5;4m",
+    'notice' => "\e[38;5;3m",
+    'warning' => "\e[38;5;211m",
+    'error' => "\e[38;5;1m",
+    'critical' => "\e[38;5;1m",
+    'alert' => "\e[38;5;1m",
     'emergency' => "\e[38;5;200m",
   ];
-
 
   /**
    * LogServiceProvider constructor.
@@ -106,7 +104,7 @@ class LogServiceProvider extends ServiceProvider
     $this->logLevel = $plugin->config('plugin.log_level');
 
     // get the right filename
-    $this->filename = ($this->log == 'single') ? 'debug.log' : date('Y-m-d') . '.log';
+    $this->filename = $this->log == 'single' ? 'debug.log' : date('Y-m-d') . '.log';
 
     // complete log path
     $this->path = "{$logFolder}{$this->filename}";
@@ -171,7 +169,7 @@ class LogServiceProvider extends ServiceProvider
 
     if (in_array($method, array_keys($this->levels))) {
       $level = strtolower($this->levels[$method]);
-      $args  = array_merge([$level], $parameters);
+      $args = array_merge([$level], $parameters);
 
       return call_user_func_array([$this, 'write'], $args);
     }

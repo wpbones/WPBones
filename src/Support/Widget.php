@@ -5,12 +5,11 @@ namespace WPKirk\WPBones\Support;
 use WP_Widget;
 
 if (!defined('ABSPATH')) {
-  exit;
+  exit();
 }
 
 abstract class Widget extends WP_Widget
 {
-
   /**
    * An instance of plugin.
    */

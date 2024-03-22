@@ -79,12 +79,36 @@ class QueryBuilder
    * @var array
    */
   private $operators = [
-    '=', '<', '>', '<=', '>=', '<>', '!=', '<=>',
-    'like', 'like binary', 'not like', 'ilike',
-    '&', '|', '^', '<<', '>>',
-    'rlike', 'not rlike', 'regexp', 'not regexp',
-    '~', '~*', '!~', '!~*', 'similar to',
-    'not similar to', 'not ilike', '~~*', '!~~*',
+    '=',
+    '<',
+    '>',
+    '<=',
+    '>=',
+    '<>',
+    '!=',
+    '<=>',
+    'like',
+    'like binary',
+    'not like',
+    'ilike',
+    '&',
+    '|',
+    '^',
+    '<<',
+    '>>',
+    'rlike',
+    'not rlike',
+    'regexp',
+    'not regexp',
+    '~',
+    '~*',
+    '!~',
+    '!~*',
+    'similar to',
+    'not similar to',
+    'not ilike',
+    '~~*',
+    '!~~*',
   ];
 
   /**
@@ -99,19 +123,17 @@ class QueryBuilder
    */
   private $parentModel;
 
-  public function __construct($table, $primaryKey = "id")
+  public function __construct($table, $primaryKey = 'id')
   {
     global $wpdb;
 
-    $this->wpdb       = $wpdb;
-    $this->table      = DB::getTableName($table);
+    $this->wpdb = $wpdb;
+    $this->table = DB::getTableName($table);
     $this->primaryKey = $primaryKey;
 
     // init
     $this->getTableDescription();
   }
-
-
 
   /*
   |--------------------------------------------------------------------------
@@ -163,12 +185,12 @@ class QueryBuilder
 
       foreach ($desc as $column) {
         $this->columns[] = [
-          'name'    => $column->Field,
-          'type'    => $column->Type,
-          'null'    => $column->Null,
-          'key'     => $column->Key,
+          'name' => $column->Field,
+          'type' => $column->Type,
+          'null' => $column->Null,
+          'key' => $column->Key,
           'default' => $column->Default,
-          'extra'   => $column->Extra,
+          'extra' => $column->Extra,
         ];
       }
 
@@ -217,12 +239,13 @@ class QueryBuilder
     sort($columns);
     $column_string = is_array($columns) ? implode(',', $columns) : implode(',', func_get_args());
 
-    $sql = "SELECT $column_string " .
-           "FROM `{$this->table}`" .
-           $this->getWhere() .
-           $this->getOrderBy() .
-           $this->getLimit() .
-           $this->getOffset();
+    $sql =
+      "SELECT $column_string " .
+      "FROM `{$this->table}`" .
+      $this->getWhere() .
+      $this->getOrderBy() .
+      $this->getLimit() .
+      $this->getOffset();
 
     $results = $this->getSQLResults($sql);
 
@@ -254,7 +277,6 @@ class QueryBuilder
     return $this->collection;
   }
 
-
   /**
    * Return the "where" part of the query.
    *
@@ -265,10 +287,10 @@ class QueryBuilder
     $where = ' WHERE 1 ';
     if (!empty($this->wheres)) {
       foreach ($this->wheres as $where_item) {
-        $boolean  = strtoupper($where_item['boolean']);
-        $column   = $where_item['column'];
+        $boolean = strtoupper($where_item['boolean']);
+        $column = $where_item['column'];
         $operator = $this->getWhereOperator($where_item['operator']);
-        $value    = $this->getWhereValue($where_item['value'], $operator);
+        $value = $this->getWhereValue($where_item['value'], $operator);
 
         $where .= $boolean . ' ' . $column . ' ' . $operator . ' ' . $value . ' ';
       }
@@ -284,7 +306,7 @@ class QueryBuilder
    */
   private function getWhereOperator($operator)
   {
-    return $operator??'=';
+    return $operator ?? '=';
   }
 
   /**
@@ -482,11 +504,7 @@ class QueryBuilder
       return $this;
     }
 
-    [$value, $operator] = $this->prepareValueAndOperator(
-      $value,
-      $operator,
-      func_num_args() === 2
-    );
+    [$value, $operator] = $this->prepareValueAndOperator($value, $operator, func_num_args() === 2);
 
     $this->wheres[] = compact('column', 'operator', 'value', 'boolean');
 
@@ -527,8 +545,7 @@ class QueryBuilder
    */
   protected function invalidOperatorAndValue($operator, $value)
   {
-    return is_null($value) && in_array($operator, $this->operators) &&
-           !in_array($operator, ['=', '<>', '!=']);
+    return is_null($value) && in_array($operator, $this->operators) && !in_array($operator, ['=', '<>', '!=']);
   }
 
   /**
@@ -554,7 +571,7 @@ class QueryBuilder
    */
   public function select($columns = [])
   {
-    $columns              = is_array($columns) ? $columns : func_get_args();
+    $columns = is_array($columns) ? $columns : func_get_args();
     $this->select_columns = $columns;
 
     return $this;
@@ -565,9 +582,7 @@ class QueryBuilder
    */
   public function delete()
   {
-    $sql = "DELETE " .
-           "FROM `{$this->table}`" .
-           $this->getWhere();
+    $sql = 'DELETE ' . "FROM `{$this->table}`" . $this->getWhere();
 
     logger()->info($sql);
 
@@ -611,11 +626,7 @@ class QueryBuilder
       return $this;
     }
 
-    [$value, $operator] = $this->prepareValueAndOperator(
-      $value,
-      $operator,
-      func_num_args() === 2
-    );
+    [$value, $operator] = $this->prepareValueAndOperator($value, $operator, func_num_args() === 2);
 
     $this->wheres[] = compact('column', 'operator', 'value', 'boolean');
 
@@ -655,8 +666,8 @@ class QueryBuilder
    */
   public function whereIn($column, $value, $boolean = 'and')
   {
-    $value          = is_string($value) ? explode(',', $value) : $value;
-    $operator       = 'IN';
+    $value = is_string($value) ? explode(',', $value) : $value;
+    $operator = 'IN';
     $this->wheres[] = compact('column', 'operator', 'value', 'boolean');
 
     return $this;
@@ -681,8 +692,8 @@ class QueryBuilder
    */
   public function whereNotIn($column, $value, $boolean = 'and')
   {
-    $value          = is_string($value) ? explode(',', $value) : $value;
-    $operator       = 'NOT IN';
+    $value = is_string($value) ? explode(',', $value) : $value;
+    $operator = 'NOT IN';
     $this->wheres[] = compact('column', 'operator', 'value', 'boolean');
 
     return $this;
@@ -707,8 +718,8 @@ class QueryBuilder
    */
   public function whereBetween($column, $value, $boolean = 'and')
   {
-    $value          = is_string($value) ? explode(',', $value) : $value;
-    $operator       = 'BETWEEN';
+    $value = is_string($value) ? explode(',', $value) : $value;
+    $operator = 'BETWEEN';
     $this->wheres[] = compact('column', 'operator', 'value', 'boolean');
 
     return $this;
@@ -733,8 +744,8 @@ class QueryBuilder
    */
   public function whereNotBetween($column, $value, $boolean = 'and')
   {
-    $value          = is_string($value) ? explode(',', $value) : $value;
-    $operator       = 'NOT BETWEEN';
+    $value = is_string($value) ? explode(',', $value) : $value;
+    $operator = 'NOT BETWEEN';
     $this->wheres[] = compact('column', 'operator', 'value', 'boolean');
 
     return $this;
@@ -767,12 +778,13 @@ class QueryBuilder
    */
   public function count()
   {
-    $sql = "SELECT COUNT(*) " .
-           "FROM `{$this->table}`" .
-           $this->getWhere() .
-           $this->getOrderBy() .
-           $this->getLimit() .
-           $this->getOffset();
+    $sql =
+      'SELECT COUNT(*) ' .
+      "FROM `{$this->table}`" .
+      $this->getWhere() .
+      $this->getOrderBy() .
+      $this->getLimit() .
+      $this->getOffset();
 
     return $this->var($sql);
   }
@@ -820,10 +832,7 @@ class QueryBuilder
 
     [$columns, $values] = $this->getColumnsAndValues($values);
 
-    $sql = "INSERT INTO `{$this->table}` " .
-           "($columns) " .
-           "VALUES " .
-           "($values)";
+    $sql = "INSERT INTO `{$this->table}` " . "($columns) " . 'VALUES ' . "($values)";
 
     $this->query($sql);
 
@@ -838,11 +847,14 @@ class QueryBuilder
    */
   private function getColumnsAndValues($values): array
   {
-    $columns        = array_keys($values);
+    $columns = array_keys($values);
     $columns_string = implode(',', $columns);
-    $values_string  = implode(',', array_map(function ($value) {
-      return "'" . $this->wpdb->_real_escape($value) . "'";
-    }, $values));
+    $values_string = implode(
+      ',',
+      array_map(function ($value) {
+        return "'" . $this->wpdb->_real_escape($value) . "'";
+      }, $values)
+    );
 
     return [$columns_string, $values_string];
   }
@@ -854,13 +866,14 @@ class QueryBuilder
    */
   public function update($values)
   {
-    $set = implode(',', array_map(function ($key) use ($values) {
-      return "`$key` = " . (is_numeric($values[$key]) ? $values[$key] : "'$values[$key]'");
-    }, array_keys($values)));
+    $set = implode(
+      ',',
+      array_map(function ($key) use ($values) {
+        return "`$key` = " . (is_numeric($values[$key]) ? $values[$key] : "'$values[$key]'");
+      }, array_keys($values))
+    );
 
-    $sql = "UPDATE `{$this->table}` " .
-           "SET {$set} " .
-           $this->getWhere();
+    $sql = "UPDATE `{$this->table}` " . "SET {$set} " . $this->getWhere();
 
     return $this->query($sql);
   }

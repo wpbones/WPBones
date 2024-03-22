@@ -28,9 +28,8 @@ abstract class Model extends DB
 
   public function __construct()
   {
-
     // get the class name
-    $this->table = DB::getTableName($this->table??get_called_class());
+    $this->table = DB::getTableName($this->table ?? get_called_class());
 
     parent::__construct($this->table, $this->primaryKey);
   }
@@ -52,6 +51,6 @@ abstract class Model extends DB
    */
   public static function __callStatic($name, $arguments)
   {
-    return (new static)->$name(...$arguments);
+    return (new static())->$name(...$arguments);
   }
 }

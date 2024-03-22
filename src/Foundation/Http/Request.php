@@ -5,7 +5,7 @@ namespace WPKirk\WPBones\Foundation\Http;
 use WPKirk\WPBones\Support\Traits\HasAttributes;
 
 if (!defined('ABSPATH')) {
-  exit;
+  exit();
 }
 
 /**
@@ -84,8 +84,7 @@ class Request
     if (defined('DOING_AJAX')) {
       return true;
     }
-    if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest'
-    ) {
+    if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
       return true;
     } else {
       return false;
@@ -96,6 +95,6 @@ class Request
   {
     $verb = strtolower($verb);
 
-    return ($verb == strtolower($_SERVER['REQUEST_METHOD']));
+    return $verb == strtolower($_SERVER['REQUEST_METHOD']);
   }
 }

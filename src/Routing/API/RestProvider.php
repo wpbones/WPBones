@@ -3,7 +3,7 @@
 namespace WPKirk\WPBones\Routing\API;
 
 if (!defined('ABSPATH')) {
-  exit;
+  exit();
 }
 
 use WP_Error;
@@ -91,7 +91,7 @@ class RestProvider extends ServiceProvider
 
     foreach ($array as $key => $value) {
       if (is_array($value)) {
-        $new    = $this->array_flatten($value, $path . $key . '/');
+        $new = $this->array_flatten($value, $path . $key . '/');
         $result = array_merge($result, $new);
       } else {
         $result[$path . $key] = $value;
@@ -114,11 +114,7 @@ class RestProvider extends ServiceProvider
         // No authentication has been performed yet.
         // Return an error if user is not logged in.
         if (!is_user_logged_in()) {
-          return new WP_Error(
-            'rest_not_logged_in',
-            __('You are not currently logged in.'),
-            ['status' => 401]
-          );
+          return new WP_Error('rest_not_logged_in', __('You are not currently logged in.'), ['status' => 401]);
         }
 
         // Our custom authentication check should have no effect

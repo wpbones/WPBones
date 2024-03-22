@@ -5,12 +5,11 @@ namespace WPKirk\WPBones\Foundation;
 use WPKirk\WPBones\Support\ServiceProvider;
 
 if (!defined('ABSPATH')) {
-  exit;
+  exit();
 }
 
 abstract class WordPressShortcodesServiceProvider extends ServiceProvider
 {
-
   /**
    * List of registered shortcodes. Here you will use a methods list.
    *

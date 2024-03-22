@@ -100,7 +100,7 @@ abstract class Seeder
    * @param string $tablename Optional. The table name without the WordPress prefix.
    *                          If not specified, the tablename property will be used.
    */
-  protected function truncate($tablename = "")
+  protected function truncate($tablename = '')
   {
     if (empty($tablename)) {
       return $this->wpdb->query("TRUNCATE TABLE {$this->tablename}");

@@ -10,6 +10,7 @@
 */
 
 namespace Bones\SemVer\Exceptions {
+
   use Exception;
 
   class InvalidVersionException extends Exception
@@ -18,6 +19,7 @@ namespace Bones\SemVer\Exceptions {
 }
 
 namespace Bones\SemVer\Traits {
+
   use Bones\SemVer\Version;
 
   trait Comparable
@@ -185,6 +187,7 @@ namespace Bones\SemVer\Traits {
 }
 
 namespace Bones\SemVer {
+
   use Bones\SemVer\Exceptions\InvalidVersionException;
   use Bones\SemVer\Traits\Comparable;
   use Bones\SemVer\Traits\Incrementable;
@@ -436,7 +439,7 @@ namespace Bones {
   /**
    * The WP Bones command line version.
    */
-  define('WPBONES_COMMAND_LINE_VERSION', '1.2.6');
+  define('WPBONES_COMMAND_LINE_VERSION', '1.3.0');
 
   use Bones\SemVer\Version;
   use Exception;
@@ -2379,4 +2382,3 @@ namespace Bones {
 
   BonesCommandLine::run();
 }
-

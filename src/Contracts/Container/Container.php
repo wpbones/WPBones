@@ -2,5 +2,6 @@
 
 namespace WPKirk\WPBones\Contracts\Container;
 
-interface Container {
+interface Container
+{
 }

@@ -5,7 +5,7 @@ namespace WPKirk\WPBones\Database;
 use ArrayAccess;
 
 if (!defined('ABSPATH')) {
-  exit;
+  exit();
 }
 
 /**
@@ -16,25 +16,19 @@ if (!defined('ABSPATH')) {
  */
 class WordPressOption implements ArrayAccess
 {
-
   /**
    * Name of table.
    *
    * @var string
    */
-  protected $tableName = "";
+  protected $tableName = '';
 
   /**
    * Table description fields.
    *
    * @var array
    */
-  protected $fields = [
-    'option_id',
-    'option_name',
-    'option_value',
-    'autoload',
-  ];
+  protected $fields = ['option_id', 'option_name', 'option_value', 'autoload'];
 
   /**
    * An instance of Plugin class or null.
@@ -78,7 +72,7 @@ class WordPressOption implements ArrayAccess
         $options = include $this->plugin->getBasePath() . '/config/options.php';
 
         $values = [
-          'option_name'  => $this->plugin->slug,
+          'option_name' => $this->plugin->slug,
           'option_value' => json_encode($options),
         ];
         $result = $wpdb->insert($this->tableName, $values);
@@ -132,7 +126,7 @@ class WordPressOption implements ArrayAccess
     }
 
     $path = str_replace('/', '.', $path);
-    $keys = explode(".", $path);
+    $keys = explode('.', $path);
 
     $copy = $this->_value;
 
@@ -168,7 +162,7 @@ class WordPressOption implements ArrayAccess
       $this->_value = [];
     } else {
       $path = str_replace('/', '.', $path);
-      $keys = explode(".", $path);
+      $keys = explode('.', $path);
 
       $lastKey = $keys[count($keys) - 1];
 
@@ -232,7 +226,7 @@ class WordPressOption implements ArrayAccess
     $options = include $this->plugin->getBasePath() . '/config/options.php';
 
     $values = [
-      'option_name'  => $this->plugin->slug,
+      'option_name' => $this->plugin->slug,
       'option_value' => json_encode($options),
     ];
 
@@ -260,10 +254,10 @@ class WordPressOption implements ArrayAccess
    *     echo $plugin->options->get( 'General.doNotExists', 'default');
    *
    */
-  public function get($path, $default = "")
+  public function get($path, $default = '')
   {
     $path = str_replace('/', '.', $path);
-    $keys = explode(".", $path);
+    $keys = explode('.', $path);
 
     $current = $this->_value;
 
@@ -282,12 +276,12 @@ class WordPressOption implements ArrayAccess
     return $current;
   }
 
-  public function offsetUnset(mixed $offset):void 
+  public function offsetUnset(mixed $offset): void
   {
     $this->set($offset);
   }
 
-  public function offsetGet(mixed $offset): mixed 
+  public function offsetGet(mixed $offset): mixed
   {
     return $this->get($offset);
   }

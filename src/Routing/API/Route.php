@@ -3,7 +3,7 @@
 namespace WPKirk\WPBones\Routing\API;
 
 if (!defined('ABSPATH')) {
-  exit;
+  exit();
 }
 
 use WP_Error;
@@ -46,10 +46,14 @@ class Route
       foreach (self::$apis as $vendor => $api) {
         foreach ($api as $method => $route) {
           foreach ($route as $route_name => $route_args) {
-            register_rest_route($vendor, $route_name, ([
-                                                         'methods'  => strtoupper($method),
-                                                         'callback' => self::callback($route_args['callback'], $vendor),
-                                                       ] + $route_args['options']));
+            register_rest_route(
+              $vendor,
+              $route_name,
+              [
+                'methods' => strtoupper($method),
+                'callback' => self::callback($route_args['callback'], $vendor),
+              ] + $route_args['options']
+            );
           }
         }
       }
@@ -109,11 +113,11 @@ class Route
     if (in_array($method, self::METHODS)) {
       @[$path, $callback, $options] = $args;
 
-      $options = array_merge(['permission_callback' => '__return_true'], $options??[]);
+      $options = array_merge(['permission_callback' => '__return_true'], $options ?? []);
 
       self::$apis[self::$vendor][$method][$path] = [
         'callback' => $callback,
-        'options'  => $options,
+        'options' => $options,
       ];
     }
   }
@@ -137,7 +141,7 @@ class Route
 
       self::$apis[self::$vendor][$method][$path] = [
         'callback' => $callback,
-        'options'  => $options,
+        'options' => $options,
       ];
     }
   }
