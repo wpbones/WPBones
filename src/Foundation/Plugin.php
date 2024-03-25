@@ -337,12 +337,12 @@ class Plugin extends Container implements PluginContract
   /**
    * Return an instance of View/Contract.
    *
-   * @param null $key  Optional. Default null.
-   * @param null $data Optional. Default null.
+   * @param null       $key  Optional. Default null.
+   * @param array|null $data Optional. Default null.
    *
    * @return \WPKirk\WPBones\View\View
    */
-  public function view($key = null, $data = null): View
+  public function view($key = null, ?array $data = []): View
   {
     $view = new View($this, $key, $data);
 
