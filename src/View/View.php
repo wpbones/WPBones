@@ -202,6 +202,7 @@ class View
    */
   protected function filename(): string
   {
+    // This is for backward compatibility with view that not use blade.  
     $exts = ['.blade.php', '.php'];
 
     foreach ($exts as $ext) {
