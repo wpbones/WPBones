@@ -436,10 +436,11 @@ namespace Bones {
      */
     define('WPBONES_MINIMAL_PHP_VERSION', '7.4');
 
+
     /**
-     * The WP Bones command line version.
+     * MARK: The WP Bones command line version.
      */
-    define('WPBONES_COMMAND_LINE_VERSION', '1.3.2');
+    define('WPBONES_COMMAND_LINE_VERSION', '1.3.3');
 
     use Bones\SemVer\Version;
     use Exception;

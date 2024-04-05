@@ -27,3 +27,9 @@ Have a look at the new [WPBones website and documentation](https://wpbones.verce
   </a>
 
 </p>
+
+## Thanks to Our Contributors
+
+<a href="https://github.com/wpbones/wpbones/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=wpbones/wpbones" />
+</a>
