@@ -1,22 +1,22 @@
 {
-  "authors" : [
+  "authors": [
     {
-      "email" : "giovambattista.fazioli@gmail.com",
-      "homepage" : "http://undolog.com",
-      "name" : "Giovambattista Fazioli"
+      "email": "giovambattista.fazioli@gmail.com",
+      "homepage": "http://undolog.com",
+      "name": "Giovambattista Fazioli"
     }
   ],
-  "autoload" : {
-    "files" : [
+  "autoload": {
+    "files": [
       "src/helpers.php"
     ],
-    "psr-4" : {
-      "WPKirk\\WPBones\\" : "src/"
+    "psr-4": {
+      "WPKirk\\WPBones\\": "src/"
     }
   },
-  "description" : "WordPress framework for Laravel developers",
-  "homepage" : "https://wpbones.vercel.app",
-  "keywords" : [
+  "description": "WordPress framework for Laravel developers",
+  "homepage": "https://wpbones.vercel.app",
+  "keywords": [
     "wordpress",
     "laravel",
     "framework",
@@ -24,20 +24,15 @@
     "plugins",
     "themes"
   ],
-  "license" : "GPL-3.0",
-  "name" : "wpbones/wpbones",
-  "repository" : {
-    "type" : "git",
-    "url" : "https://github.com/wpbones/wpbones"
-  },
-  "require" : {
-    "php" : ">=7.4",
+  "license": "GPL-3.0-only",
+  "name": "wpbones/wpbones",
+  "require": {
+    "php": ">=7.4",
     "eftec/bladeone": "^4.13"
   },
-  "support" : {
-    "issues" : "https://github.com/wpbones/WPBones/issues",
-    "source" : "https://github.com/wpbones/WPBones/"
+  "support": {
+    "issues": "https://github.com/wpbones/WPBones/issues",
+    "source": "https://github.com/wpbones/WPBones/"
   },
-  "type" : "library",
-  "version" : "1.3.3"
+  "type": "library"
 }
