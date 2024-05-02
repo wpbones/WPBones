@@ -24,6 +24,8 @@ class View
    */
   protected $adminStyles = [];
   protected $adminScripts = [];
+  protected $adminAppsScripts = [];
+  protected $adminAppsModules = [];
 
   /**
    * List of the scripts to localize.
@@ -96,7 +98,10 @@ class View
     }
 
     // Check if view exists as a blade file
-    if (file_exists($this->container->getBasePath() . '/resources/views/' . $this->filename()) && strpos($this->filename(), '.blade.php') !== false) {
+    if (
+      file_exists($this->container->getBasePath() . '/resources/views/' . $this->filename()) &&
+      strpos($this->filename(), '.blade.php') !== false
+    ) {
       // Inject the plugin instance into the view
       $this->data['plugin'] = $this->container;
 
@@ -107,7 +112,6 @@ class View
     }
     // Use a php file
     else {
-
       // Check if view exists as a php file
 
       $func = function () {
@@ -152,6 +156,13 @@ class View
       }
     }
 
+    if (!empty($this->adminAppsScripts)) {
+      foreach ($this->adminAppsScripts as $script) {
+        $src = $this->container->apps . '/' . $script[0] . '.js';
+        wp_enqueue_script($script[0], $src, $script[1], $script[2], true);
+      }
+    }
+
     if (!empty($this->localizeScripts)) {
       foreach ($this->localizeScripts as $script) {
         wp_localize_script($script[0], $script[1], $script[2]);
@@ -167,13 +178,20 @@ class View
         wp_enqueue_style($style[0], $src, $style[1], $style[2]);
       }
     }
+
+    if (!empty($this->adminAppsModules)) {
+      foreach ($this->adminAppsModules as $script) {
+        $src = $this->container->apps . '/' . $script[0] . '.css';
+        wp_enqueue_style($script[0], $src);
+      }
+    }
   }
 
   protected function wp_enqueue_scripts()
   {
     if (!empty($this->scripts)) {
       foreach ($this->scripts as $script) {
-        $src = $this->container->js . '/' . $script[0]  . '.js';
+        $src = $this->container->js . '/' . $script[0] . '.js';
         wp_enqueue_script($script[0], $src, $script[1], $script[2], true);
       }
     }
@@ -189,7 +207,7 @@ class View
   {
     if (!empty($this->styles)) {
       foreach ($this->styles as $style) {
-        $src = $this->container->css . '/' . $style[0]  . '.css';
+        $src = $this->container->css . '/' . $style[0] . '.css';
         wp_enqueue_style($style[0], $src, $style[1], $style[2]);
       }
     }
@@ -202,11 +220,13 @@ class View
    */
   protected function filename(): string
   {
-    // This is for backward compatibility with view that not use blade.  
+    // This is for backward compatibility with view that not use blade.
     $exts = ['.blade.php', '.php'];
 
     foreach ($exts as $ext) {
-      if (file_exists($this->container->getBasePath() . '/resources/views/' . str_replace('.', '/', $this->key) . $ext)) {
+      if (
+        file_exists($this->container->getBasePath() . '/resources/views/' . str_replace('.', '/', $this->key) . $ext)
+      ) {
         return str_replace('.', '/', $this->key) . $ext;
       }
     }
@@ -264,7 +284,7 @@ class View
   }
 
   /**
-   * Load a new css resource in admin area.
+   * Load a new Javascript resource in admin area.
    *
    * @param string $name Name of script.
    * @param array  $deps Optional. Array of slug deps
@@ -275,6 +295,36 @@ class View
   public function withAdminScripts($name, $deps = [], $ver = []): View
   {
     $this->adminScripts[] = [$name, $deps, $ver];
+
+    return $this;
+  }
+
+  /**
+   * Load new Javascript (React bundle) resource in admin area.
+   *
+   * @param string $name Name of script.
+   * @param bool   $module Optional. There is a module css.
+   * @param string $variabile  Optional. Name of the variable.
+   * @param array  $data   Optional. Data to pass.
+   */
+  public function withAdminAppsScripts($name, $module = true, $variabile = '', $data = []): View
+  {
+    ['dependencies' => $deps, 'version' => $ver] = @include $this->container->getBasePath() .
+      '/public/apps/' .
+      $name .
+      '.asset.php';
+
+    $ver = $ver ?: '';
+
+    $this->adminAppsScripts[] = [$name, ['wp-element'], $ver || ''];
+
+    if ($module) {
+      $this->adminAppsModules[] = [$name, [], $ver];
+    }
+
+    if ($variabile) {
+      $this->localizeScripts[] = [$name, $variabile, $data];
+    }
 
     return $this;
   }
