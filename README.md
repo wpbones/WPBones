@@ -6,7 +6,8 @@
 
 Have a look at the new [WPBones website and documentation](https://wpbones.vercel.app).
 
-![image](https://github.com/wpbones/WPBones/assets/432181/24019b5a-212d-4a17-baf3-6b5617ffb4f2)
+<img width="1206" alt="image" src="https://github.com/wpbones/WPBones/assets/432181/9bf56945-4204-48f7-a3b1-b1a3566ad4fd">
+
 
 <p align="center">
 
