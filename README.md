@@ -36,11 +36,9 @@ Have a look at the new <a href="https://wpbones.vercel.app">WPBones website and 
 
 <img width="1206" alt="image" src="https://github.com/wpbones/WPBones/assets/432181/9bf56945-4204-48f7-a3b1-b1a3566ad4fd">
 
-## Join the Community
+## 2. Join the Community
 
 To participate more actively in discussions and stay updated on proposals and latest releases, I would be pleased if you joined the [WP Bones community on Discord](https://discord.gg/5bdVyycU8F).
-
-<iframe src="https://discord.com/widget?id=905403637201784892&theme=dark" width="350" height="500" allowtransparency="true" frameborder="0" sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"></iframe>
 
 ## Thanks to Our Contributors
 
