@@ -173,6 +173,35 @@ namespace Bones\SemVer\Traits {
 
       return $this;
     }
+
+    /**
+     * Increment the pre-release version value by one.
+     *
+     * @return self This Version object
+     */
+    public function incrementPreRelease(): self
+    {
+      if (empty($this->preRelease)) {
+        $this->incrementPatch();
+        $this->setPreRelease('1');
+
+        return $this;
+      }
+
+      $identifiers = explode('.', $this->preRelease);
+
+      if (!is_numeric(end($identifiers))) {
+        $this->setPreRelease(implode('.', [$this->preRelease, '1']));
+
+        return $this;
+      }
+
+      array_push($identifiers, (string) ((int) array_pop($identifiers) + 1));
+
+      $this->setPreRelease(implode('.', $identifiers));
+
+      return $this;
+    }
   }
 }
 
@@ -1052,13 +1081,13 @@ namespace Bones {
     }
 
     /*
-         |--------------------------------------------------------------------------
-         | Internal useful function
-         |--------------------------------------------------------------------------
-         |
-         | Here you will find all internal methods
-         |
-         */
+    |--------------------------------------------------------------------------
+    | Internal useful function
+    |--------------------------------------------------------------------------
+    |
+    | Here you will find all internal methods
+    |
+    */
 
     /**
      * Return a kebalized version of the string
@@ -1478,6 +1507,11 @@ namespace Bones {
      */
     protected function version($argv)
     {
+      $version_number_from_index_php = '';
+      $version_number_from_readme_txt = '';
+      $stable_tag_version_from_readme_txt = '';
+      $version_string_from_index_php = '';
+
       // get all contents
       $readme_txt_content = file_get_contents('readme.txt');
       $index_php_content = file_get_contents('index.php');
@@ -1485,16 +1519,16 @@ namespace Bones {
       // parse the readme.txt version
       $lines = explode("\n", $readme_txt_content);
       foreach ($lines as $line) {
-        if (preg_match('/^[ \t\/*#@]*Stable\s*(.*)$/i', $line, $matches)) {
+        if (preg_match('/^[ \t\/*#@]*Stable tag:\s*(.*)$/i', $line, $matches)) {
           /**
            * The version is in the format of: Stable tag: 1.0.0
            */
           $stable_tag_version_from_readme_txt = $matches[0];
 
           /**
-           * The version is in the format of: 1.0.0
+           * The version is in the format of: 1.0.0 or 1.0.0-beta.1 or 1.0.0-alpha.1 or 1.0.0-rc.1
            */
-          $version_number_from_readme_txt = preg_replace('/[^0-9.]/', '', $matches[1]);
+          $version_number_from_readme_txt = $matches[1];
 
           $this->line("\nreadme.txt > $version_number_from_readme_txt ($stable_tag_version_from_readme_txt)");
           break;
@@ -1514,7 +1548,7 @@ namespace Bones {
           /**
            * The version is in the format of: 1.0.0
            */
-          $version_number_from_index_php = preg_replace('/[^0-9.]/', '', $matches[1]);
+          $version_number_from_index_php = $matches[1];
 
           $this->line("index.php  > {$version_number_from_index_php} ($version_string_from_index_php)");
           break;
@@ -1532,11 +1566,14 @@ namespace Bones {
         $this->info("  version [plugin version]\n");
         $this->line('Arguments:');
         $this->info(
-          "  [plugin version]\tThe version of plugin. Examples: '1', '2.0', 'v1', 'v1.2', 'v1-beta.4', 'v1.3+007'"
+          "  [plugin version]\t\tThe version of plugin. Examples: '2.0',  'v1.2',  '1.2.0-rc.40', 'v1-beta.4'"
         );
-        $this->info("  [--major]\tIncrement the major.y.z of plugin.");
-        $this->info("  [--minor]\tIncrement the x.minor.z of plugin.");
-        $this->info("  [--patch]\tIncrement the x.y.patch of plugin.\n");
+        $this->info("  [--major]\t\t\tIncrement the <major>.y.z of plugin.");
+        $this->info("  [--minor]\t\t\tIncrement the x.<minor>.z of plugin.");
+        $this->info("  [--patch]\t\t\tIncrement the x.y.<patch> of plugin.");
+        $this->info("  [--pre-patch] <prefix>\tIncrement the x.y.<patch>-<prefix>.<i> of plugin.");
+        $this->info("  [--pre-minor] <prefix>\tIncrement the x.<minor>.z-<prefix>.<i> of plugin.");
+        $this->info("  [--pre-major] <prefix>\tIncrement the <major>.y.z-<prefix>.<i> of plugin.\n");
         exit(0);
       } elseif (isset($argv[0]) && '--patch' === $argv[0]) {
         $version = semver($version_number_from_index_php)->incrementPatch();
@@ -1544,6 +1581,21 @@ namespace Bones {
         $version = semver($version_number_from_index_php)->incrementMinor();
       } elseif (isset($argv[0]) && '--major' === $argv[0]) {
         $version = semver($version_number_from_index_php)->incrementMajor();
+      } elseif (isset($argv[0]) && in_array($argv[0], ['--pre-patch', '--pre-major', '--pre-minor'])) {
+        $prefix = $argv[1] ?? 'rc';
+
+        $methods = [
+          '--pre-patch' => 'incrementPatch',
+          '--pre-major' => 'incrementMajor',
+          '--pre-minor' => 'incrementMinor',
+        ];
+        // if $version_number_from_index_php is not a pre-release version
+        if (strpos($version_number_from_index_php, $prefix) === false) {
+          $prerelease = semver($version_number_from_index_php)->{$methods[$argv[0]]}();
+          $version = semver($prerelease)->setPreRelease($prefix)->incrementPreRelease();
+        } else {
+          $version = semver($version_number_from_index_php)->incrementPreRelease();
+        }
       } else {
         $version = trim($argv[0]);
       }
