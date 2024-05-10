@@ -263,7 +263,7 @@ class Plugin extends Container implements PluginContract
 
   public function set_screen_option($status, $option, $value)
   {
-    if (in_array($option, array_keys($this->config('plugin.screen_options', [])))) {
+    if (in_array($option, array_values($this->config('plugin.screen_options', [])))) {
       return $value;
     }
 
