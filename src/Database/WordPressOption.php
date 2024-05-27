@@ -10,7 +10,7 @@ if (!defined('ABSPATH')) {
 
 /**
  * @class   WordPressOption
- * @package WPKirk\WPBones\Database
+ * @package WPBannerize\WPBones\Database
  *
  *
  */
@@ -33,7 +33,7 @@ class WordPressOption implements ArrayAccess
   /**
    * An instance of Plugin class or null.
    *
-   * @var \WPKirk\WPBones\Foundation\Plugin
+   * @var \WPBannerize\WPBones\Foundation\Plugin
    */
   protected $plugin = null;
 
@@ -281,7 +281,7 @@ class WordPressOption implements ArrayAccess
     $this->set($offset);
   }
 
-  public function offsetGet($offset): mixed
+  public function offsetGet($offset)
   {
     return $this->get($offset);
   }
