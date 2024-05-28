@@ -10,7 +10,7 @@ if (!defined('ABSPATH')) {
 
 /**
  * @class   WordPressOption
- * @package WPBannerize\WPBones\Database
+ * @package WPKirk\WPBones\Database
  *
  *
  */
@@ -33,7 +33,7 @@ class WordPressOption implements ArrayAccess
   /**
    * An instance of Plugin class or null.
    *
-   * @var \WPBannerize\WPBones\Foundation\Plugin
+   * @var \WPKirk\WPBones\Foundation\Plugin
    */
   protected $plugin = null;
 
