@@ -66,7 +66,9 @@ class WordPressOption implements ArrayAccess
       $this->plugin = $plugin;
 
       // in $this->row you'll fond a stdClass with column/property
-      $this->row = $wpdb->get_row("SELECT * FROM {$this->tableName} WHERE option_name='{$plugin->slug}'");
+      $this->row = $wpdb->get_row(
+        "SELECT * FROM {$this->tableName} WHERE option_name='{$plugin->slug}'"
+      );
 
       if (is_null($this->row)) {
         $options = include $this->plugin->getBasePath() . '/config/options.php';
@@ -77,7 +79,9 @@ class WordPressOption implements ArrayAccess
         ];
         $result = $wpdb->insert($this->tableName, $values);
 
-        $this->row = $wpdb->get_row("SELECT * FROM {$this->tableName} WHERE option_name='{$plugin->slug}'");
+        $this->row = $wpdb->get_row(
+          "SELECT * FROM {$this->tableName} WHERE option_name='{$plugin->slug}'"
+        );
       }
 
       if (isset($this->row->option_value) && !empty($this->row->option_value)) {
@@ -181,7 +185,9 @@ class WordPressOption implements ArrayAccess
       'option_value' => json_encode($this->_value),
     ];
 
-    $result = $wpdb->update($this->tableName, $values, ['option_name' => $this->plugin->slug]);
+    $result = $wpdb->update($this->tableName, $values, [
+      'option_name' => $this->plugin->slug,
+    ]);
 
     return $this->_value;
   }
@@ -207,7 +213,9 @@ class WordPressOption implements ArrayAccess
       'option_value' => json_encode($mergeOptions),
     ];
 
-    $result = $wpdb->update($this->tableName, $values, ['option_name' => $this->plugin->slug]);
+    $result = $wpdb->update($this->tableName, $values, [
+      'option_name' => $this->plugin->slug,
+    ]);
 
     $this->_value = (array) json_decode($values['option_value'], true);
 
@@ -230,7 +238,9 @@ class WordPressOption implements ArrayAccess
       'option_value' => json_encode($options),
     ];
 
-    $result = $wpdb->update($this->tableName, $values, ['option_name' => $this->plugin->slug]);
+    $result = $wpdb->update($this->tableName, $values, [
+      'option_name' => $this->plugin->slug,
+    ]);
 
     $this->_value = (array) json_decode($values['option_value'], true);
 
@@ -281,6 +291,7 @@ class WordPressOption implements ArrayAccess
     $this->set($offset);
   }
 
+  #[\ReturnTypeWillChange]
   public function offsetGet($offset)
   {
     return $this->get($offset);
@@ -307,7 +318,9 @@ class WordPressOption implements ArrayAccess
       'option_value' => json_encode($mergeOptions),
     ];
 
-    $result = $wpdb->update($this->tableName, $values, ['option_name' => $this->plugin->slug]);
+    $result = $wpdb->update($this->tableName, $values, [
+      'option_name' => $this->plugin->slug,
+    ]);
 
     $this->_value = (array) json_decode($values['option_value'], true);
 
