@@ -36,14 +36,17 @@ class AdminMenuProvider extends ServiceProvider
 
         // icon
         $icon = $menu['icon'];
-        if (isset($menu['icon']) && !empty($menu['icon']) && 'dashicons' != substr($menu['icon'], 0, 9)) {
-          $icon = $this->images . '/' . $menu['icon'];
+        $hasImage = false;
+
+        if (isset($menu['icon']) && !empty($menu['icon']) && 'dashicons' != substr($menu['icon'], 0, 9) && 'data:' != substr($menu['icon'], 0, 5)) {
+          $icon = $this->plugin->images . '/' . $menu['icon'];
+          $hasImage = true;
         }
 
         $firstMenu = true;
 
         if (substr($topLevelSlug, 0, 8) !== 'edit.php') {
-          add_menu_page(
+          $suffix = add_menu_page(
             $menu['page_title'],
             $menu['menu_title'],
             $menu['capability'],
@@ -52,6 +55,12 @@ class AdminMenuProvider extends ServiceProvider
             $icon,
             $menu['position']
           );
+
+          if ($hasImage) {
+            add_action('admin_head', function () use ($suffix) {
+              echo '<style>li.' . $suffix . ' div.wp-menu-image img {padding:6px 0 !important;}</style>';
+            });
+          }
         } else {
           $firstMenu = false;
         }

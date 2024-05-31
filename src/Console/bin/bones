@@ -465,7 +465,7 @@ namespace Bones {
   /**
    * MARK: The WP Bones command line version.
    */
-  define('WPBONES_COMMAND_LINE_VERSION', '1.4.5');
+  define('WPBONES_COMMAND_LINE_VERSION', '1.4.6');
 
   use Bones\SemVer\Version;
   use Exception;
