@@ -10,6 +10,7 @@
 */
 
 namespace Bones\SemVer\Exceptions {
+
   use Exception;
 
   class InvalidVersionException extends Exception
@@ -18,6 +19,7 @@ namespace Bones\SemVer\Exceptions {
 }
 
 namespace Bones\SemVer\Traits {
+
   use Bones\SemVer\Version;
 
   trait Comparable
@@ -214,6 +216,7 @@ namespace Bones\SemVer\Traits {
 }
 
 namespace Bones\SemVer {
+
   use Bones\SemVer\Exceptions\InvalidVersionException;
   use Bones\SemVer\Traits\Comparable;
   use Bones\SemVer\Traits\Incrementable;
@@ -465,7 +468,7 @@ namespace Bones {
   /**
    * MARK: The WP Bones command line version.
    */
-  define('WPBONES_COMMAND_LINE_VERSION', '1.4.6');
+  define('WPBONES_COMMAND_LINE_VERSION', '1.4.7');
 
   use Bones\SemVer\Version;
   use Exception;
@@ -1396,13 +1399,17 @@ namespace Bones {
 
         // files and folders to skip
         $this->skipWhenDeploy = [
-          '/node_modules',
           '/.git',
+          '/.cache',
+          '/assets',
           '/.gitignore',
           '/.gitkeep',
           '/.DS_Store',
           '/.babelrc',
+          '/node_modules',
           '/bones',
+          '/vendor/wpbones/wpbones/src/Console/stubs',
+          '/vendor/wpbones/wpbones/src/Console/bin',
           '/resources/assets',
           '/deploy.php',
           '/composer.json',
@@ -1487,6 +1494,7 @@ namespace Bones {
       if (is_file($source)) {
         // if the file starts with "." or is in the skip list
         // we don't copy it
+
         if (strpos(basename($source), '.') === 0 || $this->skip($source)) {
           return false;
         }
@@ -1506,6 +1514,7 @@ namespace Bones {
         if (
           $entry === '.' ||
           $entry === '..' ||
+          strpos($entry, '.') === 0 ||
           $this->skip("{$source}/{$entry}")
         ) {
           continue;
@@ -1694,9 +1703,7 @@ namespace Bones {
         ];
         // if $version_number_from_index_php is not a pre-release version
         if (strpos($version_number_from_index_php, $prefix) === false) {
-          $prerelease = semver($version_number_from_index_php)->{$methods[
-            $argv[0]
-          ]}();
+          $prerelease = semver($version_number_from_index_php)->{$methods[$argv[0]]}();
           $version = semver($prerelease)
             ->setPreRelease($prefix)
             ->incrementPreRelease();
@@ -2438,4 +2445,3 @@ namespace Bones {
 
   BonesCommandLine::run();
 }
-
