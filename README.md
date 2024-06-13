@@ -34,7 +34,7 @@
 Have a look at the new <a href="https://wpbones.vercel.app">WPBones website and documentation</a>
 </p>
 
-<img width="1206" alt="image" src="https://github.com/wpbones/WPBones/assets/432181/9bf56945-4204-48f7-a3b1-b1a3566ad4fd">
+<img width="1432" alt="image" src="https://github.com/wpbones/WPBones/assets/432181/d08cfd91-3992-4579-a4a3-2847d39fad26">
 
 ## 2. Join the Community
 
