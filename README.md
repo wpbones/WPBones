@@ -42,6 +42,14 @@ To participate more actively in discussions and stay updated on proposals and la
 
 ## Thanks to Our Contributors
 
+### WPBones
+
 <a href="https://github.com/wpbones/wpbones/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=wpbones/wpbones" />
+</a>
+
+### WPKirk demo
+
+<a href="https://github.com/wpbones/wpkirk/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=wpbones/wpkirk" />
 </a>
