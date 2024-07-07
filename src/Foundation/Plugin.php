@@ -104,20 +104,20 @@ class Plugin extends Container implements PluginContract
     $this->pluginData = get_plugin_data($this->file, false);
 
     /*
-         * In $this->pluginData you'll find all WordPress
-         *
-         Author = "Giovambattista Fazioli"
-         AuthorName = "Giovambattista Fazioli"
-         AuthorURI = "http://undolog.com"
-         Description = "WPKirk is a WP Bones boilperate plugin"
-         DomainPath = "localization"
-         Name = "WPKirk"
-         Network = false
-         PluginURI = "http://undolog.com"
-         TextDomain = "wp-kirk"
-         Title = "WPKirk"
-         Version = "1.0.0"
-         */
+     * In $this->pluginData you'll find all WordPress
+     *
+     * Author = "Giovambattista Fazioli"
+     * AuthorName = "Giovambattista Fazioli"
+     * AuthorURI = "http://undolog.com"
+     * Description = "WPKirk is a WP Bones boilperate plugin"
+     * DomainPath = "localization"
+     * Name = "WPKirk"
+     * Network = false
+     * PluginURI = "http://undolog.com"
+     * TextDomain = "wp-kirk"
+     * Title = "WPKirk"
+     * Version = "1.0.0"
+     */
 
     // plugin slug
     $this->slug = str_replace('-', '_', sanitize_title($this->pluginData['Name'])) . '_slug';
@@ -132,6 +132,9 @@ class Plugin extends Container implements PluginContract
     // Activation & Deactivation Hook
     register_activation_hook($this->file, [$this, 'activation']);
     register_deactivation_hook($this->file, [$this, 'deactivation']);
+
+    // handle plugin update
+    add_filter('upgrader_post_install', [$this, 'upgrader_post_install'], 10, 3);
 
     /*
      * There are many pitfalls to using the uninstall hook. It ’ s a much cleaner, and easier, process to use the
@@ -435,11 +438,53 @@ class Plugin extends Container implements PluginContract
   }
 
   /**
+   * Called when a plugin is updated; `upgrader_post_install`
+   *
+   * @param $response
+   * @param $hook_extra
+   * @param $result
+   *
+   * @return mixed
+   */
+  public function upgrader_post_install($response, $hook_extra, $result)
+  {
+    // Check if the installation type is for a plugin
+    if ($hook_extra['type'] == 'plugin') {
+      // Check if the action is an update
+      if ($hook_extra['action'] == 'update' && isset($hook_extra['plugin'])) {
+        // Verify if the updated plugin is the specific one
+        if ($hook_extra['plugin'] == plugin_basename(__FILE__)) {
+          // Call the update function
+          // include your own activation
+          $updated = include_once "{$this->basePath}/plugin/updated.php";
+
+          // updates/align the plugin options
+          $this->options->delta();
+
+          // migrations
+          foreach (glob("{$this->basePath}/database/migrations/*.php") as $filename) {
+            $instance = include $filename;
+          }
+
+          // seeders
+          foreach (glob("{$this->basePath}/database/seeders/*.php") as $filename) {
+            $instance = include $filename;
+          }
+        }
+      }
+    }
+
+    return $response;
+  }
+
+
+  /**
    * Called when a plugin is activated; `register_activation_hook()`
    *
    */
   public function activation()
   {
+    // updates/align the plugin options
     $this->options->delta();
 
     // include your own activation
@@ -450,6 +495,7 @@ class Plugin extends Container implements PluginContract
       $instance = include $filename;
     }
 
+    // seeders
     foreach (glob("{$this->basePath}/database/seeders/*.php") as $filename) {
       $instance = include $filename;
     }
