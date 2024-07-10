@@ -13,9 +13,7 @@ namespace Bones\SemVer\Exceptions {
 
   use Exception;
 
-  class InvalidVersionException extends Exception
-  {
-  }
+  class InvalidVersionException extends Exception {}
 }
 
 namespace Bones\SemVer\Traits {
@@ -468,7 +466,7 @@ namespace Bones {
   /**
    * MARK: The WP Bones command line version.
    */
-  define('WPBONES_COMMAND_LINE_VERSION', '1.4.10');
+  define('WPBONES_COMMAND_LINE_VERSION', '1.4.11');
 
   use Bones\SemVer\Version;
   use Exception;
@@ -1494,11 +1492,11 @@ namespace Bones {
 
           $this->info("✅ Found '$packageManager' as package manager");
 
-          $answer = $this->ask("Do you want to run '$packageManager build' to build assets? (y/n)", 'y');
+          $answer = $this->ask("Do you want to run '$packageManager run build' to build assets? (y/n)", 'y');
 
           if (strtolower($answer) === 'y') {
-            $this->info("📦 Build for production by using '{$packageManager} build'");
-            shell_exec("{$packageManager} build");
+            $this->info("📦 Build for production by using '{$packageManager} run build'");
+            shell_exec("{$packageManager} run build");
             $this->info("✅ Build assets successfully");
             do_action('wpbones_console_deploy_after_build_assets', $this, $path);
           } else {
@@ -1506,8 +1504,8 @@ namespace Bones {
             if (empty($answer)) {
               $this->info('⏭︎ Skip build assets');
             } else {
-              $this->info("📦 Build for production by using '{$answer} build'");
-              shell_exec("{$answer} build");
+              $this->info("📦 Build for production by using '{$answer} run build'");
+              shell_exec("{$answer} run build");
               $this->info("✅ Build assets successfully");
             }
           }
