@@ -1507,6 +1507,7 @@ namespace Bones {
               $this->info("📦 Build for production by using '{$answer} run build'");
               shell_exec("{$answer} run build");
               $this->info("✅ Build assets successfully");
+              do_action('wpbones_console_deploy_after_build_assets', $this, $path);
             }
           }
         } else {
