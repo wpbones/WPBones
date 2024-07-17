@@ -16,6 +16,13 @@ class DB
    */
   protected QueryBuilder $queryBuilder;
 
+  /**
+   * A key-value array of attributes of the attributes.
+   *
+   * @var array
+   */
+  public $attributes = [];
+
   public function __construct($table, $primaryKey = 'id')
   {
     $this->queryBuilder = new QueryBuilder($table, $primaryKey);
