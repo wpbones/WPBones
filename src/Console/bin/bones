@@ -600,7 +600,10 @@ namespace Bones {
         | We have to load the WordPress environment.
         |
         */
-        if (!file_exists(__DIR__ . '/../../../wp-load.php')) {
+        $currentDir = $_SERVER['PWD'] ?? __DIR__;
+        $wpLoadPath = dirname(dirname(dirname($currentDir))) . '/wp-load.php';
+
+        if (!file_exists($wpLoadPath)) {
           echo "\n\033[33;5;82mWarning!!\n";
           echo "\n\033[38;5;82m\t" .
             'You must be inside "wp-content/plugins/" folders';
@@ -608,7 +611,7 @@ namespace Bones {
           exit();
         }
 
-        require __DIR__ . '/../../../wp-load.php';
+        require $wpLoadPath;
       } catch (Exception $e) {
         echo "\n\033[33;5;82mWarning!!\n";
         echo "\n\033[38;5;82m\t" . 'Can\'t load WordPress';
