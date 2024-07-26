@@ -468,7 +468,7 @@ namespace Bones {
     /**
      * MARK: The WP Bones command line version.
      */
-    define('WPBONES_COMMAND_LINE_VERSION', '1.5.1');
+    define('WPBONES_COMMAND_LINE_VERSION', '1.5.2');
 
     use Bones\SemVer\Exceptions\InvalidVersionException;
     use Bones\SemVer\Version;
@@ -1491,14 +1491,19 @@ namespace Bones {
                 $this->line("\nUsage:");
                 $this->info("  deploy <path>\n");
                 $this->line('Arguments:');
-                $this->info("  path\tThe complete path of deploy.");
-                $this->info("  [--wp]\tWe are going to release this plugin in the WordPress.org public repository.");
+                $this->info("  path\t\tThe complete path of deploy.");
+                $this->info("  [--wp]\tYou are going to release this plugin in the WordPress.org public repository.");
                 exit(0);
             }
 
             if (!empty($path)) {
 
                 $dontSkipWhenDeploy = [
+                    '/gulpfile.js',
+                    '/package.json',
+                    '/package-lock.json',
+                    '/yarn.lock',
+                    '/pnpm-lock.yaml',
                     '/resources/assets',
                     '/composer.json',
                     '/composer.lock',
@@ -1565,11 +1570,6 @@ namespace Bones {
                     '/vendor/wpbones/wpbones/src/Console/bin',
                     '/deploy.php',
                     '/namespace',
-                    '/gulpfile.js',
-                    '/package.json',
-                    '/package-lock.json',
-                    '/yarn.lock',
-                    '/pnpm-lock.yaml',
                     '/README.md',
                     '/webpack.mix.js',
                     '/webpack.config.js',
