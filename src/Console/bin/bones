@@ -468,7 +468,7 @@ namespace Bones {
     /**
      * MARK: The WP Bones command line version.
      */
-    define('WPBONES_COMMAND_LINE_VERSION', '1.5.3');
+    define('WPBONES_COMMAND_LINE_VERSION', '1.5.4');
 
     use Bones\SemVer\Exceptions\InvalidVersionException;
     use Bones\SemVer\Version;
@@ -924,14 +924,14 @@ namespace Bones {
             // use the current plugin name and namespace from the namespace file
             $search_plugin_name = $this->getPluginName();
             $search_namespace = $this->getNamespace();
-            [$plugin_name, $namespace] = $this->getDefaultPlaginNameAndNamespace();
+            [$plugin_name, $namespace] = $this->getDefaultPluginNameAndNamespace();
             $this->setPluginNameAndNamespace($search_plugin_name, $search_namespace, $plugin_name, $namespace);
         }
 
         /**
          * Return the default plugin name and namespace.
          */
-        protected function getDefaultPlaginNameAndNamespace(): array
+        protected function getDefaultPluginNameAndNamespace(): array
         {
             return ['WP Kirk', 'WPKirk'];
         }
@@ -1223,7 +1223,7 @@ namespace Bones {
             // use the current plugin name and namespace from the namespace file
             $plugin_name = $this->getPluginName();
             $namespace = $this->getNamespace();
-            [$search_plugin_name, $search_namespace] = $this->getDefaultPlaginNameAndNamespace();
+            [$search_plugin_name, $search_namespace] = $this->getDefaultPluginNameAndNamespace();
             $this->setPluginNameAndNamespace($search_plugin_name, $search_namespace, $plugin_name, $namespace);
         }
 
@@ -1249,11 +1249,13 @@ namespace Bones {
             // You may set just the plugin name and the namespace will be created from plugin name
             if (!empty($plugin_name) && empty($namespace)) {
                 $namespace = str_replace(' ', '', ucwords($plugin_name));
-                return [$search_plugin_name, $search_namespace, $plugin_name, $namespace];
+                $mainPluginFile = $this->getMainPluginFile($plugin_name);
+                return [$search_plugin_name, $search_namespace, $plugin_name, $namespace, $mainPluginFile];
             }
 
             if (!empty($plugin_name) && !empty($namespace)) {
-                return [$search_plugin_name, $search_namespace, $plugin_name, $namespace];
+                $mainPluginFile = $this->getMainPluginFile($plugin_name);
+                return [$search_plugin_name, $search_namespace, $plugin_name, $namespace, $mainPluginFile];
             }
 
             $this->info('🚦 ---------------------------------------------------------------------------------');
@@ -1472,7 +1474,7 @@ namespace Bones {
         /**
          * Create a deployment version of the plugin
          *
-         * @param string $path The path to the deployment version of the plugin
+         * @param $argv
          */
         protected function deploy($argv)
         {
