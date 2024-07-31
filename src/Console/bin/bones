@@ -468,7 +468,7 @@ namespace Bones {
     /**
      * MARK: The WP Bones command line version.
      */
-    define('WPBONES_COMMAND_LINE_VERSION', '1.5.5');
+    define('WPBONES_COMMAND_LINE_VERSION', '1.5.6');
 
     use Bones\SemVer\Exceptions\InvalidVersionException;
     use Bones\SemVer\Version;
@@ -1055,8 +1055,6 @@ namespace Bones {
             // save new plugin name and namespace
             file_put_contents('namespace', "{$plugin_name},{$namespace}");
 
-            $this->optimize();
-
             $this->info("👏 Rename process completed!");
         }
 
@@ -1218,14 +1216,6 @@ namespace Bones {
         }
 
         /**
-         * Alias composer dump-autoload
-         */
-        protected function optimize()
-        {
-            $this->line(`composer dump-autoload -o`);
-        }
-
-        /**
          * Update the plugin name and namespace after a install new package
          */
         protected function updatePluginNameAndNamespace()
@@ -1236,15 +1226,6 @@ namespace Bones {
             [$search_plugin_name, $search_namespace] = $this->getDefaultPluginNameAndNamespace();
             $this->setPluginNameAndNamespace($search_plugin_name, $search_namespace, $plugin_name, $namespace);
         }
-
-        /*
-        |--------------------------------------------------------------------------
-        | Internal useful function
-        |--------------------------------------------------------------------------
-        |
-        | Here you will find all internal methods
-        |
-        */
 
         /**
          * Get the plugin name and namespace from args or ask them from the console
@@ -1312,6 +1293,15 @@ namespace Bones {
 
             return [$search_plugin_name, $search_namespace, $plugin_name, $namespace, $mainPluginFile];
         }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Internal useful function
+        |--------------------------------------------------------------------------
+        |
+        | Here you will find all internal methods
+        |
+        */
 
         /**
          * Get input from console
@@ -1401,15 +1391,6 @@ namespace Bones {
             @rmdir("{$path}");
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | Public task
-        |--------------------------------------------------------------------------
-        |
-        | Here you will find all tasks that a user can run from console.
-        |
-        */
-
         /**
          * Run subtask. Handle the php bones commands.
          *
@@ -1480,6 +1461,15 @@ namespace Bones {
                 }
             }
         }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Public task
+        |--------------------------------------------------------------------------
+        |
+        | Here you will find all tasks that a user can run from console.
+        |
+        */
 
         /**
          * Create a deployment version of the plugin
@@ -1723,6 +1713,14 @@ namespace Bones {
             $single = str_replace($this->rootDeploy, '', $value);
 
             return in_array($single, $this->skipWhenDeploy);
+        }
+
+        /**
+         * Alias composer dump-autoload
+         */
+        protected function optimize()
+        {
+            $this->line(`composer dump-autoload -o`);
         }
 
         /**
