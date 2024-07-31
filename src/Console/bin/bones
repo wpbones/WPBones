@@ -468,7 +468,7 @@ namespace Bones {
     /**
      * MARK: The WP Bones command line version.
      */
-    define('WPBONES_COMMAND_LINE_VERSION', '1.5.6');
+    define('WPBONES_COMMAND_LINE_VERSION', '1.5.7');
 
     use Bones\SemVer\Exceptions\InvalidVersionException;
     use Bones\SemVer\Version;
@@ -876,6 +876,7 @@ namespace Bones {
                         return;
                     }
                     $this->setPluginNameAndNamespace($search_plugin_name, $search_namespace, $plugin_name, $namespace);
+                    $this->update();
                     break;
             }
         }
@@ -1216,6 +1217,55 @@ namespace Bones {
         }
 
         /**
+         * Execute composer update
+         */
+        protected function update()
+        {
+            if ($this->isHelp()) {
+                $this->line(
+                    "Will run the composer update. Useful if there is a new version of WP Bones\n"
+                );
+                $this->info('Usage:');
+                $this->line(' php bones update');
+                exit();
+            }
+            // delete the current vendor/wpbones/wpbones folder
+            $this->deleteDirectory('vendor/wpbones/wpbones');
+
+            // update composer module
+            $this->line(`composer update`);
+        }
+
+        /**
+         * Delete a whole folder
+         *
+         * @param string $path The path to the folder to delete
+         */
+        public function deleteDirectory($path)
+        {
+            $path = rtrim($path, '/');
+
+            array_map(function ($file) {
+                if (is_dir($file)) {
+                    $this->deleteDirectory($file);
+                } else {
+                    @unlink($file);
+                }
+            }, glob("{$path}/" . '{,.}[!.,!..]*', GLOB_MARK | GLOB_BRACE));
+
+            @rmdir("{$path}");
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Internal useful function
+        |--------------------------------------------------------------------------
+        |
+        | Here you will find all internal methods
+        |
+        */
+
+        /**
          * Update the plugin name and namespace after a install new package
          */
         protected function updatePluginNameAndNamespace()
@@ -1294,15 +1344,6 @@ namespace Bones {
             return [$search_plugin_name, $search_namespace, $plugin_name, $namespace, $mainPluginFile];
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | Internal useful function
-        |--------------------------------------------------------------------------
-        |
-        | Here you will find all internal methods
-        |
-        */
-
         /**
          * Get input from console
          *
@@ -1349,46 +1390,6 @@ namespace Bones {
                 exit();
             }
             $this->line(`composer install`);
-        }
-
-        /**
-         * Execute composer update
-         */
-        protected function update()
-        {
-            if ($this->isHelp()) {
-                $this->line(
-                    "Will run the composer update. Useful if there is a new version of WP Bones\n"
-                );
-                $this->info('Usage:');
-                $this->line(' php bones update');
-                exit();
-            }
-            // delete the current vendor/wpbones/wpbones folder
-            $this->deleteDirectory('vendor/wpbones/wpbones');
-
-            // update composer module
-            $this->line(`composer update`);
-        }
-
-        /**
-         * Delete a whole folder
-         *
-         * @param string $path The path to the folder to delete
-         */
-        public function deleteDirectory($path)
-        {
-            $path = rtrim($path, '/');
-
-            array_map(function ($file) {
-                if (is_dir($file)) {
-                    $this->deleteDirectory($file);
-                } else {
-                    @unlink($file);
-                }
-            }, glob("{$path}/" . '{,.}[!.,!..]*', GLOB_MARK | GLOB_BRACE));
-
-            @rmdir("{$path}");
         }
 
         /**
