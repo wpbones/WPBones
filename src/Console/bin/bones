@@ -468,7 +468,7 @@ namespace Bones {
     /**
      * MARK: The WP Bones command line version.
      */
-    define('WPBONES_COMMAND_LINE_VERSION', '1.5.7');
+    define('WPBONES_COMMAND_LINE_VERSION', '1.5.8');
 
     use Bones\SemVer\Exceptions\InvalidVersionException;
     use Bones\SemVer\Version;
@@ -518,14 +518,14 @@ namespace Bones {
          *
          * @var array
          */
-        protected $skipWhenDeploy = [];
+        protected array $skipWhenDeploy = [];
 
         /**
          * Base folder during the deployment.
          *
          * @var string
          */
-        protected $rootDeploy = '';
+        protected string $rootDeploy = '';
 
         public function __construct()
         {
@@ -569,20 +569,32 @@ namespace Bones {
         /**
          * Return the arguments after "php bones".
          *
-         * @param int $index Optional. Index of argument.
+         * @param int|null $index Optional. Index of argument.
          *                   If NULL will be returned the whole array.
          *
          * @return mixed|array
          */
-        protected function arguments($index = null)
+        protected function arguments(int $index = null): ?array
         {
+            // Check if 'argv' is set in the server variables
+            if (!isset($_SERVER['argv'])) {
+                return null;
+            }
+
             $argv = $_SERVER['argv'];
 
-            // strip the application name
+            // Strip the application name
             array_shift($argv);
 
-            return $index ? $argv[$index] ?? null : $argv;
+            // If $index is provided, return the specific argument or null if it doesn't exist
+            if (is_int($index)) {
+                return $argv[$index] ?? null;
+            }
+
+            // Return all arguments if no index is provided
+            return $argv;
         }
+
 
         /**
          * Load WordPress core and all environment.
@@ -705,7 +717,7 @@ namespace Bones {
          * @param string $command Bones command to check.
          * @return bool
          */
-        protected function isCommand($command): bool
+        protected function isCommand(string $command): bool
         {
             $arguments = $this->arguments();
 
@@ -787,7 +799,7 @@ namespace Bones {
          *
          * @param string $str The message to display.
          */
-        protected function info($str)
+        protected function info(string $str)
         {
             echo "\033[38;5;213m" . $str;
             echo "\033[0m\n";
@@ -798,7 +810,7 @@ namespace Bones {
          *
          * @param string $str The message to display.
          */
-        protected function line($str)
+        protected function line(string $str)
         {
             echo "\033[38;5;82m" . $str;
             echo "\033[0m\n";
@@ -807,9 +819,10 @@ namespace Bones {
         /**
          * Return the default Plugin filename as snake case from the plugin name.
          *
+         * @param string|null $pluginName
          * @return string
          */
-        public function getMainPluginFile($pluginName = ""): string
+        public function getMainPluginFile(?string $pluginName = ''): string
         {
             if (empty($pluginName)) {
                 $pluginName = $this->getPluginName();
@@ -884,11 +897,11 @@ namespace Bones {
         /**
          * Commodity function to check if help has been requested.
          *
-         * @param string $str Optional. Command to check.
+         * @param string|null $str Optional. Command to check.
          *
          * @return bool
          */
-        protected function isHelp($str = null): bool
+        protected function isHelp(string $str = null): bool
         {
             if (!is_null($str)) {
                 return empty($str) || $str === '--help';
@@ -902,12 +915,12 @@ namespace Bones {
         /**
          * Return the params after "php bones [command]".
          *
-         * @param int $index Optional. Index of param.
+         * @param int|null $index Optional. Index of param.
          *                   If NULL will be returned the whole array.
          *
          * @return array|string
          */
-        protected function commandParams($index = null)
+        protected function commandParams(int $index = null)
         {
             $params = $this->arguments();
 
@@ -945,7 +958,7 @@ namespace Bones {
          * @param string $plugin_name The new plugin name
          * @param string $namespace The new namespace
          */
-        protected function setPluginNameAndNamespace($search_plugin_name, $search_namespace, $plugin_name, $namespace)
+        protected function setPluginNameAndNamespace(string $search_plugin_name, string $search_namespace, string $plugin_name, string $namespace)
         {
             $mainPluginFile = $this->getMainPluginFile($plugin_name);
             $currentMainPluginFile = $this->getMainPluginFile($search_plugin_name);
@@ -1075,7 +1088,7 @@ namespace Bones {
          * @since 1.0.0.b4
          *
          */
-        protected function recursiveScan($path, $match = ''): array
+        protected function recursiveScan(string $path, string $match = ''): array
         {
             /**
              * Return an array with all matched files from root folder.
@@ -1091,7 +1104,7 @@ namespace Bones {
              *
              * @suppress PHP0405
              */
-            function _rglob($path, $match = '', &$result = []): array
+            function _rglob(string $path, string $match = '', array &$result = []): array
             {
                 $path = rtrim($path, '/\\') . '/';
 
@@ -1127,10 +1140,12 @@ namespace Bones {
 
         /**
          * Return the plugin slug.
+         *
+         * @param string|null $str
          */
-        public function getPluginSlug($str = null): string
+        public function getPluginSlug(string $str = null): string
         {
-            $str = $this->getSnakeCasePluginName($str);
+            $str = $this->snakeCasePluginName($str);
 
             return $str . '_slug';
         }
@@ -1138,12 +1153,12 @@ namespace Bones {
         /**
          * Return the snake case plugin name.
          *
-         * @param string $str
+         * @param string|null $str
          * @return string
          */
-        public function getSnakeCasePluginName($str = null): string
+        public function snakeCasePluginName(string $str = null): string
         {
-            $str = $this->getSanitizePluginName($str);
+            $str = $this->sanitizePluginName($str);
 
             return str_replace('-', '_', $str);
         }
@@ -1151,10 +1166,10 @@ namespace Bones {
         /**
          * Return the sanitized plugin name.
          *
-         * @param string $str
+         * @param string|null $str
          * @return string
          */
-        public function getSanitizePluginName($str = null): string
+        public function sanitizePluginName(string $str = null): string
         {
             if (is_null($str)) {
                 $str = $this->getPluginName();
@@ -1168,7 +1183,7 @@ namespace Bones {
          *
          * @param string $title
          */
-        protected function sanitize($title): string
+        protected function sanitize(string $title): string
         {
             $title = strip_tags($title);
             // Preserve escaped octets.
@@ -1193,12 +1208,12 @@ namespace Bones {
         /**
          * Return the plugin vars.
          *
-         * @param string $str
+         * @param string|null $str
          * @return string
          */
-        public function getPluginVars($str = null): string
+        public function getPluginVars(string $str = null): string
         {
-            $str = $this->getSnakeCasePluginName($str);
+            $str = $this->snakeCasePluginName($str);
 
             return $str . '_vars';
         }
@@ -1213,57 +1228,8 @@ namespace Bones {
          */
         public function getPluginId(string $str = null): string
         {
-            return $this->getSanitizePluginName($str);
+            return $this->sanitizePluginName($str);
         }
-
-        /**
-         * Execute composer update
-         */
-        protected function update()
-        {
-            if ($this->isHelp()) {
-                $this->line(
-                    "Will run the composer update. Useful if there is a new version of WP Bones\n"
-                );
-                $this->info('Usage:');
-                $this->line(' php bones update');
-                exit();
-            }
-            // delete the current vendor/wpbones/wpbones folder
-            $this->deleteDirectory('vendor/wpbones/wpbones');
-
-            // update composer module
-            $this->line(`composer update`);
-        }
-
-        /**
-         * Delete a whole folder
-         *
-         * @param string $path The path to the folder to delete
-         */
-        public function deleteDirectory($path)
-        {
-            $path = rtrim($path, '/');
-
-            array_map(function ($file) {
-                if (is_dir($file)) {
-                    $this->deleteDirectory($file);
-                } else {
-                    @unlink($file);
-                }
-            }, glob("{$path}/" . '{,.}[!.,!..]*', GLOB_MARK | GLOB_BRACE));
-
-            @rmdir("{$path}");
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | Internal useful function
-        |--------------------------------------------------------------------------
-        |
-        | Here you will find all internal methods
-        |
-        */
 
         /**
          * Update the plugin name and namespace after a install new package
@@ -1283,7 +1249,7 @@ namespace Bones {
          * @param array $args The arguments from the console. The first argument is the plugin name and the second is the namespace
          *
          */
-        protected function getAskPluginNameAndNamespace($args): array
+        protected function getAskPluginNameAndNamespace(array $args): array
         {
             // Get the current plugin name and namespace
             $search_plugin_name = $this->getPluginName();
@@ -1296,9 +1262,12 @@ namespace Bones {
             $plugin_name = $args[0] ?? '';
             $namespace = $args[1] ?? '';
 
+            // Sanitize the namespace by removing spaces and any backslashes
+            $namespace = $this->sanitizeToCamelCase($namespace);
+
             // You may set just the plugin name and the namespace will be created from plugin name
             if (!empty($plugin_name) && empty($namespace)) {
-                $namespace = str_replace(' ', '', ucwords($plugin_name));
+                $namespace = $this->sanitizeToCamelCase($plugin_name);
                 $mainPluginFile = $this->getMainPluginFile($plugin_name);
                 return [$search_plugin_name, $search_namespace, $plugin_name, $namespace, $mainPluginFile];
             }
@@ -1336,7 +1305,7 @@ namespace Bones {
 
             // You may set just the plugin name and the namespace will be created from plugin name
             if (empty($namespace)) {
-                $namespace = str_replace(' ', '', ucwords($plugin_name));
+                $namespace = $this->sanitizeToCamelCase($plugin_name);
             }
 
             $mainPluginFile = $this->getMainPluginFile($plugin_name);
@@ -1345,12 +1314,46 @@ namespace Bones {
         }
 
         /**
+         * Return the CamelCase plugin name.
+         * Used for Namespace
+         *
+         * @param string $input
+         * @return string
+         */
+        public function sanitizeToCamelCase(string $input): string
+        {
+            // Remove special characters except letters and numbers
+            $sanitized = preg_replace('/[^a-zA-Z0-9\s]/', '', $input);
+
+            // Split the string into words (using spaces as delimiter)
+            $words = explode(' ', $sanitized);
+
+            // Convert the first letter of each word to uppercase
+            $camelCasedWords = array_map('ucfirst', $words);
+
+            // Join the words without spaces
+            $camelCasedString = implode('', $camelCasedWords);
+
+            // Return the CamelCase string
+            return $camelCasedString;
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Internal useful function
+        |--------------------------------------------------------------------------
+        |
+        | Here you will find all internal methods
+        |
+        */
+
+        /**
          * Get input from console
          *
          * @param string $str The question to ask
-         * @param string $default The default value
+         * @param string|null $default The default value
          */
-        protected function ask($str, $default = ''): string
+        protected function ask(string $str, ?string $default = ''): string
         {
             echo "\n\e[38;5;33m$str" .
                 (empty($default) ? '' : " (default: {$default})") .
@@ -1371,11 +1374,51 @@ namespace Bones {
          *
          * @param string $str The message to display.
          */
-        protected function error($str)
+        protected function error(string $str)
         {
             echo "\033[41m\n";
             echo "\033[41;255m" . $str . "\n";
             echo "\033[0m\n";
+        }
+
+        /**
+         * Execute composer update
+         */
+        protected function update()
+        {
+            if ($this->isHelp()) {
+                $this->line(
+                    "Will run the composer update. Useful if there is a new version of WP Bones\n"
+                );
+                $this->info('Usage:');
+                $this->line(' php bones update');
+                exit();
+            }
+            // delete the current vendor/wpbones/wpbones folder
+            $this->deleteDirectory('vendor/wpbones/wpbones');
+
+            // update composer module
+            $this->line(`composer update`);
+        }
+
+        /**
+         * Delete a whole folder
+         *
+         * @param string $path The path to the folder to delete
+         */
+        public function deleteDirectory(string $path)
+        {
+            $path = rtrim($path, '/');
+
+            array_map(function ($file) {
+                if (is_dir($file)) {
+                    $this->deleteDirectory($file);
+                } else {
+                    @unlink($file);
+                }
+            }, glob("{$path}/" . '{,.}[!.,!..]*', GLOB_MARK | GLOB_BRACE));
+
+            @rmdir("{$path}");
         }
 
         /**
@@ -1621,7 +1664,7 @@ namespace Bones {
          *
          * @return string|null The name of the available package manager (yarn, npm, pnpm, bun) or null if none is available.
          */
-        protected function getAvailablePackageManager()
+        protected function getAvailablePackageManager(): ?string
         {
             $packageManagers = ['yarn', 'npm', 'pnpm', 'bun'];
 
@@ -1637,9 +1680,10 @@ namespace Bones {
         /**
          * Return true if the command is available in the system.
          *
-         * @return string
+         * @param string $command
+         * @return bool
          */
-        protected function isCommandAvailable($command)
+        protected function isCommandAvailable(string $command): bool
         {
             $whereCommand = (PHP_OS_FAMILY === 'Windows') ? 'where' : 'command -v';
             $output = shell_exec("$whereCommand $command");
@@ -1651,11 +1695,11 @@ namespace Bones {
          *
          * @param string $source The source path
          * @param string $dest The target path
-         * @param int $permissions The permissions to set
+         * @param int|null $permissions The permissions to set
          *
          * @return bool
          */
-        protected function xcopy($source, $dest, $permissions = 0755): bool
+        protected function xcopy(string $source, string $dest, ?int $permissions = 0755): bool
         {
             // Check for symlinks
             if (is_link($source)) {
@@ -1709,7 +1753,7 @@ namespace Bones {
          *
          * @return bool
          */
-        protected function skip($value): bool
+        protected function skip(string $value): bool
         {
             $single = str_replace($this->rootDeploy, '', $value);
 
@@ -1753,7 +1797,7 @@ namespace Bones {
          *
          * @param string $package The composer package to install
          */
-        protected function requirePackage($package)
+        protected function requirePackage(string $package)
         {
             if ($this->isHelp($package)) {
                 $this->info('Use php bones require <PackageName>');
@@ -1959,7 +2003,7 @@ namespace Bones {
          *
          * @param string $tablename
          */
-        protected function createMigrate($tablename)
+        protected function createMigrate(string $tablename)
         {
             if ($this->isHelp($tablename)) {
                 $this->info('Use php bones migrate:make <Tablename>');
@@ -1994,7 +2038,7 @@ namespace Bones {
          * @param array $replacements
          * @return string
          */
-        public function prepareStub($filename, $replacements = []): string
+        public function prepareStub(string $filename, array $replacements): string
         {
             $stub = $this->getStubContent($filename);
 
@@ -2008,10 +2052,10 @@ namespace Bones {
         /**
          * Return the content of a stub file.
          *
-         * @param $filename
+         * @param string $filename
          * @return string
          */
-        public function getStubContent($filename): string
+        public function getStubContent(string $filename): string
         {
             return file_get_contents(
                 "vendor/wpbones/wpbones/src/Console/stubs/{$filename}.stub"
@@ -2021,9 +2065,9 @@ namespace Bones {
         /**
          * Create a controller
          *
-         * @param string $className The class name
+         * @param string|null $className The class name
          */
-        protected function createController($className)
+        protected function createController(?string $className = '')
         {
             if ($this->isHelp($className)) {
                 $this->info('Use php bones make:controller <ClassName>');
@@ -2073,11 +2117,11 @@ namespace Bones {
         /**
          * Commodity function to check if ClassName has been requested.
          *
-         * @param string $className Optional. Command to check.
+         * @param string|null $className Optional. Command to check.
          *
          * @return string
          */
-        protected function askClassNameIfEmpty($className = ''): string
+        protected function askClassNameIfEmpty(?string $className = ''): string
         {
             if (empty($className)) {
                 $className = $this->ask('ClassName:');
@@ -2093,9 +2137,9 @@ namespace Bones {
         /**
          * Create a Command controller
          *
-         * @param string $className The class name
+         * @param string|null $className The class name
          */
-        protected function createCommand($className)
+        protected function createCommand(?string $className = '')
         {
             if ($this->isHelp($className)) {
                 $this->info('Use php bones make:console <ClassName>');
@@ -2154,9 +2198,9 @@ namespace Bones {
         /**
          * Create a Custom Post Type controller
          *
-         * @param string $className The class name
+         * @param string|null $className The class name
          */
-        protected function createCustomPostType($className)
+        protected function createCustomPostType(?string $className = '')
         {
             if ($this->isHelp($className)) {
                 $this->info('Use php bones make:cpt <ClassName>');
@@ -2191,6 +2235,7 @@ namespace Bones {
                 '{Plural}' => $plural,
             ]);
 
+            // Create the folder if it doesn't exist
             if (!is_dir('plugin/CustomPostTypes')) {
                 mkdir('plugin/CustomPostTypes', 0777, true);
             }
@@ -2207,9 +2252,9 @@ namespace Bones {
         /**
          * Create a Shortcode controller
          *
-         * @param string $className The class name
+         * @param string|null $className The class name
          */
-        protected function createShortcode($className)
+        protected function createShortcode(?string $className = '')
         {
             if ($this->isHelp($className)) {
                 $this->info('Use php bones make:shortcode <ClassName>');
@@ -2231,6 +2276,7 @@ namespace Bones {
                 '{ClassName}' => $className,
             ]);
 
+            // Create the folder if it doesn't exist
             if (!is_dir('plugin/Shortcodes')) {
                 mkdir('plugin/Shortcodes', 0777, true);
             }
@@ -2247,9 +2293,9 @@ namespace Bones {
         /**
          * Create a Service Provider
          *
-         * @param string $className The class name
+         * @param string|null $className The class name
          */
-        protected function createProvider($className)
+        protected function createProvider(?string $className = '')
         {
             if ($this->isHelp($className)) {
                 $this->info('Use php bones make:provider <ClassName>');
@@ -2271,6 +2317,7 @@ namespace Bones {
                 '{ClassName}' => $className,
             ]);
 
+            // Create the folder if it doesn't exist
             if (!is_dir('plugin/Providers')) {
                 mkdir('plugin/Providers', 0777, true);
             }
@@ -2283,9 +2330,9 @@ namespace Bones {
         /**
          * Create a Ajax controller
          *
-         * @param string $className The class name
+         * @param string|null $className The class name
          */
-        protected function createAjax($className)
+        protected function createAjax(?string $className = '')
         {
             if ($this->isHelp($className)) {
                 $this->info('Use php bones make:ajax <ClassName>');
@@ -2305,6 +2352,7 @@ namespace Bones {
                 '{ClassName}' => $className,
             ]);
 
+            // Create the folder if it doesn't exist
             if (!is_dir('plugin/Ajax')) {
                 mkdir('plugin/Ajax', 0777, true);
             }
@@ -2323,9 +2371,9 @@ namespace Bones {
         /**
          * Create a Custom Taxonomy controller
          *
-         * @param string $className The class name
+         * @param string|null $className The class name
          */
-        protected function createCustomTaxonomyType($className)
+        protected function createCustomTaxonomyType(?string $className = '')
         {
             if ($this->isHelp($className)) {
                 $this->info('Use php bones make:ctt <ClassName>');
@@ -2367,6 +2415,7 @@ namespace Bones {
                 '{ObjectType}' => $objectType,
             ]);
 
+            // Create the folder if it doesn't exist
             if (!is_dir('plugin/CustomTaxonomyTypes')) {
                 mkdir('plugin/CustomTaxonomyTypes', 0777, true);
             }
@@ -2383,9 +2432,9 @@ namespace Bones {
         /**
          * Create a Widget controller
          *
-         * @param string $className The class name
+         * @param string|null $className The class name
          */
-        protected function createWidget($className)
+        protected function createWidget(?string $className = '')
         {
             if ($this->isHelp($className)) {
                 $this->info('Use php bones make:widget <ClassName>');
@@ -2411,6 +2460,7 @@ namespace Bones {
                 '{Slug}' => $slug,
             ]);
 
+            // Create the folder if it doesn't exist
             if (!is_dir('plugin/Widgets')) {
                 mkdir('plugin/Widgets', 0777, true);
             }
@@ -2443,9 +2493,9 @@ namespace Bones {
         /**
          * Create a database Model
          *
-         * @param string $className The class name
+         * @param string|null $className The class name
          */
-        protected function createModel($className)
+        protected function createModel(?string $className = '')
         {
             if ($this->isHelp($className)) {
                 $this->info('Use php bones make:model <ClassName>');
@@ -2491,11 +2541,11 @@ namespace Bones {
         }
 
         /**
-         * Create a Eloquent database Model
+         * Create an Eloquent database Model
          *
-         * @param string $className The class name
+         * @param string|null $className The class name
          */
-        protected function createEloquentModel($className)
+        protected function createEloquentModel(?string $className = '')
         {
             if ($this->isHelp($className)) {
                 $this->info('Use php bones make:eloquent-model <ClassName>');
@@ -2547,9 +2597,9 @@ namespace Bones {
         /**
          * Create an API Controller
          *
-         * @param string $className The class name
+         * @param string|null $className The class name
          */
-        protected function createAPIController($className)
+        protected function createAPIController(?string $className = '')
         {
             if ($this->isHelp($className)) {
                 $this->info('Use php bones make:api <ClassName>');
@@ -2577,6 +2627,11 @@ namespace Bones {
                 '{Namespace}' => $namespace,
                 '{ClassName}' => $className,
             ]);
+
+            // Create the folder if it doesn't exist
+            if (!is_dir('plugin/API')) {
+                mkdir('plugin/API', 0777, true);
+            }
 
             if (!empty($path)) {
                 $content = str_replace('{Path}', $namespacePath, $content);
