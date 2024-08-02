@@ -468,7 +468,7 @@ namespace Bones {
     /**
      * MARK: The WP Bones command line version.
      */
-    define('WPBONES_COMMAND_LINE_VERSION', '1.5.9');
+    define('WPBONES_COMMAND_LINE_VERSION', '1.5.10');
 
     use Bones\SemVer\Exceptions\InvalidVersionException;
     use Bones\SemVer\Version;
@@ -1355,16 +1355,15 @@ namespace Bones {
          */
         protected function ask(string $str, ?string $default = ''): string
         {
-            echo "\n\e[38;5;33m$str" .
+            $str = "\n\e[38;5;33m$str" .
                 (empty($default) ? '' : " (default: {$default})") .
                 "\e[0m ";
 
-            $handle = fopen('php://stdin', 'r');
-            $line = fgets($handle);
+            // Use readline to get the user input
+            $line = readline($str);
 
-            fclose($handle);
-
-            $line = trim($line, " \n\r");
+            // Trim the input to remove extra spaces or newlines
+            $line = trim($line);
 
             return $line ?: $default;
         }
