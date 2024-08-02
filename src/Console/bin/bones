@@ -468,7 +468,7 @@ namespace Bones {
     /**
      * MARK: The WP Bones command line version.
      */
-    define('WPBONES_COMMAND_LINE_VERSION', '1.5.8');
+    define('WPBONES_COMMAND_LINE_VERSION', '1.5.9');
 
     use Bones\SemVer\Exceptions\InvalidVersionException;
     use Bones\SemVer\Version;
@@ -889,7 +889,7 @@ namespace Bones {
                         return;
                     }
                     $this->setPluginNameAndNamespace($search_plugin_name, $search_namespace, $plugin_name, $namespace);
-                    $this->update();
+                    $this->optimize();
                     break;
             }
         }
@@ -1382,6 +1382,28 @@ namespace Bones {
         }
 
         /**
+         * Alias composer dump-autoload
+         */
+        protected function optimize()
+        {
+            $this->line(`composer dump-autoload -o`);
+        }
+
+        /**
+         * Execute composer install
+         */
+        protected function install()
+        {
+            if ($this->isHelp()) {
+                $this->line("Will run the composer install\n");
+                $this->info('Usage:');
+                $this->line(' php bones install');
+                exit();
+            }
+            $this->line(`composer install`);
+        }
+
+        /**
          * Execute composer update
          */
         protected function update()
@@ -1421,19 +1443,14 @@ namespace Bones {
             @rmdir("{$path}");
         }
 
-        /**
-         * Execute composer install
-         */
-        protected function install()
-        {
-            if ($this->isHelp()) {
-                $this->line("Will run the composer install\n");
-                $this->info('Usage:');
-                $this->line(' php bones install');
-                exit();
-            }
-            $this->line(`composer install`);
-        }
+        /*
+        |--------------------------------------------------------------------------
+        | Public task
+        |--------------------------------------------------------------------------
+        |
+        | Here you will find all tasks that a user can run from console.
+        |
+        */
 
         /**
          * Run subtask. Handle the php bones commands.
@@ -1505,15 +1522,6 @@ namespace Bones {
                 }
             }
         }
-
-        /*
-        |--------------------------------------------------------------------------
-        | Public task
-        |--------------------------------------------------------------------------
-        |
-        | Here you will find all tasks that a user can run from console.
-        |
-        */
 
         /**
          * Create a deployment version of the plugin
@@ -1758,14 +1766,6 @@ namespace Bones {
             $single = str_replace($this->rootDeploy, '', $value);
 
             return in_array($single, $this->skipWhenDeploy);
-        }
-
-        /**
-         * Alias composer dump-autoload
-         */
-        protected function optimize()
-        {
-            $this->line(`composer dump-autoload -o`);
         }
 
         /**
