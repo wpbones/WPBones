@@ -23,7 +23,7 @@ class AdminMenuProvider extends ServiceProvider
   // register
   public function register()
   {
-    $menus = include_once "{$this->plugin->getBasePath()}/config/menus.php";
+    $menus = include_once "{$this->plugin->basePath}/config/menus.php";
 
     if (!empty($menus) && is_array($menus)) {
       foreach ($menus as $topLevelSlug => $menu) {

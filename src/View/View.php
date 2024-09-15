@@ -14,18 +14,18 @@ class View
    * A plugin instance container.
    */
   protected $container;
-  protected $key;
   protected $data;
+  protected $key;
 
   /**
    * List of styles and script to enqueue in admin area.
    *
    * @var array
    */
+  protected $adminAppsModules = [];
+  protected $adminAppsScripts = [];
   protected $adminStyles = [];
   protected $adminScripts = [];
-  protected $adminAppsScripts = [];
-  protected $adminAppsModules = [];
 
   /**
    * List of the scripts to localize.
@@ -35,7 +35,21 @@ class View
   protected $localizeScripts = [];
 
   /**
-   * List of styles and script to enqueue in frontend.
+   * List of the inline scripts.
+   *
+   * @var array
+   */
+  protected $inlineScripts = [];
+
+  /**
+   * List of the inline styles.
+   *
+   * @var array
+   */
+  protected $inlineStyles = [];
+
+  /**
+   * List of styles and script to enqueue in theme.
    *
    * @var array
    */
@@ -62,18 +76,18 @@ class View
     $this->key = $key;
     $this->data = $data;
 
-    $cache = $this->container->getBasePath() . '/.cache';
+    $cache = $this->container->basePath . '/.cache';
 
     if (!file_exists($cache)) {
       mkdir($cache, 0777, true);
     }
 
     // Initiate BladeOne
-    $this->blade = new BladeOne($this->container->getBasePath() . '/resources/views', $cache, BladeOne::MODE_AUTO);
+    $this->blade = new BladeOne($this->container->basePath . '/resources/views', $cache, BladeOne::MODE_AUTO);
   }
 
   /**
-   * Get the string rappresentation of a view.
+   * Get the string of a view.
    *
    * @return string
    */
@@ -85,21 +99,24 @@ class View
   /**
    * Get the view content.
    *
-   * @param bool $asHTML Set to TRUE to get the content of view as string/html.
+   * @param bool $asHTML  Optional. Set to TRUE to get the content of view as string/html.
    * @return mixed
    */
   public function render($asHTML = false)
   {
     if (!$this->container->isAjax()) {
-      $this->admin_enqueue_scripts();
-      $this->admin_print_styles();
-      $this->wp_enqueue_scripts();
-      $this->wp_print_styles();
+      if (is_admin()) {
+        $this->admin_enqueue_scripts();
+        $this->admin_print_styles();
+      } else {
+        $this->wp_enqueue_scripts();
+        $this->wp_print_styles();
+      }
     }
 
     // Check if view exists as a blade file
     if (
-      file_exists($this->container->getBasePath() . '/resources/views/' . $this->filename()) &&
+      file_exists($this->container->basePath . '/resources/views/' . $this->filename()) &&
       strpos($this->filename(), '.blade.php') !== false
     ) {
       // Inject the plugin instance into the view
@@ -131,7 +148,7 @@ class View
         }
 
         // include view
-        include $this->container->getBasePath() . '/resources/views/' . $this->filename();
+        include $this->container->basePath . '/resources/views/' . $this->filename();
       };
     }
 
@@ -145,93 +162,6 @@ class View
     }
 
     return $func();
-  }
-
-  protected function admin_enqueue_scripts()
-  {
-    if (!empty($this->adminScripts)) {
-      foreach ($this->adminScripts as $script) {
-        $src = $this->container->js . '/' . $script[0] . '.js';
-        wp_enqueue_script($script[0], $src, $script[1], $script[2], true);
-      }
-    }
-
-    if (!empty($this->adminAppsScripts)) {
-      foreach ($this->adminAppsScripts as $script) {
-        $src = $this->container->apps . '/' . $script[0] . '.js';
-        wp_enqueue_script($script[0], $src, $script[1], $script[2], true);
-      }
-    }
-
-    if (!empty($this->localizeScripts)) {
-      foreach ($this->localizeScripts as $script) {
-        wp_localize_script($script[0], $script[1], $script[2]);
-      }
-    }
-  }
-
-  protected function admin_print_styles()
-  {
-    if (!empty($this->adminStyles)) {
-      foreach ($this->adminStyles as $style) {
-        $src = $this->container->css . '/' . $style[0] . '.css';
-        wp_enqueue_style($style[0], $src, $style[1], $style[2]);
-      }
-    }
-
-    if (!empty($this->adminAppsModules)) {
-      foreach ($this->adminAppsModules as $script) {
-        $src = $this->container->apps . '/' . $script[0] . '.css';
-        wp_enqueue_style($script[0], $src);
-      }
-    }
-  }
-
-  protected function wp_enqueue_scripts()
-  {
-    if (!empty($this->scripts)) {
-      foreach ($this->scripts as $script) {
-        $src = $this->container->js . '/' . $script[0] . '.js';
-        wp_enqueue_script($script[0], $src, $script[1], $script[2], true);
-      }
-    }
-
-    if (!empty($this->localizeScripts)) {
-      foreach ($this->localizeScripts as $script) {
-        wp_localize_script($script[0], $script[1], $script[2]);
-      }
-    }
-  }
-
-  protected function wp_print_styles()
-  {
-    if (!empty($this->styles)) {
-      foreach ($this->styles as $style) {
-        $src = $this->container->css . '/' . $style[0] . '.css';
-        wp_enqueue_style($style[0], $src, $style[1], $style[2]);
-      }
-    }
-  }
-
-  /**
-   * Get the filename.
-   *
-   * @return string
-   */
-  protected function filename(): string
-  {
-    // This is for backward compatibility with view that not use blade.
-    $exts = ['.blade.php', '.php'];
-
-    foreach ($exts as $ext) {
-      if (
-        file_exists($this->container->getBasePath() . '/resources/views/' . str_replace('.', '/', $this->key) . $ext)
-      ) {
-        return str_replace('.', '/', $this->key) . $ext;
-      }
-    }
-
-    return str_replace('.', '/', $this->key) . '.php';
   }
 
   /**
@@ -252,17 +182,56 @@ class View
   }
 
   /**
-   * Attach a new script to localize.
+   * Adds a new Localizes a script.
    *
-   * @param string $handle Name of script.
-   * @param string $name   Name of the variable.
-   * @param array  $data   Data to pass.
+   * @param string $handle Script handle the data will be attached to.
+   * @param string $name   Name for the JavaScript object
+   * @param array  $l10n   The data itself. The data can be either a single or multi-dimensional array.
    *
    * @return $this
    */
-  public function withLocalizeScripts($handle, $name, $data): View
+  public function withLocalizeScript($handle, $name, $l10n): View
   {
-    $this->localizeScripts[] = [$handle, $name, $data];
+    $this->localizeScripts[] = [$handle, $name, $l10n];
+
+    return $this;
+  }
+
+  public function withLocalizeScripts($handle, $name, $l10n): View
+  {
+    _deprecated_function(__METHOD__, '1.6.0', 'withLocalizeScript()');
+
+    return $this->withLocalizeScript($handle, $name, $l10n);
+  }
+
+  /**
+   * Adds extra code to a registered script.
+   *
+   * @param string $name      Name of the script will be attached to.
+   * @param string $data      String containing the JavaScript to be added.
+   * @param string $position  Optional. Whether to add the inline script before the handle
+   *                          or after. Default 'after'.
+   *
+   * @return $this
+   */
+  public function withInlineScript($name, $data, $position = 'after'): View
+  {
+    $this->inlineScripts[] = [$name, $data, $position];
+
+    return $this;
+  }
+
+  /**
+   * Adds extra style to a registered style.
+   *
+   * @param string $name      Name of the script will be attached to.
+   * @param string $data      String containing the JavaScript to be added.
+   *
+   * @return $this
+   */
+  public function withInlineStyle($name, $data): View
+  {
+    $this->inlineStyles[] = [$name, $data];
 
     return $this;
   }
@@ -276,11 +245,18 @@ class View
    *
    * @return $this
    */
-  public function withAdminStyles($name, $deps = [], $ver = []): View
+  public function withAdminStyle($name, $deps = [], $ver = []): View
   {
     $this->adminStyles[] = [$name, $deps, $ver];
 
     return $this;
+  }
+
+  public function withAdminStyles($name, $deps = [], $ver = []): View
+  {
+    _deprecated_function(__METHOD__, '1.6.0', 'withAdminStyle()');
+
+    return $this->withAdminStyle($name, $deps, $ver);
   }
 
   /**
@@ -292,24 +268,31 @@ class View
    *
    * @return $this
    */
-  public function withAdminScripts($name, $deps = [], $ver = []): View
+  public function withAdminScript($name, $deps = [], $ver = []): View
   {
     $this->adminScripts[] = [$name, $deps, $ver];
 
     return $this;
   }
 
+  public function withAdminScripts($name, $deps = [], $ver = []): View
+  {
+    _deprecated_function(__METHOD__, '1.6.0', 'withAdminScript()');
+
+    return $this->withAdminScript($name, $deps, $ver);
+  }
+
   /**
    * Load new Javascript (React bundle) resource in admin area.
    *
-   * @param string $name Name of script.
-   * @param bool   $module Optional. There is a module css.
-   * @param string $variabile  Optional. Name of the variable.
-   * @param array  $data   Optional. Data to pass.
+   * @param string $name      Script handle the data will be attached to.
+   * @param bool   $module    Optional. There is a module css.
+   * @param string $variabile Optional. Name for the JavaScript object
+   * @param array  $data      Optional. The data itself. The data can be either a single or multi-dimensional array.
    */
-  public function withAdminAppsScripts($name, $module = true, $variabile = '', $data = []): View
+  public function withAdminAppsScript($name, $module = true, $variabile = '', $data = []): View
   {
-    ['dependencies' => $deps, 'version' => $ver] = @include $this->container->getBasePath() .
+    ['dependencies' => $deps, 'version' => $ver] = @include $this->container->basePath .
       '/public/apps/' .
       $name .
       '.asset.php';
@@ -329,8 +312,15 @@ class View
     return $this;
   }
 
+  public function withAdminAppsScripts($name, $deps = [], $ver = []): View
+  {
+    _deprecated_function(__METHOD__, '1.6.0', 'withAdminAppsScript()');
+
+    return $this->withAdminAppsScript($name, $deps, $ver);
+  }
+
   /**
-   * Load a new css resource in frontend.
+   * Load a new css resource in theme.
    *
    * @param string $name Name of style.
    * @param array  $deps Optional. Array of slug deps
@@ -346,7 +336,7 @@ class View
   }
 
   /**
-   * Load a new css resource in front-end.
+   * Load a new css resource in theme.
    *
    * @param string $name Name of script.
    * @param array  $deps Optional. Array of slug deps
@@ -380,5 +370,119 @@ class View
     }
 
     return $this;
+  }
+
+  /**
+   * Enqueue scripts in the admin area.
+   * This method is called only if the view is rendered in the admin area.
+   * @see View::render()
+   */
+  protected function admin_enqueue_scripts()
+  {
+    if (!empty($this->adminScripts)) {
+      foreach ($this->adminScripts as $script) {
+        $src = $this->container->js . '/' . $script[0] . '.js';
+        wp_enqueue_script($script[0], $src, $script[1], $script[2], true);
+      }
+    }
+
+    if (!empty($this->adminAppsScripts)) {
+      foreach ($this->adminAppsScripts as $script) {
+        $src = $this->container->apps . '/' . $script[0] . '.js';
+        wp_enqueue_script($script[0], $src, $script[1], $script[2], true);
+        wp_set_script_translations($script[0], $this->container->TextDomain, $this->container->basePath . '/' . $this->container->DomainPath);
+      }
+    }
+
+    if (!empty($this->localizeScripts)) {
+      foreach ($this->localizeScripts as $script) {
+        wp_localize_script($script[0], $script[1], $script[2]);
+      }
+    }
+  }
+
+  /**
+   * Enqueue styles in the admin area.
+   * This method is called only if the view is rendered in the admin area.
+   * @see View::render()
+   */
+  protected function admin_print_styles()
+  {
+    if (!empty($this->adminStyles)) {
+      foreach ($this->adminStyles as $style) {
+        $src = $this->container->css . '/' . $style[0] . '.css';
+        wp_enqueue_style($style[0], $src, $style[1], $style[2]);
+      }
+    }
+
+    if (!empty($this->adminAppsModules)) {
+      foreach ($this->adminAppsModules as $script) {
+        $src = $this->container->apps . '/' . $script[0] . '.css';
+        wp_enqueue_style($script[0], $src);
+      }
+    }
+  }
+
+  /**
+   * Enqueue scripts in the theme.
+   * This method is called only if the view is rendered in the theme.
+   * @see View::render()
+   */
+  protected function wp_enqueue_scripts()
+  {
+    if (!empty($this->scripts)) {
+      foreach ($this->scripts as $script) {
+        $src = $this->container->js . '/' . $script[0] . '.js';
+        wp_enqueue_script($script[0], $src, $script[1], $script[2], true);
+      }
+    }
+
+    if (!empty($this->localizeScripts)) {
+      foreach ($this->localizeScripts as $script) {
+        wp_localize_script($script[0], $script[1], $script[2]);
+      }
+    }
+
+    if (!empty($this->inlineScripts)) {
+      foreach ($this->inlineScripts as $script) {
+        wp_add_inline_script($script[0], $script[1], $script[2]);
+      }
+    }
+  }
+
+  /**
+   * Enqueue styles in the theme.
+   * This method is called only if the view is rendered in the theme.
+   * @see View::render()
+   */
+  protected function wp_print_styles()
+  {
+    if (!empty($this->styles)) {
+      foreach ($this->styles as $style) {
+        $src = $this->container->css . '/' . $style[0] . '.css';
+        wp_enqueue_style($style[0], $src, $style[1], $style[2]);
+      }
+    }
+  }
+
+  /**
+   * Get the filename.
+   *
+   * @return string
+   */
+  protected function filename(): string
+  {
+    // This is for backward compatibility with view that not use blade.
+    $exts = ['.blade.php', '.php'];
+
+    foreach ($exts as $ext) {
+      if (
+        file_exists($this->container->basePath . '/resources/views/' . str_replace('.', '/', $this->key) . $ext)
+      ) {
+        return str_replace('.', '/', $this->key) . $ext;
+      }
+    }
+
+    return str_replace('.', '/', $this->key) . '.php';
   }
 }

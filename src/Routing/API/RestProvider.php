@@ -48,7 +48,7 @@ class RestProvider extends ServiceProvider
   private function initCustomRoutes()
   {
     if (true === $this->config('custom.enabled', false)) {
-      $folder = $this->plugin->getBasePath() . $this->config('custom.path', '/api');
+      $folder = $this->plugin->basePath . $this->config('custom.path', '/api');
 
       $api_folder_exists = file_exists($folder);
 
@@ -72,7 +72,7 @@ class RestProvider extends ServiceProvider
     $contents = [];
 
     foreach (scandir($dir) as $node) {
-      if ($node == '.' || $node == '..'||$node==".DS_Store") {
+      if ($node == '.' || $node == '..' || $node == ".DS_Store") {
         continue;
       }
       if (is_dir($dir . '/' . $node)) {

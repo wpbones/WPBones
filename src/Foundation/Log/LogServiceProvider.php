@@ -90,7 +90,7 @@ class LogServiceProvider extends ServiceProvider
     }
 
     // the plugin path
-    $pluginPath = $plugin->getBasePath();
+    $pluginPath = $plugin->basePath;
 
     // default log storage folder
     $logFolder = "{$pluginPath}/storage/logs/";

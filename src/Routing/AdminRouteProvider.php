@@ -24,7 +24,7 @@ class AdminRouteProvider extends ServiceProvider
   {
     global $admin_page_hooks, $_registered_pages, $_parent_pages;
 
-    $pages = include_once "{$this->plugin->getBasePath()}/config/routes.php";
+    $pages = include_once "{$this->plugin->basePath}/config/routes.php";
 
     if (!empty($pages) && is_array($pages)) {
       foreach ($pages as $page_slug => $page) {

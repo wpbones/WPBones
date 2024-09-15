@@ -58,7 +58,7 @@ class PageProvider extends ServiceProvider
     global $admin_page_hooks, $_registered_pages, $_parent_pages;
 
     // the main path for the custom pages
-    $folder_pages = $this->plugin->getBasePath() . '/pages';
+    $folder_pages = $this->plugin->basePath . '/pages';
 
     $folder_pages_exists = file_exists($folder_pages);
 
