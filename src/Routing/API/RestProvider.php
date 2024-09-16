@@ -72,7 +72,7 @@ class RestProvider extends ServiceProvider
     $contents = [];
 
     foreach (scandir($dir) as $node) {
-      if ($node == '.' || $node == '..') {
+      if ($node == '.' || $node == '..'||$node==".DS_Store") {
         continue;
       }
       if (is_dir($dir . '/' . $node)) {
