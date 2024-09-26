@@ -351,7 +351,7 @@ abstract class HtmlTag
     // html tag attributes
     $stack = [];
     foreach ($this->attributes as $attribute => $value) {
-      if (!is_null($value)) {
+      if (!is_null($value) && !is_array($value)) {
         $stack[] = sprintf('%s="%s"', $attribute, htmlspecialchars(stripslashes($value)));
       }
     }

@@ -1,5 +1,20 @@
 # Release Notes for 1.6.x
 
+## 1.6.1 - September 25, 2024
+
+### ✨ Added
+
+- Added a new WP Bones helper function `wpbones_flatten_and_uniquify()` to flatten and uniquify the array.
+
+### 🐛 Fixed
+
+- Fixed the `select()`fluent method in the `HTML::select()` component to work with the `multiple` attribute. Now you can pass a comma separated string to the `selected` attribute as well as an array.
+- Fixed the Eloquent documentation link in the `README.md` file.
+
+### 💎 Changed and Improved
+
+- Removed the files list change in the `php bones update` command.
+
 ## 1.6.0 - September 24, 2024
 
 ### ✨ Added

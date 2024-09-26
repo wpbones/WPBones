@@ -28,40 +28,41 @@ class HtmlTagSelect extends HtmlTag
    *
    * @var array
    */
-  protected $markup = [ '<select', '</select>' ];
+  protected $markup = ['<select', '</select>'];
 
   private $_options = null;
 
-  public function html(  )
+  public function html()
   {
-    if( !is_null( $this->_options ) ) {
+    if (!is_null($this->_options)) {
       $items = $this->_options;
 
       $stack = [];
-      foreach ( $items as $key => $value ) {
-        $option = new HtmlTagOption( $value );
-        if ( is_string( $key ) ) {
+      $flattenedSelected = is_null($this->selected) ? [] : wpbones_flatten_and_uniquify($this->selected);
+
+      foreach ($items as $key => $value) {
+        $option = new HtmlTagOption($value);
+        if (is_string($key)) {
           $option->value = $key;
         }
 
-        if ( ! is_null( $this->selected ) && $this->selected == $key ) {
+        if (in_array($key, $flattenedSelected)) {
           $option->selected = 'selected';
         }
 
         $stack[] = $option->html();
       }
 
-      $this->content = implode( '', $stack );
+      $this->content = implode('', $stack);
     }
 
     return parent::html();
   }
 
-  public function options( $items )
+  public function options($items)
   {
     $this->_options = $items;
 
     return $this;
   }
-
 }
