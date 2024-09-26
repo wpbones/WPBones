@@ -328,11 +328,18 @@ class View
    *
    * @return $this
    */
-  public function withStyles($name, $deps = [], $ver = []): View
+  public function withStyle($name, $deps = [], $ver = []): View
   {
     $this->styles[] = [$name, $deps, $ver];
 
     return $this;
+  }
+
+  public function withStyles($name, $deps = [], $ver = []): View
+  {
+    _deprecated_function(__METHOD__, '1.6.1', 'withStyle()');
+
+    return $this->withStyle($name, $deps, $ver);
   }
 
   /**
@@ -344,11 +351,18 @@ class View
    *
    * @return $this
    */
-  public function withScripts($name, $deps = [], $ver = []): View
+  public function withScript($name, $deps = [], $ver = []): View
   {
     $this->scripts[] = [$name, $deps, $ver];
 
     return $this;
+  }
+
+  public function withScripts($name, $deps = [], $ver = []): View
+  {
+    _deprecated_function(__METHOD__, '1.6.1', 'withScript()');
+
+    return $this->withScript($name, $deps, $ver);
   }
 
   /**
@@ -399,6 +413,12 @@ class View
         wp_localize_script($script[0], $script[1], $script[2]);
       }
     }
+
+    if (!empty($this->inlineScripts)) {
+      foreach ($this->inlineScripts as $script) {
+        wp_add_inline_script($script[0], $script[1], $script[2]);
+      }
+    }
   }
 
   /**
@@ -419,6 +439,12 @@ class View
       foreach ($this->adminAppsModules as $script) {
         $src = $this->container->apps . '/' . $script[0] . '.css';
         wp_enqueue_style($script[0], $src);
+      }
+    }
+
+    if (!empty($this->inlineStyles)) {
+      foreach ($this->inlineStyles as $style) {
+        wp_add_inline_style($style[0], $style[1]);
       }
     }
   }
@@ -461,6 +487,12 @@ class View
       foreach ($this->styles as $style) {
         $src = $this->container->css . '/' . $style[0] . '.css';
         wp_enqueue_style($style[0], $src, $style[1], $style[2]);
+      }
+    }
+
+    if (!empty($this->inlineStyles)) {
+      foreach ($this->inlineStyles as $style) {
+        wp_add_inline_style($style[0], $style[1]);
       }
     }
   }

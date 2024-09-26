@@ -207,6 +207,8 @@ if (!function_exists('wpbones_provider')) {
    *
    * @param string  $name The Class name of the provider.
    *
+   * @since 1.6.0
+   *
    * @return mixed|null
    */
   function wpbones_provider($provider)
@@ -225,6 +227,9 @@ if (!function_exists('wpbones_flatten_and_uniquify')) {
    *
    * @param array|string $input The input to be flattened and uniquified.
    *                            Can be a multi-dimensional array or a comma-separated string.
+   *
+   * @since 1.6.1
+
    * @return array A flat array with unique values.
    */
   function wpbones_flatten_and_uniquify($input): array

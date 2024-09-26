@@ -456,7 +456,7 @@ namespace Bones {
   define('WPBONES_MINIMAL_PHP_VERSION', '7.4');
 
   /* MARK: The WP Bones command line version. */
-  define('WPBONES_COMMAND_LINE_VERSION', '1.6.0');
+  define('WPBONES_COMMAND_LINE_VERSION', '1.6.1');
 
   use Bones\SemVer\Exceptions\InvalidVersionException;
   use Bones\SemVer\Version;
@@ -718,27 +718,35 @@ namespace Bones {
     protected function wpCliInfoHelp()
     {
       if ($this->wpCliVersion) {
-        $this->info("WP-CLI version: {$this->wpCliVersion}\n");
+        $this->info("→ WP-CLI version: {$this->wpCliVersion}");
       } else {
-        $this->warning("WP-CLI not found: we recommend to install it globally - https://wp-cli.org/#installing\n");
+        $this->warning("⚠️ WP-CLI not found: we recommend to install it globally - https://wp-cli.org/#installing\n");
       }
     }
 
     /** Display the full help. */
     protected function help()
     {
-      echo '
-  o       o o--o      o--o
-  |       | |   |     |   |
-  o   o   o O--o      O--o  o-o o-o  o-o o-o
-   \ / \ /  |         |   | | | |  | |-\'  \
-    o   o   o         o--o  o-o o  o o-o o-o
+      $colorCodes = [
+        [51, 45, 39, 33, 27, 21],
+        [249, 248, 247, 246, 245, 244],
+        [88, 89, 90, 91, 92, 93],
+        [76, 82, 46, 40, 34, 28],
+        [201, 200, 199, 198, 197, 196],
+        [243, 242, 241, 240, 239, 238]
+      ];
+      $colorCode = $colorCodes[rand(0, count($colorCodes) - 1)];
 
-    ';
+      echo "\n\033[38;5;{$colorCode[0]}m██╗    ██╗██████╗     ██████╗  ██████╗ ███╗   ██╗███████╗███████╗\033[0m\n";
+      echo "\033[38;5;{$colorCode[1]}m██║    ██║██╔══██╗    ██╔══██╗██╔═══██╗████╗  ██║██╔════╝██╔════╝\033[0m\n";
+      echo "\033[38;5;{$colorCode[2]}m██║ █╗ ██║██████╔╝    ██████╔╝██║   ██║██╔██╗ ██║█████╗  ███████╗\033[0m\n";
+      echo "\033[38;5;{$colorCode[3]}m██║███╗██║██╔═══╝     ██╔══██╗██║   ██║██║╚██╗██║██╔══╝  ╚════██║\033[0m\n";
+      echo "\033[38;5;{$colorCode[4]}m╚███╔███╔╝██║         ██████╔╝╚██████╔╝██║ ╚████║███████╗███████║\033[0m\n";
+      echo "\033[38;5;{$colorCode[5]}m ╚══╝╚══╝ ╚═╝         ╚═════╝  ╚═════╝ ╚═╝  ╚═══╝╚══════╝╚══════╝\033[0m\n";
 
-      $this->info("\nBones Version " . self::VERSION . "\n");
+      $this->line("                        Bones Version " . self::VERSION . "\n");
       $this->wpCliInfoHelp();
-      $this->info('Current plugin filename, name and namespace:');
+      $this->info('→ Current Plugin Filename, Name, Namespace:', false);
       $this->line(" '{$this->getMainPluginFile()}', '{$this->getPluginName()}', '{$this->getNamespace()}'\n");
       $this->info('Usage:');
       $this->line(" command [options] [arguments]\n");
@@ -755,6 +763,7 @@ namespace Bones {
       $this->line(' tinker                  Interact with your application');
       $this->line(' update                  Update the Framework');
       $this->line(' version                 Update the Plugin version');
+      $this->line(' plugin                  Perform plugin operations');
       $this->info('migrate');
       $this->line(' migrate:create          Create a new Migration');
       $this->info('make');
@@ -796,22 +805,48 @@ namespace Bones {
      * Commodity to display a message in the console.
      *
      * @param string $str The message to display.
+     * @param bool $newLine Optional. Whether to add a new line at the end.
      */
-    protected function info(string $str)
+    protected function info(string $str, $newLine = true)
     {
       echo "\033[38;5;213m" . $str;
-      echo "\033[0m\n";
+      echo "\033[0m";
+      echo $newLine ? "\n" : '';
     }
 
     /**
      * Commodity to display a message in the console.
      *
      * @param string $str The message to display.
+     * @param bool $newLine Optional. Whether to add a new line at the end.
      */
-    protected function line(string $str)
+    protected function line(string $str, $newLine = true)
     {
       echo "\033[38;5;82m" . $str;
-      echo "\033[0m\n";
+      echo "\033[0m";
+      echo $newLine ? "\n" : '';
+    }
+
+    /* Commodity to display an error message in the console. */
+    protected function error(string $str, $newLine = true)
+    {
+      echo "\033[41m";
+      echo $newLine ? "\n" : '';
+      echo "\033[41;255m" . $str;
+      echo $newLine ? "\n" : '';
+      echo "\033[0m";
+      echo $newLine ? "\n" : '';
+    }
+
+    /* Commodity to display an info message in the console. */
+    protected function warning(string $str, $newLine = true)
+    {
+      echo "\e[31m";
+      echo $newLine ? "\n" : '';
+      echo  $str;
+      echo $newLine ? "\n" : '';
+      echo "\e[0m";
+      echo $newLine ? "\n" : '';
     }
 
     /**
@@ -988,8 +1023,8 @@ namespace Bones {
       ]);
 
       // change namespace
+      $this->line("🚧 Loading and process files...");
       foreach ($files as $file) {
-        $this->line("🚧 Loading and process {$file}...");
 
         $content = file_get_contents($file);
 
@@ -1023,17 +1058,20 @@ namespace Bones {
         }
 
         file_put_contents($file, $content);
-
-        $this->info("✅ {$file} content renamed completed!");
       }
+      $this->info("✅ Content renamed completed!");
 
-      foreach (glob('localization/*') as $file) {
-        $newFile = str_replace(
-          $this->getPluginId($search_plugin_name),
-          $this->getPluginId($plugin_name),
-          $file
-        );
-        rename($file, $newFile);
+      $folder = $this->getDomainPath();
+
+      if (!empty($folder) && is_dir($folder)) {
+        foreach (glob($folder . '/*') as $file) {
+          $newFile = str_replace(
+            $this->getPluginId($search_plugin_name),
+            $this->getPluginId($plugin_name),
+            $file
+          );
+          rename($file, $newFile);
+        }
       }
 
       foreach (glob('resources/assets/js/*') as $file) {
@@ -1306,6 +1344,72 @@ namespace Bones {
     }
 
     /**
+     * Extracts the first comment block from a PHP file.
+     *
+     * @return string The first comment block found, or an empty string if none found.
+     */
+    public function extractHeader(): string
+    {
+      $filePath = $this->getMainPluginFile();
+
+      // Ensure the file exists
+      if (!file_exists($filePath)) {
+        return ''; // File doesn't exist
+      }
+
+      // Read the first 8KB of the file
+      $content = file_get_contents($filePath, false, null, 0, 8192);
+
+      if ($content === false) {
+        return ''; // File couldn't be read
+      }
+
+      // Use a regular expression to find the first comment block
+      if (preg_match('/\/\*\*.*?\*\//s', $content, $matches)) {
+        return $matches[0];
+      }
+
+      return ''; // No comment block found
+    }
+
+    /**
+     * Extracts specified fields from a WordPress plugin file header.
+     *
+     * @param string|array ...$fields Field(s) to extract. Can be a string, an array, or multiple string arguments.
+     * @return array An associative array of extracted fields and their values.
+     */
+    public function extractPluginHeaderInfo(...$fields): array
+    {
+      $filePath = $this->getMainPluginFile();
+
+      // Flatten and unique the fields array
+      $fields = array_unique(array_merge(...array_map(function ($field) {
+        return is_array($field) ? $field : [$field];
+      }, $fields)));
+
+      // Read the first 8KB of the file
+      $content = file_get_contents($filePath, false, null, 0, 8192);
+
+      if ($content === false) {
+        return []; // File couldn't be read
+      }
+
+      $result = [];
+
+      foreach ($fields as $field) {
+        // Escape the field name for use in regex
+        $escapedField = preg_quote($field, '/');
+
+        // Use a regular expression to find the field
+        if (preg_match("/^[ \t\/*#@]*{$escapedField}:[ \t]*(.+)$/m", $content, $matches)) {
+          $result[$field] = trim($matches[1]);
+        }
+      }
+
+      return $result;
+    }
+
+    /**
      * Return the CamelCase plugin name.
      * Used for Namespace
      *
@@ -1359,25 +1463,7 @@ namespace Bones {
       return $line ?: $default;
     }
 
-    /**
-     * Commodity to display an error message in the console.
-     *
-     * @param string $str The message to display.
-     */
-    protected function error(string $str)
-    {
-      echo "\033[41m\n";
-      echo "\033[41;255m" . $str . "\n";
-      echo "\033[0m\n";
-    }
 
-    /* Commodity to display an info message in the console. */
-    protected function warning(string $str)
-    {
-      echo "\e[31m\n";
-      echo  $str . "\n";
-      echo "\e[0m\n";
-    }
 
     /* Alias composer dump-autoload */
     protected function optimize()
@@ -1461,6 +1547,9 @@ namespace Bones {
       elseif ($this->isCommand('version')) {
         $this->version($this->commandParams());
       } // migrate:create {table_name}
+      elseif ($this->isCommand('plugin')) {
+        $this->plugin($this->commandParams());
+      } // migrate:create {table_name}
       elseif ($this->isCommand('migrate:create')) {
         $this->createMigrate($this->commandParams(0));
       } // make:controller {controller_name}
@@ -1521,8 +1610,6 @@ namespace Bones {
       $index = $argv[0] !== '--wp' ? 1 : 0;
       $is_wp_org = array_key_exists($index, $argv) && $argv[$index] === '--wp';
 
-      $this->info("\nStarting deploy ¯\_(ツ)_/¯\n");
-
       $path = rtrim($path, '/');
 
       if (empty($path)) {
@@ -1535,6 +1622,8 @@ namespace Bones {
         $this->info("  [--wp]\tYou are going to release this plugin in the WordPress.org public repository.");
         exit(0);
       }
+
+      $this->info("\nStarting deploy ¯\_(ツ)_/¯\n");
 
       if (!empty($path)) {
 
@@ -1980,6 +2069,78 @@ namespace Bones {
       }
 
       $this->line("\nVersion is already {$version}");
+    }
+
+    /**
+     * Plugin actions
+     *
+     * @since 1.6.1
+     */
+    protected function plugin($args)
+    {
+      if ($this->isHelp()) {
+        $this->info('Usage:');
+        $this->line(' php bones plugin [options]');
+        $this->info('Available options:');
+        $this->line(' --check-header              Check the plugin header');
+        exit();
+      }
+
+      if (isset($args[0]) && '--check-header' === $args[0]) {
+        return $this->checkPluginHeader();
+      }
+
+      echo $this->extractHeader() . "\n";
+    }
+
+    /**
+     * Check the plugin header
+     *
+     * @since 1.6.1
+     */
+    protected function checkPluginHeader()
+    {
+      $headerKeys = [
+        'Plugin Name',
+        'Version',
+        'Author',
+        'Author URI',
+        'Description',
+        'Text Domain',
+        'Domain Path',
+        'Network',
+        'Requires at least',
+        'Requires PHP',
+        'License',
+        'License URI',
+        'GitHub Plugin URI',
+        'GitHub Branch',
+      ];
+      $header = $this->extractPluginHeaderInfo($headerKeys);
+
+      foreach ($headerKeys as $key) {
+        if (isset($header[$key])) {
+          echo '✅ ' . $key . ': ';
+          $this->info($header[$key]);
+        } else {
+          $this->warning('👀 ' . $key . ': ', false);
+          $this->error(" Not found \n", false);
+        }
+      }
+    }
+
+    /**
+     * Help method to get the Domain Path from the plugin header
+     *
+     * @return string|null
+     */
+    protected function getDomainPath()
+    {
+      $header = $this->extractPluginHeaderInfo('Domain Path');
+      if (isset($header['Domain Path'])) {
+        return $header['Domain Path'];
+      }
+      return null;
     }
 
     /**

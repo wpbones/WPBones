@@ -1,19 +1,29 @@
 # Release Notes for 1.6.x
 
-## 1.6.1 - September 25, 2024
+## 1.6.1 - September 27, 2024
 
 ### ✨ Added
 
-- Added a new WP Bones helper function `wpbones_flatten_and_uniquify()` to flatten and uniquify the array.
-
-### 🐛 Fixed
-
-- Fixed the `select()`fluent method in the `HTML::select()` component to work with the `multiple` attribute. Now you can pass a comma separated string to the `selected` attribute as well as an array.
-- Fixed the Eloquent documentation link in the `README.md` file.
+- Added a new WP Bones helper function [`wpbones_flatten_and_uniquify()`](https://wpbones.vercel.app/docs/helpers#wpbones_checked) to flatten and uniquify the array.
+- Added a new `php bones plugin` command to display the plugin header and perform plugin related operations.
+- Added a new `php bones plugin --check-header` command to check the plugin header.
 
 ### 💎 Changed and Improved
 
-- Removed the files list change in the `php bones update` command.
+- Revamped the `php bones` command intro message.
+- Removed verbose file listing during the `php bones update` command.
+- Improved documentation for enhanced clarity and usability
+
+### 🐛 Fixed
+
+- Fixed the `select()` fluent method in the `HTML::select()` component to work with the `multiple` attribute. Now you can pass a comma separated string to the `selected` attribute as well as an array.
+- Fixed the [Eloquent documentation](https://wpbones.vercel.app/docs/DatabaseORM/eloquent-orm#install-eloquent-orm-out-of-the-box).
+- Fixed an issue with the `php bones update` command where it was incorrectly searching for the hardcoded `localization` folder instead of using the `Domain Path` value from the plugin header.
+- Fixed an issue in the [`View Class`](https://wpbones.vercel.app/docs/CoreClasses/view) class that prevent that correct enqueueing of the inline scripts and inline styles.
+
+## 💥 Breaking Changes
+
+- Deprecated `withScripts()` and `withStyles()` fluent methods in the [`View Class`](https://wpbones.vercel.app/docs/CoreClasses/view) - use `withScript()` and `withStyle()` instead.
 
 ## 1.6.0 - September 24, 2024
 
