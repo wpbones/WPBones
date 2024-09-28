@@ -38,7 +38,8 @@
 Have a look at the new <a href="https://wpbones.vercel.app">WPBones website and documentation</a>
 </p>
 
-<img width="1127" alt="WP Bones docs" src="https://github.com/user-attachments/assets/e268fcd8-592c-4c21-bf08-94fe01a8113a">
+<img width="100%" alt="WP Bones Website and Documentation" src="https://github.com/user-attachments/assets/20832196-1766-4a3a-81aa-fb4f60128f70">
+
 
 ## 2. Join the Community
 
