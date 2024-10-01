@@ -446,7 +446,7 @@ namespace Bones\SemVer {
 }
 
 /**
- * MARK: Bones
+ * Bones
  *
  * @package Bones
  */
@@ -456,7 +456,7 @@ namespace Bones {
   define('WPBONES_MINIMAL_PHP_VERSION', '7.4');
 
   /* MARK: The WP Bones command line version. */
-  define('WPBONES_COMMAND_LINE_VERSION', '1.6.1');
+  define('WPBONES_COMMAND_LINE_VERSION', '1.6.5');
 
   use Bones\SemVer\Exceptions\InvalidVersionException;
   use Bones\SemVer\Version;
