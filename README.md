@@ -38,7 +38,8 @@
 Have a look at the new <a href="https://wpbones.vercel.app">WPBones website and documentation</a>
 </p>
 
-<img width="100%" alt="WP Bones Website and Documentation" src="https://github.com/user-attachments/assets/20832196-1766-4a3a-81aa-fb4f60128f70">
+<img width="100%" alt="WP Bones Website and Documentation" src="https://github.com/user-attachments/assets/647cfc42-1bc4-45b0-aeb9-f16ff4c95038">
+
 
 
 ## 2. Join the Community
@@ -51,10 +52,4 @@ To participate more actively in discussions and stay updated on proposals and la
 
 <a href="https://github.com/wpbones/wpbones/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=wpbones/wpbones" />
-</a>
-
-### WPKirk Demo
-
-<a href="https://github.com/wpbones/wpkirk/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=wpbones/wpkirk" />
 </a>
