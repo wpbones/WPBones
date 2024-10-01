@@ -111,12 +111,12 @@ class Plugin extends Container implements PluginContract
      *
      * Author = "Giovambattista Fazioli"
      * AuthorName = "Giovambattista Fazioli"
-     * AuthorURI = "https://wpbones.vercel.app/"
+     * AuthorURI = "https://wpbones.com/"
      * Description = "WPKirk is a WP Bones boilerplate plugin"
      * DomainPath = "languages"
      * Name = "WPKirk"
      * Network = false
-     * PluginURI = "https://wpbones.vercel.app/"
+     * PluginURI = "https://wpbones.com/"
      * TextDomain = "wp-kirk"
      * Title = "WPKirk"
      * Version = "1.0.0"

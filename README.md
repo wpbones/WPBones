@@ -35,7 +35,7 @@
 ## 1. Checkout the Website and Docs
 
 <p align="center">
-Have a look at the new <a href="https://wpbones.vercel.app">WPBones website and documentation</a>
+Have a look at the new <a href="https://wpbones.com">WPBones website and documentation</a>
 </p>
 
 <img width="100%" alt="WP Bones Website and Documentation" src="https://github.com/user-attachments/assets/647cfc42-1bc4-45b0-aeb9-f16ff4c95038">

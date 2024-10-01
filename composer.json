@@ -3,7 +3,7 @@
     {
       "name": "Giovambattista Fazioli",
       "email": "wpbones.info@gmail.com",
-      "homepage": "https://wpbones.vercel.app/"
+      "homepage": "https://wpbones.com/"
     }
   ],
   "autoload": {
@@ -15,7 +15,7 @@
     }
   },
   "description": "WordPress framework for Laravel developers",
-  "homepage": "https://wpbones.vercel.app",
+  "homepage": "https://wpbones.com",
   "keywords": [
     "wordpress",
     "laravel",
