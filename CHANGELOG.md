@@ -9,6 +9,7 @@
 ### 💎 Changed and Improved
 
 - Updated the [Logging documentation](https://wpbones.com/docs/CoreConcepts/logging) to reflect the new changes.
+- Updated the [Core Plugin Files documentation](https://wpbones.com/docs/CorePluginFiles/config/config-plugin) to reflect the new changes.
 
 ### 🐛 Fixed
 
