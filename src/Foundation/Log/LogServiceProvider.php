@@ -15,7 +15,7 @@ class LogServiceProvider extends ServiceProvider
    *
    * @var string
    */
-  protected $filename;
+  private $filename;
 
   /**
    * Log complete path.
@@ -30,14 +30,21 @@ class LogServiceProvider extends ServiceProvider
    *
    * @var string
    */
-  protected $log;
+  private $log;
 
   /**
-   * What we can log.
+   * The log path.
    *
    * @var string
    */
-  protected $logLevel;
+  protected $logPath;
+
+  /**
+   * The log daily format.
+   *
+   * @var string
+   */
+  protected $dailyFormat = 'Y-m-d';
 
   /**
    * The Log levels.
@@ -80,34 +87,42 @@ class LogServiceProvider extends ServiceProvider
   {
     parent::__construct($plugin);
 
-    // first check if log is enabled
-    $this->log = $plugin->config('plugin.log');
+    // first check if log storage is enabled
+    $this->log = $plugin->config('plugin.logging.type', 'errorlog');
+    $this->logPath = $plugin->config('plugin.logging.path', "{$plugin->basePath}/storage/logs/");
+    $this->dailyFormat = $plugin->config('plugin.logging.daily_format', 'Y-m-d');
 
-    if (in_array($this->log, [false, 'false', 'FALSE', 'none', 'N', 'n', 'off', 'OFF'])) {
+    // Check if the date format is prefixed with a string
+    if (strpos($this->dailyFormat, '|') !== false) {
+      list($prefix, $date_format) = explode('|', $this->dailyFormat);
+    } else {
+      $prefix = '';
+      $date_format = $this->dailyFormat;
+    }
+    $this->dailyFormat = $prefix . date($date_format);
+
+    // Backward compatibility
+    // if it's not set, check the old config and set the default value
+    if ($this->log === null) {
+      $this->log = $plugin->config('plugin.log', 'errorlog');
+    }
+
+    if (in_array($this->log, [false, 'false', 'FALSE', 'none', 'N', 'n', 'off', 'OFF'], true)) {
       $this->log = false;
 
       return;
     }
 
-    // the plugin path
-    $pluginPath = $plugin->basePath;
-
-    // default log storage folder
-    $logFolder = "{$pluginPath}/storage/logs/";
-
     // create if it doesn't exist
-    if (!file_exists($logFolder)) {
-      mkdir($logFolder, 0777, true);
+    if (!file_exists($this->logPath)) {
+      mkdir($this->logPath, 0777, true);
     }
 
-    // get the minimum log level
-    $this->logLevel = $plugin->config('plugin.log_level');
-
     // get the right filename
-    $this->filename = $this->log == 'single' ? 'debug.log' : date('Y-m-d') . '.log';
+    $this->filename = $this->log == 'single' ? 'debug.log' : $this->dailyFormat . '.log';
 
     // complete log path
-    $this->path = "{$logFolder}{$this->filename}";
+    $this->path = "{$this->logPath}{$this->filename}";
   }
 
   /**
@@ -119,11 +134,6 @@ class LogServiceProvider extends ServiceProvider
    */
   protected function write($level = 'debug', $message = '', $context = [])
   {
-    // if log is disabled, nothing to do
-    if (!$this->log) {
-      return;
-    }
-
     // get the color console
     $color = $this->colors[$level];
 
@@ -142,8 +152,9 @@ class LogServiceProvider extends ServiceProvider
     $eStr = "{$color}[{$l}]: {$message} {$c}\e[0m";
     error_log($eStr);
 
-    if ($this->log !== 'errorlog') {
-      error_log($eStr . PHP_EOL, 3, $this->path);
+    if ($this->log !== false) {
+      $eStrWithDate = '[' . date('d-M-Y H:i:s T') . '] ' . $eStr;
+      error_log($eStrWithDate . PHP_EOL, 3, $this->path);
     }
   }
 

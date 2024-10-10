@@ -1,5 +1,25 @@
 # Release Notes for 1.6.x
 
+## 1.6.6 - October 10, 2024
+
+### ✨ Added
+
+- Added new entry `logging` in `config/plugin.php` file to configure [Logging](https://wpbones.com/docs/CoreConcepts/logging) behavior.
+
+### 💎 Changed and Improved
+
+- Updated the [Logging documentation](https://wpbones.com/docs/CoreConcepts/logging) to reflect the new changes.
+
+### 🐛 Fixed
+
+- Resolved an issue with the `Log` provider that prevented logs from being written to the file and displayed in the console.
+
+## 💥 Breaking Changes
+
+- The `"log"` entry in the `config/plugin.php` file is **deprecated**. Use the new setting `logging` instead.
+- The `"log_level"` entry in the `config/plugin.php` file is **deprecated** as it is no longer used.
+
+
 ## 1.6.5 - October 2, 2024
 
 ### ✨ Added
