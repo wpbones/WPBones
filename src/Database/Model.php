@@ -29,9 +29,9 @@ abstract class Model extends DB
   public function __construct()
   {
     // get the class name
-    $this->table = DB::getTableName($this->table ?? get_called_class());
+    $this->table = DB::getTableName($this->table ?? get_called_class(), $this->usePrefix);
 
-    parent::__construct($this->table, $this->primaryKey);
+    parent::__construct($this->table, $this->primaryKey, $this->usePrefix);
   }
 
   /*

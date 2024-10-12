@@ -23,6 +23,14 @@ abstract class Seeder
   protected $tablename;
 
   /**
+   * Will use the WordPress prefix of the database.
+   *
+   * @since 1.7.0
+   * @var bool
+   */
+  protected $usePrefix = true;
+
+  /**
    * The WordPress database object.
    */
   protected $wpdb;
@@ -49,7 +57,7 @@ abstract class Seeder
       throw new Exception('The tablename property is not set.');
     }
 
-    $this->tablename = DB::getTableName($this->tablename);
+    $this->tablename = DB::getTableName($this->tablename, $this->usePrefix);
 
     if ($this->runOnce && $this->count() > 0) {
       return;

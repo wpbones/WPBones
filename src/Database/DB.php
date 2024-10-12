@@ -23,9 +23,25 @@ class DB
    */
   public $attributes = [];
 
-  public function __construct($table, $primaryKey = 'id')
+  /**
+   * Will use the WordPress prefix of the database.
+   *
+   * @since 1.7.0
+   * @var bool
+   */
+  protected $usePrefix = true;
+
+  /**
+   * Create a new DB model.
+   *
+   * @param string $table The table name.
+   * @param string $primaryKey
+   * @param bool $usePrefix Optional. @since 1.7.0 you can set this to false to not use the WordPress prefix. Default is true.
+   */
+  public function __construct($table, $primaryKey = 'id', $usePrefix = true)
   {
-    $this->queryBuilder = new QueryBuilder($table, $primaryKey);
+    $this->usePrefix = $usePrefix;
+    $this->queryBuilder = new QueryBuilder($table, $primaryKey, $this->usePrefix);
     $this->queryBuilder->setParentModel($this);
   }
 
@@ -53,21 +69,33 @@ class DB
    * Return a WordPress table name with the WordPress prefix.
    *
    * @param string $class
+   * @param string $usePrefix Optional. @since 1.7.0 you can set this to false to not use the WordPress prefix.
+   *                          Default is true.
    * @return string
-   * @example Model::tableName('User') returns 'wp_users'
+   *
+   * @example
+   *          Model::tableName('User') returns 'wp_users'
    *          Model::tableName('WPMyTable') returns 'wp_w_p_my_table'
    *          Model::tableName('WP_MyTable') returns 'wp_w_p_my_table'
    *
+   * @since 1.7.0
+   * If you set the $usePrefix to false, it will not use the WordPress prefix.
+   * @example
+   *          Model::tableName('User', false) returns 'users'
+   *          Model::tableName('WPMyTable', false) returns 'wp_my_table'
+   *          Model::tableName('WP_MyTable', false) returns 'wp_my_table'
+   *
    */
-  public static function getTableName(string $class): string
+  public static function getTableName(string $class, $usePrefix = true): string
   {
     global $wpdb;
 
     $paths = explode('\\', $class);
     $only = array_pop($paths);
     $name = Str::snake(Str::studly($only));
+    $prefix = $usePrefix ? $wpdb->prefix : '';
 
-    return Str::startsWith($name, $wpdb->prefix) ? $name : $wpdb->prefix . $name;
+    return Str::startsWith($name, $prefix) ? $name : $prefix . $name;
   }
 
   /*

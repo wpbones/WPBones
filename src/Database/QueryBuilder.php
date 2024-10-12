@@ -124,12 +124,20 @@ class QueryBuilder
    */
   private $parentModel;
 
-  public function __construct($table, $primaryKey = 'id')
+  /**
+   * The constructor.
+   *
+   * @param string $table The table name.
+   * @param string $primaryKey The primary key column name.
+   * @param bool $usePrefix Optional. @since 1.7.0 - Will use the WordPress prefix of the database. Default is true.
+   * @return void         The QueryBuilder instance.
+   */
+  public function __construct($table, $primaryKey = 'id', $usePrefix = true)
   {
     global $wpdb;
 
     $this->wpdb = $wpdb;
-    $this->table = DB::getTableName($table);
+    $this->table = DB::getTableName($table, $usePrefix);
     $this->primaryKey = $primaryKey;
 
     // init
@@ -137,20 +145,20 @@ class QueryBuilder
   }
 
   /*
-    |--------------------------------------------------------------------------
-    | Magic methods
-    |--------------------------------------------------------------------------
-    |
-    |
-    */
+  |--------------------------------------------------------------------------
+  | Magic methods
+  |--------------------------------------------------------------------------
+  |
+  |
+  */
 
   /*
-    |--------------------------------------------------------------------------
-    | Public methods
-    |--------------------------------------------------------------------------
-    |
-    |
-    */
+  |--------------------------------------------------------------------------
+  | Public methods
+  |--------------------------------------------------------------------------
+  |
+  |
+  */
 
   /**
    * Get the table description.

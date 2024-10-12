@@ -6,7 +6,20 @@ use WPKirk\WPBones\Database\DB;
 
 class Migration
 {
+  /**
+   * The charset collate of the database.
+   *
+   * @var string
+   */
   protected $charsetCollate = 'dummy_charset_collate';
+
+  /**
+   * Will use the WordPress prefix of the database.
+   *
+   * @since 1.7.0
+   * @var bool
+   */
+  protected $usePrefix = true;
 
   /**
    * Create a new Migration.
@@ -27,7 +40,7 @@ class Migration
 
   protected function create($tablename, $schema)
   {
-    $table = DB::getTableName($tablename);
+    $table = DB::getTableName($tablename, $this->usePrefix);
 
     $sql = "CREATE TABLE {$table} {$schema};";
 
