@@ -2671,16 +2671,16 @@ namespace Bones {
 
       if (!empty($path)) {
         $content = str_replace('{Path}', $namespacePath, $content);
-        mkdir("plugin/Http/Controllers/{$path}", 0777, true);
+        mkdir("plugin/Models/{$path}", 0777, true);
       } else {
         $content = str_replace('{Path}', '', $content);
       }
 
       $filename = sprintf('%s.php', $className);
 
-      file_put_contents("plugin/Http/Controllers/{$path}{$filename}", $content);
+      file_put_contents("plugin/Models/{$path}{$filename}", $content);
 
-      $this->line(" Created plugin/Http/Controllers/{$path}{$filename}");
+      $this->line(" Created plugin/Models/{$path}{$filename}");
 
       $this->optimize();
     }
@@ -2725,16 +2725,16 @@ namespace Bones {
 
       if (!empty($path)) {
         $content = str_replace('{Path}', $namespacePath, $content);
-        mkdir("plugin/Http/Controllers/{$path}", 0777, true);
+        mkdir("plugin/Models/{$path}", 0777, true);
       } else {
         $content = str_replace('{Path}', '', $content);
       }
 
       $filename = sprintf('%s.php', $className);
 
-      file_put_contents("plugin/Http/Controllers/{$path}{$filename}", $content);
+      file_put_contents("plugin/Models/{$path}{$filename}", $content);
 
-      $this->line(" Created plugin/Http/Controllers/{$path}{$filename}");
+      $this->line(" Created plugin/Models/{$path}{$filename}");
 
       $this->optimize();
     }

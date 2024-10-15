@@ -5,21 +5,31 @@
 ### ✨ Added
 
 - Added new entry `logging` in `config/plugin.php` file to configure [Logging](https://wpbones.com/docs/CoreConcepts/logging) behavior.
+- Added new `DB::tableWithoutPrefix()` method to query the database table without the table prefix.
+- Added new `$usePrefix` params in the `DB::table()` method to query the database table with or without the table prefix.
+- Added new `$usePrefix`property in the `Model` class to query the database table with or without the table prefix.
+- Added new `$usePrefix`property in the `Migration` class to query the database table with or without the table prefix.
+- Added new `$usePrefix`property in the `Seeder` class to query the database table with or without the table prefix.
+- Added new [WPKirk-Database-Boilerplate](https://github.com/wpbones/WPKirk-Database-Boilerplate) example plugin.
+- Added new [Templates]() section in the documentation.
 
 ### 💎 Changed and Improved
 
 - Updated the [Logging documentation](https://wpbones.com/docs/CoreConcepts/logging) to reflect the new changes.
 - Updated the [Core Plugin Files documentation](https://wpbones.com/docs/CorePluginFiles/config/config-plugin) to reflect the new changes.
+- Database table prefix is now optional in the `DB::table()` method, `Model`, `Migration`, and `Seeder` classes.
+- Updated the [Database](https://wpbones.com/docs/DatabaseORM/eloquent-orm) documentation to reflect the new changes.
+- Updated and improved the [WPKirk Demo]() plugin.
 
 ### 🐛 Fixed
 
 - Resolved an issue with the `Log` provider that prevented logs from being written to the file and displayed in the console.
+- Fixed the `Model` and `Eloquent` model path created by bones command.
 
 ## 💥 Breaking Changes
 
 - The `"log"` entry in the `config/plugin.php` file is **deprecated**. Use the new setting `logging` instead.
 - The `"log_level"` entry in the `config/plugin.php` file is **deprecated** as it is no longer used.
-
 
 ## 1.6.5 - October 2, 2024
 

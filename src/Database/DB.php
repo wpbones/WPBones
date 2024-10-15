@@ -58,11 +58,27 @@ class DB
    *
    * @param string $table The table name.
    * @param string $primaryKey
+   * @param bool $usePrefix Optional. @since 1.7.0 you can set this to false to not use the WordPress prefix. Default is true.
+   *
+   * @see DB::tableWithoutPrefix()
+   *
    * @return DB
    */
-  public static function table(string $table, string $primaryKey = 'id'): DB
+  public static function table(string $table, string $primaryKey = 'id', $usePrefix = true): DB
   {
-    return new static($table, $primaryKey);
+    return new static($table, $primaryKey, $usePrefix);
+  }
+
+  /**
+   * Instantiate a new DB model with the given table name without the WordPress prefix.
+   *
+   * @param string $table The table name.
+   * @param string $primaryKey
+   * @return DB
+   */
+  public static function tableWithoutPrefix(string $table, string $primaryKey = 'id'): DB
+  {
+    return new static($table, $primaryKey, false);
   }
 
   /**

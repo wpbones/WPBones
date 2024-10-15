@@ -1,6 +1,6 @@
 <?php
 
-namespace {Namespace}\Http\Controllers{Path};
+namespace {Namespace}\Models\{Path};
 
 if (! defined('ABSPATH')) {
     exit;
@@ -13,19 +13,25 @@ class {ClassName} extends Model
     /**
      * The table associated with the model.
      *
+     * Uncomment the line below to use a custom table name
+     *
+     * @see https://wpbones.com/docs/DatabaseORM/eloquent-orm
+     *
      * @var string
      */
-    protected $table = '{Table}';
+    // protected $table = '{Table}';
 
     /**
      * Get the table associated with the model.
      *
+     * Uncomment the line below to use the WordPress table prefix
+     *
+     * @see https://wpbones.com/docs/DatabaseORM/eloquent-orm
+     *
      * @return string
-     */
     public function getTable()
     {
-        global $wpdb;
-
-        return $wpdb->prefix . preg_replace('/[[:<:]]' . $wpdb->prefix . '/', '', parent::getTable(), 1);
+      return DB::getTableName('{Table}');
     }
+    */
 }
