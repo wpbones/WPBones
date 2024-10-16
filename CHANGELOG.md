@@ -1,6 +1,6 @@
 # Release Notes for 1.6.x
 
-## 1.6.6 - October 10, 2024
+## 1.7.0 - October 16, 2024
 
 ### ✨ Added
 
@@ -11,7 +11,6 @@
 - Added new `$usePrefix`property in the `Migration` class to query the database table with or without the table prefix.
 - Added new `$usePrefix`property in the `Seeder` class to query the database table with or without the table prefix.
 - Added new [WPKirk-Database-Boilerplate](https://github.com/wpbones/WPKirk-Database-Boilerplate) example plugin.
-- Added new [Templates]() section in the documentation.
 
 ### 💎 Changed and Improved
 
@@ -19,7 +18,7 @@
 - Updated the [Core Plugin Files documentation](https://wpbones.com/docs/CorePluginFiles/config/config-plugin) to reflect the new changes.
 - Database table prefix is now optional in the `DB::table()` method, `Model`, `Migration`, and `Seeder` classes.
 - Updated the [Database](https://wpbones.com/docs/DatabaseORM/eloquent-orm) documentation to reflect the new changes.
-- Updated and improved the [WPKirk Demo]() plugin.
+- Updated and improved the [WPKirk Demo](https://github.com/wpbones/WPKirk) plugin.
 
 ### 🐛 Fixed
 
