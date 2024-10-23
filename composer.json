@@ -34,11 +34,5 @@
     "issues": "https://github.com/wpbones/WPBones/issues",
     "source": "https://github.com/wpbones/WPBones/"
   },
-  "type": "library",
-  "funding": [
-    {
-      "type": "individual",
-      "url": "https://wpbones.com"
-    }
-  ]
+  "type": "library"
 }
