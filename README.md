@@ -39,7 +39,7 @@ To participate more actively in discussions and stay updated on proposals and th
 <div align="center">
 
 [![Twitter](https://img.shields.io/badge/Twitter-%231877F2.svg?style=for-the-badge&logo=x&logoColor=white)](https://twitter.com/wpbonesx) &nbsp;
-[![LinkedIn](https://img.shields.io/badge/Linkedin-%231877F2.svg?style=for-the-badge&logo=Linkedin&logoColor=white)](https://it.linkedin.com/in/wpbones) &nbsp;
+[![LinkedIn](https://img.shields.io/badge/Linkedin-%231877F2.svg?style=for-the-badge&logo=Linkedin&logoColor=white)](https://www.linkedin.com/company/wpbones/) &nbsp;
 [![Discord](https://img.shields.io/badge/Discord-%231877F2.svg?style=for-the-badge&logo=Discord&logoColor=white)](https://discord.com/invite/5bdVyycU8F) &nbsp;
 [![Docs](https://img.shields.io/badge/Docs-%231877F2.svg?style=for-the-badge&logo=readthedocs&logoColor=white)](https://wpbones.com) &nbsp;
 [![Newsletter](https://img.shields.io/badge/substack-%231877F2.svg?style=for-the-badge&logo=substack&logoColor=white)](https://wpbones.substack.com/) &nbsp;
