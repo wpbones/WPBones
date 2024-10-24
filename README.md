@@ -25,7 +25,7 @@
 Have a look at the new <a href="https://wpbones.com">WPBones website and documentation</a>
 </p>
 
-![image](https://github.com/user-attachments/assets/91b06306-688b-4ea2-8591-c9373307d397)
+[![image](https://github.com/user-attachments/assets/91b06306-688b-4ea2-8591-c9373307d397)](https://wpbones.com)
 
   
 </div>
