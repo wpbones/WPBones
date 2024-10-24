@@ -2,9 +2,9 @@
   <img src="https://github.com/wpbones/WPBones/assets/432181/13e0e825-9b0d-44c2-a77d-1baad88a1070" alt="WP Bones Logo" />
 </p>
 
-<h4 align="center">
+<h1 align="center">
   WP Bones allows for WordPress plugins with Laravel-like features
-</h4>
+</h1>
 
 <p align="center">
 
@@ -32,24 +32,38 @@
 
 <hr/>
 
-## 1. Checkout the Website and Docs
+
+<div align="center">
 
 <p align="center">
 Have a look at the new <a href="https://wpbones.com">WPBones website and documentation</a>
 </p>
 
-<img width="100%" alt="WP Bones Website and Documentation" src="https://github.com/user-attachments/assets/647cfc42-1bc4-45b0-aeb9-f16ff4c95038">
+![image](https://github.com/user-attachments/assets/91b06306-688b-4ea2-8591-c9373307d397)
 
+  
+</div>
 
+<div align="center">
+  
+## 📣 Join the community
 
-## 2. Join the Community
+To participate more actively in discussions and stay updated on proposals and the latest releases, please join us at:
 
-To participate more actively in discussions and stay updated on proposals and latest releases, I would be pleased if you joined the [WP Bones community on Discord](https://discord.gg/5bdVyycU8F).
+<div align="center">
 
-## Thanks to Our Contributors
+[![Twitter](https://img.shields.io/badge/Twitter-%231877F2.svg?style=for-the-badge&logo=x&logoColor=white)](https://twitter.com/wpbonesx) &nbsp;
+[![LinkedIn](https://img.shields.io/badge/Linkedin-%231877F2.svg?style=for-the-badge&logo=Linkedin&logoColor=white)](https://it.linkedin.com/in/wpbones) &nbsp;
+[![Discord](https://img.shields.io/badge/Discord-%231877F2.svg?style=for-the-badge&logo=Discord&logoColor=white)](https://discord.com/invite/5bdVyycU8F) &nbsp;
+[![Docs](https://img.shields.io/badge/Docs-%231877F2.svg?style=for-the-badge&logo=readthedocs&logoColor=white)](https://wpbones.com) &nbsp;
+[![Newsletter](https://img.shields.io/badge/substack-%231877F2.svg?style=for-the-badge&logo=substack&logoColor=white)](https://wpbones.substack.com/) &nbsp;
 
-### WPBones
+</div>
+
+## 👏 Thank you to our contributors
 
 <a href="https://github.com/wpbones/wpbones/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=wpbones/wpbones" />
 </a>
+
+</div>
