@@ -1,0 +1,43 @@
+<?php
+
+namespace {Namespace}\Shortcodes;
+
+if (! defined('ABSPATH')) {
+    exit;
+}
+
+use {Namespace}\WPBones\Foundation\WordPressShortcodesServiceProvider as ServiceProvider;
+
+class {ClassName} extends ServiceProvider
+{
+
+  /**
+   * List of registred shortcodes. {shortcode}/method
+   *
+   * @var array
+   */
+  protected $shortcodes = [
+    'my-shortcode' => 'myShortcodeMethod'
+  ];
+
+  /**
+   * Example of shortcode.
+   *
+   * @param array $atts    Optional.Attribute into the shortcode
+   * @param null  $content Optional. HTML content
+   *
+   * @return string
+   */
+  public function myShortcodeMethod( $atts = [ ], $content = null )
+  {
+    // Default values for shortcode
+    $defaults = [
+      'computer' => false,
+    ];
+
+    $atts = shortcode_atts( $defaults, $atts, 'wp_kirk' );
+
+    return 'Computer, engage';
+  }
+
+}

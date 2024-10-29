@@ -456,7 +456,7 @@ namespace Bones {
   define('WPBONES_MINIMAL_PHP_VERSION', '7.4');
 
   /* MARK: The WP Bones command line version. */
-  define('WPBONES_COMMAND_LINE_VERSION', '1.7.0');
+  define('WPBONES_COMMAND_LINE_VERSION', '1.8.0');
 
   use Bones\SemVer\Exceptions\InvalidVersionException;
   use Bones\SemVer\Version;
@@ -753,45 +753,28 @@ namespace Bones {
       $this->info('Available commands:');
       $this->line(' deploy                  Create a deploy version');
       $this->line(' install                 Install a new WP Bones plugin');
-      $this->line(
-        ' optimize                Run composer dump-autoload with -o option'
-      );
-      $this->line(
-        ' rename                  Rename the plugin name and the namespace'
-      );
+      $this->line(' optimize                Run composer dump-autoload with -o option');
+      $this->line(' plugin                  Perform plugin operations');
+      $this->line(' rename                  Rename the plugin name and the namespace');
       $this->line(' require                 Install a WP Bones package');
       $this->line(' tinker                  Interact with your application');
       $this->line(' update                  Update the Framework');
       $this->line(' version                 Update the Plugin version');
-      $this->line(' plugin                  Perform plugin operations');
       $this->info('migrate');
       $this->line(' migrate:create          Create a new Migration');
       $this->info('make');
-      $this->line(
-        ' make:ajax               Create a new Ajax service provider class'
-      );
+      $this->line(' make:ajax               Create a new Ajax service provider class');
       $this->line(' make:api                Create a new API controller class');
-      $this->line(' make:controller         Create a new controller class');
       $this->line(' make:console            Create a new Bones command');
-      $this->line(
-        ' make:cpt                Create a new Custom Post Type service provider class'
-      );
-      $this->line(
-        ' make:ctt                Create a new Custom Taxonomy Type service provider class'
-      );
-      $this->line(
-        ' make:shortcode          Create a new Shortcode service provider class'
-      );
-      $this->line(
-        ' make:provider           Create a new service provider class'
-      );
-      $this->line(
-        ' make:widget             Create a new Widget service provider class'
-      );
+      $this->line(' make:controller         Create a new controller class');
+      $this->line(' make:cpt                Create a new Custom Post Type service provider class');
+      $this->line(' make:ctt                Create a new Custom Taxonomy Type service provider class');
+      $this->line(' make:eloquent-model     Create a new Eloquent database model class');
       $this->line(' make:model              Create a new database model class');
-      $this->line(
-        ' make:eloquent-model     Create a new Eloquent database model class'
-      );
+      $this->line(' make:schedule           Create a new schedule (cron) service provider class');
+      $this->line(' make:shortcode          Create a new Shortcode service provider class');
+      $this->line(' make:provider           Create a new service provider class');
+      $this->line(' make:widget             Create a new Widget service provider class');
 
       if ($this->kernel && $this->kernel->hasCommands()) {
         $this->info('Extensions');
@@ -2432,6 +2415,49 @@ namespace Bones {
 
       $this->info(
         "Remember to add {$className} in the config/plugin.php array in the 'shortcodes' key."
+      );
+    }
+
+    /**
+     * Create a Schedule controller
+     *
+     * @since 1.8.0
+     *
+     * @param string|null $className The class name
+     */
+    protected function createSchedule(?string $className = '')
+    {
+      if ($this->isHelp($className)) {
+        $this->info('Use php bones make:schedule <ClassName>');
+
+        return;
+      }
+
+      // ask className if empty
+      $className = $this->askClassNameIfEmpty($className);
+
+      $filename = sprintf('%s.php', $className);
+
+      // current plugin name and namespace
+      $namespace = $this->getNamespace();
+
+      // stubbing
+      $content = $this->prepareStub('schedule', [
+        '{Namespace}' => $namespace,
+        '{ClassName}' => $className,
+      ]);
+
+      // Create the folder if it doesn't exist
+      if (!is_dir('plugin/Providers')) {
+        mkdir('plugin/Providers', 0777, true);
+      }
+
+      file_put_contents("plugin/Providers/{$filename}", $content);
+
+      $this->line(" Created plugin/Providers/{$filename}");
+
+      $this->info(
+        "Remember to add {$className} in the config/plugin.php array in the 'providers' key."
       );
     }
 
