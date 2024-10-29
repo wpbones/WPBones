@@ -1,35 +1,43 @@
 <?php
 
-namespace {Namespace}\Providers;
+namespace {Namespace}\Shortcodes;
 
 if (! defined('ABSPATH')) {
     exit;
 }
 
-use {Namespace}\WPBones\Foundation\WordPressScheduleServiceProvider as ServiceProvider;
+use {Namespace}\WPBones\Foundation\WordPressShortcodesServiceProvider as ServiceProvider;
 
 class {ClassName} extends ServiceProvider
 {
-  // Hook name - used in the WordPress schedule event
-  protected $hook = '';
-
-  // Recurrence - used in the WordPress schedule event
-  protected $recurrence = 'twicedaily';
-
-  public function boot()
-  {
-    // You may override this method to set the properties
-    // $this->hook = 'schedule_example_event';
-    // $this->recurrence = 'twicedaily';
-  }
 
   /**
-   * Run the scheduled event.
+   * List of registred shortcodes. {shortcode}/method
    *
+   * @var array
    */
-  public function run()
+  protected $shortcodes = [
+    'my-shortcode' => 'myShortcodeMethod'
+  ];
+
+  /**
+   * Example of shortcode.
+   *
+   * @param array $atts    Optional.Attribute into the shortcode
+   * @param null  $content Optional. HTML content
+   *
+   * @return string
+   */
+  public function myShortcodeMethod( $atts = [ ], $content = null )
   {
-    wpbones_logger()->info('Schedule example event triggered');
+    // Default values for shortcode
+    $defaults = [
+      'computer' => false,
+    ];
+
+    $atts = shortcode_atts( $defaults, $atts, 'wp_kirk' );
+
+    return 'Computer, engage';
   }
 
 }

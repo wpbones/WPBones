@@ -1547,6 +1547,9 @@ namespace Bones {
       } // make:shortcode {className}
       elseif ($this->isCommand('make:shortcode')) {
         $this->createShortcode($this->commandParams(0));
+      } // make:schedule {className}
+      elseif ($this->isCommand('make:schedule')) {
+        $this->createSchedule($this->commandParams(0));
       } // make:provider {className}
       elseif ($this->isCommand('make:provider')) {
         $this->createProvider($this->commandParams(0));
