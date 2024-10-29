@@ -248,3 +248,39 @@ if (!function_exists('wpbones_flatten_and_uniquify')) {
     return array_unique($flattened);
   }
 }
+
+if (!function_exists('wpbones_cache')) {
+  /**
+   * Utility to cache a value.
+   * If the cache key exists, the value is returned.
+   * If the cache key does not exist, the value is cached and returned.
+   * If the expire time is 0, the cache key is deleted.
+   * Under the hood, this function uses the WordPress Transients API.
+   *
+   * @param string $key    The cache key.
+   * @param mixed  $value  The value to cache.
+   * @param int    $expire The expiration time in seconds. Default is 12 hours.
+   *
+   * @since 1.8.0
+   *
+   * @return mixed
+   */
+  function wpbones_cache($key, $value, $expire = 12 * HOUR_IN_SECONDS)
+  {
+    // delete the transient if the expire time is 0
+    if ($expire === 0 || $expire === false) {
+      delete_transient($key);
+
+      return $value;
+    }
+
+    $result = get_transient($key);
+
+    if (false === $result) {
+      $result = $value;
+      set_transient($key, $result, $expire);
+    }
+
+    return $result;
+  }
+}
