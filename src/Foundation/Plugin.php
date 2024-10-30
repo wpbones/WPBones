@@ -760,6 +760,21 @@ class Plugin extends Container implements PluginContract
   }
 
   /**
+   * Return the plugin file.
+   * This is an alias of `__FILE__`
+   *
+   * @example /var/www/html/wp-content/plugins/my-plugin/my-plugin.php
+   *
+   * @since 1.8.0
+   *
+   * @return string
+   */
+  protected function getFileAttribute(): string
+  {
+    return $this->file;
+  }
+
+  /**
    * Return the list of classes in a PHP file.
    *
    * @param string $filename A PHP Filename file.
