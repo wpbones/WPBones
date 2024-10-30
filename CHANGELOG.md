@@ -1,12 +1,13 @@
 # Release Notes
 
-## 1.8.0 - October 30, 2024
+## 1.8.0 - November 30, 2024
 
 ### ✨ Added
 
 - Added new `WordPressScheduleServiceProvider` service provider to manage the WordPress cron jobs.
 - Added new [WPKirk-Cron-Boilerplate](https://github.com/wpbones/WPKirk-Cron-Boilerplate) example plugin.
 - Added new `wpbones_cache()` helper function to manage a simple cached data in the WordPress transients.
+- Added new `file` property in the [`Plugin Class`](https://wpbones.com/docs/CoreClasses/plugin) as alias of `__FILE__` constant.
 - Added new `hooks` folder to load all PHP files within it.
 
 ### 💎 Changed and Improved
