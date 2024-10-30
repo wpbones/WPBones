@@ -55,6 +55,9 @@ abstract class WordPressScheduleServiceProvider extends ServiceProvider
     }
 
     add_action($this->hook, [$this, 'run']);
+
+    // Clear the scheduled event on plugin deactivation
+    register_deactivation_hook($this->plugin->file, [$this, '__clear']);
   }
 
   /**
@@ -62,6 +65,20 @@ abstract class WordPressScheduleServiceProvider extends ServiceProvider
    *
    */
   abstract public function run();
+
+  /**
+   * Clear the scheduled event.
+   *
+   * @access private Use `clear()`
+   */
+  public function __clear()
+  {
+    wp_clear_scheduled_hook($this->hook);
+
+    if (method_exists($this, 'clear')) {
+      $this->clear();
+    }
+  }
 
   /**
    * You may override this method
