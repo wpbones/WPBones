@@ -6,50 +6,53 @@ use WPKirk\WPBones\Database\DB;
 
 class Migration
 {
-  /**
-   * The charset collate of the database.
-   *
-   * @var string
-   */
-  protected $charsetCollate = 'dummy_charset_collate';
+    /**
+     * The charset collate of the database.
+     *
+     * @var string
+     */
+    protected $charsetCollate = 'dummy_charset_collate';
 
-  /**
-   * Will use the WordPress prefix of the database.
-   *
-   * @since 1.7.0
-   * @var bool
-   */
-  protected $usePrefix = true;
+    /**
+     * Will use the WordPress prefix of the database.
+     *
+     * @since 1.7.0
+     * @var bool
+     */
+    protected $usePrefix = true;
 
-  /**
-   * Create a new Migration.
-   */
-  public function __construct()
-  {
-    global $wpdb;
+    /**
+     * Create a new Migration.
+     */
+    public function __construct()
+    {
+        global $wpdb;
 
-    $this->charsetCollate = $wpdb->get_charset_collate();
+        $this->charsetCollate = $wpdb->get_charset_collate();
 
-    $this->up();
-  }
+        $this->up();
+    }
 
-  public function up()
-  {
-    // You may override this method on plugin activation
-  }
+    public function up()
+    {
+        // You may override this method on plugin activation
+    }
 
-  protected function create($tablename, $schema)
-  {
-    $table = DB::getTableName($tablename, $this->usePrefix);
+    protected function create($tablename, $schema)
+    {
+        $table = DB::getTableName($tablename, $this->usePrefix);
 
-    $sql = "CREATE TABLE {$table} {$schema};";
+        $sql = "CREATE TABLE {$table} {$schema}";
 
-    require_once ABSPATH . 'wp-admin/includes/upgrade.php';
-    dbDelta($sql);
-  }
+        // add ";" at the end of the string $sql if missing
+        $sql = rtrim($sql, ';') . ';';
 
-  public function down()
-  {
-    // You may override this method on plugin deactivation
-  }
+        require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+        dbDelta($sql);
+    }
+
+    public function down()
+    {
+        // You may override this method on plugin deactivation
+    }
 }
