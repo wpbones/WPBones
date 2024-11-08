@@ -284,3 +284,32 @@ if (!function_exists('wpbones_cache')) {
     return $result;
   }
 }
+
+if (!function_exists('wpbones_modules')) {
+  /**
+   * Import a file from the theme or plugin.
+   *
+   * @param string $file The file to import.
+   *
+   * @return mixed
+   */
+  function wpbones_modules($file)
+  {
+    // append ".php" if not present
+    $file_name = rtrim($file, '.php') . '.php';
+
+    $path = WPKirk()->basePath . '/plugin/modules/' . $file_name;
+
+    return require $path;
+  }
+}
+
+if (!function_exists('import')) {
+  /**
+   * Alias of wpbones_modules()
+   */
+  function import($file)
+  {
+    return wpbones_modules($file);
+  }
+}

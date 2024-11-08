@@ -528,12 +528,12 @@ class Plugin extends Container implements PluginContract
 
     // Load all available hooks
     // @since 1.8.0
-    if (is_dir($this->basePath . '/plugins/hooks/')) {
+    if (is_dir($this->basePath . '/plugin/hooks')) {
       array_map(function ($file) {
         if (!is_dir($file)) {
           require_once $file;
         }
-      }, glob($this->basePath . '/plugins/hooks/' . '*.php', GLOB_MARK));
+      }, glob($this->basePath . '/plugin/hooks/' . '*.php', GLOB_MARK));
     }
   }
 
