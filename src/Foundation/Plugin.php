@@ -479,10 +479,27 @@ class Plugin extends Container implements PluginContract
    *
    * If you wish to plug an action once WP is loaded, use the wp_loaded hook below.
    *
+   * @since 1.8.0 - Sequence
+   *
+   * - Load all available hooks (in /plugin/hooks)
+   * - Custom post types Service Provider
+   * - Custom taxonomy type Service Provider
+   * - Custom shortcodes Service Provider
+   * - Custom Ajax Service Provider
+   * - Custom Services Service Provider
+   *
    */
   public function init()
   {
-    // Here we are going to init Service Providers
+    // Load all available hooks
+    // @since 1.8.0
+    if (is_dir($this->basePath . '/plugin/hooks')) {
+      array_map(function ($file) {
+        if (!is_dir($file)) {
+          require_once $file;
+        }
+      }, glob($this->basePath . '/plugin/hooks/' . '*.php', GLOB_MARK));
+    }
 
     // Custom post types Service Provider
     $custom_post_types = $this->config('plugin.custom_post_types', []);
@@ -524,16 +541,6 @@ class Plugin extends Container implements PluginContract
       $object = new $className($this);
       $object->register();
       $this->provides[$className] = $object;
-    }
-
-    // Load all available hooks
-    // @since 1.8.0
-    if (is_dir($this->basePath . '/plugin/hooks')) {
-      array_map(function ($file) {
-        if (!is_dir($file)) {
-          require_once $file;
-        }
-      }, glob($this->basePath . '/plugin/hooks/' . '*.php', GLOB_MARK));
     }
   }
 
