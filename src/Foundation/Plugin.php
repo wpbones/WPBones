@@ -100,38 +100,6 @@ class Plugin extends Container implements PluginContract
 
     $this->baseUri = rtrim(plugin_dir_url($this->file), '\/');
 
-    // Use WordPress get_plugin_data() function for auto retrieve plugin information.
-    if (!function_exists('get_plugin_data')) {
-      require_once ABSPATH . 'wp-admin/includes/plugin.php';
-    }
-    $this->pluginData = get_plugin_data($this->file, false);
-
-    /**
-     * In $this->pluginData you'll find all WordPress
-     *
-     * Author = "Giovambattista Fazioli"
-     * AuthorName = "Giovambattista Fazioli"
-     * AuthorURI = "https://wpbones.com/"
-     * Description = "WPKirk is a WP Bones boilerplate plugin"
-     * DomainPath = "languages"
-     * Name = "WPKirk"
-     * Network = false
-     * PluginURI = "https://wpbones.com/"
-     * TextDomain = "wp-kirk"
-     * Title = "WPKirk"
-     * Version = "1.0.0"
-     */
-
-    // plugin slug
-    $this->slug = str_replace('-', '_', sanitize_title($this->pluginData['Name'])) . '_slug';
-
-    // Load text domain
-    load_plugin_textdomain(
-      'wp-kirk',
-      false,
-      trailingslashit(basename($this->basePath)) . $this->pluginData['DomainPath']
-    );
-
     // Activation & Deactivation Hook
     register_activation_hook($this->file, [$this, 'activation']);
     register_deactivation_hook($this->file, [$this, 'deactivation']);
@@ -185,24 +153,149 @@ class Plugin extends Container implements PluginContract
   }
 
   /**
-   * Dynamically retrieves some attributes (magic getter).
-   * If getter methods exist for the attributes, it calls them and returns the value.
-   * If attributes exist in pluginData, it returns them.
-   *
-   * @param string $name
-   *
-   * @return mixed
+   * Init some data by getting the plugin header information.
    */
-  public function __get($name)
+  private function initPluginData()
   {
-    if ($this->hasGetMutator($name)) {
-      return $this->mutateAttribute($name);
+    // Use WordPress get_plugin_data() function for auto retrieve plugin information.
+    if (!function_exists('get_plugin_data')) {
+      require_once ABSPATH . 'wp-admin/includes/plugin.php';
     }
 
-    if (in_array($name, array_keys($this->pluginData))) {
-      return $this->pluginData[$name];
+    // Starting from WordPress 6.7, the third parameter (translate) must be set to false.
+    // Otherwise, the plugin data will be translated.
+    // https://make.wordpress.org/core/2024/10/21/i18n-improvements-6-7/
+    $this->pluginData = get_plugin_data($this->file, false, false);
+
+    /**
+     * In $this->pluginData you'll find all WordPress
+     *
+     * Author = "Giovambattista Fazioli"
+     * AuthorName = "Giovambattista Fazioli"
+     * AuthorURI = "https://wpbones.com/"
+     * Description = "WPKirk is a WP Bones boilerplate plugin"
+     * DomainPath = "languages"
+     * Name = "WPKirk"
+     * Network = false
+     * PluginURI = "https://wpbones.com/"
+     * TextDomain = "wp-kirk"
+     * Title = "WPKirk"
+     * Version = "1.0.0"
+     */
+
+    // plugin slug
+    $this->slug = str_replace('-', '_', sanitize_title($this->pluginData['Name'])) . '_slug';
+  }
+
+
+  /**
+   * Fires after WordPress has finished loading but before any headers are sent.
+   *
+   * Most of WP is loaded at this stage, and the user is authenticated. WP continues
+   * to load on the init hook that follows (e.g. widgets), and many plugins instantiate
+   * themselves on it for all sorts of reasons (e.g. they need a user, a taxonomy, etc.).
+   *
+   * If you wish to plug an action once WP is loaded, use the wp_loaded hook below.
+   *
+   * @since 1.8.0 - Sequence
+   *
+   * - Load all available hooks (in /plugin/hooks)
+   * - Custom post types Service Provider
+   * - Custom taxonomy type Service Provider
+   * - Custom shortcodes Service Provider
+   * - Custom Ajax Service Provider
+   * - Custom Services Service Provider
+   *
+   */
+  public function init()
+  {
+    // Use WordPress get_plugin_data() function for auto retrieve plugin information.
+    if (!function_exists('get_plugin_data')) {
+      require_once ABSPATH . 'wp-admin/includes/plugin.php';
+    }
+    $this->pluginData = get_plugin_data($this->file, false, false);
+
+    /**
+     * In $this->pluginData you'll find all WordPress
+     *
+     * Author = "Giovambattista Fazioli"
+     * AuthorName = "Giovambattista Fazioli"
+     * AuthorURI = "https://wpbones.com/"
+     * Description = "WPKirk is a WP Bones boilerplate plugin"
+     * DomainPath = "languages"
+     * Name = "WPKirk"
+     * Network = false
+     * PluginURI = "https://wpbones.com/"
+     * TextDomain = "wp-kirk"
+     * Title = "WPKirk"
+     * Version = "1.0.0"
+     */
+
+    // plugin slug
+    $this->slug = str_replace('-', '_', sanitize_title($this->pluginData['Name'])) . '_slug';
+
+    // Load plugin text domain
+    load_plugin_textdomain(
+      'wp-kirk',
+      false,
+      trailingslashit(basename($this->basePath)) . $this->pluginData['DomainPath']
+    );
+
+
+    // Load all available hooks
+    // @since 1.8.0
+    if (is_dir($this->basePath . '/plugin/hooks')) {
+      array_map(function ($file) {
+        if (!is_dir($file)) {
+          require_once $file;
+        }
+      }, glob($this->basePath . '/plugin/hooks/' . '*.php', GLOB_MARK));
+    }
+
+    // Custom post types Service Provider
+    $custom_post_types = $this->config('plugin.custom_post_types', []);
+    foreach ($custom_post_types as $className) {
+      $object = new $className($this);
+      $object->register();
+      $this->provides[$className] = $object;
+    }
+
+    // Custom taxonomy type Service Provider
+    $custom_taxonomy_types = $this->config('plugin.custom_taxonomy_types', []);
+    foreach ($custom_taxonomy_types as $className) {
+      $object = new $className($this);
+      $object->register();
+      $this->provides[$className] = $object;
+    }
+
+    // Shortcodes Service Provider
+    $shortcodes = $this->config('plugin.shortcodes', []);
+    foreach ($shortcodes as $className) {
+      $object = new $className($this);
+      $object->register();
+      $this->provides[$className] = $object;
+    }
+
+    // Ajax Service Provider
+    if ($this->isAjax()) {
+      $ajax = $this->config('plugin.ajax', []);
+      foreach ($ajax as $className) {
+        $object = new $className($this);
+        $object->register();
+        $this->provides[$className] = $object;
+      }
+    }
+
+    // Custom service provider
+    $providers = $this->config('plugin.providers', []);
+    foreach ($providers as $className) {
+      $object = new $className($this);
+      $object->register();
+      $this->provides[$className] = $object;
     }
   }
+
+
 
   public function set_screen_option($status, $option, $value)
   {
@@ -254,28 +347,15 @@ class Plugin extends Container implements PluginContract
   }
 
   /**
-   * Get the base path of the plugin installation.
+   * Return the Log provider
    *
-   * @return string
+   * @return mixed
    */
-  public function getBasePath(): string
+  public function log()
   {
-    _deprecated_function(__METHOD__, '1.6.0', 'basePath');
-    return $this->basePath;
+    return $this->provides['Log'];
   }
 
-  /**
-   * Return the absolute URL for the installation plugin.
-   *
-   * Example: http://example.com/wp-content/plugins/plugin-name
-   *
-   * @return string
-   */
-  public function getBaseUri(): string
-  {
-    _deprecated_function(__METHOD__, '1.6.0', 'baseUri');
-    return $this->baseUri;
-  }
 
   /**
    * Returns the absolute URL for the vendor directory.
@@ -317,31 +397,7 @@ class Plugin extends Container implements PluginContract
     return $view;
   }
 
-  /**
-   * Return the URL of a custom page
-   *
-   * @param string  $pageSlug The slug of the page
-   *
-   * @return string
-   */
-  public function getPageUrl($pageSlug): string
-  {
-    return add_query_arg(['page' => $pageSlug], admin_url('admin.php'));
-  }
 
-  /**
-   * Return the URL of a menu page
-   *
-   * @param string|int  $menuSlug The slug of the menu. The array key used in the menu array.
-   *
-   * @return string
-   */
-  public function getMenuUrl($menuSlug): string
-  {
-    $array = explode('\\', __NAMESPACE__);
-    $namespace = sanitize_title($array[0]);
-    return add_query_arg(['page' => "{$namespace}_{$menuSlug}"], admin_url('admin.php'));
-  }
 
   /**
    * Return a provider by name
@@ -408,6 +464,32 @@ class Plugin extends Container implements PluginContract
   }
 
   /**
+   * Return TRUE if an Ajax called
+   *
+   * @return bool
+   */
+  public function isAjax(): bool
+  {
+    if (defined('DOING_AJAX')) {
+      return true;
+    }
+    if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
+      return true;
+    }
+
+    return false;
+  }
+
+  /*
+  |--------------------------------------------------------------------------
+  | WordPress actions & filter
+  |--------------------------------------------------------------------------
+  |
+  | When a plugin starts we will use some useful actions and filters.
+  |
+  */
+
+  /**
    * Called when a plugin is updated; `upgrader_post_install`
    *
    * @param $response
@@ -470,116 +552,6 @@ class Plugin extends Container implements PluginContract
     $deactivation = include_once "{$this->basePath}/plugin/deactivation.php";
   }
 
-  /**
-   * Fires after WordPress has finished loading but before any headers are sent.
-   *
-   * Most of WP is loaded at this stage, and the user is authenticated. WP continues
-   * to load on the init hook that follows (e.g. widgets), and many plugins instantiate
-   * themselves on it for all sorts of reasons (e.g. they need a user, a taxonomy, etc.).
-   *
-   * If you wish to plug an action once WP is loaded, use the wp_loaded hook below.
-   *
-   * @since 1.8.0 - Sequence
-   *
-   * - Load all available hooks (in /plugin/hooks)
-   * - Custom post types Service Provider
-   * - Custom taxonomy type Service Provider
-   * - Custom shortcodes Service Provider
-   * - Custom Ajax Service Provider
-   * - Custom Services Service Provider
-   *
-   */
-  public function init()
-  {
-    // Load all available hooks
-    // @since 1.8.0
-    if (is_dir($this->basePath . '/plugin/hooks')) {
-      array_map(function ($file) {
-        if (!is_dir($file)) {
-          require_once $file;
-        }
-      }, glob($this->basePath . '/plugin/hooks/' . '*.php', GLOB_MARK));
-    }
-
-    // Custom post types Service Provider
-    $custom_post_types = $this->config('plugin.custom_post_types', []);
-    foreach ($custom_post_types as $className) {
-      $object = new $className($this);
-      $object->register();
-      $this->provides[$className] = $object;
-    }
-
-    // Custom taxonomy type Service Provider
-    $custom_taxonomy_types = $this->config('plugin.custom_taxonomy_types', []);
-    foreach ($custom_taxonomy_types as $className) {
-      $object = new $className($this);
-      $object->register();
-      $this->provides[$className] = $object;
-    }
-
-    // Shortcodes Service Provider
-    $shortcodes = $this->config('plugin.shortcodes', []);
-    foreach ($shortcodes as $className) {
-      $object = new $className($this);
-      $object->register();
-      $this->provides[$className] = $object;
-    }
-
-    // Ajax Service Provider
-    if ($this->isAjax()) {
-      $ajax = $this->config('plugin.ajax', []);
-      foreach ($ajax as $className) {
-        $object = new $className($this);
-        $object->register();
-        $this->provides[$className] = $object;
-      }
-    }
-
-    // Custom service provider
-    $providers = $this->config('plugin.providers', []);
-    foreach ($providers as $className) {
-      $object = new $className($this);
-      $object->register();
-      $this->provides[$className] = $object;
-    }
-  }
-
-  /**
-   * Return TRUE if an Ajax called
-   *
-   * @return bool
-   */
-  public function isAjax(): bool
-  {
-    if (defined('DOING_AJAX')) {
-      return true;
-    }
-    if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
-      return true;
-    }
-
-    return false;
-  }
-
-  /**
-   * Return the Log provider
-   *
-   * @return mixed
-   */
-  public function log()
-  {
-    return $this->provides['Log'];
-  }
-
-  /*
-      |--------------------------------------------------------------------------
-      | WordPress actions & filter
-      |--------------------------------------------------------------------------
-      |
-      | When a plugin starts we will use some useful actions and filters.
-      |
-      */
-
   /* Fires before the administration menu loads in the admin. */
   public function admin_menu()
   {
@@ -604,6 +576,76 @@ class Plugin extends Container implements PluginContract
       //register_widget($className);
       $wp_widget_factory->widgets[$className] = new $className($this);
     }
+  }
+
+  /**
+   * Dynamically retrieves some attributes (magic getter).
+   * If getter methods exist for the attributes, it calls them and returns the value.
+   * If attributes exist in pluginData, it returns them.
+   *
+   * @param string $name
+   *
+   * @return mixed
+   */
+  public function __get($name)
+  {
+    if ($this->hasGetMutator($name)) {
+      return $this->mutateAttribute($name);
+    }
+
+    if (in_array($name, array_keys($this->pluginData))) {
+      return $this->pluginData[$name];
+    }
+  }
+
+  /**
+   * Get the base path of the plugin installation.
+   *
+   * @return string
+   */
+  public function getBasePath(): string
+  {
+    _deprecated_function(__METHOD__, '1.6.0', 'basePath');
+    return $this->basePath;
+  }
+
+  /**
+   * Return the absolute URL for the installation plugin.
+   *
+   * Example: http://example.com/wp-content/plugins/plugin-name
+   *
+   * @return string
+   */
+  public function getBaseUri(): string
+  {
+    _deprecated_function(__METHOD__, '1.6.0', 'baseUri');
+    return $this->baseUri;
+  }
+
+  /**
+   * Return the URL of a custom page
+   *
+   * @param string  $pageSlug The slug of the page
+   *
+   * @return string
+   */
+  public function getPageUrl($pageSlug): string
+  {
+    return add_query_arg(['page' => $pageSlug], admin_url('admin.php'));
+  }
+
+  /**
+   * Return the URL of a menu page
+   *
+   * @param string|int  $menuSlug The slug of the menu. The array key used in the menu array.
+   *
+   * @return string
+   */
+  public function getMenuUrl($menuSlug): string
+  {
+    $array = explode('\\', __NAMESPACE__);
+    $namespace = sanitize_title($array[0]);
+    return add_query_arg(['page' => "{$namespace}_{$menuSlug}"], admin_url('admin.php'));
   }
 
   /**
@@ -652,6 +694,36 @@ class Plugin extends Container implements PluginContract
     }
 
     return null;
+  }
+
+  /**
+   * Return the list of classes in a PHP file.
+   *
+   * @param string $filename A PHP Filename file.
+   *
+   * @return array|bool
+   *
+   * @suppress PHP0415
+   */
+  private function getFileClasses($filename)
+  {
+    $code = file_get_contents($filename);
+
+    if (empty($code)) {
+      return false;
+    }
+
+    $classes = [];
+    $tokens = token_get_all($code);
+    $count = count($tokens);
+    for ($i = 2; $i < $count; $i++) {
+      if ($tokens[$i - 2][0] == T_CLASS && $tokens[$i - 1][0] == T_WHITESPACE && $tokens[$i][0] == T_STRING) {
+        $class_name = $tokens[$i][1];
+        $classes[] = $class_name;
+      }
+    }
+
+    return $classes;
   }
 
   /**
@@ -779,35 +851,5 @@ class Plugin extends Container implements PluginContract
   protected function getFileAttribute(): string
   {
     return $this->file;
-  }
-
-  /**
-   * Return the list of classes in a PHP file.
-   *
-   * @param string $filename A PHP Filename file.
-   *
-   * @return array|bool
-   *
-   * @suppress PHP0415
-   */
-  private function getFileClasses($filename)
-  {
-    $code = file_get_contents($filename);
-
-    if (empty($code)) {
-      return false;
-    }
-
-    $classes = [];
-    $tokens = token_get_all($code);
-    $count = count($tokens);
-    for ($i = 2; $i < $count; $i++) {
-      if ($tokens[$i - 2][0] == T_CLASS && $tokens[$i - 1][0] == T_WHITESPACE && $tokens[$i][0] == T_STRING) {
-        $class_name = $tokens[$i][1];
-        $classes[] = $class_name;
-      }
-    }
-
-    return $classes;
   }
 }
