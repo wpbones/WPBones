@@ -1,19 +1,28 @@
 # Release Notes
 
-## 1.8.0 - November 30, 2024
+## 1.8.0 - November 15, 2024
 
 ### ✨ Added
 
-- Added new `WordPressScheduleServiceProvider` service provider to manage the WordPress cron jobs.
-- Added new [WPKirk-Cron-Boilerplate](https://github.com/wpbones/WPKirk-Cron-Boilerplate) example plugin.
-- Added new `wpbones_cache()` helper function to manage a simple cached data in the WordPress transients.
-- Added new `file` property in the [`Plugin Class`](https://wpbones.com/docs/CoreClasses/plugin) as alias of `__FILE__` constant.
-- Added new `hooks` folder to load all PHP files within it.
+- Added new [`WordPressScheduleServiceProvider`](https://wpbones.com/docs/ServicesProvider/schedule) service provider to manage the WordPress cron jobs
+- Added new `php bones make:schedule` command to create a new WordPress cron job
+- Added new [WPKirk-Cron-Boilerplate](https://github.com/wpbones/WPKirk-Cron-Boilerplate) example plugin
+- Added new [WPKirk-Hooks-Boilerplate](https://github.com/wpbones/WPKirk-Hooks-Boilerplate) example plugin
+- Added new [`wpbones_cache()`](https://wpbones.com/docs/helpers#wpbones_cache) helper function to manage a simple cached data in the WordPress transients
+- Added new [`wpbones_import()`](https://wpbones.com/docs/helpers#wpbones_import) helper function and [`import()`](https://wpbones.com/docs/helpers#import) alias for streamlined [module](https://wpbones.com/docs/CoreConcepts/hooks-modules/) folder management
+- Added new `file` property in the `Plugin Class` as alias of `__FILE__` constant
+
+### 🐛 Fixed
+
+- Improved deployment process by excluding `tsconfig.json` from file synchronization to streamline build and transfer operations (#50)
+- Improved text domain loading to align with [WordPress 6.7 Internationalization improvements](https://make.wordpress.org/core/2024/10/21/i18n-improvements-6-7/) (#51)
 
 ### 💎 Changed and Improved
 
 - Reorganized the command list in `php bones` for better readability.
-- Updated the [Service Providers](https://wpbones.com/docs/ServicesProvider/services) documentation to reflect the new changes.
+- Updated the [Service Providers](https://wpbones.com/docs/ServicesProvider/services) documentation to reflect the new changes
+- Completely rewrote all boilerplates using the new [`wpkirk-helpers`](https://github.com/wpbones/wpkirk-helpers) package, enhancing project structure and maintainability
+- Improved documentation for Boilerplate, addressing minor bug fixes and enhancing overall clarity
 
 ## 1.7.0 - October 16, 2024
 
