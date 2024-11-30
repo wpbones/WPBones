@@ -456,7 +456,7 @@ namespace Bones {
   define('WPBONES_MINIMAL_PHP_VERSION', '7.4');
 
   /* MARK: The WP Bones command line version. */
-  define('WPBONES_COMMAND_LINE_VERSION', '1.8.0');
+  define('WPBONES_COMMAND_LINE_VERSION', '1.8.1');
 
   use Bones\SemVer\Exceptions\InvalidVersionException;
   use Bones\SemVer\Version;
@@ -576,7 +576,7 @@ namespace Bones {
      *
      * @return mixed|array
      */
-    protected function arguments(int $index = null): ?array
+    protected function arguments($index = null)
     {
       // Check if 'argv' is set in the server variables
       if (!isset($_SERVER['argv'])) {
@@ -838,7 +838,7 @@ namespace Bones {
      * @param string|null $pluginName
      * @return string
      */
-    public function getMainPluginFile(?string $pluginName = ''): string
+    public function getMainPluginFile($pluginName = ''): string
     {
       if (empty($pluginName)) {
         $pluginName = $this->getPluginName();
@@ -917,7 +917,7 @@ namespace Bones {
      *
      * @return bool
      */
-    protected function isHelp(string $str = null): bool
+    protected function isHelp($str = null): bool
     {
       if (!is_null($str)) {
         return empty($str) || $str === '--help';
@@ -936,7 +936,7 @@ namespace Bones {
      *
      * @return array|string
      */
-    protected function commandParams(int $index = null)
+    protected function commandParams($index = null)
     {
       $params = $this->arguments();
 
@@ -1158,7 +1158,7 @@ namespace Bones {
      *
      * @param string|null $str
      */
-    public function getPluginSlug(string $str = null): string
+    public function getPluginSlug($str = null): string
     {
       $str = $this->snakeCasePluginName($str);
 
@@ -1171,7 +1171,7 @@ namespace Bones {
      * @param string|null $str
      * @return string
      */
-    public function snakeCasePluginName(string $str = null): string
+    public function snakeCasePluginName($str = null): string
     {
       $str = $this->sanitizePluginName($str);
 
@@ -1184,7 +1184,7 @@ namespace Bones {
      * @param string|null $str
      * @return string
      */
-    public function sanitizePluginName(string $str = null): string
+    public function sanitizePluginName($str = null): string
     {
       if (is_null($str)) {
         $str = $this->getPluginName();
@@ -1226,7 +1226,7 @@ namespace Bones {
      * @param string|null $str
      * @return string
      */
-    public function getPluginVars(string $str = null): string
+    public function getPluginVars($str = null): string
     {
       $str = $this->snakeCasePluginName($str);
 
@@ -1241,7 +1241,7 @@ namespace Bones {
      *
      * @return string
      */
-    public function getPluginId(string $str = null): string
+    public function getPluginId($str = null): string
     {
       return $this->sanitizePluginName($str);
     }
@@ -1700,7 +1700,6 @@ namespace Bones {
         if (!$is_wp_org) {
           $this->skipWhenDeploy = array_merge($this->skipWhenDeploy, $dontSkipWhenDeploy);
         }
-
 
         /**
          * Filter the list of files and folders to skip during the deployment.
