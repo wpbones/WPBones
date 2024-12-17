@@ -327,7 +327,7 @@ class View
       $this->adminAppsModules[] = [$name, [], $ver];
     }
 
-    if ($variabile) {
+    if ($variable) {
       $this->localizeScripts[] = [$name, $variable, $data];
     }
 

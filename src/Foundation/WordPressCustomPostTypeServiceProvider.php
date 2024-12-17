@@ -40,6 +40,30 @@ abstract class WordPressCustomPostTypeServiceProvider extends ServiceProvider
    * If not set, post labels are inherited for non-hierarchical types and page labels for hierarchical ones.
    * You can see accepted values in {@link get_post_type_labels()}.
    *
+   * By using the property $labels you can set just the labels you want to change.
+   * The final labels will be merged with the default labels.
+   * If you want to handle all labels, you can override the method `registerLabels()`.
+   *
+   * @example
+   *
+   * class MyCustomPostType extends WordPressCustomPostTypeServiceProvider {
+   *    protected $labels = [
+   *        'name' => 'My Custom Post Types',
+   *        'singular_name' => 'My Custom Post Type',
+   *     ];
+   * }
+   *
+   * or
+   *
+   * class MyCustomPostType extends WordPressCustomPostTypeServiceProvider {
+   *   public function boot() {
+   *     $this->labels = [
+   *         'name' => 'My Custom Post Types',
+   *         'singular_name' => 'My Custom Post Type',
+   *     ];
+   *   }
+   *
+   *
    * @var array
    */
   protected $labels = [];
@@ -498,10 +522,6 @@ abstract class WordPressCustomPostTypeServiceProvider extends ServiceProvider
   /**
    * You may override this method in order to register your own labels.
    *
-   * An array of labels for this post type.
-   * If not set, post labels are inherited for non-hierarchical types and page labels for hierarchical ones.
-   * You can see accepted values in {@link get_post_type_labels()}.
-   *
    * @param array $defaults Default labels
    *
    * @example
@@ -509,7 +529,8 @@ abstract class WordPressCustomPostTypeServiceProvider extends ServiceProvider
    * class MyCustomPostType extends WordPressCustomPostTypeServiceProvider {
    *    public function registerLabels($defaults) {
    *
-   *        // You may also merge the defaults with your own labels
+   *        // You will use just the labels you want to change
+   *        // Otherwise you have to merge manually with the default labels
    *        return [
    *            'name' => 'My Custom Post Types',
    *            'singular_name' => 'My Custom Post Type',
@@ -524,7 +545,7 @@ abstract class WordPressCustomPostTypeServiceProvider extends ServiceProvider
   public function registerLabels($defaults)
   {
     // You may override this method
-    return [];
+    return $this->labels;
   }
 
   /**
@@ -547,52 +568,11 @@ abstract class WordPressCustomPostTypeServiceProvider extends ServiceProvider
       'post-formats',
     ];
 
-    $this->supports = $this->registerSupports($defaults);
-
     if (empty($this->supports)) {
       return $defaults;
     }
 
     return $this->supports;
-  }
-
-  /**
-   * You may override this method in order to register your own supports.
-   *
-   * An alias for calling add_post_type_support() directly.
-   * Defaults
-   * [
-   *  'title',
-   *  'editor',
-   *  'author',
-   *  'thumbnail',
-   *  'excerpt',
-   *  'trackbacks',
-   *  'custom-fields',
-   *  'comments',
-   *  'revisions',
-   *  'post-formats',
-   * ];
-   *
-   * See {@link add_post_type_support()} for documentation.
-   *
-   * @param array $defaults Default supports
-   *
-   * @example
-   *
-   * class MyCustomPostType extends WordPressCustomPostTypeServiceProvider {
-   *    public function registerSupports($defaults) {
-   *       return ['title', 'editor', 'thumbnail'];
-   *    }
-   * }
-   *
-   * @since 1.9.0
-   * @return array
-   */
-  public function registerSupports($defaults)
-  {
-    // You may override this method
-    return [];
   }
 
 

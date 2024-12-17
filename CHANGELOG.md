@@ -10,7 +10,6 @@
 - Added new `registerPostMeta` overwritten method in `WordPressCustomPostTypeServiceProvider` to register the post meta for the custom post type.
 - Added new `registerMetaBoxes` overwritten method in `WordPressCustomPostTypeServiceProvider` to register the post meta for the custom post type.
 - Added new `registerLabels` overwritten method in `WordPressCustomPostTypeServiceProvider` to set the labels for the custom post type.
-- Added new `registerSupports` overwritten method in `WordPressCustomPostTypeServiceProvider` to set the supports for the custom post type.
 - Added new `columnContent` overwritten method in `WordPressCustomPostTypeServiceProvider` to handle the column content for the custom post type.
 
 ### 🐛 Fixed

@@ -359,7 +359,6 @@ abstract class WordPressCustomTaxonomyTypeServiceProvider extends ServiceProvide
 
   /**
    * You may override this method in order to register your own actions and filters.
-   *
    */
   public function boot()
   {
