@@ -20,6 +20,7 @@ abstract class WordPressShortcodesServiceProvider extends ServiceProvider
   /**
    * Init the registered shortcodes.
    *
+   * @access private
    */
   public function register()
   {

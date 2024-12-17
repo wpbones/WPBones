@@ -71,6 +71,8 @@ abstract class WordPressAjaxServiceProvider extends ServiceProvider
   /**
    * Init the registered Ajax actions.
    *
+   * @access private
+   *
    */
   public function register()
   {
@@ -90,7 +92,7 @@ abstract class WordPressAjaxServiceProvider extends ServiceProvider
       // if $this->capability is not empty, then use it
       if (!empty($this->capability)) {
         if (!current_user_can($this->capability)) {
-          add_action('wp_ajax_' . $action, [$this, 'permissionDenied']);
+          add_action('wp_ajax_' . $action, [$this, '_permissionDenied']);
           continue;
         }
       }
@@ -103,6 +105,13 @@ abstract class WordPressAjaxServiceProvider extends ServiceProvider
     }
   }
 
+  /**
+   * Use this method to get the POST data.
+   *
+   * @param array ...$args
+   *
+   * @return array
+   */
   protected function useHTTPPost(...$args)
   {
     $result = [];
@@ -112,6 +121,11 @@ abstract class WordPressAjaxServiceProvider extends ServiceProvider
     return $result;
   }
 
+  /**
+   * Use this method to verify the nonce.
+   *
+   * @return array
+   */
   protected function verifyNonce()
   {
     if (!empty($this->nonceKey) && !empty($this->nonceHash)) {
@@ -128,7 +142,13 @@ abstract class WordPressAjaxServiceProvider extends ServiceProvider
     return true;
   }
 
-  public function permissionDenied()
+  /**
+   * Use this method to send an error JSON response.
+   *
+   * @access private
+   *
+   */
+  public function _permissionDenied()
   {
     wp_send_json_error(__("You don't have permission to do this."), 403);
   }
@@ -136,12 +156,18 @@ abstract class WordPressAjaxServiceProvider extends ServiceProvider
   /**
    * You may override this method in order to register your own actions and filters.
    *
+   * @access private
    */
   public function boot()
   {
     // You may override this method
   }
 
+  /**
+   * Get the request attribute.
+   *
+   * @return Request
+   */
   public function getRequestAttribute(): Request
   {
     if (is_null($this->_request)) {

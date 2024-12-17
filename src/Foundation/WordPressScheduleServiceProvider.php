@@ -44,6 +44,8 @@ abstract class WordPressScheduleServiceProvider extends ServiceProvider
   /**
    * Init the registered shortcodes.
    *
+   * @access private
+   *
    */
   public function register()
   {
@@ -82,7 +84,6 @@ abstract class WordPressScheduleServiceProvider extends ServiceProvider
 
   /**
    * You may override this method
-   *
    */
   public function boot()
   {

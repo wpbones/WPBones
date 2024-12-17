@@ -91,6 +91,8 @@ class Plugin extends Container implements PluginContract
   /**
    * Boot the plugin.
    *
+   * @access private
+   *
    * @return Plugin
    */
   public function boot(): Plugin
@@ -101,11 +103,11 @@ class Plugin extends Container implements PluginContract
     $this->baseUri = rtrim(plugin_dir_url($this->file), '\/');
 
     // Activation & Deactivation Hook
-    register_activation_hook($this->file, [$this, 'activation']);
-    register_deactivation_hook($this->file, [$this, 'deactivation']);
+    register_activation_hook($this->file, [$this, '_activation']);
+    register_deactivation_hook($this->file, [$this, '_deactivation']);
 
     // handle plugin update
-    add_filter('upgrader_post_install', [$this, 'upgrader_post_install'], 10, 3);
+    add_filter('upgrader_post_install', [$this, '_upgrader_post_install'], 10, 3);
 
     /**
      * There are many pitfalls to using the uninstall hook. It ’ s a much cleaner, and easier, process to use the
@@ -130,23 +132,28 @@ class Plugin extends Container implements PluginContract
     $this->initApi();
 
     // Fires after WordPress has finished loading but before any headers are sent.
-    add_action('init', [$this, 'init']);
+    add_action('init', [$this, '_init']);
 
     // Fires before the administration menu loads in the admin.
-    add_action('admin_menu', [$this, 'admin_menu']);
+    add_action('admin_menu', [$this, '_admin_menu']);
 
     // Fires after all default WordPress widgets have been registered.
-    add_action('widgets_init', [$this, 'widgets_init']);
+    add_action('widgets_init', [$this, '_widgets_init']);
 
     // Filter a screen option value before it is set.
-    add_filter('set-screen-option', [$this, 'set_screen_option'], 10, 3);
+    add_filter('set-screen-option', [$this, '_set_screen_option'], 10, 3);
 
     static::$instance = $this;
 
     return $this;
   }
 
-  /* Init the Rest API Provider  */
+  /**
+   * Init the Rest API Provider
+   *
+   * @access private
+   * @return void
+   */
   private function initApi()
   {
     (new RestProvider($this))->register();
@@ -154,6 +161,9 @@ class Plugin extends Container implements PluginContract
 
   /**
    * Init some data by getting the plugin header information.
+   *
+   * @access private
+   * @return void
    */
   private function initPluginData()
   {
@@ -187,7 +197,6 @@ class Plugin extends Container implements PluginContract
     $this->slug = str_replace('-', '_', sanitize_title($this->pluginData['Name'])) . '_slug';
   }
 
-
   /**
    * Fires after WordPress has finished loading but before any headers are sent.
    *
@@ -197,6 +206,7 @@ class Plugin extends Container implements PluginContract
    *
    * If you wish to plug an action once WP is loaded, use the wp_loaded hook below.
    *
+   * @access private
    * @since 1.8.0 - Sequence
    *
    * - Load all available hooks (in /plugin/hooks)
@@ -207,7 +217,7 @@ class Plugin extends Container implements PluginContract
    * - Custom Services Service Provider
    *
    */
-  public function init()
+  public function _init()
   {
     // Use WordPress get_plugin_data() function for auto retrieve plugin information.
     if (!function_exists('get_plugin_data')) {
@@ -295,9 +305,12 @@ class Plugin extends Container implements PluginContract
     }
   }
 
-
-
-  public function set_screen_option($status, $option, $value)
+  /**
+   * Fires before the administration menu loads in the admin.
+   *
+   * @access private
+   */
+  public function _set_screen_option($status, $option, $value)
   {
     if (in_array($option, array_values($this->config('plugin.screen_options', [])))) {
       return $value;
@@ -397,8 +410,6 @@ class Plugin extends Container implements PluginContract
     return $view;
   }
 
-
-
   /**
    * Return a provider by name
    *
@@ -496,9 +507,11 @@ class Plugin extends Container implements PluginContract
    * @param $hook_extra
    * @param $result
    *
+   * @access private
+   *
    * @return mixed
    */
-  public function upgrader_post_install($response, $hook_extra, $result)
+  public function _upgrader_post_install($response, $hook_extra, $result)
   {
     // Check if the action is an update for a plugin
     if (isset($hook_extra['plugin'])) {
@@ -526,8 +539,12 @@ class Plugin extends Container implements PluginContract
     return $response;
   }
 
-  /* Called when a plugin is activated; `register_activation_hook()` */
-  public function activation()
+  /**
+   * Called when a plugin is activated; `register_activation_hook()`
+   *
+   * @access private
+   */
+  public function _activation()
   {
     // updates/align the plugin options
     $this->options->delta();
@@ -546,14 +563,22 @@ class Plugin extends Container implements PluginContract
     }
   }
 
-  /* Called when a plugin is deactivated; `register_deactivation_hook()` */
-  public function deactivation()
+  /**
+   * Called when a plugin is deactivated; `register_deactivation_hook()`
+   *
+   * @access private
+   */
+  public function _deactivation()
   {
     $deactivation = include_once "{$this->basePath}/plugin/deactivation.php";
   }
 
-  /* Fires before the administration menu loads in the admin. */
-  public function admin_menu()
+  /**
+   * Fires before the administration menu loads in the admin.
+   *
+   * @access private
+   */
+  public function _admin_menu()
   {
     // register the admin menu
     (new AdminMenuProvider($this))->register();
@@ -565,8 +590,12 @@ class Plugin extends Container implements PluginContract
     (new PageProvider($this))->register();
   }
 
-  /* Register the Widgets */
-  public function widgets_init()
+  /**
+   * Register the Widgets
+   *
+   * @access private
+   */
+  public function _widgets_init()
   {
     global $wp_widget_factory;
 
@@ -601,6 +630,7 @@ class Plugin extends Container implements PluginContract
   /**
    * Get the base path of the plugin installation.
    *
+   * @deprecated 1.6.0 Use basePath instead
    * @return string
    */
   public function getBasePath(): string
@@ -613,6 +643,8 @@ class Plugin extends Container implements PluginContract
    * Return the absolute URL for the installation plugin.
    *
    * Example: http://example.com/wp-content/plugins/plugin-name
+   *
+   * @deprecated 1.6.0 Use baseUri instead
    *
    * @return string
    */
@@ -727,7 +759,9 @@ class Plugin extends Container implements PluginContract
   }
 
   /**
-   * Magic method to get the options
+   * Return the plugin options
+   *
+   * See the Options <https://wpbones.com/docs/CoreConcepts/options> documentation for more information.
    *
    * @return mixed
    */
@@ -741,7 +775,7 @@ class Plugin extends Container implements PluginContract
   }
 
   /**
-   * Magic method to get the request
+   * Return the request
    *
    * @return Request
    */

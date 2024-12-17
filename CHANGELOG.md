@@ -1,5 +1,33 @@
 # Release Notes
 
+## 1.9.0 - December 15, 2024
+
+### ✨ Added
+
+- Added new `registerPlaceholderTitle` overwritten method in `WordPressCustomPostTypeServiceProvider` to set the placeholder title for the custom post type.
+- Added new `registerAfterTitleView` overwritten method in `WordPressCustomPostTypeServiceProvider` to set the after title view for the custom post type.
+- Added new `registerColumns` overwritten method in `WordPressCustomPostTypeServiceProvider` to set the columns for the custom post type.
+- Added new `registerPostMeta` overwritten method in `WordPressCustomPostTypeServiceProvider` to register the post meta for the custom post type.
+- Added new `registerMetaBoxes` overwritten method in `WordPressCustomPostTypeServiceProvider` to register the post meta for the custom post type.
+- Added new `registerLabels` overwritten method in `WordPressCustomPostTypeServiceProvider` to set the labels for the custom post type.
+- Added new `registerSupports` overwritten method in `WordPressCustomPostTypeServiceProvider` to set the supports for the custom post type.
+- Added new `columnContent` overwritten method in `WordPressCustomPostTypeServiceProvider` to handle the column content for the custom post type.
+
+### 🐛 Fixed
+- Minor fixes in the [documentation](https://wpbones.com/docs)
+
+### 💎 Changed and Improved
+
+- Updated the [Custom Post Type](https://wpbones.com/docs/ServicesProvider/custom-post-types) documentation to reflect the new changes
+- Added the [Custom Post Type](https://wpbones.com/docs/CoreClasses/cpt) core class documentation
+- Improved documentation header generation to provide concise page content summaries
+
+## 💥 Breaking Changes
+
+- The `registerMetaBoxCallback` property in the `WordPressCustomPostTypeServiceProvider` is **deprecated**, use `registerMetaBoxes` overwritten method instead.
+- The `labels` property in the `WordPressCustomPostTypeServiceProvider` is **deprecated**, use `registerLabels` overwritten method instead.
+- The `supports` property in the `WordPressCustomPostTypeServiceProvider` is **deprecated**, use `registerSupports` overwritten method instead.
+
 ## 1.8.0 - November 15, 2024
 
 ### ✨ Added
