@@ -22,13 +22,10 @@
 > [![Docs](https://img.shields.io/badge/Docs-%231877F2.svg?style=for-the-badge&logo=readthedocs&logoColor=white)](https://wpbones.com) &nbsp;
 > [![Newsletter](https://img.shields.io/badge/substack-%231877F2.svg?style=for-the-badge&logo=substack&logoColor=white)](https://wpbones.substack.com/) &nbsp;
 
-
-
-
 > [!TIP]
 > ## 🙏 Thanks to Our Core Contributors
 > [![Contributors](https://contrib.rocks/image?repo=wpbones/wpbones)](https://github.com/wpbones/wpbones/graphs/contributors)
-> 
+>
 > ## 🙏 Thanks to Our Documentation Contributors
 > [![Contributors](https://contrib.rocks/image?repo=wpbones/website-docs)](https://github.com/wpbones/website-docs/graphs/contributors)
 
@@ -44,7 +41,7 @@
 
 > [!TIP]
 > To participate more actively in discussions and stay updated on proposals and latest releases, I would be pleased if you joined:
-> 
+>
 >  - [WP Bones community on Discord](https://discord.gg/5bdVyycU8F)
 >  - [WP Bones GitHub Discussion](https://github.com/wpbones/WPBones/discussions)
 >  - [WP Bones GitHub Roadmap](https://github.com/orgs/wpbones/projects/4)
