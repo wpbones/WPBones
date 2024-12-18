@@ -11,8 +11,10 @@
 - Added new `registerMetaBoxes` overwritten method in `WordPressCustomPostTypeServiceProvider` to register the post meta for the custom post type.
 - Added new `registerLabels` overwritten method in `WordPressCustomPostTypeServiceProvider` to set the labels for the custom post type.
 - Added new `columnContent` overwritten method in `WordPressCustomPostTypeServiceProvider` to handle the column content for the custom post type.
+- Enhance `php bones install` command with comprehensive package installation support
 
 ### 🐛 Fixed
+
 - Minor fixes in the [documentation](https://wpbones.com/docs)
 
 ### 💎 Changed and Improved
@@ -20,6 +22,7 @@
 - Updated the [Custom Post Type](https://wpbones.com/docs/ServicesProvider/custom-post-types) documentation to reflect the new changes
 - Added the [Custom Post Type](https://wpbones.com/docs/CoreClasses/cpt) core class documentation
 - Improved documentation header generation to provide concise page content summaries
+- Enhance package manager handling within the `php bones` command for improved reliability and performance
 
 ## 💥 Breaking Changes
 
