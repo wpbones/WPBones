@@ -28,7 +28,7 @@
 > 
 >  - [WP Bones community on Discord](https://discord.gg/5bdVyycU8F)
 >  - [WP Bones GitHub Discussion](https://github.com/wpbones/WPBones/discussions)
->  - [WP Bones GitHub Roadmap](https://github.com/wpbones/WPBones/projects)
+>  - [WP Bones GitHub Roadmap](https://github.com/orgs/wpbones/projects/4)
 
 > [!NOTE]
 > ### Thanks to Our Contributors
