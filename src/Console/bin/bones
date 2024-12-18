@@ -456,7 +456,7 @@ namespace Bones {
   define('WPBONES_MINIMAL_PHP_VERSION', '7.4');
 
   /* MARK: The WP Bones command line version. */
-  define('WPBONES_COMMAND_LINE_VERSION', '1.8.1');
+  define('WPBONES_COMMAND_LINE_VERSION', '1.9.0');
 
   use Bones\SemVer\Exceptions\InvalidVersionException;
   use Bones\SemVer\Version;
@@ -1463,6 +1463,13 @@ namespace Bones {
         $this->line(' php bones install');
         exit();
       }
+
+      // check if the "node_modules" folder exists
+      if (!is_dir('node_modules')) {
+        $this->line("🚧 Node modules not found. Installing...");
+        $this->installPackages();
+      }
+
       $this->line(`composer install`);
     }
 
@@ -1643,33 +1650,7 @@ namespace Bones {
 
         do_action('wpbones_console_deploy_before_build_assets', $this, $path);
 
-        $packageManager = $this->getAvailablePackageManager();
-
-        if ($packageManager) {
-
-          $this->info("✅ Found '$packageManager' as package manager");
-
-          $answer = $this->ask("Do you want to run '$packageManager run build' to build assets? (y/n)", 'y');
-
-          if (strtolower($answer) === 'y') {
-            $this->info("📦 Build for production by using '{$packageManager} run build'");
-            shell_exec("{$packageManager} run build");
-            $this->info("✅ Built assets successfully");
-            do_action('wpbones_console_deploy_after_build_assets', $this, $path);
-          } else {
-            $answer = $this->ask("Enter the package manager to build assets (press RETURN to skip the build)", '');
-            if (empty($answer)) {
-              $this->info('⏭︎ Skip build assets');
-            } else {
-              $this->info("📦 Build for production by using '{$answer} run build'");
-              shell_exec("{$answer} run build");
-              $this->info("✅ Built assets successfully");
-              do_action('wpbones_console_deploy_after_build_assets', $this, $path);
-            }
-          }
-        } else {
-          $this->info("🛑 No package manager found. The build assets will be skipped");
-        }
+        $this->buildAssets($path);
 
         // files and folders to skip
         $this->skipWhenDeploy = [
@@ -1731,13 +1712,95 @@ namespace Bones {
     }
 
     /**
+     * Ask the user which package manager to use
+     *
+     * @since 1.9.0
+     * @return string|null The name of the package manager to use
+     */
+    protected function askPackageManager()
+    {
+      $packageManager = null;
+
+      // get the available package manager
+      $listPackageManagers = $this->getListAvailablePackageManagers();
+
+      if ($listPackageManagers) {
+        // if we found just one package manager, we use it
+        if (count($listPackageManagers) === 1) {
+          return $listPackageManagers[0];
+        }
+
+        $availablePackageManagerStr = implode(', ', $listPackageManagers);
+        $this->info("🔍 Found package managers: " . $availablePackageManagerStr);
+
+        // ask which package manager to use
+        $packageManager = $this->ask('Which package manager do you want to use (' . $availablePackageManagerStr . ')', $packageManager);
+      }
+
+      return $packageManager;
+    }
+
+    /**
+     * Build assets
+     *
+     * @since 1.9.0
+     * @param string $path The path of the deploy
+     */
+    protected function buildAssets($path)
+    {
+      $packageManager = $this->askPackageManager();
+
+      if ($packageManager) {
+
+        // ask to build assets
+        $answer = $this->ask("Do you want to run '$packageManager run build' to build assets? (y/n)", 'y');
+
+        if (strtolower($answer) === 'y') {
+          $this->info("📦 Build for production by using '{$packageManager} run build'");
+          shell_exec("{$packageManager} run build");
+          $this->info("✅ Built assets successfully");
+          do_action('wpbones_console_deploy_after_build_assets', $this, $path);
+        } else {
+          $answer = $this->ask("Enter the package manager to build assets (press RETURN to skip the build)", '');
+          if (empty($answer)) {
+            $this->info('⏭︎ Skip build assets');
+          } else {
+            $this->info("📦 Build for production by using '{$answer} run build'");
+            shell_exec("{$answer} run build");
+            $this->info("✅ Built assets successfully");
+            do_action('wpbones_console_deploy_after_build_assets', $this, $path);
+          }
+        }
+      } else {
+        $this->info("🛑 No package manager found. The build assets will be skipped");
+      }
+    }
+
+    /**
+     * Install node modules
+     *
+     * @since 1.9.0
+     */
+    protected function installPackages()
+    {
+      // ask to install node modules
+      $yesno = $this->ask('Do you want to install node modules (y/n)', 'n');
+      if (strtolower($yesno) === 'y') {
+        $this->info("📦 Installing node modules");
+        $packageManager = $this->getAvailablePackageManager();
+        shell_exec("{$packageManager} install");
+        $this->info("✅ Node modules created and packages installed successfully");
+      }
+    }
+
+    /**
      * Returns the available package manager
      *
      * @return string|null The name of the available package manager (yarn, npm, pnpm, bun) or null if none is available.
      */
     protected function getAvailablePackageManager(): ?string
     {
-      $packageManagers = ['yarn', 'npm', 'pnpm', 'bun'];
+      $packageManagers = $this->getListAvailablePackageManagers();
 
       foreach ($packageManagers as $manager) {
         if ($this->isCommandAvailable($manager)) {
@@ -1746,6 +1809,26 @@ namespace Bones {
       }
 
       return null;
+    }
+
+    /**
+     * Returns the list of available package managers
+     *
+     * @since 1.9.0
+     * @return array The list of available package managers
+     */
+    protected function getListAvailablePackageManagers(): array
+    {
+      $checkIdAvailable = ['yarn', 'npm', 'pnpm', 'bun'];
+      $available = [];
+
+      foreach ($checkIdAvailable as $id) {
+        if ($this->isCommandAvailable($id)) {
+          $available[] = $id;
+        }
+      }
+
+      return $available;
     }
 
     /**
