@@ -26,7 +26,7 @@
 - Improved documentation header generation to provide concise page content summaries
 - Enhance package manager handling within the `php bones` command for improved reliability and performance
 - Enhance `php bones install` command with comprehensive package installation support (#54)
-- Minor fixed and improvements in `php bones` command
+- Minor fixes and improvements to the `php bones` command.
 
 ## 💥 Breaking Changes
 
