@@ -1,6 +1,6 @@
 # Release Notes
 
-## 1.9.0 - December 15, 2024
+## 1.9.0 - December 20, 2024
 
 ### ✨ Added
 
@@ -11,7 +11,9 @@
 - Added new `registerMetaBoxes` overwritten method in `WordPressCustomPostTypeServiceProvider` to register the post meta for the custom post type.
 - Added new `registerLabels` overwritten method in `WordPressCustomPostTypeServiceProvider` to set the labels for the custom post type.
 - Added new `columnContent` overwritten method in `WordPressCustomPostTypeServiceProvider` to handle the column content for the custom post type.
-- Enhance `php bones install` command with comprehensive package installation support (#54)
+- Added new `wpbones_console_deploy_dont_skip_files_folders` filters to exclude specific files from deployment
+- Added new `wpbones_console_deploy_skip_files_folders` filters to skip specific files from deployment
+- Added new `wpbones_console_deploy_build_assets` filters to skip asset building during deployment
 
 ### 🐛 Fixed
 
@@ -23,12 +25,11 @@
 - Added the [Custom Post Type](https://wpbones.com/docs/CoreClasses/cpt) core class documentation
 - Improved documentation header generation to provide concise page content summaries
 - Enhance package manager handling within the `php bones` command for improved reliability and performance
+- Enhance `php bones install` command with comprehensive package installation support (#54)
 
 ## 💥 Breaking Changes
 
 - The `registerMetaBoxCallback` property in the `WordPressCustomPostTypeServiceProvider` is **deprecated**, use `registerMetaBoxes` overwritten method instead.
-- The `labels` property in the `WordPressCustomPostTypeServiceProvider` is **deprecated**, use `registerLabels` overwritten method instead.
-- The `supports` property in the `WordPressCustomPostTypeServiceProvider` is **deprecated**, use `registerSupports` overwritten method instead.
 
 ## 1.8.0 - November 15, 2024
 

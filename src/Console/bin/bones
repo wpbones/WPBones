@@ -445,6 +445,153 @@ namespace Bones\SemVer {
   }
 }
 
+namespace Bones\Traits {
+
+  // Standard Color Definitions
+  define('WPBONES_COLOR_BLACK', "\033[0;30m");
+  define('WPBONES_COLOR_RED', "\033[0;31m");
+  define('WPBONES_COLOR_GREEN', "\033[0;32m");
+  define('WPBONES_COLOR_YELLOW', "\033[0;33m");
+  define('WPBONES_COLOR_BLUE', "\033[0;34m");
+  define('WPBONES_COLOR_MAGENTA', "\033[0;35m");
+  define('WPBONES_COLOR_CYAN', "\033[0;36m");
+  define('WPBONES_COLOR_WHITE', "\033[0;37m");
+
+  // Definition of bold colors
+  define('WPBONES_COLOR_BOLD_BLACK', "\033[1;30m");
+  define('WPBONES_COLOR_BOLD_RED', "\033[1;31m");
+  define('WPBONES_COLOR_BOLD_GREEN', "\033[1;32m");
+  define('WPBONES_COLOR_BOLD_YELLOW', "\033[1;33m");
+  define('WPBONES_COLOR_BOLD_BLUE', "\033[1;34m");
+  define('WPBONES_COLOR_BOLD_MAGENTA', "\033[1;35m");
+  define('WPBONES_COLOR_BOLD_CYAN', "\033[1;36m");
+  define('WPBONES_COLOR_BOLD_WHITE', "\033[1;37m");
+
+  // Definition of Light Colors
+  define('WPBONES_COLOR_LIGHT_BLACK', "\033[0;38;5;240m");
+  define('WPBONES_COLOR_LIGHT_RED', "\033[0;38;5;203m");
+  define('WPBONES_COLOR_LIGHT_GREEN', "\033[0;38;5;82m");
+  define('WPBONES_COLOR_LIGHT_YELLOW', "\033[0;38;5;227m");
+  define('WPBONES_COLOR_LIGHT_BLUE', "\033[0;38;5;117m");
+  define('WPBONES_COLOR_LIGHT_MAGENTA', "\033[0;38;5;213m");
+  define('WPBONES_COLOR_LIGHT_CYAN', "\033[0;38;5;159m");
+  define('WPBONES_COLOR_LIGHT_WHITE', "\033[0;38;5;15m");
+
+  // Definition for color reset
+  define('WPBONES_COLOR_RESET', "\033[0m");
+
+  // Definition for cursor up
+  define('WPBONES_CURSOR_UP', "\033[1A");
+
+  trait Console
+  {
+    /**
+     * Commodity to display a message in the console with color.
+     *
+     * @param string $str The message to display.
+     * @param string $color The color to use. Default is 'white'.
+     */
+    protected function color($str, $color = WPBONES_COLOR_YELLOW)
+    {
+      echo $color . $str . WPBONES_COLOR_RESET;
+    }
+
+    /**
+     * Commodity to display a message in the console.
+     *
+     * @param string $str The message to display.
+     * @param bool $newLine Optional. Whether to add a new line at the end.
+     */
+    protected function info(string $str, $newLine = true)
+    {
+      $this->color($str, WPBONES_COLOR_LIGHT_MAGENTA);
+      echo $newLine ? "\n" : '';
+    }
+
+    /**
+     * Commodity to display a message in the console.
+     *
+     * @param string $str The message to display.
+     * @param bool $newLine Optional. Whether to add a new line at the end.
+     */
+    protected function line(string $str, $newLine = true)
+    {
+      $this->color($str, WPBONES_COLOR_LIGHT_GREEN);
+      echo $newLine ? "\n" : '';
+    }
+
+    /* Commodity to display an error message in the console. */
+    protected function error(string $str, $newLine = true)
+    {
+      echo "❌ ";
+      $this->color($str, WPBONES_COLOR_BOLD_RED);
+      echo $newLine ? "\n" : '';
+    }
+
+    /* Commodity to display an info message in the console. */
+    protected function warning(string $str, $newLine = true)
+    {
+      echo "❗ ";
+      $this->color($str, WPBONES_COLOR_BOLD_YELLOW);
+      echo $newLine ? "\n" : '';
+    }
+
+    /* Commodity to display a success message in the console. */
+    protected function success($str)
+    {
+      $this->color("✅ " . $str, WPBONES_COLOR_GREEN);
+    }
+
+    protected function startCommand($str)
+    {
+      $this->color("------------------------------------------------" . "\n", WPBONES_COLOR_BLUE);
+      $this->color("🙌 " . $str . " " . $this->getPluginName() . "\n", WPBONES_COLOR_BLUE);
+      $this->color("------------------------------------------------" . "\n", WPBONES_COLOR_BLUE);
+    }
+
+    /* Commodity to display a start progress message in the console. */
+    protected function startProgress($str)
+    {
+      $this->color("🚧 " . $str . "\n", WPBONES_COLOR_GREEN);
+    }
+
+    /* Commodity to replace a previous progress message in the console with cursor up. */
+    protected function endProgress()
+    {
+      echo WPBONES_CURSOR_UP . WPBONES_COLOR_GREEN . "✅" . WPBONES_COLOR_RESET . "\n";
+    }
+
+    /* Commodity to display a completed message in the console. */
+    protected function processCompleted($str)
+    {
+      $this->color("✅ " . $str, WPBONES_COLOR_GREEN);
+    }
+
+    /**
+     * Get input from console
+     *
+     * @param string $str The question to ask
+     * @param string|null $default The default value
+     */
+    protected function ask(string $str, ?string $default = ''): string
+    {
+
+      $str = WPBONES_COLOR_GREEN .
+        "❓ $str" .
+        (empty($default) ? '' : " (default: {$default})") .
+        WPBONES_COLOR_RESET;
+
+      // Use readline to get the user input
+      $line = readline($str);
+
+      // Trim the input to remove extra spaces or newlines
+      $line = trim($line);
+
+      return $line ?: $default;
+    }
+  }
+}
+
 /**
  * Bones
  *
@@ -475,12 +622,9 @@ namespace Bones {
   }
 
   if (version_compare(PHP_VERSION, WPBONES_MINIMAL_PHP_VERSION) < 0) {
-    echo "\n\033[33;5;82mWarning!!\n";
-    echo "\n\033[38;5;82m\t" .
-      'You must run with PHP version ' .
-      WPBONES_MINIMAL_PHP_VERSION .
-      ' or greater';
-    echo "\033[0m\n\n";
+    echo WPBONES_COLOR_BOLD_RED .
+      "❌ Error! You must run with PHP version " . WPBONES_MINIMAL_PHP_VERSION . " or greater\n" .
+      WPBONES_COLOR_RESET;
     exit();
   }
 
@@ -489,6 +633,8 @@ namespace Bones {
    */
   class BonesCommandLine
   {
+    use Traits\Console;
+
     /**
      * WP Bones version
      */
@@ -554,10 +700,10 @@ namespace Bones {
         $this->help();
       } // rename
       elseif ($this->isCommand('rename')) {
-        $this->rename($this->commandParams());
+        $this->rename($this->getCommandParams());
       } // install
       elseif ($this->isCommand('install')) {
-        $this->install($this->commandParams());
+        $this->install($this->getCommandParams());
       } // Update
       elseif ($this->isCommand('update')) {
         $this->update();
@@ -606,26 +752,18 @@ namespace Bones {
     {
       try {
 
-        /**
-         * MARK: Load WordPress
-         * We have to load the WordPress environment.
-         */
+        // We have to load the WordPress environment.
         $currentDir = $_SERVER['PWD'] ?? __DIR__;
         $wpLoadPath = dirname(dirname(dirname($currentDir))) . '/wp-load.php';
 
         if (!file_exists($wpLoadPath)) {
-          echo "\n\033[33;5;82mWarning!!\n";
-          echo "\n\033[38;5;82m\t" .
-            'You must be inside "wp-content/plugins/" folders';
-          echo "\033[0m\n\n";
+          $this->error("Error! You need to be inside the wp-content/plugins/ folder");
           exit();
         }
 
         require $wpLoadPath;
       } catch (Exception $e) {
-        echo "\n\033[33;5;82mWarning!!\n";
-        echo "\n\033[38;5;82m\t" . 'Can\'t load WordPress';
-        echo "\033[0m\n\n";
+        $this->error("Error! Can't load WordPress (" . $e->getMessage() . ")");
       }
 
       try {
@@ -641,8 +779,8 @@ namespace Bones {
           require __DIR__ . '/vendor/autoload.php';
         }
       } catch (Exception $e) {
-        echo "\n\033[33;5;82mWarning!!\n";
-        echo "\n\033[38;5;82m\t" . 'Can\'t load Composer';
+        $this->error("Error! Can't load Composer autoload (" . $e->getMessage() . ")");
+        exit();
       }
 
       try {
@@ -655,8 +793,8 @@ namespace Bones {
           require_once __DIR__ . '/bootstrap/plugin.php';
         }
       } catch (Exception $e) {
-        echo "\n\033[33;5;82mWarning!!\n";
-        echo "\n\033[38;5;82m\t" . 'Can\'t load this plugin env';
+        $this->error("Error! Can't load the plugin env (" . $e->getMessage() . ")");
+        exit();
       }
     }
 
@@ -674,9 +812,87 @@ namespace Bones {
           $this->kernel = new $kernelClass();
         }
       } catch (Exception $e) {
-        echo "\n\033[33;5;82mWarning!!\n";
-        echo "\n\033[38;5;82m\t" . 'Can\'t load console kernel';
+        $this->error("Error! Can't load kernel console (" . $e->getMessage() . ")");
+        exit();
       }
+    }
+
+    /**
+     * Commodity function to check if ClassName has been requested.
+     *
+     * @param string|null $className Optional. Command to check.
+     *
+     * @return string
+     */
+    protected function askClassNameIfEmpty($className = ''): string
+    {
+      if (empty($className)) {
+        $className = $this->ask('ClassName:');
+        if (empty($className)) {
+          $this->error('ClassName is required');
+          exit(0);
+        }
+      }
+
+      return $className;
+    }
+
+    /**
+     * Ask the user which package manager to use
+     *
+     * @since 1.9.0
+     * @return string|null The name of the package manager to use
+     */
+    protected function askPackageManager()
+    {
+      $packageManager = null;
+
+      // get the available package manager
+      $listPackageManagers = $this->getListAvailablePackageManagers();
+
+      if ($listPackageManagers) {
+        // if we found just one package manager, we use it
+        if (count($listPackageManagers) === 1) {
+          return $listPackageManagers[0];
+        }
+
+        $availablePackageManagerStr = implode(', ', $listPackageManagers);
+        $this->info("🔍 Found package managers: " . $availablePackageManagerStr);
+
+        // check if "npm" is available and use it by default
+        if (in_array('npm', $listPackageManagers)) {
+          $packageManager = 'npm';
+        }
+
+        // ask which package manager to use
+        $packageManager = $this->ask('Which package manager do you want to use (' . $availablePackageManagerStr . ')', $packageManager);
+      }
+
+      return $packageManager;
+    }
+
+    /**
+     * Return the params after "php bones [command]".
+     *
+     * @param int|null $index Optional. Index of param.
+     *                   If NULL will be returned the whole array.
+     *
+     * @return array|string
+     */
+    protected function getCommandParams($index = null)
+    {
+      $params = $this->arguments();
+
+      // strip the command name
+      array_shift($params);
+
+      return !is_null($index) ? $params[$index] ?? null : $params;
+    }
+
+    /* Return the default plugin name and namespace. */
+    protected function getDefaultPluginNameAndNamespace(): array
+    {
+      return ['WP Kirk', 'WPKirk'];
     }
 
     /**
@@ -692,6 +908,70 @@ namespace Bones {
     }
 
     /**
+     * Return the default Plugin filename as snake case from the plugin name.
+     *
+     * @param string|null $pluginName
+     * @return string
+     */
+    public function getMainPluginFile($pluginName = ''): string
+    {
+      if (empty($pluginName)) {
+        $pluginName = $this->getPluginName();
+      }
+      return strtolower(str_replace(' ', '-', $pluginName)) . '.php';
+    }
+
+    /**
+     * Return the current Plugin name defined in the namespace file.
+     *
+     * @return string
+     */
+    public function getPluginName(): string
+    {
+      [$plugin_name] = $this->getPluginNameAndNamespace();
+
+      return $plugin_name;
+    }
+
+    /**
+     * Return the plugin slug.
+     *
+     * @param string|null $str
+     */
+    public function getPluginSlug($str = null): string
+    {
+      $str = $this->snakeCasePluginName($str);
+
+      return $str . '_slug';
+    }
+
+    /**
+     * Return the plugin vars.
+     *
+     * @param string|null $str
+     * @return string
+     */
+    public function getPluginVars($str = null): string
+    {
+      $str = $this->snakeCasePluginName($str);
+
+      return $str . '_vars';
+    }
+
+    /**
+     * Return the plugin id used for css, js, less and files.
+     * Currently, it's the sanitized plugin name.
+     *
+     * @param string|null $str
+     *
+     * @return string
+     */
+    public function getPluginId($str = null): string
+    {
+      return $this->sanitizePluginName($str);
+    }
+
+    /**
      * Return the current Plugin name and namespace defined in the namespace file.
      *
      * @return array
@@ -699,6 +979,83 @@ namespace Bones {
     public function getPluginNameAndNamespace(): array
     {
       return explode(',', file_get_contents('namespace'));
+    }
+
+    /**
+     * Help method to get the Domain Path from the plugin header
+     *
+     * @return string|null
+     */
+    protected function getDomainPath()
+    {
+      $header = $this->extractPluginHeaderInfo('Domain Path');
+      if (isset($header['Domain Path'])) {
+        return $header['Domain Path'];
+      }
+      return null;
+    }
+
+    /**
+     * Returns the first package manager available.
+     *
+     * @return string|null The name of the available package manager (yarn, npm, pnpm, bun) or null if none is available.
+     */
+    protected function getAvailablePackageManager(): ?string
+    {
+      $packageManagers = $this->getListAvailablePackageManagers();
+
+      if (empty($packageManagers)) {
+        return null;
+      }
+
+      return $packageManagers[0];
+    }
+
+    /**
+     * Returns the list of effective package managers.
+     * We will check for ['yarn', 'npm', 'pnpm', 'bun'] and return the available ones.
+     *
+     * @since 1.9.0
+     * @return array The list of available package managers
+     */
+    protected function getListAvailablePackageManagers(): array
+    {
+      $checkIdAvailable = ['yarn', 'npm', 'pnpm', 'bun'];
+      $available = [];
+
+      foreach ($checkIdAvailable as $id) {
+        if ($this->isCommandAvailable($id)) {
+          $available[] = $id;
+        }
+      }
+
+      return $available;
+    }
+
+    /**
+     * Return the content of a stub file.
+     *
+     * @param string $filename
+     * @return string
+     */
+    public function getStubContent(string $filename): string
+    {
+      return file_get_contents(
+        "vendor/wpbones/wpbones/src/Console/stubs/{$filename}.stub"
+      );
+    }
+
+    /**
+     * Return true if the command is available in the system.
+     *
+     * @param string $command
+     * @return bool
+     */
+    protected function isCommandAvailable(string $command): bool
+    {
+      $whereCommand = (PHP_OS_FAMILY === 'Windows') ? 'where' : 'command -v';
+      $output = shell_exec("$whereCommand $command");
+      return !empty($output);
     }
 
     /**
@@ -714,13 +1071,111 @@ namespace Bones {
       return $command === ($arguments[0] ?? '');
     }
 
+    /**
+     * Commodity function to check if help has been requested.
+     *
+     * @param string|null $str Optional. Command to check.
+     *
+     * @return bool
+     */
+    protected function isHelp($str = null): bool
+    {
+      if (!is_null($str)) {
+        return empty($str) || $str === '--help';
+      }
+
+      $param = $this->getCommandParams()[0] ?? null;
+
+      return !empty($param) && $param === '--help';
+    }
+
+    /**
+     * Return the snake case plugin name.
+     *
+     * @param string|null $str
+     * @return string
+     */
+    public function snakeCasePluginName($str = null): string
+    {
+      $str = $this->sanitizePluginName($str);
+
+      return str_replace('-', '_', $str);
+    }
+
+    /**
+     * Return the sanitized plugin name.
+     *
+     * @param string|null $str
+     * @return string
+     */
+    public function sanitizePluginName($str = null): string
+    {
+      if (is_null($str)) {
+        $str = $this->getPluginName();
+      }
+
+      return $this->sanitize($str);
+    }
+
+    /**
+     * Return the CamelCase plugin name.
+     * Used for Namespace
+     *
+     * @param string $input
+     * @return string
+     */
+    public function sanitizeToCamelCase(string $input): string
+    {
+      // Remove special characters except letters and numbers
+      $sanitized = preg_replace('/[^a-zA-Z0-9\s]/', '', $input);
+
+      // Split the string into words (using spaces as delimiter)
+      $words = explode(' ', $sanitized);
+
+      // Convert the first letter of each word to uppercase
+      $camelCasedWords = array_map('ucfirst', $words);
+
+      // Join the words without spaces
+      $camelCasedString = implode('', $camelCasedWords);
+
+      // Return the CamelCase string
+      return $camelCasedString;
+    }
+
+    /**
+     * Return a kebalized version of the string
+     *
+     * @param string $title
+     */
+    protected function sanitize(string $title): string
+    {
+      $title = strip_tags($title);
+      // Preserve escaped octets.
+      $title = preg_replace('|%([a-fA-F0-9][a-fA-F0-9])|', '---$1---', $title);
+      // Remove percent signs that are not part of an octet.
+      $title = str_replace('%', '', $title);
+      // Restore octets.
+      $title = preg_replace('|---([a-fA-F0-9][a-fA-F0-9])---|', '%$1', $title);
+
+      $title = strtolower($title);
+
+      $title = preg_replace('/&.+?;/', '', $title); // kill entities
+      $title = str_replace('.', '-', $title);
+
+      $title = preg_replace('/[^%a-z0-9 _-]/', '', $title);
+      $title = preg_replace('/\s+/', '-', $title);
+      $title = preg_replace('|-+|', '-', $title);
+
+      return trim($title, '-');
+    }
+
     /** Display the WP-CLI version in the bones console. */
     protected function wpCliInfoHelp()
     {
       if ($this->wpCliVersion) {
         $this->info("→ WP-CLI version: {$this->wpCliVersion}");
       } else {
-        $this->warning("⚠️ WP-CLI not found: we recommend to install it globally - https://wp-cli.org/#installing\n");
+        $this->warning("WP-CLI not found: we recommend to install it globally - https://wp-cli.org/#installing\n");
       }
     }
 
@@ -784,166 +1239,78 @@ namespace Bones {
       echo "\n\n";
     }
 
-    /**
-     * Commodity to display a message in the console.
-     *
-     * @param string $str The message to display.
-     * @param bool $newLine Optional. Whether to add a new line at the end.
-     */
-    protected function info(string $str, $newLine = true)
+    /* Run subtask. Handle the php bones commands */
+    protected function handle()
     {
-      echo "\033[38;5;213m" . $str;
-      echo "\033[0m";
-      echo $newLine ? "\n" : '';
-    }
+      // deploy
+      if ($this->isCommand('deploy')) {
+        $this->deploy($this->getCommandParams());
+      } // Optimize
+      elseif ($this->isCommand('optimize')) {
+        $this->optimize();
+      } // Tinker
+      elseif ($this->isCommand('tinker')) {
+        $this->tinker();
+      } // Require
+      elseif ($this->isCommand('require')) {
+        $this->requirePackage($this->getCommandParams(0));
+      } // Version
+      elseif ($this->isCommand('version')) {
+        $this->version($this->getCommandParams());
+      } // migrate:create {table_name}
+      elseif ($this->isCommand('plugin')) {
+        $this->plugin($this->getCommandParams());
+      } // migrate:create {table_name}
+      elseif ($this->isCommand('migrate:create')) {
+        $this->createMigrate($this->getCommandParams(0));
+      } // make:controller {controller_name}
+      elseif ($this->isCommand('make:controller')) {
+        $this->createController($this->getCommandParams(0));
+      } // make:console {command_name}
+      elseif ($this->isCommand('make:console')) {
+        $this->createCommand($this->getCommandParams(0));
+      } // make:cpt {className}
+      elseif ($this->isCommand('make:cpt')) {
+        $this->createCustomPostType($this->getCommandParams(0));
+      } // make:shortcode {className}
+      elseif ($this->isCommand('make:shortcode')) {
+        $this->createShortcode($this->getCommandParams(0));
+      } // make:schedule {className}
+      elseif ($this->isCommand('make:schedule')) {
+        $this->createSchedule($this->getCommandParams(0));
+      } // make:provider {className}
+      elseif ($this->isCommand('make:provider')) {
+        $this->createProvider($this->getCommandParams(0));
+      } // make:ajax {className}
+      elseif ($this->isCommand('make:ajax')) {
+        $this->createAjax($this->getCommandParams(0));
+      } // make:ctt {className}
+      elseif ($this->isCommand('make:ctt')) {
+        $this->createCustomTaxonomyType($this->getCommandParams(0));
+      } // make:widget {className}
+      elseif ($this->isCommand('make:widget')) {
+        $this->createWidget($this->getCommandParams(0));
+      } // make:model {className}
+      elseif ($this->isCommand('make:model')) {
+        $this->createModel($this->getCommandParams(0));
+      } // make:eloquent-model {className}
+      elseif ($this->isCommand('make:eloquent-model')) {
+        $this->createEloquentModel($this->getCommandParams(0));
+      } // make:api {className}
+      elseif ($this->isCommand('make:api')) {
+        $this->createAPIController($this->getCommandParams(0));
+      } // else...
+      else {
+        $extended = false;
 
-    /**
-     * Commodity to display a message in the console.
-     *
-     * @param string $str The message to display.
-     * @param bool $newLine Optional. Whether to add a new line at the end.
-     */
-    protected function line(string $str, $newLine = true)
-    {
-      echo "\033[38;5;82m" . $str;
-      echo "\033[0m";
-      echo $newLine ? "\n" : '';
-    }
+        if ($this->kernel) {
+          $extended = $this->kernel->handle($this->arguments());
+        }
 
-    /* Commodity to display an error message in the console. */
-    protected function error(string $str, $newLine = true)
-    {
-      echo "\033[41m";
-      echo $newLine ? "\n" : '';
-      echo "\033[41;255m" . $str;
-      echo $newLine ? "\n" : '';
-      echo "\033[0m";
-      echo $newLine ? "\n" : '';
-    }
-
-    /* Commodity to display an info message in the console. */
-    protected function warning(string $str, $newLine = true)
-    {
-      echo "\e[31m";
-      echo $newLine ? "\n" : '';
-      echo  $str;
-      echo $newLine ? "\n" : '';
-      echo "\e[0m";
-      echo $newLine ? "\n" : '';
-    }
-
-    /**
-     * Return the default Plugin filename as snake case from the plugin name.
-     *
-     * @param string|null $pluginName
-     * @return string
-     */
-    public function getMainPluginFile($pluginName = ''): string
-    {
-      if (empty($pluginName)) {
-        $pluginName = $this->getPluginName();
+        if (!$extended) {
+          $this->info("\nUnknown command! Use --help for commands list\n");
+        }
       }
-      return strtolower(str_replace(' ', '-', $pluginName)) . '.php';
-    }
-
-    /**
-     * Return the current Plugin name defined in the namespace file.
-     *
-     * @return string
-     */
-    public function getPluginName(): string
-    {
-      [$plugin_name] = $this->getPluginNameAndNamespace();
-
-      return $plugin_name;
-    }
-
-    /**
-     * This is the most important function of WP Bones.
-     * Here we will rename all occurrences of the plugin name and namespace.
-     * The default plugin name is 'WP Kirk' and the default namespace is 'WPKirk'.
-     * Here we will create also the slug used in the plugin.
-     *
-     * For example, if the plugin name is 'My WP Plugin'
-     *
-     * My WP Plugin          Name of plugin
-     * MyWPPlugin            Namespace, see [PSR-4 autoload standard](http://www.php-fig.org/psr/psr-4/)
-     * my_wp_plugin_slug     Plugin slug
-     * my_wp_plugin_vars     Plugin vars used for CPT, taxonomy, etc.
-     * my-wp-plugin          Internal id used for css, js and less files
-     *
-     * As you can see we're going to create all namespace/id from the plugin name.
-     *
-     * @brief Rename the plugin
-     *
-     */
-    protected function rename($args)
-    {
-      if ($this->isHelp()) {
-        $this->info('Usage:');
-        $this->line(' php bones rename [options] <Plugin Name> <Namespace>');
-        $this->info('Available options:');
-        $this->line(' --reset                 Reset the plugin name and namespace');
-        $this->line(' --update                Rename after an update. For example after install a new package');
-        exit();
-      }
-
-      $arg_option_plugin_name = $args[0] ?? null;
-
-      switch ($arg_option_plugin_name) {
-        case '--reset':
-          $this->resetPluginNameAndNamespace();
-          break;
-        case '--update':
-          $this->updatePluginNameAndNamespace();
-          break;
-        default:
-          [$search_plugin_name, $search_namespace, $plugin_name, $namespace, $mainPluginFile] = $this->getAskPluginNameAndNamespace($args);
-          $this->info("\nThe new plugin filename, name and namespace will be '{$mainPluginFile}', '{$plugin_name}', '{$namespace}'");
-          $yesno = $this->ask('Continue (y/n)', 'n');
-          if (strtolower($yesno) != 'y') {
-            return;
-          }
-          $this->setPluginNameAndNamespace($search_plugin_name, $search_namespace, $plugin_name, $namespace);
-          $this->optimize();
-          break;
-      }
-    }
-
-    /**
-     * Commodity function to check if help has been requested.
-     *
-     * @param string|null $str Optional. Command to check.
-     *
-     * @return bool
-     */
-    protected function isHelp($str = null): bool
-    {
-      if (!is_null($str)) {
-        return empty($str) || $str === '--help';
-      }
-
-      $param = $this->commandParams()[0] ?? null;
-
-      return !empty($param) && $param === '--help';
-    }
-
-    /**
-     * Return the params after "php bones [command]".
-     *
-     * @param int|null $index Optional. Index of param.
-     *                   If NULL will be returned the whole array.
-     *
-     * @return array|string
-     */
-    protected function commandParams($index = null)
-    {
-      $params = $this->arguments();
-
-      // strip the command name
-      array_shift($params);
-
-      return !is_null($index) ? $params[$index] ?? null : $params;
     }
 
     /* Reset the plugin name and namespace to the original values */
@@ -954,12 +1321,6 @@ namespace Bones {
       $search_namespace = $this->getNamespace();
       [$plugin_name, $namespace] = $this->getDefaultPluginNameAndNamespace();
       $this->setPluginNameAndNamespace($search_plugin_name, $search_namespace, $plugin_name, $namespace);
-    }
-
-    /* Return the default plugin name and namespace. */
-    protected function getDefaultPluginNameAndNamespace(): array
-    {
-      return ['WP Kirk', 'WPKirk'];
     }
 
     /**
@@ -1006,7 +1367,7 @@ namespace Bones {
       ]);
 
       // change namespace
-      $this->line("🚧 Loading and process files...");
+      $this->startProgress("Loading and process files...");
       foreach ($files as $file) {
 
         $content = file_get_contents($file);
@@ -1042,7 +1403,7 @@ namespace Bones {
 
         file_put_contents($file, $content);
       }
-      $this->info("✅ Content renamed completed!");
+      $this->endProgress();
 
       $folder = $this->getDomainPath();
 
@@ -1084,7 +1445,7 @@ namespace Bones {
       // save new plugin name and namespace
       file_put_contents('namespace', "{$plugin_name},{$namespace}");
 
-      $this->info("👏 Rename process completed!");
+      $this->processCompleted("Rename process completed!");
     }
 
     /**
@@ -1153,99 +1514,6 @@ namespace Bones {
       return _rglob($path, $match, $result);
     }
 
-    /**
-     * Return the plugin slug.
-     *
-     * @param string|null $str
-     */
-    public function getPluginSlug($str = null): string
-    {
-      $str = $this->snakeCasePluginName($str);
-
-      return $str . '_slug';
-    }
-
-    /**
-     * Return the snake case plugin name.
-     *
-     * @param string|null $str
-     * @return string
-     */
-    public function snakeCasePluginName($str = null): string
-    {
-      $str = $this->sanitizePluginName($str);
-
-      return str_replace('-', '_', $str);
-    }
-
-    /**
-     * Return the sanitized plugin name.
-     *
-     * @param string|null $str
-     * @return string
-     */
-    public function sanitizePluginName($str = null): string
-    {
-      if (is_null($str)) {
-        $str = $this->getPluginName();
-      }
-
-      return $this->sanitize($str);
-    }
-
-    /**
-     * Return a kebalized version of the string
-     *
-     * @param string $title
-     */
-    protected function sanitize(string $title): string
-    {
-      $title = strip_tags($title);
-      // Preserve escaped octets.
-      $title = preg_replace('|%([a-fA-F0-9][a-fA-F0-9])|', '---$1---', $title);
-      // Remove percent signs that are not part of an octet.
-      $title = str_replace('%', '', $title);
-      // Restore octets.
-      $title = preg_replace('|---([a-fA-F0-9][a-fA-F0-9])---|', '%$1', $title);
-
-      $title = strtolower($title);
-
-      $title = preg_replace('/&.+?;/', '', $title); // kill entities
-      $title = str_replace('.', '-', $title);
-
-      $title = preg_replace('/[^%a-z0-9 _-]/', '', $title);
-      $title = preg_replace('/\s+/', '-', $title);
-      $title = preg_replace('|-+|', '-', $title);
-
-      return trim($title, '-');
-    }
-
-    /**
-     * Return the plugin vars.
-     *
-     * @param string|null $str
-     * @return string
-     */
-    public function getPluginVars($str = null): string
-    {
-      $str = $this->snakeCasePluginName($str);
-
-      return $str . '_vars';
-    }
-
-    /**
-     * Return the plugin id used for css, js, less and files.
-     * Currently, it's the sanitized plugin name.
-     *
-     * @param string|null $str
-     *
-     * @return string
-     */
-    public function getPluginId($str = null): string
-    {
-      return $this->sanitizePluginName($str);
-    }
-
     /* Update the plugin name and namespace after a install new package */
     protected function updatePluginNameAndNamespace()
     {
@@ -1262,14 +1530,14 @@ namespace Bones {
      * @param array $args The arguments from the console. The first argument is the plugin name and the second is the namespace
      *
      */
-    protected function getAskPluginNameAndNamespace(array $args): array
+    protected function askPluginNameAndNamespace(array $args): array
     {
       // Get the current plugin name and namespace
       $search_plugin_name = $this->getPluginName();
       $search_namespace = $this->getNamespace();
 
       if ($search_plugin_name === 'WP Kirk' && $search_namespace === 'WPKirk') {
-        $this->line("ℹ️  You are renaming your plugin for the first time.\n");
+        $this->line("→ You are renaming your plugin for the first time.\n");
       }
 
       $plugin_name = $args[0] ?? '';
@@ -1303,13 +1571,13 @@ namespace Bones {
 
         // both plugin name and namespace don't have to contains 'WP Kirk' or 'WPKirk'
         if (strpos($plugin_name, 'WP Kirk') !== false || strpos($plugin_name, 'WPKirk') !== false) {
-          $this->error('🛑 Plugin name cannot contain "WP Kirk" or "WPKirk"');
+          $this->warning('Plugin name cannot contain "WP Kirk" or "WPKirk"');
           $plugin_name = '';
           continue;
         }
 
         if (strpos($namespace, 'WP Kirk') !== false || strpos($namespace, 'WPKirk') !== false) {
-          $this->error('🛑 Namespace cannot contain "WP Kirk" or "WPKirk"');
+          $this->warning('Namespace cannot contain "WP Kirk" or "WPKirk"');
           $plugin_name = '';
           $namespace = '';
           continue;
@@ -1392,68 +1660,6 @@ namespace Bones {
       return $result;
     }
 
-    /**
-     * Return the CamelCase plugin name.
-     * Used for Namespace
-     *
-     * @param string $input
-     * @return string
-     */
-    public function sanitizeToCamelCase(string $input): string
-    {
-      // Remove special characters except letters and numbers
-      $sanitized = preg_replace('/[^a-zA-Z0-9\s]/', '', $input);
-
-      // Split the string into words (using spaces as delimiter)
-      $words = explode(' ', $sanitized);
-
-      // Convert the first letter of each word to uppercase
-      $camelCasedWords = array_map('ucfirst', $words);
-
-      // Join the words without spaces
-      $camelCasedString = implode('', $camelCasedWords);
-
-      // Return the CamelCase string
-      return $camelCasedString;
-    }
-
-    /**
-     * --------------------------------------------------------------------------
-     * Internal useful function
-     * --------------------------------------------------------------------------
-     * Contains all internal methods.
-     */
-
-
-    /**
-     * Get input from console
-     *
-     * @param string $str The question to ask
-     * @param string|null $default The default value
-     */
-    protected function ask(string $str, ?string $default = ''): string
-    {
-      $str = "\n\e[38;5;33m$str" .
-        (empty($default) ? '' : " (default: {$default})") .
-        "\e[0m ";
-
-      // Use readline to get the user input
-      $line = readline($str);
-
-      // Trim the input to remove extra spaces or newlines
-      $line = trim($line);
-
-      return $line ?: $default;
-    }
-
-
-
-    /* Alias composer dump-autoload */
-    protected function optimize()
-    {
-      $this->line(`composer dump-autoload -o`);
-    }
-
     /* Execute composer install */
     protected function install()
     {
@@ -1466,11 +1672,69 @@ namespace Bones {
 
       // check if the "node_modules" folder exists
       if (!is_dir('node_modules')) {
-        $this->line("🚧 Node modules not found. Installing...");
+        $this->startProgress("Node modules not found. Installing...");
         $this->installPackages();
       }
 
       $this->line(`composer install`);
+    }
+
+    /* Alias composer dump-autoload */
+    protected function optimize()
+    {
+      $this->line(`composer dump-autoload -o`);
+    }
+
+    /**
+     * This is the most important function of WP Bones.
+     * Here we will rename all occurrences of the plugin name and namespace.
+     * The default plugin name is 'WP Kirk' and the default namespace is 'WPKirk'.
+     * Here we will create also the slug used in the plugin.
+     *
+     * For example, if the plugin name is 'My WP Plugin'
+     *
+     * My WP Plugin          Name of plugin
+     * MyWPPlugin            Namespace, see [PSR-4 autoload standard](http://www.php-fig.org/psr/psr-4/)
+     * my_wp_plugin_slug     Plugin slug
+     * my_wp_plugin_vars     Plugin vars used for CPT, taxonomy, etc.
+     * my-wp-plugin          Internal id used for css, js and less files
+     *
+     * As you can see we're going to create all namespace/id from the plugin name.
+     *
+     * @brief Rename the plugin
+     *
+     */
+    protected function rename($args)
+    {
+      if ($this->isHelp()) {
+        $this->info('Usage:');
+        $this->line(' php bones rename [options] <Plugin Name> <Namespace>');
+        $this->info('Available options:');
+        $this->line(' --reset                 Reset the plugin name and namespace');
+        $this->line(' --update                Rename after an update. For example after install a new package');
+        exit();
+      }
+
+      $arg_option_plugin_name = $args[0] ?? null;
+
+      switch ($arg_option_plugin_name) {
+        case '--reset':
+          $this->resetPluginNameAndNamespace();
+          break;
+        case '--update':
+          $this->updatePluginNameAndNamespace();
+          break;
+        default:
+          [$search_plugin_name, $search_namespace, $plugin_name, $namespace, $mainPluginFile] = $this->askPluginNameAndNamespace($args);
+          $this->info("\nThe new plugin filename, name and namespace will be '{$mainPluginFile}', '{$plugin_name}', '{$namespace}'");
+          $yesno = $this->ask('Continue (y/n)', 'n');
+          if (strtolower($yesno) != 'y') {
+            return;
+          }
+          $this->setPluginNameAndNamespace($search_plugin_name, $search_namespace, $plugin_name, $namespace);
+          $this->optimize();
+          break;
+      }
     }
 
     /* Execute composer update */
@@ -1512,87 +1776,6 @@ namespace Bones {
     }
 
     /**
-     * --------------------------------------------------------------------------
-     * Public task
-     * --------------------------------------------------------------------------
-     * Contains tasks a user can run from the console.
-     */
-
-    /* Run subtask. Handle the php bones commands */
-    protected function handle()
-    {
-      // deploy
-      if ($this->isCommand('deploy')) {
-        $this->deploy($this->commandParams());
-      } // Optimize
-      elseif ($this->isCommand('optimize')) {
-        $this->optimize();
-      } // Tinker
-      elseif ($this->isCommand('tinker')) {
-        $this->tinker();
-      } // Require
-      elseif ($this->isCommand('require')) {
-        $this->requirePackage($this->commandParams(0));
-      } // Version
-      elseif ($this->isCommand('version')) {
-        $this->version($this->commandParams());
-      } // migrate:create {table_name}
-      elseif ($this->isCommand('plugin')) {
-        $this->plugin($this->commandParams());
-      } // migrate:create {table_name}
-      elseif ($this->isCommand('migrate:create')) {
-        $this->createMigrate($this->commandParams(0));
-      } // make:controller {controller_name}
-      elseif ($this->isCommand('make:controller')) {
-        $this->createController($this->commandParams(0));
-      } // make:console {command_name}
-      elseif ($this->isCommand('make:console')) {
-        $this->createCommand($this->commandParams(0));
-      } // make:cpt {className}
-      elseif ($this->isCommand('make:cpt')) {
-        $this->createCustomPostType($this->commandParams(0));
-      } // make:shortcode {className}
-      elseif ($this->isCommand('make:shortcode')) {
-        $this->createShortcode($this->commandParams(0));
-      } // make:schedule {className}
-      elseif ($this->isCommand('make:schedule')) {
-        $this->createSchedule($this->commandParams(0));
-      } // make:provider {className}
-      elseif ($this->isCommand('make:provider')) {
-        $this->createProvider($this->commandParams(0));
-      } // make:ajax {className}
-      elseif ($this->isCommand('make:ajax')) {
-        $this->createAjax($this->commandParams(0));
-      } // make:ctt {className}
-      elseif ($this->isCommand('make:ctt')) {
-        $this->createCustomTaxonomyType($this->commandParams(0));
-      } // make:widget {className}
-      elseif ($this->isCommand('make:widget')) {
-        $this->createWidget($this->commandParams(0));
-      } // make:model {className}
-      elseif ($this->isCommand('make:model')) {
-        $this->createModel($this->commandParams(0));
-      } // make:eloquent-model {className}
-      elseif ($this->isCommand('make:eloquent-model')) {
-        $this->createEloquentModel($this->commandParams(0));
-      } // make:api {className}
-      elseif ($this->isCommand('make:api')) {
-        $this->createAPIController($this->commandParams(0));
-      } // else...
-      else {
-        $extended = false;
-
-        if ($this->kernel) {
-          $extended = $this->kernel->handle($this->arguments());
-        }
-
-        if (!$extended) {
-          $this->info("\nUnknown command! Use --help for commands list\n");
-        }
-      }
-    }
-
-    /**
      * Create a deployment version of the plugin
      *
      * @param $argv
@@ -1616,128 +1799,124 @@ namespace Bones {
         exit(0);
       }
 
-      $this->info("\nStarting deploy ¯\_(ツ)_/¯\n");
+      if (empty($path)) {
+        $this->error("The path is empty!");
+        exit(1);
+      }
 
-      if (!empty($path)) {
+      $this->startCommand("Deploy");
 
-        $dontSkipWhenDeploy = [
-          '/gulpfile.js',
-          '/package.json',
-          '/package-lock.json',
-          '/yarn.lock',
-          '/tsconfig.json',
-          '/pnpm-lock.yaml',
-          '/resources/assets',
-          '/composer.json',
-          '/composer.lock',
-        ];
+      do_action('wpbones_console_deploy_start', $this, $path);
 
-        if ($is_wp_org) {
-          $this->info("\n🚦 You are going to release this plugin in the WordPress.org public repository");
-          $this->line("\n→ In this case some files won't be skipped during the deployment.");
-          $this->line("→ The files that won't be skipped are:\n\n" . implode("\n", $dontSkipWhenDeploy) . "\n\n");
-        }
+      // alternative method to customize the deployment
+      @include 'deploy.php';
 
-        // alternative method to customize the deployment
-        @include 'deploy.php';
+      /**
+       * Filter the list of files and folders that won't be skipped during the deployment.
+       *
+       * @since 1.9.0
+       * @param array $array The files and folders are relative to the root of plugin.
+       */
+      $dontSkipWhenDeploy = apply_filters('wpbones_console_deploy_dont_skip_files_folders', [
+        '/gulpfile.js',
+        '/package.json',
+        '/package-lock.json',
+        '/yarn.lock',
+        '/tsconfig.json',
+        '/pnpm-lock.yaml',
+        '/resources/assets',
+        '/composer.json',
+        '/composer.lock',
+      ]);
 
-        do_action('wpbones_console_deploy_start', $this, $path);
+      if ($is_wp_org) {
+        $this->info("\n🚦 You are going to release this plugin in the WordPress.org public repository");
+        $this->line("\n→ In this case some files won't be skipped during the deployment.");
+        $this->line("→ The files that won't be skipped are:\n\n" . implode("\n", $dontSkipWhenDeploy) . "\n\n");
+      }
 
-        // first delete previous path
-        $this->info("🕐 Delete folder {$path}");
-        $this->deleteDirectory($path);
-        $this->info("\033[1A👍");
+      /**
+       * Filter to enable or disable the build assets during the deployment.
+       *
+       * @since 1.9.0
+       * @param bool $buildAssets True to build assets, false to skip the build.
+       */
+      $buildAssets = apply_filters('wpbones_console_deploy_build_assets', true);
 
+      if ($buildAssets) {
         do_action('wpbones_console_deploy_before_build_assets', $this, $path);
-
         $this->buildAssets($path);
-
-        // files and folders to skip
-        $this->skipWhenDeploy = [
-          '/.git',
-          '/.cache',
-          '/assets',
-          '/.gitignore',
-          '/.gitkeep',
-          '/.DS_Store',
-          '/.babelrc',
-          '/node_modules',
-          '/bones',
-          '/vendor/wpbones/wpbones/src/Console/stubs',
-          '/vendor/wpbones/wpbones/src/Console/bin',
-          '/vendor/bin/bladeonecli',
-          '/vendor/eftec/bladeone/lib/bladeonecli',
-          '/deploy.php',
-          '/namespace',
-          '/README.md',
-          '/webpack.mix.js',
-          '/webpack.config.js',
-          '/phpcs.xml.dist',
-          '/mix-manifest.json',
-          '/release.sh',
-        ];
-
-        // The new strict rules require that the composer must also be released to publish the plugin in the WordPress.org repository.
-        if (!$is_wp_org) {
-          $this->skipWhenDeploy = array_merge($this->skipWhenDeploy, $dontSkipWhenDeploy);
-        }
-
-        /**
-         * Filter the list of files and folders to skip during the deployment.
-         *
-         * @param array $array The files and folders are relative to the root of plugin.
-         */
-        $this->skipWhenDeploy = apply_filters(
-          'wpbones_console_deploy_skip_folders',
-          $this->skipWhenDeploy
-        );
-
-        $this->rootDeploy = __DIR__;
-
-        $this->info("🚧 Copying to {$path}");
-        $this->xcopy(__DIR__, $path);
-        $this->info("✅ Copy completed");
-
-        /**
-         * Fires when the console deploy is completed.
-         *
-         * @param mixed $bones Bones command instance.
-         * @param string $path The deployed path.
-         */
-        do_action('wpbones_console_deploy_completed', $this, $path);
-
-        $this->info("\n\e[5m👏 Deploy completed!\e[0m");
-        $this->info("\n🚀 You can now deploy the plugin from the path: {$path}\n");
-      }
-    }
-
-    /**
-     * Ask the user which package manager to use
-     *
-     * @since 1.9.0
-     * @return string|null The name of the package manager to use
-     */
-    protected function askPackageManager()
-    {
-      $packageManager = null;
-
-      // get the available package manager
-      $listPackageManagers = $this->getListAvailablePackageManagers();
-
-      if ($listPackageManagers) {
-        // if we found just one package manager, we use it
-        if (count($listPackageManagers) === 1) {
-          return $listPackageManagers[0];
-        }
-
-        $availablePackageManagerStr = implode(', ', $listPackageManagers);
-        $this->info("🔍 Found package managers: " . $availablePackageManagerStr);
-
-        // ask which package manager to use
-        $packageManager = $this->ask('Which package manager do you want to use (' . $availablePackageManagerStr . ')', $packageManager);
       }
 
-      return $packageManager;
+      // check if the destination folder exists
+      if (is_dir($path)) {
+        $this->startProgress("Delete destination folder 📁 {$path}");
+        sleep(5);
+        $this->deleteDirectory($path);
+        $this->endProgress();
+      }
+
+      /**
+       * Filter the list of files and folders to skip during the deployment.
+       *
+       * @since 1.9.0
+       * @param array $array The files and folders are relative to the root of plugin.
+       */
+      $this->skipWhenDeploy = apply_filters('wpbones_console_deploy_skip_files_folders', [
+        '/.git',
+        '/.cache',
+        '/assets',
+        '/.gitignore',
+        '/.gitkeep',
+        '/.DS_Store',
+        '/.babelrc',
+        '/node_modules',
+        '/bones',
+        '/vendor/wpbones/wpbones/src/Console/stubs',
+        '/vendor/wpbones/wpbones/src/Console/bin',
+        '/vendor/bin/bladeonecli',
+        '/vendor/eftec/bladeone/lib/bladeonecli',
+        '/deploy.php',
+        '/namespace',
+        '/README.md',
+        '/webpack.mix.js',
+        '/webpack.config.js',
+        '/phpcs.xml.dist',
+        '/mix-manifest.json',
+        '/release.sh',
+      ]);
+
+      // The new strict rules require that the composer must also be released to publish the plugin in the WordPress.org repository.
+      if (!$is_wp_org) {
+        $this->skipWhenDeploy = array_merge($this->skipWhenDeploy, $dontSkipWhenDeploy);
+      }
+
+      /**
+       * Filter the list of files and folders to skip during the deployment.
+       *
+       * @param array $array The files and folders are relative to the root of plugin.
+       */
+      $this->skipWhenDeploy = apply_filters(
+        'wpbones_console_deploy_skip_folders',
+        $this->skipWhenDeploy
+      );
+
+      $this->rootDeploy = __DIR__;
+
+      $this->startProgress("Copying to 📁 {$path}");
+      $this->xcopy(__DIR__, $path);
+      $this->endProgress();
+
+      /**
+       * Fires when the console deploy is completed.
+       *
+       * @param mixed $bones Bones command instance.
+       * @param string $path The deployed path.
+       */
+      do_action('wpbones_console_deploy_completed', $this, $path);
+
+      $this->success("Deploy completed!");
+      $this->info("\n🚀 You can now deploy the plugin from the path: {$path}\n");
     }
 
     /**
@@ -1756,23 +1935,23 @@ namespace Bones {
         $answer = $this->ask("Do you want to run '$packageManager run build' to build assets? (y/n)", 'y');
 
         if (strtolower($answer) === 'y') {
-          $this->info("📦 Build for production by using '{$packageManager} run build'");
+          $this->startProgress("Build for production by using '{$packageManager} run build'");
           shell_exec("{$packageManager} run build");
-          $this->info("✅ Built assets successfully");
+          $this->processCompleted("Build completed\n");
           do_action('wpbones_console_deploy_after_build_assets', $this, $path);
         } else {
           $answer = $this->ask("Enter the package manager to build assets (press RETURN to skip the build)", '');
           if (empty($answer)) {
             $this->info('⏭︎ Skip build assets');
           } else {
-            $this->info("📦 Build for production by using '{$answer} run build'");
+            $this->startProgress("Build for production by using '{$answer} run build'");
             shell_exec("{$answer} run build");
-            $this->info("✅ Built assets successfully");
+            $this->endProgress();
             do_action('wpbones_console_deploy_after_build_assets', $this, $path);
           }
         }
       } else {
-        $this->info("🛑 No package manager found. The build assets will be skipped");
+        $this->warning("No package manager found. The build assets will be skipped");
       }
     }
 
@@ -1786,62 +1965,11 @@ namespace Bones {
       // ask to install node modules
       $yesno = $this->ask('Do you want to install node modules (y/n)', 'n');
       if (strtolower($yesno) === 'y') {
-        $this->info("📦 Installing node modules");
+        $this->startProgress("Installing node modules 📦");
         $packageManager = $this->getAvailablePackageManager();
         shell_exec("{$packageManager} install");
-        $this->info("✅ Node modules created and packages installed successfully");
+        $this->processCompleted("Node modules created and packages installed successfully");
       }
-    }
-
-    /**
-     * Returns the available package manager
-     *
-     * @return string|null The name of the available package manager (yarn, npm, pnpm, bun) or null if none is available.
-     */
-    protected function getAvailablePackageManager(): ?string
-    {
-      $packageManagers = $this->getListAvailablePackageManagers();
-
-      foreach ($packageManagers as $manager) {
-        if ($this->isCommandAvailable($manager)) {
-          return $manager;
-        }
-      }
-
-      return null;
-    }
-
-    /**
-     * Returns the list of available package managers
-     *
-     * @since 1.9.0
-     * @return array The list of available package managers
-     */
-    protected function getListAvailablePackageManagers(): array
-    {
-      $checkIdAvailable = ['yarn', 'npm', 'pnpm', 'bun'];
-      $available = [];
-
-      foreach ($checkIdAvailable as $id) {
-        if ($this->isCommandAvailable($id)) {
-          $available[] = $id;
-        }
-      }
-
-      return $available;
-    }
-
-    /**
-     * Return true if the command is available in the system.
-     *
-     * @param string $command
-     * @return bool
-     */
-    protected function isCommandAvailable(string $command): bool
-    {
-      $whereCommand = (PHP_OS_FAMILY === 'Windows') ? 'where' : 'command -v';
-      $output = shell_exec("$whereCommand $command");
-      return !empty($output);
     }
 
     /**
@@ -1917,21 +2045,25 @@ namespace Bones {
     /* Start a Tinker emulation */
     protected function tinker()
     {
-      $eval = $this->ask('>>>');
+      $eval = trim(readline(WPBONES_COLOR_BOLD_GREEN . "〉" . WPBONES_COLOR_LIGHT_GREEN), " \t\n\r\0\x0B");
 
       try {
         if ($eval == 'exit') {
           exit();
         }
 
-        if (substr($eval, -1) != ';') {
+        if (!empty($eval) && substr($eval, -1) != ';') {
           $eval .= ';';
         }
 
-        $this->line(eval($eval));
+        if (!empty($eval)) {
+          echo WPBONES_COLOR_RESET;
+          $this->line(eval($eval));
+        }
       } catch (Exception $e) {
         $this->info(eval($e->getMessage()));
       } finally {
+        echo empty($eval) ? "" : "\n";
         $this->tinker();
       }
     }
@@ -1979,14 +2111,10 @@ namespace Bones {
       $lines = explode("\n", $readme_txt_content);
       foreach ($lines as $line) {
         if (preg_match('/^[ \t\/*#@]*Stable tag:\s*(.*)$/i', $line, $matches)) {
-          /**
-           * The version is in the format of: Stable tag: 1.0.0
-           */
+          // The version is in the format of: Stable tag: 1.0.0
           $stable_tag_version_from_readme_txt = $matches[0];
 
-          /**
-           * The version is in the format of: 1.0.0 or 1.0.0-beta.1 or 1.0.0-alpha.1 or 1.0.0-rc.1
-           */
+          // The version is in the format of: 1.0.0 or 1.0.0-beta.1 or 1.0.0-alpha.1 or 1.0.0-rc.1
           $version_number_from_readme_txt = $matches[1];
 
           $this->line(
@@ -2001,14 +2129,11 @@ namespace Bones {
       foreach ($lines as $line) {
         // get the plugin version for WordPress comments
         if (preg_match('/^[ \t\/*#@]*Version:\s*(.*)$/i', $line, $matches)) {
-          /**
-           * The version is in the format of: * Version: 1.0.0
-           */
+
+          // The version is in the format of: * Version: 1.0.0
           $version_string_from_index_php = $matches[0];
 
-          /**
-           * The version is in the format of: 1.0.0
-           */
+          // The version is in the format of: 1.0.0
           $version_number_from_index_php = $matches[1];
 
           $this->line(
@@ -2085,7 +2210,7 @@ namespace Bones {
       try {
         $version = Version::parse($version);
       } catch (InvalidVersionException $e) {
-        $this->error("\nERROR:\n\nThe version is not valid.\n");
+        $this->error("Error! The version is not valid.\n");
         exit(1);
       }
 
@@ -2191,27 +2316,13 @@ namespace Bones {
 
       foreach ($headerKeys as $key) {
         if (isset($header[$key])) {
-          echo '✅ ' . $key . ': ';
+          $this->success($key . ': ');
           $this->info($header[$key]);
         } else {
-          $this->warning('👀 ' . $key . ': ', false);
-          $this->error(" Not found \n", false);
+          $this->warning($key . ': ', false);
+          $this->color(" Not found \n", WPBONES_COLOR_RED);
         }
       }
-    }
-
-    /**
-     * Help method to get the Domain Path from the plugin header
-     *
-     * @return string|null
-     */
-    protected function getDomainPath()
-    {
-      $header = $this->extractPluginHeaderInfo('Domain Path');
-      if (isset($header['Domain Path'])) {
-        return $header['Domain Path'];
-      }
-      return null;
     }
 
     /**
@@ -2266,19 +2377,6 @@ namespace Bones {
     }
 
     /**
-     * Return the content of a stub file.
-     *
-     * @param string $filename
-     * @return string
-     */
-    public function getStubContent(string $filename): string
-    {
-      return file_get_contents(
-        "vendor/wpbones/wpbones/src/Console/stubs/{$filename}.stub"
-      );
-    }
-
-    /**
      * Create a controller
      *
      * @param string|null $className The class name
@@ -2328,26 +2426,6 @@ namespace Bones {
       $this->line(" Created plugin/Http/Controllers/{$path}{$filename}");
 
       $this->optimize();
-    }
-
-    /**
-     * Commodity function to check if ClassName has been requested.
-     *
-     * @param string|null $className Optional. Command to check.
-     *
-     * @return string
-     */
-    protected function askClassNameIfEmpty(?string $className = ''): string
-    {
-      if (empty($className)) {
-        $className = $this->ask('ClassName:');
-        if (empty($className)) {
-          $this->error('ClassName is required');
-          exit(0);
-        }
-      }
-
-      return $className;
     }
 
     /**
