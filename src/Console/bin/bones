@@ -564,7 +564,7 @@ namespace Bones\Traits {
     /* Commodity to display a completed message in the console. */
     protected function processCompleted($str)
     {
-      $this->color("✅ " . $str, WPBONES_COLOR_GREEN);
+      $this->color("✅ " . $str . "\n", WPBONES_COLOR_GREEN);
     }
 
     /**
@@ -578,7 +578,7 @@ namespace Bones\Traits {
 
       $str = WPBONES_COLOR_GREEN .
         "❓ $str" .
-        (empty($default) ? '' : " (default: {$default})") .
+        (empty($default) ? ': ' : " (default: {$default}): ") .
         WPBONES_COLOR_RESET;
 
       // Use readline to get the user input
@@ -827,7 +827,7 @@ namespace Bones {
     protected function askClassNameIfEmpty($className = ''): string
     {
       if (empty($className)) {
-        $className = $this->ask('ClassName:');
+        $className = $this->ask('ClassName');
         if (empty($className)) {
           $this->error('ClassName is required');
           exit(0);
@@ -1367,7 +1367,7 @@ namespace Bones {
       ]);
 
       // change namespace
-      $this->startProgress("Loading and process files...");
+      $this->startProgress("Processing files");
       foreach ($files as $file) {
 
         $content = file_get_contents($file);
@@ -1566,8 +1566,8 @@ namespace Bones {
       $namespace = '';
 
       while (empty($plugin_name)) {
-        $plugin_name = $this->ask('Plugin name:', $plugin_name);
-        $namespace = $this->ask('Namespace:', $namespace);
+        $plugin_name = $this->ask('Plugin name', $plugin_name);
+        $namespace = $this->ask('Namespace', $namespace);
 
         // both plugin name and namespace don't have to contains 'WP Kirk' or 'WPKirk'
         if (strpos($plugin_name, 'WP Kirk') !== false || strpos($plugin_name, 'WPKirk') !== false) {
@@ -1670,19 +1670,39 @@ namespace Bones {
         exit();
       }
 
+      $this->startCommand("Install");
+
       // check if the "node_modules" folder exists
       if (!is_dir('node_modules')) {
-        $this->startProgress("Node modules not found. Installing...");
+        $this->warning("Node modules not found");
         $this->installPackages();
       }
 
       $this->line(`composer install`);
     }
 
+    /**
+     * Install node modules
+     *
+     * @since 1.9.0
+     */
+    protected function installPackages()
+    {
+      // ask to install node modules
+      $yesno = $this->ask('Do you want to install node modules (y/n)', 'n');
+      if (strtolower($yesno) === 'y') {
+        $packageManager = $this->askPackageManager();
+        shell_exec("{$packageManager} install");
+        $this->processCompleted("Node modules created and packages installed successfully\n");
+      }
+    }
+
     /* Alias composer dump-autoload */
     protected function optimize()
     {
+      $this->startCommand("Optimize");
       $this->line(`composer dump-autoload -o`);
+      $this->processCompleted("Optimize process completed!");
     }
 
     /**
@@ -1715,6 +1735,8 @@ namespace Bones {
         exit();
       }
 
+      $this->startCommand("Rename");
+
       $arg_option_plugin_name = $args[0] ?? null;
 
       switch ($arg_option_plugin_name) {
@@ -1726,7 +1748,7 @@ namespace Bones {
           break;
         default:
           [$search_plugin_name, $search_namespace, $plugin_name, $namespace, $mainPluginFile] = $this->askPluginNameAndNamespace($args);
-          $this->info("\nThe new plugin filename, name and namespace will be '{$mainPluginFile}', '{$plugin_name}', '{$namespace}'");
+          $this->line("\n→ The new plugin filename, name and namespace will be '{$mainPluginFile}', '{$plugin_name}', '{$namespace}'");
           $yesno = $this->ask('Continue (y/n)', 'n');
           if (strtolower($yesno) != 'y') {
             return;
@@ -1788,8 +1810,10 @@ namespace Bones {
 
       $path = rtrim($path, '/');
 
+      $this->startCommand("Deploy");
+
       if (empty($path)) {
-        $path = $this->ask('Enter the complete path of deploy:');
+        $path = $this->ask('Enter the complete path of deploy');
       } elseif ('--help' === $path) {
         $this->line("\nUsage:");
         $this->info("  deploy <path>\n");
@@ -1803,8 +1827,6 @@ namespace Bones {
         $this->error("The path is empty!");
         exit(1);
       }
-
-      $this->startCommand("Deploy");
 
       do_action('wpbones_console_deploy_start', $this, $path);
 
@@ -1955,22 +1977,7 @@ namespace Bones {
       }
     }
 
-    /**
-     * Install node modules
-     *
-     * @since 1.9.0
-     */
-    protected function installPackages()
-    {
-      // ask to install node modules
-      $yesno = $this->ask('Do you want to install node modules (y/n)', 'n');
-      if (strtolower($yesno) === 'y') {
-        $this->startProgress("Installing node modules 📦");
-        $packageManager = $this->getAvailablePackageManager();
-        shell_exec("{$packageManager} install");
-        $this->processCompleted("Node modules created and packages installed successfully");
-      }
-    }
+
 
     /**
      * Copy a whole folder. Used by deploy()
@@ -2073,11 +2080,22 @@ namespace Bones {
      *
      * @param string $package The composer package to install
      */
-    protected function requirePackage(string $package)
+    protected function requirePackage(?string $package = '')
     {
       if ($this->isHelp($package)) {
         $this->info('Use php bones require <PackageName>');
         exit();
+      }
+
+      $this->startCommand("Require");
+
+      if (empty($package)) {
+        $package = $this->ask('Enter the composer package to install');
+      }
+
+      if (empty($package)) {
+        $this->error("The package is empty!");
+        exit(1);
       }
 
       $this->line(`composer require {$package}`);
@@ -2096,6 +2114,8 @@ namespace Bones {
      */
     protected function version($argv)
     {
+      $this->startCommand("Version");
+
       $version_number_from_index_php = '';
       $version_number_from_readme_txt = '';
       $stable_tag_version_from_readme_txt = '';
@@ -2117,8 +2137,8 @@ namespace Bones {
           // The version is in the format of: 1.0.0 or 1.0.0-beta.1 or 1.0.0-alpha.1 or 1.0.0-rc.1
           $version_number_from_readme_txt = $matches[1];
 
-          $this->line(
-            "\nreadme.txt > $version_number_from_readme_txt ($stable_tag_version_from_readme_txt)"
+          $this->info(
+            "\n→ readme.txt > $version_number_from_readme_txt ($stable_tag_version_from_readme_txt)"
           );
           break;
         }
@@ -2136,8 +2156,8 @@ namespace Bones {
           // The version is in the format of: 1.0.0
           $version_number_from_index_php = $matches[1];
 
-          $this->line(
-            "$mainPluginFilename  > {$version_number_from_index_php} ($version_string_from_index_php)"
+          $this->info(
+            "→ $mainPluginFilename  > {$version_number_from_index_php} ($version_string_from_index_php)\n"
           );
           break;
         }
@@ -2150,7 +2170,7 @@ namespace Bones {
       }
 
       if (!isset($argv[0]) || empty($argv[0])) {
-        $version = $this->ask('Enter new version of your plugin:');
+        $version = $this->ask('Enter new version of your plugin');
       } elseif ($this->isHelp()) {
         $this->line("\nUsage:");
         $this->info("  version [plugin version]\n");
@@ -2210,7 +2230,7 @@ namespace Bones {
       try {
         $version = Version::parse($version);
       } catch (InvalidVersionException $e) {
-        $this->error("Error! The version is not valid.\n");
+        $this->error("Error! The version is not valid.");
         exit(1);
       }
 
@@ -2259,12 +2279,12 @@ namespace Bones {
 
         file_put_contents($mainPluginFilename, $new_index_php_content);
 
-        $this->line("\nVersion updated to {$version}");
+        $this->processCompleted("Version updated to {$version}");
 
         return;
       }
 
-      $this->line("\nVersion is already {$version}");
+      $this->warning("Version is already {$version}");
     }
 
     /**
@@ -2452,8 +2472,8 @@ namespace Bones {
       $signature = str_replace('-', '', $this->sanitize($pluginName));
       $command = str_replace('-', '', $this->sanitize($className));
 
-      $signature = $this->ask('Enter a signature:', $signature);
-      $command = $this->ask('Enter the command:', $command);
+      $signature = $this->ask('Enter a signature', $signature);
+      $command = $this->ask('Enter the command', $command);
 
       // stubbing
       $content = $this->prepareStub('command', [
@@ -2512,9 +2532,9 @@ namespace Bones {
 
       $slug = str_replace('-', '_', $this->sanitize($pluginName));
 
-      $id = $this->ask('Enter a ID:', $slug);
-      $name = $this->ask('Enter the name:');
-      $plural = $this->ask('Enter the plural name:');
+      $id = $this->ask('Enter a ID', $slug);
+      $name = $this->ask('Enter the name');
+      $plural = $this->ask('Enter the plural name');
 
       if (empty($id)) {
         $id = $slug;
@@ -2728,15 +2748,15 @@ namespace Bones {
 
       $slug = $this->getPluginId();
 
-      $id = $this->ask('Enter a ID:', $slug);
-      $name = $this->ask('Enter the name:');
-      $plural = $this->ask('Enter the plural name:');
+      $id = $this->ask('Enter a ID', $slug);
+      $name = $this->ask('Enter the name');
+      $plural = $this->ask('Enter the plural name');
 
       $this->line(
         'The object type below refers to the id of your previous Custom Post Type'
       );
 
-      $objectType = $this->ask('Enter the object type to bound:');
+      $objectType = $this->ask('Enter the object type to bound');
 
       if (empty($id)) {
         $id = $slug;
