@@ -48,6 +48,13 @@ class LogServiceProvider extends ServiceProvider
 
   /**
    * The Log levels.
+   * The levels are used to determine the importance of log messages.
+   * They will be use as dynamic methods to log messages.
+   * The levels are: debug, info, notice, warning, error, critical, alert, emergency.
+   *
+   * @example
+   * $this->debug('This is a debug message');
+   * $this->info('This is an info message');
    *
    * @var array
    */
@@ -158,6 +165,13 @@ class LogServiceProvider extends ServiceProvider
     }
   }
 
+  /**
+   * Register the service provider.
+   *
+   * @access private
+   *
+   * @return $this
+   */
   public function register()
   {
     return $this;

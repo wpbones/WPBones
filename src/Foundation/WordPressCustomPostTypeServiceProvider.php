@@ -40,6 +40,30 @@ abstract class WordPressCustomPostTypeServiceProvider extends ServiceProvider
    * If not set, post labels are inherited for non-hierarchical types and page labels for hierarchical ones.
    * You can see accepted values in {@link get_post_type_labels()}.
    *
+   * By using the property $labels you can set just the labels you want to change.
+   * The final labels will be merged with the default labels.
+   * If you want to handle all labels, you can override the method `registerLabels()`.
+   *
+   * @example
+   *
+   * class MyCustomPostType extends WordPressCustomPostTypeServiceProvider {
+   *    protected $labels = [
+   *        'name' => 'My Custom Post Types',
+   *        'singular_name' => 'My Custom Post Type',
+   *     ];
+   * }
+   *
+   * or
+   *
+   * class MyCustomPostType extends WordPressCustomPostTypeServiceProvider {
+   *   public function boot() {
+   *     $this->labels = [
+   *         'name' => 'My Custom Post Types',
+   *         'singular_name' => 'My Custom Post Type',
+   *     ];
+   *   }
+   *
+   *
    * @var array
    */
   protected $labels = [];
@@ -238,9 +262,11 @@ abstract class WordPressCustomPostTypeServiceProvider extends ServiceProvider
    * Provide a callback function that sets up the meta boxes
    * for the edit form. Do remove_meta_box() and add_meta_box() calls in the callback.
    *
+   * @deprecated 1.9.0 Use registerMetaBoxes() instead.
+   *
    * @var null
    */
-  protected $registerMetaBoxCallback;
+  // protected $registerMetaBoxCallback;
 
   /**
    * An array of taxonomy identifiers that will be registered for the post type.
@@ -375,6 +401,21 @@ abstract class WordPressCustomPostTypeServiceProvider extends ServiceProvider
    */
   //private $_editLink = '';
 
+  /*
+  |--------------------------------------------------------------------------
+  | WPBones Custom Properties
+  |--------------------------------------------------------------------------
+  |
+  */
+
+  /**
+   * Array of the columns that should be added to the post type table.
+   *
+   * @since 1.9.0
+   */
+  private $columns = [];
+
+
   public function register()
   {
     // you can override this method to set the properties
@@ -422,7 +463,6 @@ abstract class WordPressCustomPostTypeServiceProvider extends ServiceProvider
       'capabilities' => 'capabilities',
       'map_meta_cap' => 'mapMetaCap',
       'supports' => 'supports',
-      'register_meta_box_cb' => 'registerMetaBoxCallback',
       'taxonomies' => 'taxonomies',
       'has_archive' => 'hasArchive',
       'rewrite' => 'rewrite',
@@ -433,7 +473,16 @@ abstract class WordPressCustomPostTypeServiceProvider extends ServiceProvider
       'template_lock' => 'templateLock',
     ];
 
-    return $this->mapPropertiesToArray($mapProperties);
+    // since 1.9.0 - Deprecated alert
+    if (property_exists($this, 'registerMetaBoxCallback')) {
+      error_log('Property registerMetaBoxCallback is deprecated since 1.9.0. Use registerMetaBoxes() instead.');
+    }
+
+    $props = $this->mapPropertiesToArray($mapProperties);
+
+    $result = array_merge($props, ['register_meta_box_cb' => [$this, '_registerMetaBoxCallback']]);
+
+    return $result;
   }
 
   /**
@@ -461,11 +510,42 @@ abstract class WordPressCustomPostTypeServiceProvider extends ServiceProvider
       'parent_item_colon' => '',
     ];
 
+    $this->labels = $this->registerLabels($defaults);
+
     if (empty($this->labels)) {
       return $defaults;
     }
 
     return array_merge($defaults, $this->labels);
+  }
+
+  /**
+   * You may override this method in order to register your own labels.
+   *
+   * @param array $defaults Default labels
+   *
+   * @example
+   *
+   * class MyCustomPostType extends WordPressCustomPostTypeServiceProvider {
+   *    public function registerLabels($defaults) {
+   *
+   *        // You will use just the labels you want to change
+   *        // Otherwise you have to merge manually with the default labels
+   *        return [
+   *            'name' => 'My Custom Post Types',
+   *            'singular_name' => 'My Custom Post Type',
+   *            'menu_name' => 'Custom Posts',
+   *        ];
+   *    }
+   * }
+   *
+   * @since 1.9.0
+   * @return array
+   */
+  public function registerLabels($defaults)
+  {
+    // You may override this method
+    return $this->labels;
   }
 
   /**
@@ -475,23 +555,26 @@ abstract class WordPressCustomPostTypeServiceProvider extends ServiceProvider
    */
   protected function supports(): array
   {
+    $defaults = [
+      'title',
+      'editor',
+      'author',
+      'thumbnail',
+      'excerpt',
+      'trackbacks',
+      'custom-fields',
+      'comments',
+      'revisions',
+      'post-formats',
+    ];
+
     if (empty($this->supports)) {
-      return [
-        'title',
-        'editor',
-        'author',
-        'thumbnail',
-        'excerpt',
-        'trackbacks',
-        'custom-fields',
-        'comments',
-        'revisions',
-        'post-formats',
-      ];
+      return $defaults;
     }
 
     return $this->supports;
   }
+
 
   /**
    * To specify rewrite rules, an array can be passed with any of these keys
@@ -524,14 +607,251 @@ abstract class WordPressCustomPostTypeServiceProvider extends ServiceProvider
     return $this->mapPropertiesToArray($mapProperties);
   }
 
+  /**
+   * Initialize hooks
+   */
   protected function initHooks()
   {
     // admin hooks
     if (is_admin()) {
+
+      $this->_registerPostMeta();
+
       // Hook save post
       add_action('save_post_' . $this->id, [$this, 'save_post'], 10, 2);
+
+      // Manage columns @since 1.9.0
+      add_filter("manage_{$this->id}_posts_columns", [$this, '_manage_posts_columns']);
+      add_action("manage_{$this->id}_posts_custom_column", [$this, '_manage_posts_custom_column']);
+
+      // Filter the title field placeholder text.
+      add_filter('enter_title_here', [$this, '_enter_title_here']);
+
+      // Add action to add content after title
+      add_action('edit_form_after_title', [$this, '_edit_form_after_title']);
     }
   }
+
+  /**
+   * Register meta boxes callback.
+   *
+   * @since 1.9.0
+   * @internal
+   * @return void
+   */
+  public function _registerMetaBoxCallback()
+  {
+    // You may override this method
+    $metaBoxes = $this->registerMetaBoxes();
+
+    if (empty($metaBoxes)) {
+      return;
+    }
+
+    foreach ($metaBoxes as $metaBox) {
+      add_meta_box(
+        $metaBox['id'],
+        $metaBox['title'],
+        $metaBox['view'],
+        $this->id,
+        $metaBox['context'] ?? 'normal',
+        $metaBox['priority'] ?? 'default',
+        $metaBox['callback_args'] ?? null
+      );
+    }
+  }
+
+  /**
+   * Register meta boxes.
+   *
+   * $meta_box = [
+   *   'id' => 'my_meta_box',
+   *   'title' => 'My Meta Box',
+   *   'view' => 'my_meta_box_view',
+   *   'context' => 'normal',
+   *   'priority' => 'high',
+   *   'callback_args' => null,
+   * ];
+   *
+   * @since 1.9.0
+   * @return array
+   */
+  public function registerMetaBoxes()
+  {
+    // You may override this method
+    return [];
+  }
+
+  /**
+   * Register post meta
+   *
+   * @since 1.9.0
+   */
+  public function registerPostMeta()
+  {
+    // You may override this method
+    return [];
+  }
+
+  /**
+   * Register post meta
+   *
+   * @since 1.9.0
+   * @internal
+   * @return void
+   */
+  private function _registerPostMeta()
+  {
+    $postMeta = $this->registerPostMeta();
+
+    if (empty($postMeta)) {
+      return;
+    }
+
+    foreach ($postMeta as $meta => $options) {
+      register_post_meta($this->id, $meta, $options);
+    }
+  }
+
+  /**
+   * Filter the title field placeholder text.
+   *
+   * @param string $placeholder Placeholder text. Default 'Enter title here'.
+   *
+   * @since 1.9.0
+   *
+   * @return string
+   */
+  public function _enter_title_here($placeholder)
+  {
+    if (!$this->is()) {
+      return $placeholder;
+    }
+
+    return $this->registerPlaceholderTitle($placeholder);
+  }
+
+  /**
+   * Add content after title
+   *
+   * @since 1.9.0
+   * @return void
+   */
+  public function _edit_form_after_title()
+  {
+    if (!$this->is()) {
+      return;
+    }
+
+    // You may override this method
+    return $this->registerAfterTitleView();
+  }
+
+  /**
+   * Add content after title
+   *
+   * @since 1.9.0
+   * @return void
+   */
+  public function registerAfterTitleView()
+  {
+    // You may override this method
+  }
+
+  /**
+   * Return the placeholder title.
+   * You may override this method to return your own placeholder title.
+   *
+   * @param string $placeholder Default 'Enter title here'.
+   *
+   * @since 1.9.0
+   *
+   * @return string
+   */
+  public function registerPlaceholderTitle($placeholder)
+  {
+    return $placeholder;
+  }
+
+  /**
+   * You may override this method in order to register your own columns.
+   *
+   * @param array $columns
+   *
+   * @since 1.9.0
+   *
+   * @return array
+   */
+  public function registerColumns($columns)
+  {
+    return [];
+  }
+
+  /**
+   * Manage columns
+   *
+   * @param array $columns
+   *
+   * @since 1.9.0
+   * @return array
+   */
+  public function _manage_posts_columns($columns)
+  {
+    $new_columns = $this->registerColumns($columns);
+
+    if (empty($new_columns)) {
+      return $columns;
+    }
+
+    foreach ($new_columns as $column) {
+      $columns = wpbones_array_insert(
+        $columns,
+        $column['id'],
+        $column['title'],
+        2
+      );
+    }
+
+    $this->columns = $new_columns;
+
+    return $columns;
+  }
+
+  /**
+   * Manage custom columns
+   *
+   * @since 1.9.0
+   * @param string $column_id
+   */
+  public function _manage_posts_custom_column($column_id)
+  {
+    global $post;
+
+    if (empty($this->columns)) {
+      return;
+    }
+
+    $value = esc_attr($post->{$column_id});
+
+    echo $this->columnContent($column_id, $value, $post);
+  }
+
+  /**
+   * Return the column content
+   *
+   * @param string $column_id
+   * @param string $value
+   * @param object $post
+   *
+   * @since 1.9.0
+   * @return string
+   */
+  public function columnContent($column_id, $value, $post)
+  {
+    // You may override this method
+    return $value;
+  }
+
 
   /**
    * Return TRUE if this custom post type is current view.
@@ -593,7 +913,7 @@ abstract class WordPressCustomPostTypeServiceProvider extends ServiceProvider
 
     // If all ok and post request then update()
     if (Request::isVerb('post')) {
-      $this->update($post_id, $post);
+      $this->_update($post_id, $post);
     }
   }
 
@@ -608,5 +928,36 @@ abstract class WordPressCustomPostTypeServiceProvider extends ServiceProvider
   public function update($post_id, $post)
   {
     // You can override this method to save your own data
+  }
+
+  private function _update($post_id, $post)
+  {
+    if (!$this->verifyNonce()) {
+      return $post_id;
+    }
+    return $this->update($post_id, $post);
+  }
+
+  /**
+   * Verify nonce
+   *
+   * @param int $post_id
+   *
+   * @internal
+   * @return bool
+   */
+  private function verifyNonce()
+  {
+    global $post;
+
+    error_log('verifyNonce Vendor');
+    error_log($post->ID);
+
+    if (!isset($_POST['_wpnonce']) || !wp_verify_nonce($_POST['_wpnonce'], "update-post_{$post->ID}")) {
+      wp_die(__('You are not allowed to do this', 'wp_kirk'));
+      return false;
+    }
+
+    return true;
   }
 }

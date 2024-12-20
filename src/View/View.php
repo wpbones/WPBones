@@ -252,6 +252,17 @@ class View
     return $this;
   }
 
+  /**
+   * Load a new css resource in admin area.
+   *
+   * @param string $name Name of style.
+   * @param array  $deps Optional. Array of slug deps
+   * @param array  $ver  Optional. Version.
+   *
+   * @deprecated 1.6.0
+   *
+   * @return $this
+   */
   public function withAdminStyles($name, $deps = [], $ver = []): View
   {
     _deprecated_function(__METHOD__, '1.6.0', 'withAdminStyle()');
@@ -275,6 +286,17 @@ class View
     return $this;
   }
 
+  /**
+   * Load a new Javascript resource in admin area.
+   *
+   * @param string $name Name of script.
+   * @param array  $deps Optional. Array of slug deps
+   * @param array  $ver  Optional. Version.
+   *
+   * @deprecated 1.6.0
+   *
+   * @return $this
+   */
   public function withAdminScripts($name, $deps = [], $ver = []): View
   {
     _deprecated_function(__METHOD__, '1.6.0', 'withAdminScript()');
@@ -287,10 +309,10 @@ class View
    *
    * @param string $name      Script handle the data will be attached to.
    * @param bool   $module    Optional. There is a module css.
-   * @param string $variabile Optional. Name for the JavaScript object
+   * @param string $variable  Optional. Name for the JavaScript object
    * @param array  $data      Optional. The data itself. The data can be either a single or multi-dimensional array.
    */
-  public function withAdminAppsScript($name, $module = true, $variabile = '', $data = []): View
+  public function withAdminAppsScript($name, $module = true, $variable = '', $data = []): View
   {
     ['dependencies' => $deps, 'version' => $ver] = @include $this->container->basePath .
       '/public/apps/' .
@@ -305,13 +327,25 @@ class View
       $this->adminAppsModules[] = [$name, [], $ver];
     }
 
-    if ($variabile) {
-      $this->localizeScripts[] = [$name, $variabile, $data];
+    if ($variable) {
+      $this->localizeScripts[] = [$name, $variable, $data];
     }
 
     return $this;
   }
 
+  /**
+   * Load new Javascript (React bundle) resource in admin area.
+   *
+   * @param string $name      Script handle the data will be attached to.
+   * @param bool   $module    Optional. There is a module css.
+   * @param string $variable  Optional. Name for the JavaScript object
+   * @param array  $data      Optional. The data itself. The data can be either a single or multi-dimensional array.
+   *
+   * @deprecated 1.6.0
+   *
+   * @return $this
+   */
   public function withAdminAppsScripts($name, $deps = [], $ver = []): View
   {
     _deprecated_function(__METHOD__, '1.6.0', 'withAdminAppsScript()');
@@ -335,6 +369,17 @@ class View
     return $this;
   }
 
+  /**
+   * Load a new css resource in theme.
+   *
+   * @param string $name Name of style.
+   * @param array  $deps Optional. Array of slug deps
+   * @param array  $ver  Optional. Version.
+   *
+   * @deprecated 1.6.1
+   *
+   * @return $this
+   */
   public function withStyles($name, $deps = [], $ver = []): View
   {
     _deprecated_function(__METHOD__, '1.6.1', 'withStyle()');
