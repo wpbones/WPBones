@@ -1879,12 +1879,12 @@ namespace Bones {
       }
 
       /**
-       * Filter the list of files and folders to skip during the deployment.
+       * Filter the default list of files and folders to skip during the deployment.
        *
        * @since 1.9.0
        * @param array $array The files and folders are relative to the root of plugin.
        */
-      $this->skipWhenDeploy = apply_filters('wpbones_console_deploy_skip_files_folders', [
+      $this->skipWhenDeploy = apply_filters('wpbones_console_deploy_default_skip_files_folders', [
         '/.git',
         '/.cache',
         '/assets',
