@@ -1,6 +1,6 @@
 # Release Notes
 
-## 1.9.0 - December 20, 2024
+## 1.9.0 - December 22, 2024
 
 ### ✨ Added
 
@@ -12,7 +12,7 @@
 - Added new `registerLabels` overwritten method in `WordPressCustomPostTypeServiceProvider` to set the labels for the custom post type.
 - Added new `columnContent` overwritten method in `WordPressCustomPostTypeServiceProvider` to handle the column content for the custom post type.
 - Added new `wpbones_console_deploy_dont_skip_files_folders` filters to exclude specific files from deployment
-- Added new `wpbones_console_deploy_skip_files_folders` filters to skip specific files from deployment
+- Added new `wpbones_console_deploy_default_skip_files_folders` filters the default list of the files and folder to skip during deployment
 - Added new `wpbones_console_deploy_build_assets` filters to skip asset building during deployment
 
 ### 🐛 Fixed
