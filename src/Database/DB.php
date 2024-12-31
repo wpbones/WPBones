@@ -122,8 +122,9 @@ class DB
         return Str::startsWith($name, $prefix) ? $name : $prefix . $name;
     }
 
-
-
+    /**
+     * Return the site-wide tables
+     */
     public static function getMultisiteTables(){
         global $wpdb;
         $prefix = is_multisite()? $wpdb->base_prefix : $wpdb->prefix;
