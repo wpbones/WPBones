@@ -18,6 +18,13 @@ abstract class Model extends DB
    * @var string
    */
   protected $table;
+  /**
+   * The table's prefix
+   *
+   * @var string
+   */
+  protected $prefix;
+
 
   /**
    * The primary key for the model.
@@ -29,9 +36,9 @@ abstract class Model extends DB
   public function __construct()
   {
     // get the class name
-    $this->table = DB::getTableName($this->table ?? get_called_class(), $this->usePrefix);
+    $this->table = DB::getTableName($this->table ?? get_called_class(), $this->usePrefix,$this->prefix);
 
-    parent::__construct($this->table, $this->primaryKey, $this->usePrefix);
+    parent::__construct($this->table, $this->primaryKey, $this->usePrefix,$this->prefix);
   }
 
   /*
