@@ -1,5 +1,12 @@
 # Release Notes
 
+## 1.9.1 - January 14, 2025
+
+### 🐛 Fixed
+
+- Remove `ABS_PATH` validation in `helpers.php` to improve PHPUnit compatibility and test loading mechanism
+---
+
 ## 1.9.0 - December 22, 2024
 
 ### ✨ Added
@@ -32,6 +39,8 @@
 
 - The `registerMetaBoxCallback` property in the `WordPressCustomPostTypeServiceProvider` is **deprecated**, use `registerMetaBoxes` overwritten method instead.
 
+---
+
 ## 1.8.0 - November 15, 2024
 
 ### ✨ Added
@@ -55,6 +64,8 @@
 - Updated the [Service Providers](https://wpbones.com/docs/ServicesProvider/services) documentation to reflect the new changes
 - Completely rewrote all boilerplates using the new [`wpkirk-helpers`](https://github.com/wpbones/wpkirk-helpers) package, enhancing project structure and maintainability
 - Improved documentation for Boilerplate, addressing minor bug fixes and enhancing overall clarity
+
+---
 
 ## 1.7.0 - October 16, 2024
 
@@ -86,6 +97,8 @@
 - The `"log"` entry in the `config/plugin.php` file is **deprecated**. Use the new setting `logging` instead.
 - The `"log_level"` entry in the `config/plugin.php` file is **deprecated** as it is no longer used.
 
+---
+
 ## 1.6.5 - October 2, 2024
 
 ### ✨ Added
@@ -110,6 +123,8 @@
 ## 💥 Breaking Changes
 
 - Deprecated `withScripts()` and `withStyles()` fluent methods in the [`View Class`](https://wpbones.com/docs/CoreClasses/view) - use `withScript()` and `withStyle()` instead.
+
+---
 
 ## 1.6.0 - September 24, 2024
 
