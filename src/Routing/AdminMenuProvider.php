@@ -64,69 +64,70 @@ class AdminMenuProvider extends ServiceProvider
         } else {
           $firstMenu = false;
         }
+        if(!empty($menu['items'])){
+            foreach ($menu['items'] as $key => $subMenu) {
+            if (is_null($subMenu)) {
+                continue;
+            }
 
-        foreach ($menu['items'] as $key => $subMenu) {
-          if (is_null($subMenu)) {
-            continue;
-          }
+            // index 0
+            if (empty($key)) {
+                $key = '0';
+            }
 
-          // index 0
-          if (empty($key)) {
-            $key = '0';
-          }
+            // sanitize array keys
+            $subMenu['capability'] = isset($subMenu['capability']) ? $subMenu['capability'] : $menu['capability'];
+            $subMenu['page_title'] = isset($subMenu['page_title']) ? $subMenu['page_title'] : $subMenu['menu_title'];
 
-          // sanitize array keys
-          $subMenu['capability'] = isset($subMenu['capability']) ? $subMenu['capability'] : $menu['capability'];
-          $subMenu['page_title'] = isset($subMenu['page_title']) ? $subMenu['page_title'] : $subMenu['menu_title'];
+            // key could be a number
+            $key = str_replace('-', '_', sanitize_title($key));
 
-          // key could be a number
-          $key = str_replace('-', '_', sanitize_title($key));
+            $array = explode('\\', __NAMESPACE__);
+            $namespace = sanitize_title($array[0]);
 
-          $array = explode('\\', __NAMESPACE__);
-          $namespace = sanitize_title($array[0]);
+            // submenu slug
+            $submenuSlug = "{$namespace}_{$key}";
 
-          // submenu slug
-          $submenuSlug = "{$namespace}_{$key}";
+            if ($firstMenu) {
+                $firstMenu = false;
+                $submenuSlug = $topLevelSlug;
+            }
 
-          if ($firstMenu) {
-            $firstMenu = false;
-            $submenuSlug = $topLevelSlug;
-          }
+            // get hook
+            $hook = $this->plugin->getCallableHook($subMenu['route']);
 
-          // get hook
-          $hook = $this->plugin->getCallableHook($subMenu['route']);
+            $subMenuHook = add_submenu_page(
+                $topLevelSlug,
+                $subMenu['page_title'],
+                $subMenu['menu_title'],
+                $subMenu['capability'],
+                $submenuSlug,
+                $hook
+            );
 
-          $subMenuHook = add_submenu_page(
-            $topLevelSlug,
-            $subMenu['page_title'],
-            $subMenu['menu_title'],
-            $subMenu['capability'],
-            $submenuSlug,
-            $hook
-          );
+            if (isset($subMenu['route']['load'])) {
+                [$controller, $method] = Str::parseCallback($subMenu['route']['load']);
 
-          if (isset($subMenu['route']['load'])) {
-            [$controller, $method] = Str::parseCallback($subMenu['route']['load']);
+                add_action("load-{$subMenuHook}", function () use ($controller, $method) {
+                $className = "WPKirk\\Http\\Controllers\\{$controller}";
+                $instance = new $className();
 
-            add_action("load-{$subMenuHook}", function () use ($controller, $method) {
-              $className = "WPKirk\\Http\\Controllers\\{$controller}";
-              $instance = new $className();
+                return $instance->{$method}();
+                });
+            }
 
-              return $instance->{$method}();
-            });
-          }
+            if (isset($subMenu['route']['resource'])) {
+                $controller = $subMenu['route']['resource'];
 
-          if (isset($subMenu['route']['resource'])) {
-            $controller = $subMenu['route']['resource'];
-
-            add_action("load-{$subMenuHook}", function () use ($controller) {
-              $className = "WPKirk\\Http\\Controllers\\{$controller}";
-              $instance = new $className();
-              if (method_exists($instance, 'load')) {
-                return $instance->load();
-              }
-            });
-          }
+                add_action("load-{$subMenuHook}", function () use ($controller) {
+                $className = "WPKirk\\Http\\Controllers\\{$controller}";
+                $instance = new $className();
+                if (method_exists($instance, 'load')) {
+                    return $instance->load();
+                }
+                });
+            }
+            }
         }
       }
     }
