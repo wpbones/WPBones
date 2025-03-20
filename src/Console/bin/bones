@@ -573,11 +573,12 @@ namespace Bones\Traits {
      * @param string $str The question to ask
      * @param string|null $default The default value
      */
-    protected function ask(string $str, ?string $default = ''): string
+    protected function ask(string $str, ?string $default = '',?string $example = ''): string
     {
 
       $str = WPBONES_COLOR_GREEN .
         "❓ $str" .
+        (empty($example) ? '' : " ie: {$example}") .
         (empty($default) ? ': ' : " (default: {$default}): ") .
         WPBONES_COLOR_RESET;
 
@@ -2591,28 +2592,26 @@ namespace Bones {
       }
 
       // ask className if empty
-      $className = $this->askClassNameIfEmpty($className);
-
-      $filename = sprintf('%s.php', $className);
+      $className  = $this->askClassNameIfEmpty($className);
+      $filename   = sprintf('%s.php', $className);
       // current plugin name and namespace
       [$pluginName, $namespace] = $this->getPluginNameAndNamespace();
-      $className = ucfirst($this->sanitize($className));
-      $name = ($className);
-      $plural = ucfirst($this->simplePluralize($className));
-      $slug = $this->slugify($namespace,$plural);
-      
-      $id = $this->ask('Enter a ID', $slug);
-      $name = $this->ask('Enter the name',$name);
-      $plural = $this->ask('Enter the plural name',$plural);
+      $className  = ucfirst($this->sanitize($className));
+      $name       = ($className);
+      $plural     = ucfirst($this->simplePluralize($className));
+      $slug       = $this->slugify($namespace,$plural);
+      $id         = $this->ask('Enter a ID', $slug);
+      $name       = $this->ask('Enter the name',$name);
+      $plural     = $this->ask('Enter the plural name',$plural);
 
       $showInRest = true;
       $showInRest = $this->askYesNo('Show in Rest?',$showInRest);
 
-      $showUI = true;
-      $showUI = $this->askYesNo('Show in admin sidebar?',$showUI);
+      $showUI     = true;
+      $showUI     = $this->askYesNo('Show in admin sidebar?',$showUI);
 
-      $supports = 'title, editor, thumbnail, excerpt';
-      $supports = $this->ask('Features available for the CPT',$supports);
+      $supports   = 'title, editor, thumbnail, excerpt';
+      $supports   = $this->ask('Features available for the CPT',$supports);
       $itemsSupport  = $this->stringToArray($supports);
   
       if (empty($id)) {
@@ -2621,14 +2620,14 @@ namespace Bones {
 
       // stubbing
       $content = $this->prepareStub('cpt', [
-        '{Namespace}' => $namespace,
-        '{ClassName}' => $className,
-        '{ID}' => $id,
-        '{Name}' => $name,
-        '{Plural}' => $plural,
-        '{ShowInRest}' => $showInRest,
-        '{showUI}' => $showUI,
-        '{Supports}' => "'".join("','",$itemsSupport)."'",
+        '{Namespace}'   => $namespace,
+        '{ClassName}'   => $className,
+        '{ID}'          => $id,
+        '{Name}'        => $name,
+        '{Plural}'      => $plural,
+        '{ShowInRest}'  => $showInRest,
+        '{showUI}'      => $showUI,
+        '{Supports}'    => "'".join("','",$itemsSupport)."'",
       ]);
 
       // Create the folder if it doesn't exist
@@ -2641,7 +2640,7 @@ namespace Bones {
       $this->line(" Created plugin/CustomPostTypes/{$filename}");
 
       $this->info(
-        "Remember to add {$namespace}\CustomPostTypes\\{$className} in the config/plugin.php array in the 'custom_post_types' key."
+        "Remember to add \\{$namespace}\CustomPostTypes\\{$className} in the config/plugin.php array in the 'custom_post_types' key."
       );
     }
     private function stringToArray($content){
@@ -2656,7 +2655,7 @@ namespace Bones {
     private function slugify($namespace,$name,$remove=0){
 
       $subNamespace = substr($namespace,0,20-$remove-strlen($name)-1);
-      $slug = strtolower($subNamespace."_".str_replace('-', '_', $name));
+      $slug = strtolower($subNamespace.(empty($namespace)?"":"_").str_replace('-', '_', $name));
       $length = strlen($slug);
       if($length>20){
         return $this->slugify($namespace,$name,$length-20);
@@ -2840,25 +2839,30 @@ namespace Bones {
       }
 
       // ask className if empty
-      $className = $this->askClassNameIfEmpty($className);
-
-      $filename = sprintf('%s.php', $className);
+      $className  = $this->askClassNameIfEmpty($className);
+      $filename   = sprintf('%s.php', $className);
 
       // current plugin name and namespace
-      $namespace = $this->getNamespace();
-
-      $slug = $this->getPluginId();
-
-      $id = $this->ask('Enter a ID', $slug);
-      $name = $this->ask('Enter the name');
-      $plural = $this->ask('Enter the plural name');
-
+      $namespace  = $this->getNamespace();
+      // current plugin name and namespace
+      $className  = ucfirst($this->sanitize($className));
+      $name       = $className;
+      $plural     = ucfirst($this->simplePluralize($className));
+      $slug       = $this->slugify("",$plural);
+      $id         = $this->ask('Enter a ID', $slug);
+      $name       = $this->ask('Enter the name',$name);
+      $plural     = $this->ask('Enter the plural name',$plural);
+      $showInRest = true;
+      $showInRest = $this->askYesNo('Show in Rest?',$showInRest);
+       
       $this->line(
         'The object type below refers to the id of your previous Custom Post Type'
       );
-
-      $objectType = $this->ask('Enter the object type to bound');
-
+      $objectType ="post";
+      $example ="post, your_custom_post_type, etc";
+      $objectType = $this->ask('Enter the object type to bound',$objectType,$example);
+      $objectType  = $this->stringToArray($objectType);
+      
       if (empty($id)) {
         $id = $slug;
       }
@@ -2869,8 +2873,9 @@ namespace Bones {
         '{ClassName}' => $className,
         '{ID}' => $id,
         '{Name}' => $name,
+        '{ShowInRest}'  => $showInRest,
         '{Plural}' => $plural,
-        '{ObjectType}' => $objectType,
+        '{ObjectType}' =>  "'".join("','",$objectType)."'",
       ]);
 
       // Create the folder if it doesn't exist
@@ -2883,7 +2888,7 @@ namespace Bones {
       $this->line(" Created plugin/CustomTaxonomyTypes/{$filename}");
 
       $this->info(
-        "Remember to add {$className} in the config/plugin.php array in the 'custom_taxonomy_types' key."
+        "Remember to add \\{$namespace}\CustomTaxonomyTypes\\{$className} in the config/plugin.php array in the 'custom_taxonomy_types' key."
       );
     }
 
