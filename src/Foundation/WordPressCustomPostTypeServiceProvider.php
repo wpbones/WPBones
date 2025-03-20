@@ -422,6 +422,7 @@ abstract class WordPressCustomPostTypeServiceProvider extends ServiceProvider
     $this->boot();
 
     // Register custom post type
+
     register_post_type($this->id, $this->optionalArgs());
 
     $this->initHooks();
@@ -619,6 +620,7 @@ abstract class WordPressCustomPostTypeServiceProvider extends ServiceProvider
 
       // Hook save post
       add_action('save_post_' . $this->id, [$this, 'save_post'], 10, 2);
+      add_action('trash_' . $this->id, [$this, 'trash_post'], 10, 3);
 
       // Manage columns @since 1.9.0
       add_filter("manage_{$this->id}_posts_columns", [$this, '_manage_posts_columns']);
@@ -915,6 +917,18 @@ abstract class WordPressCustomPostTypeServiceProvider extends ServiceProvider
     if (Request::isVerb('post')) {
       $this->_update($post_id, $post);
     }
+  }
+
+  /**
+   * Override this method when your post was trashed.
+   * This method is called by hook action trashed_{post_type}`
+   *
+   * @param int|string $post_id Post ID
+   * @param object     $post    Optional. Post object
+   *
+   */
+  public function trash_post($post_id, $post, $old_status ){
+
   }
 
   /**
