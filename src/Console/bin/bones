@@ -589,6 +589,33 @@ namespace Bones\Traits {
 
       return $line ?: $default;
     }
+    /**
+     * Get input from console
+     *
+     * @param string $str The question to ask
+     * @param string|null $default The default value
+     */
+    protected function askYesNo(string $str, bool $default = true): string
+    {
+
+      $str = WPBONES_COLOR_GREEN .
+        "❓ $str (".($default?"Y/n":"y/N").")" .
+         " (default: ".($default?"Yes":"No")."): " .
+        WPBONES_COLOR_RESET;
+
+      // Use readline to get the user input
+      $line = readline($str);
+
+      // Trim the input to remove extra spaces or newlines
+      $line = strtoupper(trim($line));
+      if($line=="Y"||$line=="YES"){
+        return "true";
+      }else if($line=="N"||$line=="NO"){
+        return "false";
+      }else{
+          return $default?"true":"false";
+      }
+    }
   }
 }
 
@@ -2508,6 +2535,47 @@ namespace Bones {
         $this->line(' Created plugin/Console/Kernel.php');
       }
     }
+    protected function simplePluralize($word) {
+      $strLength = strlen($word);
+      $last = strtolower($word[$strLength - 1]);
+      $secondLast = $strLength > 1 ? strtolower($word[$strLength - 2]) : '';
+  
+      // Special cases (irregulars)
+      $irregular = [
+          'child' => 'children',
+          'man' => 'men',
+          'woman' => 'women',
+          'tooth' => 'teeth',
+          'foot' => 'feet',
+          'mouse' => 'mice',
+          'goose' => 'geese',
+          'person' => 'people',
+      ];
+  
+      if (array_key_exists(strtolower($word), $irregular)) {
+          return $irregular[strtolower($word)];
+      }
+  
+      // common words
+      if ($last === 's' || $last === 'x' || $last === 'z' || ($secondLast . $last) === 'ch' || ($secondLast . $last) === 'sh') {
+          return $word . 'es';
+      }
+  
+      if ($last === 'y' && !in_array($secondLast, ['a', 'e', 'i', 'o', 'u'])) {
+          return substr($word, 0, $strLength - 1) . 'ies';
+      }
+  
+      if ($last === 'f' || ($secondLast . $last) === 'fe') {
+          $base = substr($word, 0, $strLength - ($last === 'f' ? 1 : 2));
+          return $base . 'ves';
+      }
+  
+      if ($last === 'o' && in_array($secondLast, ['a', 'e', 'i', 'o', 'u']) === false) {
+          return $word . 'es';
+      }
+  
+      return $word . 's';
+  }
 
     /**
      * Create a Custom Post Type controller
@@ -2526,16 +2594,27 @@ namespace Bones {
       $className = $this->askClassNameIfEmpty($className);
 
       $filename = sprintf('%s.php', $className);
-
       // current plugin name and namespace
       [$pluginName, $namespace] = $this->getPluginNameAndNamespace();
-
-      $slug = str_replace('-', '_', $this->sanitize($pluginName));
-
+      $className = ucfirst($this->sanitize($className));
+      $name = ($className);
+      $plural = ucfirst($this->simplePluralize($className));
+      $slug = $this->slugify($namespace,$plural);
+      
       $id = $this->ask('Enter a ID', $slug);
-      $name = $this->ask('Enter the name');
-      $plural = $this->ask('Enter the plural name');
+      $name = $this->ask('Enter the name',$name);
+      $plural = $this->ask('Enter the plural name',$plural);
 
+      $showInRest = true;
+      $showInRest = $this->askYesNo('Show in Rest?',$showInRest);
+
+      $showUI = true;
+      $showUI = $this->askYesNo('Show in admin sidebar?',$showUI);
+
+      $supports = 'title, editor, thumbnail, excerpt';
+      $supports = $this->ask('Features available for the CPT',$supports);
+      $itemsSupport  = $this->stringToArray($supports);
+  
       if (empty($id)) {
         $id = $slug;
       }
@@ -2547,6 +2626,9 @@ namespace Bones {
         '{ID}' => $id,
         '{Name}' => $name,
         '{Plural}' => $plural,
+        '{ShowInRest}' => $showInRest,
+        '{showUI}' => $showUI,
+        '{Supports}' => "'".join("','",$itemsSupport)."'",
       ]);
 
       // Create the folder if it doesn't exist
@@ -2559,8 +2641,27 @@ namespace Bones {
       $this->line(" Created plugin/CustomPostTypes/{$filename}");
 
       $this->info(
-        "Remember to add {$className} in the config/plugin.php array in the 'custom_post_types' key."
+        "Remember to add {$namespace}\CustomPostTypes\\{$className} in the config/plugin.php array in the 'custom_post_types' key."
       );
+    }
+    private function stringToArray($content){
+      $itemsSupport=[]    ;
+      foreach(explode(",",$content) as $item)
+      {
+        if(!empty($item))
+          $itemsSupport[]=$item;
+      }
+      return $itemsSupport;
+    }
+    private function slugify($namespace,$name,$remove=0){
+
+      $subNamespace = substr($namespace,0,20-$remove-strlen($name)-1);
+      $slug = strtolower($subNamespace."_".str_replace('-', '_', $name));
+      $length = strlen($slug);
+      if($length>20){
+        return $this->slugify($namespace,$name,$length-20);
+      }
+      return $slug;
     }
 
     /**
