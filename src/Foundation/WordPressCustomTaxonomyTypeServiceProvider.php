@@ -355,6 +355,7 @@ abstract class WordPressCustomTaxonomyTypeServiceProvider extends ServiceProvide
 
     // Register custom taxonomy
     register_taxonomy($this->id, $this->objectType, $this->optionalArgs());
+    $this->initHooks();
   }
 
   /**
@@ -525,4 +526,58 @@ abstract class WordPressCustomTaxonomyTypeServiceProvider extends ServiceProvide
 
     return $this->mapPropertiesToArray($mapProperties);
   }
+   /**
+     * Initialize hooks
+     */
+    protected function initHooks()
+    {
+        add_action('admin_init', [$this, 'addTaxonomyColumns']);
+    }
+    public function addTaxonomyColumns()
+    {
+
+        add_filter('manage_' . $this->id . '_custom_column', [$this, 'columnContent'], 15, 3);
+        add_filter('manage_edit-' . $this->id . '_columns', [$this, '_manage_taxonomy_columns']);
+    }
+ /**
+     * Manage columns
+     *
+     * @param array $columns
+     *
+     * @since 1.9.0
+     * @return array
+     */
+
+    public function _manage_taxonomy_columns($columns)
+    {
+        $newColumns = $this->registerColumns();
+        $cb = [];
+        $cnt = [];
+        if (isset($columns["cb"])) {
+            $cb = ["cb"=>$columns["cb"]];
+            unset($columns["cb"]);
+        }
+        if (isset($columns["posts"])) {
+            $cnt = ["posts"=>$columns["posts"]];
+            unset($columns["posts"]);
+        }
+        return array_merge($cb, $columns, $newColumns,$cnt);
+    }
+
+
+    /**
+     * Return the column content
+     *
+     * @param string $string
+     * @param string $column_name
+     * @param int $term_id
+     *
+     * @since 1.9.0
+     * @return string
+     */
+    public function columnContent($string, $column_name, $term_id)
+    {
+        // You may override this method
+        return $string;
+    }
 }
