@@ -265,43 +265,63 @@ class Plugin extends Container implements PluginContract
     // Custom post types Service Provider
     $custom_post_types = $this->config('plugin.custom_post_types', []);
     foreach ($custom_post_types as $className) {
-      $object = new $className($this);
-      $object->register();
-      $this->provides[$className] = $object;
+      try{
+        $object = new $className($this);
+        $object->register();
+        $this->provides[$className] = $object;
+      }catch(\Throwable $e){
+        error_log("missing class ".$className);
+      }
     }
 
     // Custom taxonomy type Service Provider
     $custom_taxonomy_types = $this->config('plugin.custom_taxonomy_types', []);
     foreach ($custom_taxonomy_types as $className) {
-      $object = new $className($this);
-      $object->register();
-      $this->provides[$className] = $object;
+      try{
+        $object = new $className($this);
+        $object->register();
+        $this->provides[$className] = $object;
+      }catch(\Throwable $e){
+        error_log("missing class ".$className);
+      }
     }
 
     // Shortcodes Service Provider
     $shortcodes = $this->config('plugin.shortcodes', []);
     foreach ($shortcodes as $className) {
-      $object = new $className($this);
-      $object->register();
-      $this->provides[$className] = $object;
+      try{
+        $object = new $className($this);
+        $object->register();
+        $this->provides[$className] = $object;
+      }catch(\Throwable $e){
+        error_log("missing class ".$className);
+      }
     }
 
     // Ajax Service Provider
     if ($this->isAjax()) {
       $ajax = $this->config('plugin.ajax', []);
       foreach ($ajax as $className) {
-        $object = new $className($this);
-        $object->register();
-        $this->provides[$className] = $object;
+        try{
+          $object = new $className($this);
+          $object->register();
+          $this->provides[$className] = $object;
+        }catch(\Throwable $e){
+          error_log("missing class ".$className);
+        }
       }
     }
 
     // Custom service provider
     $providers = $this->config('plugin.providers', []);
     foreach ($providers as $className) {
-      $object = new $className($this);
-      $object->register();
-      $this->provides[$className] = $object;
+      try{
+        $object = new $className($this);
+        $object->register();
+        $this->provides[$className] = $object;
+      }catch(\Throwable $e){
+        error_log("missing class ".$className);
+      }
     }
   }
 
