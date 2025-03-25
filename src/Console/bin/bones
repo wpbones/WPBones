@@ -2648,7 +2648,7 @@ namespace Bones {
       foreach(explode(",",$content) as $item)
       {
         if(!empty($item))
-          $itemsSupport[]=$item;
+          $itemsSupport[]=trim($item);
       }
       return $itemsSupport;
     }
