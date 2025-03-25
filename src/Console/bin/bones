@@ -2593,10 +2593,10 @@ namespace Bones {
 
       // ask className if empty
       $className  = $this->askClassNameIfEmpty($className);
-      $filename   = sprintf('%s.php', $className);
       // current plugin name and namespace
       [$pluginName, $namespace] = $this->getPluginNameAndNamespace();
       $className  = ucfirst($this->sanitize($className));
+      $filename   = sprintf('%s.php', $className);
       $name       = ($className);
       $plural     = ucfirst($this->simplePluralize($className));
       $slug       = $this->slugify($namespace,$plural);

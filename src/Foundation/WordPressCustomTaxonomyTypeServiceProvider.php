@@ -553,6 +553,7 @@ abstract class WordPressCustomTaxonomyTypeServiceProvider extends ServiceProvide
         $newColumns = $this->registerColumns();
         $cb = [];
         $cnt = [];
+        //With this, we keep the cb at first item, and the post count at last.
         if (isset($columns["cb"])) {
             $cb = ["cb"=>$columns["cb"]];
             unset($columns["cb"]);
