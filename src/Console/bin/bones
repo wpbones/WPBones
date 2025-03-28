@@ -447,6 +447,8 @@ namespace Bones\SemVer {
 
 namespace Bones\Traits {
 
+  use Exception;
+
   // Standard Color Definitions
   define('WPBONES_COLOR_BLACK', "\033[0;30m");
   define('WPBONES_COLOR_RED', "\033[0;31m");
@@ -589,6 +591,128 @@ namespace Bones\Traits {
 
       return $line ?: $default;
     }
+
+    /**
+     * Get an option value from the command line arguments
+     *
+     * @param array $argv The command line arguments
+     * @param string $prefix The prefix to search for
+     * @param string $default Optional. The default value
+     *
+     * @since 1.9.2
+     */
+    protected function getOptionValue(array $argv, string $prefix, string $default = ''): string
+    {
+      $result = $default;
+      foreach ($argv as $element) {
+        if (strpos($element, $prefix) === 0) {
+          $result = substr($element, strlen($prefix));
+          break;
+        }
+      }
+      return $result;
+    }
+
+    /**
+     * Remove values from an array
+     *
+     * @param array $argv The array to remove values from
+     * @param array $values The values to remove
+     *
+     * @since 1.9.2
+     */
+    protected function removeValues(array $argv, array $values): array
+    {
+      return array_values(array_diff($argv, $values));
+    }
+  }
+
+  /**
+   * WordPress related functionality
+   *
+   * @since 1.9.2
+   */
+  trait WordPress
+  {
+    use Console;
+
+    // WordPress loaded flag
+    protected $wpLoaded = false;
+
+    /* Protected version of the do_action function */
+    protected function do_action(...$args)
+    {
+      // Check if WordPress is loaded
+      if (!defined('ABSPATH') || !function_exists('do_action')) {
+        return;
+      }
+
+      do_action(...$args);
+    }
+
+    /* Protected version of the apply_filters function */
+    protected function apply_filters(...$args)
+    {
+      // Check if WordPress is loaded
+      if (!defined('ABSPATH') || !function_exists('apply_filters')) {
+        // return the second argument
+        return $args[1];
+      }
+
+      return apply_filters(...$args);
+    }
+
+    /* Load WordPress core and all environment. */
+    protected function loadWordPress()
+    {
+      try {
+
+        // We have to load the WordPress environment.
+        $currentDir = $_SERVER['PWD'] ?? __DIR__;
+        $wpLoadPath = dirname(dirname(dirname($currentDir))) . '/wp-load.php';
+
+        if (!file_exists($wpLoadPath)) {
+          $this->wpLoaded = false;
+          return;
+        }
+
+        require $wpLoadPath;
+        $this->wpLoaded = true;
+      } catch (Exception $e) {
+        $this->error("Error! Can't load WordPress (" . $e->getMessage() . ")");
+      }
+
+      try {
+        /**
+         * --------------------------------------------------------------------------
+         * Register The Auto Loader
+         * --------------------------------------------------------------------------
+         * Composer provides an auto-generated class loader for our app. We just
+         * need to use it! Requiring it here means we don't have to load classes
+         * manually. Feels great to relax.
+         */
+        if (file_exists(__DIR__ . '/vendor/autoload.php')) {
+          require __DIR__ . '/vendor/autoload.php';
+        }
+      } catch (Exception $e) {
+        $this->error("Error! Can't load Composer autoload (" . $e->getMessage() . ")");
+        exit();
+      }
+
+      try {
+        /**
+         * --------------------------------------------------------------------------
+         * Load this plugin env
+         * --------------------------------------------------------------------------
+         */
+        if (file_exists(__DIR__ . '/bootstrap/plugin.php')) {
+          require_once __DIR__ . '/bootstrap/plugin.php';
+        }
+      } catch (Exception $e) {
+        $this->error("Error! Can't load the plugin env (" . $e->getMessage() . ")");
+        exit();
+      }
+    }
   }
 }
 
@@ -603,7 +727,7 @@ namespace Bones {
   define('WPBONES_MINIMAL_PHP_VERSION', '7.4');
 
   /* MARK: The WP Bones command line version. */
-  define('WPBONES_COMMAND_LINE_VERSION', '1.9.1');
+  define('WPBONES_COMMAND_LINE_VERSION', '1.9.2');
 
   use Bones\SemVer\Exceptions\InvalidVersionException;
   use Bones\SemVer\Version;
@@ -634,6 +758,7 @@ namespace Bones {
   class BonesCommandLine
   {
     use Traits\Console;
+    use Traits\WordPress;
 
     /**
      * WP Bones version
@@ -682,9 +807,6 @@ namespace Bones {
     {
       $arguments = $this->arguments();
 
-      // load the WordPress environment and the plugin
-      $this->loadWordPress();
-
       // load the console kernel
       $this->loadKernel();
 
@@ -695,21 +817,30 @@ namespace Bones {
         $this->wpCliVersion = $matches[1] ?? null;
       }
 
-      // we won't load the WordPress environment for the following commands
+
+      // Start
       if (empty($arguments) || $this->isCommand('--help')) {
         $this->help();
-      } // rename
-      elseif ($this->isCommand('rename')) {
-        $this->rename($this->getCommandParams());
-      } // install
-      elseif ($this->isCommand('install')) {
-        $this->install($this->getCommandParams());
-      } // Update
-      elseif ($this->isCommand('update')) {
-        $this->update();
-      } // go ahead...
+      }
+      // Command needs WordPress to work
+      //
+      // tinker
+      elseif ($this->isCommand('tinker')) {
+        if (!$this->isHelp()) {
+          $this->loadWordPress();
+        }
+        $this->tinker();
+      }
+      // deploy
+      elseif ($this->isCommand('deploy')) {
+        if (!$this->isHelp()) {
+          $this->loadWordPress();
+        }
+        $this->deploy($this->getCommandParams());
+      }
+
+      // go ahead...and run the command need workpress
       else {
-        // handle the rest of the commands except rename
         $this->handle();
       }
     }
@@ -745,57 +876,6 @@ namespace Bones {
 
       // Return all arguments if no index is provided
       return $argv;
-    }
-
-    /* Load WordPress core and all environment. */
-    protected function loadWordPress()
-    {
-      try {
-
-        // We have to load the WordPress environment.
-        $currentDir = $_SERVER['PWD'] ?? __DIR__;
-        $wpLoadPath = dirname(dirname(dirname($currentDir))) . '/wp-load.php';
-
-        if (!file_exists($wpLoadPath)) {
-          $this->error("Error! You need to be inside the wp-content/plugins/ folder");
-          exit();
-        }
-
-        require $wpLoadPath;
-      } catch (Exception $e) {
-        $this->error("Error! Can't load WordPress (" . $e->getMessage() . ")");
-      }
-
-      try {
-        /**
-         * --------------------------------------------------------------------------
-         * Register The Auto Loader
-         * --------------------------------------------------------------------------
-         * Composer provides an auto-generated class loader for our app. We just
-         * need to use it! Requiring it here means we don't have to load classes
-         * manually. Feels great to relax.
-         */
-        if (file_exists(__DIR__ . '/vendor/autoload.php')) {
-          require __DIR__ . '/vendor/autoload.php';
-        }
-      } catch (Exception $e) {
-        $this->error("Error! Can't load Composer autoload (" . $e->getMessage() . ")");
-        exit();
-      }
-
-      try {
-        /**
-         * --------------------------------------------------------------------------
-         * Load this plugin env
-         * --------------------------------------------------------------------------
-         */
-        if (file_exists(__DIR__ . '/bootstrap/plugin.php')) {
-          require_once __DIR__ . '/bootstrap/plugin.php';
-        }
-      } catch (Exception $e) {
-        $this->error("Error! Can't load the plugin env (" . $e->getMessage() . ")");
-        exit();
-      }
     }
 
     /** Check and load for console kernel extensions. */
@@ -887,6 +967,28 @@ namespace Bones {
       array_shift($params);
 
       return !is_null($index) ? $params[$index] ?? null : $params;
+    }
+
+    /**
+     * Return the path from the asked class.
+     *
+     * @param string $className Class name.
+     *
+     * @since 1.9.2
+     *
+     * @return array
+     */
+    protected function getPathFromAskedClass($className)
+    {
+      // get additional path
+      $path = $namespacePath = '';
+      if (false !== strpos($className, '/')) {
+        $parts = explode('/', $className);
+        $className = array_pop($parts);
+        $path = implode('/', $parts) . '/';
+        $namespacePath = '\\' . implode('\\', $parts);
+      }
+      return [$path, $namespacePath, $className];
     }
 
     /* Return the default plugin name and namespace. */
@@ -1242,64 +1344,93 @@ namespace Bones {
     /* Run subtask. Handle the php bones commands */
     protected function handle()
     {
-      // deploy
-      if ($this->isCommand('deploy')) {
-        $this->deploy($this->getCommandParams());
-      } // Optimize
+      // install
+      if ($this->isCommand('install')) {
+        $this->install($this->getCommandParams());
+      }
+      // optimize
       elseif ($this->isCommand('optimize')) {
         $this->optimize();
-      } // Tinker
-      elseif ($this->isCommand('tinker')) {
-        $this->tinker();
-      } // Require
-      elseif ($this->isCommand('require')) {
-        $this->requirePackage($this->getCommandParams(0));
-      } // Version
-      elseif ($this->isCommand('version')) {
-        $this->version($this->getCommandParams());
-      } // migrate:create {table_name}
+      }
+      // plugin
       elseif ($this->isCommand('plugin')) {
         $this->plugin($this->getCommandParams());
-      } // migrate:create {table_name}
+      }
+      // rename
+      elseif ($this->isCommand('rename')) {
+        $this->rename($this->getCommandParams());
+      }
+      // require
+      elseif ($this->isCommand('require')) {
+        $this->requirePackage($this->getCommandParams(0));
+      }
+      // update
+      elseif ($this->isCommand('update')) {
+        $this->update();
+      }
+      // version
+      elseif ($this->isCommand('version')) {
+        $this->version($this->getCommandParams());
+      }
+      // -- migrate ------------------------------------------
+      //
+      // migrate:create {table_name}
       elseif ($this->isCommand('migrate:create')) {
         $this->createMigrate($this->getCommandParams(0));
-      } // make:controller {controller_name}
-      elseif ($this->isCommand('make:controller')) {
-        $this->createController($this->getCommandParams(0));
-      } // make:console {command_name}
-      elseif ($this->isCommand('make:console')) {
-        $this->createCommand($this->getCommandParams(0));
-      } // make:cpt {className}
-      elseif ($this->isCommand('make:cpt')) {
-        $this->createCustomPostType($this->getCommandParams(0));
-      } // make:shortcode {className}
-      elseif ($this->isCommand('make:shortcode')) {
-        $this->createShortcode($this->getCommandParams(0));
-      } // make:schedule {className}
-      elseif ($this->isCommand('make:schedule')) {
-        $this->createSchedule($this->getCommandParams(0));
-      } // make:provider {className}
-      elseif ($this->isCommand('make:provider')) {
-        $this->createProvider($this->getCommandParams(0));
-      } // make:ajax {className}
+      }
+      // -- make ---------------------------------------------
+      //
+      // make:ajax {className}
       elseif ($this->isCommand('make:ajax')) {
         $this->createAjax($this->getCommandParams(0));
-      } // make:ctt {className}
-      elseif ($this->isCommand('make:ctt')) {
-        $this->createCustomTaxonomyType($this->getCommandParams(0));
-      } // make:widget {className}
-      elseif ($this->isCommand('make:widget')) {
-        $this->createWidget($this->getCommandParams(0));
-      } // make:model {className}
-      elseif ($this->isCommand('make:model')) {
-        $this->createModel($this->getCommandParams(0));
-      } // make:eloquent-model {className}
-      elseif ($this->isCommand('make:eloquent-model')) {
-        $this->createEloquentModel($this->getCommandParams(0));
-      } // make:api {className}
+      }
+      // make:api {className}
       elseif ($this->isCommand('make:api')) {
         $this->createAPIController($this->getCommandParams(0));
-      } // else...
+      }
+      // make:console {command_name}
+      elseif ($this->isCommand('make:console')) {
+        $this->createCommand($this->getCommandParams(0));
+      }
+      // make:controller {controller_name}
+      elseif ($this->isCommand('make:controller')) {
+        $this->createController($this->getCommandParams(0));
+      }
+      // make:cpt {className}
+      elseif ($this->isCommand('make:cpt')) {
+        $this->createCustomPostType($this->getCommandParams(0));
+      }
+      // make:ctt {className}
+      elseif ($this->isCommand('make:ctt')) {
+        $this->createCustomTaxonomyType($this->getCommandParams(0));
+      }
+      // make:eloquent-model {className}
+      elseif ($this->isCommand('make:eloquent-model')) {
+        $this->createEloquentModel($this->getCommandParams(0));
+      }
+      // make:model {className}
+      elseif ($this->isCommand('make:model')) {
+        $this->createModel($this->getCommandParams(0));
+      }
+      // make:schedule {className}
+      elseif ($this->isCommand('make:schedule')) {
+        $this->createSchedule($this->getCommandParams(0));
+      }
+      // make:shortcode {className}
+      elseif ($this->isCommand('make:shortcode')) {
+        $this->createShortcode($this->getCommandParams(0));
+      }
+      // make:provider {className}
+      elseif ($this->isCommand('make:provider')) {
+        $this->createProvider($this->getCommandParams(0));
+      }
+      // make:widget {className}
+      elseif ($this->isCommand('make:widget')) {
+        $this->createWidget($this->getCommandParams(0));
+      }
+      // -- kernel --------------------------------------------------
+      //
+      // check any registered kernel commands.
       else {
         $extended = false;
 
@@ -1446,6 +1577,23 @@ namespace Bones {
       file_put_contents('namespace', "{$plugin_name},{$namespace}");
 
       $this->processCompleted("Rename process completed!");
+    }
+
+    /**
+     * Create a directory if it does not exist.
+     *
+     * @param string $path The path of the directory to create.
+     *
+     * @since 1.9.2
+     *
+     * @return bool True if the directory was created or already exists, false otherwise.
+     */
+    protected function mkdirIfNotExists(string $path): bool
+    {
+      if (!file_exists($path)) {
+        mkdir($path, 0755, true);
+      }
+      return true;
     }
 
     /**
@@ -1801,37 +1949,57 @@ namespace Bones {
      * Create a deployment version of the plugin
      *
      * @param $argv
+     *
+     * @since 1.9.2 - If WordPress is not loaded, the deploy.php script will not be executed.
      */
     protected function deploy($argv)
     {
-      $path = $argv[0] !== '--wp' ? $argv[0] : '';
-      $index = $argv[0] !== '--wp' ? 1 : 0;
-      $is_wp_org = array_key_exists($index, $argv) && $argv[$index] === '--wp';
+      // check if there is '--wp' in the arguments array
+      $is_wp_org = in_array('--wp', $argv, true);
 
+      // check if there is '--no-build' in the arguments array
+      $no_build = in_array('--no-build', $argv, true);
+
+      // check if there is '--pkgm=<package-manager>' in the arguments array
+      // and get the <package-manager> name
+      $package_name = $this->getOptionValue($argv, '--pkgm=');
+
+      // filter the array to remove the '--wp' and '--pkgm=<package-manager>' arguments
+      $filtered_args = $this->removeValues($argv, ['--wp', '--no-build', '--pkgm=' . $package_name]);
+
+      // get the path from the filtered arguments array
+      $path = $filtered_args[0] ?? '';
       $path = rtrim($path, '/');
-
-      $this->startCommand("Deploy");
 
       if (empty($path)) {
         $path = $this->ask('Enter the complete path of deploy');
       } elseif ('--help' === $path) {
         $this->line("\nUsage:");
-        $this->info("  deploy <path>\n");
+        $this->info("  deploy <path> <options>\n");
         $this->line('Arguments:');
-        $this->info("  path\t\tThe complete path of deploy.");
-        $this->info("  [--wp]\tYou are going to release this plugin in the WordPress.org public repository.");
+        $this->info("  path\t\tThe complete path of deploy.\n");
+        $this->line('Options:');
+        $this->info("  --wp\t\t\t\tYou are going to release this plugin in the WordPress.org public repository.");
+        $this->info("  --pkgm=<package-manager>\tForces the deployment to use the specified package manager, Eg. npm, yarn, ...");
+        $this->info("  --no-build\t\t\tForces the deployment to skip the build process.");
         exit(0);
       }
+
+      $this->startCommand("Deploy");
 
       if (empty($path)) {
         $this->error("The path is empty!");
         exit(1);
       }
 
-      do_action('wpbones_console_deploy_start', $this, $path);
+      $this->do_action('wpbones_console_deploy_start', $this, $path);
 
       // alternative method to customize the deployment
-      @include 'deploy.php';
+      if ($this->wpLoaded) {
+        @include 'deploy.php';
+      } else {
+        $this->warning('This plugin looks like is not inside a WordPress. The "deploy.php" won\'t be use');
+      }
 
       /**
        * Filter the list of files and folders that won't be skipped during the deployment.
@@ -1839,7 +2007,7 @@ namespace Bones {
        * @since 1.9.0
        * @param array $array The files and folders are relative to the root of plugin.
        */
-      $dontSkipWhenDeploy = apply_filters('wpbones_console_deploy_dont_skip_files_folders', [
+      $dontSkipWhenDeploy = $this->apply_filters('wpbones_console_deploy_dont_skip_files_folders', [
         '/gulpfile.js',
         '/package.json',
         '/package-lock.json',
@@ -1863,11 +2031,11 @@ namespace Bones {
        * @since 1.9.0
        * @param bool $buildAssets True to build assets, false to skip the build.
        */
-      $buildAssets = apply_filters('wpbones_console_deploy_build_assets', true);
+      $buildAssets = $this->apply_filters('wpbones_console_deploy_build_assets', true);
 
-      if ($buildAssets) {
-        do_action('wpbones_console_deploy_before_build_assets', $this, $path);
-        $this->buildAssets($path);
+      if ($buildAssets && !$no_build) {
+        $this->do_action('wpbones_console_deploy_before_build_assets', $this, $path);
+        $this->buildAssets($path, $package_name);
       }
 
       // check if the destination folder exists
@@ -1884,7 +2052,7 @@ namespace Bones {
        * @since 1.9.0
        * @param array $array The files and folders are relative to the root of plugin.
        */
-      $this->skipWhenDeploy = apply_filters('wpbones_console_deploy_default_skip_files_folders', [
+      $this->skipWhenDeploy = $this->apply_filters('wpbones_console_deploy_default_skip_files_folders', [
         '/.git',
         '/.cache',
         '/assets',
@@ -1918,7 +2086,7 @@ namespace Bones {
        *
        * @param array $array The files and folders are relative to the root of plugin.
        */
-      $this->skipWhenDeploy = apply_filters(
+      $this->skipWhenDeploy = $this->apply_filters(
         'wpbones_console_deploy_skip_folders',
         $this->skipWhenDeploy
       );
@@ -1935,7 +2103,7 @@ namespace Bones {
        * @param mixed $bones Bones command instance.
        * @param string $path The deployed path.
        */
-      do_action('wpbones_console_deploy_completed', $this, $path);
+      $this->do_action('wpbones_console_deploy_completed', $this, $path);
 
       $this->success("Deploy completed!");
       $this->info("\n🚀 You can now deploy the plugin from the path: {$path}\n");
@@ -1946,21 +2114,24 @@ namespace Bones {
      *
      * @since 1.9.0
      * @param string $path The path of the deploy
+     *
+     * @since 1.9.2
+     * @param string $pkgm Optional. The package manager to use for building assets
      */
-    protected function buildAssets($path)
+    protected function buildAssets($path, $pkgm = '')
     {
-      $packageManager = $this->askPackageManager();
+      $packageManager = empty($pkgm) ? $this->askPackageManager() : $pkgm;
 
       if ($packageManager) {
 
         // ask to build assets
-        $answer = $this->ask("Do you want to run '$packageManager run build' to build assets? (y/n)", 'y');
+        $answer = empty($pkgm) ? $this->ask("Do you want to run '$packageManager run build' to build assets? (y/n)", 'y') : 'y';
 
         if (strtolower($answer) === 'y') {
           $this->startProgress("Build for production by using '{$packageManager} run build'");
           shell_exec("{$packageManager} run build");
           $this->processCompleted("Build completed\n");
-          do_action('wpbones_console_deploy_after_build_assets', $this, $path);
+          $this->do_action('wpbones_console_deploy_after_build_assets', $this, $path);
         } else {
           $answer = $this->ask("Enter the package manager to build assets (press RETURN to skip the build)", '');
           if (empty($answer)) {
@@ -1969,15 +2140,13 @@ namespace Bones {
             $this->startProgress("Build for production by using '{$answer} run build'");
             shell_exec("{$answer} run build");
             $this->endProgress();
-            do_action('wpbones_console_deploy_after_build_assets', $this, $path);
+            $this->do_action('wpbones_console_deploy_after_build_assets', $this, $path);
           }
         }
       } else {
         $this->warning("No package manager found. The build assets will be skipped");
       }
     }
-
-
 
     /**
      * Copy a whole folder. Used by deploy()
@@ -2052,6 +2221,16 @@ namespace Bones {
     /* Start a Tinker emulation */
     protected function tinker()
     {
+      if ($this->isHelp()) {
+        $this->line("\nUsage:");
+        $this->info("  tinker\n");
+        exit();
+      }
+
+      if (!$this->wpLoaded) {
+        $this->warning("Note: WordPress is not loaded! This means you can't use the WP functions.\n");
+      }
+
       $eval = trim(readline(WPBONES_COLOR_BOLD_GREEN . "〉" . WPBONES_COLOR_LIGHT_GREEN), " \t\n\r\0\x0B");
 
       try {
@@ -2418,13 +2597,7 @@ namespace Bones {
       $namespace = $this->getNamespace();
 
       // get additional path
-      $path = $namespacePath = '';
-      if (false !== strpos($className, '/')) {
-        $parts = explode('/', $className);
-        $className = array_pop($parts);
-        $path = implode('/', $parts) . '/';
-        $namespacePath = '\\' . implode('\\', $parts);
-      }
+      [$path, $namespacePath, $className] = $this->getPathFromAskedClass($className);
 
       // stubbing
       $content = $this->prepareStub('controller', [
@@ -2432,9 +2605,12 @@ namespace Bones {
         '{ClassName}' => $className,
       ]);
 
+      // Create the folder if it doesn't exist
+      $this->mkdirIfNotExists('plugin/Http/Controllers');
+
       if (!empty($path)) {
+        $this->mkdirIfNotExists("plugin/Http/Controllers/{$path}");
         $content = str_replace('{Path}', $namespacePath, $content);
-        mkdir("plugin/Http/Controllers/{$path}", 0777, true);
       } else {
         $content = str_replace('{Path}', '', $content);
       }
@@ -2483,9 +2659,7 @@ namespace Bones {
         '{CommandName}' => $command,
       ]);
 
-      if (!is_dir('plugin/Console/Commands')) {
-        mkdir('plugin/Console/Commands', 0777, true);
-      }
+      $this->mkdirIfNotExists('plugin/Console/Commands');
 
       file_put_contents("plugin/Console/Commands/{$filename}", $content);
 
@@ -2550,9 +2724,7 @@ namespace Bones {
       ]);
 
       // Create the folder if it doesn't exist
-      if (!is_dir('plugin/CustomPostTypes')) {
-        mkdir('plugin/CustomPostTypes', 0777, true);
-      }
+      $this->mkdirIfNotExists('plugin/CustomPostTypes');
 
       file_put_contents("plugin/CustomPostTypes/{$filename}", $content);
 
@@ -2591,9 +2763,7 @@ namespace Bones {
       ]);
 
       // Create the folder if it doesn't exist
-      if (!is_dir('plugin/Shortcodes')) {
-        mkdir('plugin/Shortcodes', 0777, true);
-      }
+      $this->mkdirIfNotExists('plugin/Shortcodes');
 
       file_put_contents("plugin/Shortcodes/{$filename}", $content);
 
@@ -2634,9 +2804,7 @@ namespace Bones {
       ]);
 
       // Create the folder if it doesn't exist
-      if (!is_dir('plugin/Providers')) {
-        mkdir('plugin/Providers', 0777, true);
-      }
+      $this->mkdirIfNotExists('plugin/Providers');
 
       file_put_contents("plugin/Providers/{$filename}", $content);
 
@@ -2663,10 +2831,11 @@ namespace Bones {
       // ask className if empty
       $className = $this->askClassNameIfEmpty($className);
 
-      $filename = sprintf('%s.php', $className);
-
       // current plugin name and namespace
       $namespace = $this->getNamespace();
+
+      // get additional path
+      [$path, $namespacePath] = $this->getPathFromAskedClass($className);
 
       // stubbing
       $content = $this->prepareStub('provider', [
@@ -2675,13 +2844,22 @@ namespace Bones {
       ]);
 
       // Create the folder if it doesn't exist
-      if (!is_dir('plugin/Providers')) {
-        mkdir('plugin/Providers', 0777, true);
+      $this->mkdirIfNotExists('plugin/Providers');
+
+      if (!empty($path)) {
+        $this->mkdirIfNotExists("plugin/Providers/{$path}");
+        $content = str_replace('{Path}', $namespacePath, $content);
+      } else {
+        $content = str_replace('{Path}', '', $content);
       }
 
-      file_put_contents("plugin/Providers/{$filename}", $content);
+      $filename = sprintf('%s.php', $className);
 
-      $this->line(" Created plugin/Providers/{$filename}");
+      file_put_contents("plugin/Providers/{$path}{$filename}", $content);
+
+      $this->line(" Created plugin/Providers/{$path}{$filename}");
+
+      $this->optimize();
     }
 
     /**
@@ -2710,9 +2888,7 @@ namespace Bones {
       ]);
 
       // Create the folder if it doesn't exist
-      if (!is_dir('plugin/Ajax')) {
-        mkdir('plugin/Ajax', 0777, true);
-      }
+      $this->mkdirIfNotExists('plugin/Ajax');
 
       $filename = sprintf('%s.php', $className);
 
@@ -2773,9 +2949,7 @@ namespace Bones {
       ]);
 
       // Create the folder if it doesn't exist
-      if (!is_dir('plugin/CustomTaxonomyTypes')) {
-        mkdir('plugin/CustomTaxonomyTypes', 0777, true);
-      }
+      $this->mkdirIfNotExists('plugin/CustomTaxonomyTypes');
 
       file_put_contents("plugin/CustomTaxonomyTypes/{$filename}", $content);
 
@@ -2818,9 +2992,7 @@ namespace Bones {
       ]);
 
       // Create the folder if it doesn't exist
-      if (!is_dir('plugin/Widgets')) {
-        mkdir('plugin/Widgets', 0777, true);
-      }
+      $this->mkdirIfNotExists('plugin/Widgets');
 
       file_put_contents("plugin/Widgets/{$filename}", $content);
 
@@ -2867,13 +3039,7 @@ namespace Bones {
       $namespace = $this->getNamespace();
 
       // get additional path
-      $path = $namespacePath = '';
-      if (false !== strpos($className, '/')) {
-        $parts = explode('/', $className);
-        $className = array_pop($parts);
-        $path = implode('/', $parts) . '/';
-        $namespacePath = '\\' . implode('\\', $parts);
-      }
+      [$path, $namespacePath, $className] = $this->getPathFromAskedClass($className);
 
       // stubbing
       $content = $this->prepareStub('model', [
@@ -2881,9 +3047,12 @@ namespace Bones {
         '{ClassName}' => $className,
       ]);
 
+      // Create the folder if it doesn't exist
+      $this->mkdirIfNotExists('plugin/Models');
+
       if (!empty($path)) {
+        $this->mkdirIfNotExists("plugin/Models/{$path}");
         $content = str_replace('{Path}', $namespacePath, $content);
-        mkdir("plugin/Models/{$path}", 0777, true);
       } else {
         $content = str_replace('{Path}', '', $content);
       }
@@ -2917,13 +3086,7 @@ namespace Bones {
       $namespace = $this->getNamespace();
 
       // get additional path
-      $path = $namespacePath = '';
-      if (false !== strpos($className, '/')) {
-        $parts = explode('/', $className);
-        $className = array_pop($parts);
-        $path = implode('/', $parts) . '/';
-        $namespacePath = '\\' . implode('\\', $parts);
-      }
+      [$path, $namespacePath, $className] = $this->getPathFromAskedClass($className);
 
       // create the table
       $table = strtolower($className);
@@ -2935,9 +3098,12 @@ namespace Bones {
         '{Table}' => $table,
       ]);
 
+      // Create the folder if it doesn't exist
+      $this->mkdirIfNotExists('plugin/Models');
+
       if (!empty($path)) {
+        $this->mkdirIfNotExists("plugin/Models/{$path}");
         $content = str_replace('{Path}', $namespacePath, $content);
-        mkdir("plugin/Models/{$path}", 0777, true);
       } else {
         $content = str_replace('{Path}', '', $content);
       }
@@ -2971,13 +3137,7 @@ namespace Bones {
       $namespace = $this->getNamespace();
 
       // get additional path
-      $path = $namespacePath = '';
-      if (false !== strpos($className, '/')) {
-        $parts = explode('/', $className);
-        $className = array_pop($parts);
-        $path = implode('/', $parts) . '/';
-        $namespacePath = '\\' . implode('\\', $parts);
-      }
+      [$path, $namespacePath, $className] = $this->getPathFromAskedClass($className);
 
       // stubbing
       $content = $this->prepareStub('api', [
@@ -2986,13 +3146,11 @@ namespace Bones {
       ]);
 
       // Create the folder if it doesn't exist
-      if (!is_dir('plugin/API')) {
-        mkdir('plugin/API', 0777, true);
-      }
+      $this->mkdirIfNotExists('plugin/API');
 
       if (!empty($path)) {
+        $this->mkdirIfNotExists("plugin/API/{$path}");
         $content = str_replace('{Path}', $namespacePath, $content);
-        mkdir("plugin/API/{$path}", 0777, true);
       } else {
         $content = str_replace('{Path}', '', $content);
       }
