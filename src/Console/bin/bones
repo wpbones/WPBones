@@ -727,7 +727,7 @@ namespace Bones {
   define('WPBONES_MINIMAL_PHP_VERSION', '7.4');
 
   /* MARK: The WP Bones command line version. */
-  define('WPBONES_COMMAND_LINE_VERSION', '1.9.2');
+  define('WPBONES_COMMAND_LINE_VERSION', '1.9.3');
 
   use Bones\SemVer\Exceptions\InvalidVersionException;
   use Bones\SemVer\Version;
@@ -2054,6 +2054,7 @@ namespace Bones {
        */
       $this->skipWhenDeploy = $this->apply_filters('wpbones_console_deploy_default_skip_files_folders', [
         '/.git',
+        '/.github',
         '/.cache',
         '/assets',
         '/.gitignore',
@@ -2069,6 +2070,7 @@ namespace Bones {
         '/deploy.php',
         '/namespace',
         '/README.md',
+        '/Dockerfile',
         '/webpack.mix.js',
         '/webpack.config.js',
         '/phpcs.xml.dist',
