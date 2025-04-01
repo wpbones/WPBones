@@ -619,7 +619,8 @@ namespace Bones\Traits {
       }else{
           return $default?"true":"false";
 
-
+      }
+    }
     /**
      * Get an option value from the command line arguments
      *
