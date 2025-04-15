@@ -1954,20 +1954,24 @@ namespace Bones {
      */
     protected function deploy($argv)
     {
-      // check if there is '--wp' in the arguments array
+      // Check if there is '--wp' in the arguments array.
       $is_wp_org = in_array('--wp', $argv, true);
 
-      // check if there is '--no-build' in the arguments array
+      // Check if there is '--create-zip' in the arguments array.
+      $is_create_zip = in_array('--create-zip', $argv, true);
+
+      // Check if there is '--no-build' in the arguments array.
       $no_build = in_array('--no-build', $argv, true);
 
-      // check if there is '--pkgm=<package-manager>' in the arguments array
-      // and get the <package-manager> name
+      // Check if there is '--pkgm=<package-manager>' in the arguments array,
+      // and get the <package-manager> name.
       $package_name = $this->getOptionValue($argv, '--pkgm=');
 
-      // filter the array to remove the '--wp' and '--pkgm=<package-manager>' arguments
-      $filtered_args = $this->removeValues($argv, ['--wp', '--no-build', '--pkgm=' . $package_name]);
+      // Filter the array to remove the '--wp', '--create-zip', '--no-build',
+      // and '--pkgm=<package-manager>' arguments.
+      $filtered_args = $this->removeValues($argv, ['--wp', '--create-zip', '--no-build', '--pkgm=' . $package_name]);
 
-      // get the path from the filtered arguments array
+      // Get the path from the filtered arguments array.
       $path = $filtered_args[0] ?? '';
       $path = rtrim($path, '/');
 
@@ -1980,6 +1984,7 @@ namespace Bones {
         $this->info("  path\t\tThe complete path of deploy.\n");
         $this->line('Options:');
         $this->info("  --wp\t\t\t\tYou are going to release this plugin in the WordPress.org public repository.");
+        $this->info("  --create-zip\t\t\tCreates an installable plugin zip file instead of deploying in a directory.");
         $this->info("  --pkgm=<package-manager>\tForces the deployment to use the specified package manager, Eg. npm, yarn, ...");
         $this->info("  --no-build\t\t\tForces the deployment to skip the build process.");
         exit(0);
@@ -1994,7 +1999,7 @@ namespace Bones {
 
       $this->do_action('wpbones_console_deploy_start', $this, $path);
 
-      // alternative method to customize the deployment
+      // Alternative method to customize the deployment.
       if ($this->wpLoaded) {
         @include 'deploy.php';
       } else {
@@ -2038,7 +2043,14 @@ namespace Bones {
         $this->buildAssets($path, $package_name);
       }
 
-      // check if the destination folder exists
+      // When creating a zip, a temporary folder must be created with the deployed version first.
+      // Append "-tmp" to the path. This folder will be deleted at the end of the deployment.
+      if ($is_create_zip) {
+        $originalPath = $path;
+        $path .= '-tmp';
+      }
+
+      // Check if the destination folder exists.
       if (is_dir($path)) {
         $this->startProgress("Delete destination folder 📁 {$path}");
         sleep(5);
@@ -2107,8 +2119,74 @@ namespace Bones {
        */
       $this->do_action('wpbones_console_deploy_completed', $this, $path);
 
+      // Create a zip if "--create-zip" is passed as an argument.
+      if ($is_create_zip) {
+        // Return an error if the zip extension is disabled.
+        if (!extension_loaded('zip')) {
+          // Delete the temporary folder once the zip can't be created.
+          $this->deleteDirectory($path);
+          $this->error("Can't create zip! PHP zip extension is disabled.");
+          exit(1);
+        }
+
+        // If the path ends with a trailing slash, remove it.
+        if (substr($originalPath, -1) === DIRECTORY_SEPARATOR) {
+          $originalPath = substr($originalPath, 0, -1);
+        }
+
+        // If the path doesn't end with .zip, add it.
+        if (substr($originalPath, -4) !== '.zip') {
+          $originalPath .= '.zip';
+        }
+
+        // Create zip file if it doesn't exist. Needed for realpath().
+        fopen($originalPath, 'wa+');
+
+        // Create the zip by iterating over the folders and files and adding them to the zip.
+        $this->startProgress("Creating zip file 📁 {$originalPath}");
+        $zip = new \ZipArchive();
+        $zip->open(realpath($originalPath), \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
+        $this->addDirToZip($zip, realpath($path));        
+        $zip->close();
+        $this->endProgress();
+
+        // Delete the temporary folder after the zip is created.
+        $this->deleteDirectory($path);
+        // Update the path to the zip file for info message below.
+        $path = $originalPath;
+      }
+
       $this->success("Deploy completed!");
       $this->info("\n🚀 You can now deploy the plugin from the path: {$path}\n");
+    }
+
+    /**
+     * Recursively adds all files and directories from $folderPath to $zip with the correct relative paths.
+     *
+     * @since 1.9.4
+     * @param \ZipArchive $zip
+     * @param string      $folderPath
+     *
+     * @return void
+     */
+    protected function addDirToZip($zip, $folderPath) {
+      $iterator = new \RecursiveIteratorIterator(
+          new \RecursiveDirectoryIterator($folderPath, \RecursiveDirectoryIterator::SKIP_DOTS),
+          \RecursiveIteratorIterator::SELF_FIRST
+      );
+  
+      foreach ($iterator as $item) {
+          $realPath = $item->getRealPath();
+          $relativePath = substr($realPath, strlen($folderPath) + 1);
+  
+          if ($item->isDir()) {
+              // Create empty directory.
+              $zip->addEmptyDir($relativePath);
+          } else {
+              // Add file to the proper path in the zip.
+              $zip->addFile($realPath, $relativePath);
+          }
+      }
     }
 
     /**
