@@ -131,17 +131,20 @@ class Plugin extends Container implements PluginContract
     // init api
     $this->initApi();
 
+    // Fetch the priorities from the config file
+    $priorities = $this->config('plugin.priorities', []);
+
     // Fires after WordPress has finished loading but before any headers are sent.
-    add_action('init', [$this, '_init']);
+    add_action('init', [$this, '_init'], $priorities['init'] ?? 10);
 
     // Fires before the administration menu loads in the admin.
-    add_action('admin_menu', [$this, '_admin_menu']);
+    add_action('admin_menu', [$this, '_admin_menu'], $priorities['admin_init'] ?? 10);
 
     // Fires after all default WordPress widgets have been registered.
-    add_action('widgets_init', [$this, '_widgets_init']);
+    add_action('widgets_init', [$this, '_widgets_init'], $priorities['widget_init'] ?? 10);
 
     // Filter a screen option value before it is set.
-    add_filter('set-screen-option', [$this, '_set_screen_option'], 10, 3);
+    add_filter('set-screen-option', [$this, '_set_screen_option'], $priorities['set_screen_option'] ?? 10, 3);
 
     static::$instance = $this;
 
