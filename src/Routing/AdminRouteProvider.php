@@ -7,6 +7,7 @@ if (!defined('ABSPATH')) {
 }
 
 use WPKirk\WPBones\Support\ServiceProvider;
+use WPKirk\WPBones\Support\Str;
 
 /**
  * Class AdminRouteProvider
@@ -44,6 +45,17 @@ class AdminRouteProvider extends ServiceProvider
                 2
               );
             });
+
+            if (isset($page['route']['load'])) {
+              [$controller, $method] = Str::parseCallback($page['route']['load']);
+
+              add_action("load-toplevel_page_{$page_slug}", function () use ($controller, $method) {
+                $className = "WPKirk\\Http\\Controllers\\{$controller}";
+                $instance = new $className();
+
+                return $instance->{$method}();
+              });
+            }
 
             add_action($hookName, $hook);
 
