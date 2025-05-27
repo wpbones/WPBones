@@ -11,9 +11,13 @@ use {Namespace}\WPBones\Foundation\WordPressCustomPostTypeServiceProvider as Ser
 class {ClassName} extends ServiceProvider
 {
 
-  protected $id     = '{ID}';
-  protected $name   = '{Name}';
-  protected $plural = '{Plural}';
+  protected $id         = '{ID}';
+  protected $name       = '{Name}';
+  protected $plural     = '{Plural}';
+  protected $showInRest = {ShowInRest};
+  protected $showUI     = {showUI};
+  protected $supports   = [{Supports}];
+  protected $menuIcon   = "dashicons-admin-post";
 
   /**
    * You may override this method in order to register your own actions and filters.
