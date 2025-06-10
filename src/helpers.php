@@ -1,6 +1,6 @@
 <?php
 
-use WPKirk\WPBones\Support\Str;
+use Ondapresswp\WPBones\Support\Str;
 
 if (!function_exists('wpbones_value')) {
     /**
@@ -182,10 +182,10 @@ if (!function_exists('wpbones_logger')) {
     function wpbones_logger()
     {
         if (count(func_get_args()) > 0) {
-            return call_user_func_array([WPKirk()->log(), 'debug'], func_get_args());
+            return call_user_func_array([Ondapresswp()->log(), 'debug'], func_get_args());
         }
 
-        return WPKirk()->log();
+        return Ondapresswp()->log();
     }
 }
 
@@ -209,7 +209,7 @@ if (!function_exists('wpbones_provider')) {
      */
     function wpbones_provider($provider)
     {
-        return WPKirk()->provider($provider);
+        return Ondapresswp()->provider($provider);
     }
 }
 
@@ -294,7 +294,7 @@ if (!function_exists('wpbones_modules')) {
         // append ".php" if not present
         $file_name = rtrim($file, '.php') . '.php';
 
-        $path = WPKirk()->basePath . '/plugin/modules/' . $file_name;
+        $path = Ondapresswp()->basePath . '/plugin/modules/' . $file_name;
 
         return require $path;
     }

@@ -1,6 +1,6 @@
 <?php
 
-namespace WPKirk\WPBones\Contracts\Container;
+namespace Ondapresswp\WPBones\Contracts\Container;
 
 interface Container
 {

@@ -1,6 +1,6 @@
 <?php
 
-namespace WPKirk\WPBones\Routing\API;
+namespace Ondapresswp\WPBones\Routing\API;
 
 if (!defined('ABSPATH')) {
   exit();
@@ -8,7 +8,7 @@ if (!defined('ABSPATH')) {
 
 use WP_Error;
 use WP_REST_Response;
-use WPKirk\WPBones\Support\Str;
+use Ondapresswp\WPBones\Support\Str;
 
 /**
  * You'll use this class to create a route.

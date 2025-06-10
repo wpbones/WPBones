@@ -11,7 +11,7 @@
       "src/helpers.php"
     ],
     "psr-4": {
-      "WPKirk\\WPBones\\": "src/"
+      "Ondapresswp\\WPBones\\": "src/"
     }
   },
   "description": "WordPress framework for Laravel developers",
@@ -28,7 +28,8 @@
   "name": "wpbones/wpbones",
   "require": {
     "php": ">=7.4",
-    "eftec/bladeone": "^4.13"
+    "eftec/bladeone": "^4.13",
+    "illuminate/database": "^12.3"
   },
   "support": {
     "issues": "https://github.com/wpbones/WPBones/issues",

@@ -1,13 +1,13 @@
 <?php
 
-namespace WPKirk\WPBones\Routing\API;
+namespace Ondapresswp\WPBones\Routing\API;
 
 if (!defined('ABSPATH')) {
   exit();
 }
 
 use WP_Error;
-use WPKirk\WPBones\Support\ServiceProvider;
+use Ondapresswp\WPBones\Support\ServiceProvider;
 
 /**
  * This provider is used to register all API routes.

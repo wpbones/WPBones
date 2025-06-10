@@ -1,10 +1,10 @@
 <?php
 
-namespace WPKirk\WPBones\Database;
+namespace Ondapresswp\WPBones\Database;
 
 use ArrayAccess;
 use ReturnTypeWillChange;
-use WPKirk\WPBones\Foundation\Plugin;
+use Ondapresswp\WPBones\Foundation\Plugin;
 
 if (!defined('ABSPATH')) {
   exit();
@@ -12,7 +12,7 @@ if (!defined('ABSPATH')) {
 
 /**
  * @class   WordPressOption
- * @package WPKirk\WPBones\Database
+ * @package Ondapresswp\WPBones\Database
  *
  *
  */

@@ -1,10 +1,10 @@
 <?php
 
-namespace WPKirk\WPBones\Database;
+namespace Ondapresswp\WPBones\Database;
 
 use InvalidArgumentException;
-use WPKirk\WPBones\Database\Support\Collection;
-use WPKirk\WPBones\Database\Support\Model;
+use Ondapresswp\WPBones\Database\Support\Collection;
+use Ondapresswp\WPBones\Database\Support\Model;
 
 /**
  * Class QueryBuilder
@@ -115,7 +115,7 @@ class QueryBuilder
   /**
    * The collection of rows.
    *
-   * @var \WPKirk\WPBones\Database\Support\Collection
+   * @var \Ondapresswp\WPBones\Database\Support\Collection
    */
   private $collection = [];
 
@@ -663,7 +663,7 @@ class QueryBuilder
    * @param string       $column The column name.
    * @param string|array $value
    * @param string       $boolean
-   * @return \WPKirk\WPBones\Database\QueryBuilder
+   * @return \Ondapresswp\WPBones\Database\QueryBuilder
    */
   public function whereIn($column, $value, $boolean = 'and')
   {

@@ -1,8 +1,8 @@
 <?php
 
-namespace WPKirk\WPBones\Foundation;
+namespace Ondapresswp\WPBones\Foundation;
 
-use WPKirk\WPBones\Support\ServiceProvider;
+use Ondapresswp\WPBones\Support\ServiceProvider;
 
 if (!defined('ABSPATH')) {
   exit();
@@ -13,7 +13,7 @@ if (!defined('ABSPATH')) {
  *
  * This class is a simple way to create scheduled events in WordPress.
  *
- * @package WPKirk\WPBones\Foundation
+ * @package Ondapresswp\WPBones\Foundation
  *
  * @since 1.8.0
  *

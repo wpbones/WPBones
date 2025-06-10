@@ -1,22 +1,22 @@
 <?php
 
-namespace WPKirk\WPBones\Html;
+namespace Ondapresswp\WPBones\Html;
 
 class Html
 {
     protected static $htmlTags = [
-    'a'        => '\WPKirk\WPBones\Html\HtmlTagA',
-    'button'   => '\WPKirk\WPBones\Html\HtmlTagButton',
-    'checkbox' => '\WPKirk\WPBones\Html\HtmlTagCheckbox',
-    'datetime' => '\WPKirk\WPBones\Html\HtmlTagDatetime',
-    'fieldset' => '\WPKirk\WPBones\Html\HtmlTagFieldSet',
-    'form'     => '\WPKirk\WPBones\Html\HtmlTagForm',
-    'input'    => '\WPKirk\WPBones\Html\HtmlTagInput',
-    'label'    => '\WPKirk\WPBones\Html\HtmlTagLabel',
-    'optgroup' => '\WPKirk\WPBones\Html\HtmlTagOptGroup',
-    'option'   => '\WPKirk\WPBones\Html\HtmlTagOption',
-    'select'   => '\WPKirk\WPBones\Html\HtmlTagSelect',
-    'textarea' => '\WPKirk\WPBones\Html\HtmlTagTextArea',
+    'a'        => '\Ondapresswp\WPBones\Html\HtmlTagA',
+    'button'   => '\Ondapresswp\WPBones\Html\HtmlTagButton',
+    'checkbox' => '\Ondapresswp\WPBones\Html\HtmlTagCheckbox',
+    'datetime' => '\Ondapresswp\WPBones\Html\HtmlTagDatetime',
+    'fieldset' => '\Ondapresswp\WPBones\Html\HtmlTagFieldSet',
+    'form'     => '\Ondapresswp\WPBones\Html\HtmlTagForm',
+    'input'    => '\Ondapresswp\WPBones\Html\HtmlTagInput',
+    'label'    => '\Ondapresswp\WPBones\Html\HtmlTagLabel',
+    'optgroup' => '\Ondapresswp\WPBones\Html\HtmlTagOptGroup',
+    'option'   => '\Ondapresswp\WPBones\Html\HtmlTagOption',
+    'select'   => '\Ondapresswp\WPBones\Html\HtmlTagSelect',
+    'textarea' => '\Ondapresswp\WPBones\Html\HtmlTagTextArea',
   ];
 
     public static function __callStatic($name, $arguments)

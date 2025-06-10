@@ -1,9 +1,9 @@
 <?php
 
-namespace WPKirk\WPBones\Database\Support;
+namespace Ondapresswp\WPBones\Database\Support;
 
-use WPKirk\WPBones\Database\QueryBuilder;
-use WPKirk\WPBones\Support\Str;
+use Ondapresswp\WPBones\Database\QueryBuilder;
+use Ondapresswp\WPBones\Support\Str;
 
 if (!defined('ABSPATH')) {
   exit();

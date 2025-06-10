@@ -1,12 +1,12 @@
 <?php
 
-namespace WPKirk\WPBones\Routing;
+namespace Ondapresswp\WPBones\Routing;
 
 if (!defined('ABSPATH')) {
   exit();
 }
 
-use WPKirk\WPBones\Support\ServiceProvider;
+use Ondapresswp\WPBones\Support\ServiceProvider;
 
 /**
  * Class AdminRouteProvider
@@ -14,7 +14,7 @@ use WPKirk\WPBones\Support\ServiceProvider;
  * This class is responsible for registering all the admin routes
  * by using the config/routes.php file.
  *
- * @package WPKirk\WPBones\Routing
+ * @package Ondapresswp\WPBones\Routing
  */
 
 class AdminRouteProvider extends ServiceProvider

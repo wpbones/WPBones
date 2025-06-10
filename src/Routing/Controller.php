@@ -1,10 +1,10 @@
 <?php
 
-namespace WPKirk\WPBones\Routing;
+namespace Ondapresswp\WPBones\Routing;
 
-use WPKirk\WPBones\Foundation\Http\Request;
-use WPKirk\WPBones\Support\Traits\HasAttributes;
-use WPKirk\WPBones\View\View;
+use Ondapresswp\WPBones\Foundation\Http\Request;
+use Ondapresswp\WPBones\Support\Traits\HasAttributes;
+use Ondapresswp\WPBones\View\View;
 
 if (!defined('ABSPATH')) {
   exit();
@@ -75,7 +75,7 @@ abstract class Controller
   /**
    * Get the Request instance.
    *
-   * @return \WPKirk\WPBones\Foundation\Http\Request
+   * @return \Ondapresswp\WPBones\Foundation\Http\Request
    */
   public function getRequestAttribute(): Request
   {

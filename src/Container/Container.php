@@ -1,8 +1,8 @@
 <?php
 
-namespace WPKirk\WPBones\Container;
+namespace Ondapresswp\WPBones\Container;
 
-use WPKirk\WPBones\Contracts\Container\Container as ContainerContract;
+use Ondapresswp\WPBones\Contracts\Container\Container as ContainerContract;
 
 class Container implements ContainerContract
 {

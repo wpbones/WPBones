@@ -1,6 +1,6 @@
 <?php
 
-namespace WPKirk\WPBones\Html;
+namespace Ondapresswp\WPBones\Html;
 
 class HtmlTagCheckbox extends HtmlTagInput
 {

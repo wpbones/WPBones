@@ -1,6 +1,6 @@
 <?php
 
-namespace WPKirk\WPBones\Database;
+namespace Ondapresswp\WPBones\Database;
 
 use Exception;
 

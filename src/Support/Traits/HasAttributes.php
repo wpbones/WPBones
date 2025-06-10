@@ -1,8 +1,8 @@
 <?php
 
-namespace WPKirk\WPBones\Support\Traits;
+namespace Ondapresswp\WPBones\Support\Traits;
 
-use WPKirk\WPBones\Support\Str;
+use Ondapresswp\WPBones\Support\Str;
 
 trait HasAttributes
 {

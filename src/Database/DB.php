@@ -1,8 +1,8 @@
 <?php
 
-namespace WPKirk\WPBones\Database;
+namespace Ondapresswp\WPBones\Database;
 
-use WPKirk\WPBones\Support\Str;
+use Ondapresswp\WPBones\Support\Str;
 
 /**
  * The Database Model provides a base class for all database models.
@@ -12,7 +12,7 @@ class DB
   /**
    * The query builder instance.
    *
-   * @var \WPKirk\WPBones\Database\QueryBuilder
+   * @var \Ondapresswp\WPBones\Database\QueryBuilder
    */
   protected QueryBuilder $queryBuilder;
 

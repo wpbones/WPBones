@@ -1,6 +1,6 @@
 <?php
 
-namespace WPKirk\WPBones\View;
+namespace Ondapresswp\WPBones\View;
 
 use eftec\bladeone\BladeOne;
 
@@ -133,8 +133,8 @@ class View
 
       $func = function () {
         // make available Html as facade
-        if (!class_exists('WPKirk\Html')) {
-          class_alias('\WPKirk\WPBones\Html\Html', 'WPKirk\Html', true);
+        if (!class_exists('Ondapresswp\Html')) {
+          class_alias('\Ondapresswp\WPBones\Html\Html', 'Ondapresswp\Html', true);
         }
 
         // make available plugin instance

@@ -1,12 +1,12 @@
 <?php
 
-namespace WPKirk\WPBones\Routing\Pages;
+namespace Ondapresswp\WPBones\Routing\Pages;
 
 if (!defined('ABSPATH')) {
   exit();
 }
 
-use WPKirk\WPBones\Support\ServiceProvider;
+use Ondapresswp\WPBones\Support\ServiceProvider;
 
 /**
  * This provider is used to register all custom pages.

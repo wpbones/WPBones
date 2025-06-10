@@ -1,6 +1,6 @@
 <?php
 
-namespace WPKirk\WPBones\Foundation\Console;
+namespace Ondapresswp\WPBones\Foundation\Console;
 
 class Kernel
 {
@@ -51,7 +51,9 @@ class Kernel
 
       foreach ($commands as $key => $command) {
         $name = $command->command;
-        $name .= str_repeat(' ', 23 - strlen($name));
+        $times = 23 - strlen($name);
+        if($times>0)
+        $name .= str_repeat(' ', $times);
         $description = $command->description;
         $this->line(" {$name} {$description}");
       }

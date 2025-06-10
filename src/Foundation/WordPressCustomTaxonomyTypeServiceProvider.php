@@ -1,8 +1,8 @@
 <?php
 
-namespace WPKirk\WPBones\Foundation;
+namespace Ondapresswp\WPBones\Foundation;
 
-use WPKirk\WPBones\Support\ServiceProvider;
+use Ondapresswp\WPBones\Support\ServiceProvider;
 
 if (!defined('ABSPATH')) {
  exit();

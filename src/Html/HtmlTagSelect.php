@@ -1,8 +1,8 @@
 <?php
 
-namespace WPKirk\WPBones\Html;
+namespace Ondapresswp\WPBones\Html;
 
-use WPKirk\WPBones\Html\HtmlTagOption;
+use Ondapresswp\WPBones\Html\HtmlTagOption;
 
 class HtmlTagSelect extends HtmlTag
 {

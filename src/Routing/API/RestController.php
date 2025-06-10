@@ -1,6 +1,6 @@
 <?php
 
-namespace WPKirk\WPBones\Routing\API;
+namespace Ondapresswp\WPBones\Routing\API;
 
 use WP_Error;
 use WP_REST_Request;

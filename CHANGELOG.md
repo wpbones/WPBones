@@ -47,8 +47,8 @@
 
 - Added new [`WordPressScheduleServiceProvider`](https://wpbones.com/docs/ServicesProvider/schedule) service provider to manage the WordPress cron jobs
 - Added new `php bones make:schedule` command to create a new WordPress cron job
-- Added new [WPKirk-Cron-Boilerplate](https://github.com/wpbones/WPKirk-Cron-Boilerplate) example plugin
-- Added new [WPKirk-Hooks-Boilerplate](https://github.com/wpbones/WPKirk-Hooks-Boilerplate) example plugin
+- Added new [Ondapresswp-Cron-Boilerplate](https://github.com/wpbones/Ondapresswp-Cron-Boilerplate) example plugin
+- Added new [Ondapresswp-Hooks-Boilerplate](https://github.com/wpbones/Ondapresswp-Hooks-Boilerplate) example plugin
 - Added new [`wpbones_cache()`](https://wpbones.com/docs/helpers#wpbones_cache) helper function to manage a simple cached data in the WordPress transients
 - Added new [`wpbones_import()`](https://wpbones.com/docs/helpers#wpbones_import) helper function and [`import()`](https://wpbones.com/docs/helpers#import) alias for streamlined [module](https://wpbones.com/docs/CoreConcepts/hooks-modules/) folder management
 - Added new `file` property in the `Plugin Class` as alias of `__FILE__` constant
@@ -77,7 +77,7 @@
 - Added new `$usePrefix`property in the `Model` class to query the database table with or without the table prefix.
 - Added new `$usePrefix`property in the `Migration` class to query the database table with or without the table prefix.
 - Added new `$usePrefix`property in the `Seeder` class to query the database table with or without the table prefix.
-- Added new [WPKirk-Database-Boilerplate](https://github.com/wpbones/WPKirk-Database-Boilerplate) example plugin.
+- Added new [Ondapresswp-Database-Boilerplate](https://github.com/wpbones/Ondapresswp-Database-Boilerplate) example plugin.
 
 ### 💎 Changed and Improved
 
@@ -85,7 +85,7 @@
 - Updated the [Core Plugin Files documentation](https://wpbones.com/docs/CorePluginFiles/config/config-plugin) to reflect the new changes.
 - Database table prefix is now optional in the `DB::table()` method, `Model`, `Migration`, and `Seeder` classes.
 - Updated the [Database](https://wpbones.com/docs/DatabaseORM/eloquent-orm) documentation to reflect the new changes.
-- Updated and improved the [WPKirk Demo](https://github.com/wpbones/WPKirk) plugin.
+- Updated and improved the [Ondapresswp Demo](https://github.com/wpbones/Ondapresswp) plugin.
 
 ### 🐛 Fixed
 
@@ -145,11 +145,11 @@
 - Added [`withInlineScript()`](https://wpbones.com/docs/CoreClasses/view#withinlinescript) fluent method in the [`View Class`](https://wpbones.com/docs/CoreClasses/view)
 - Added [`withInlineStyle()`](https://wpbones.com/docs/CoreClasses/view#withinlinestyle) fluent method in the [`View Class`](https://wpbones.com/docs/CoreClasses/view)
 - Added [CHANGELOG.md](https://github.com/wpbones/WPBones/blob/master/CHANGELOG.md) file.
-- Added new [WP Bones API Boilerplate](https://github.com/wpbones/WPKirk-API-Boilerplate) example plugin.
-- Added new [WP Bones Internationalization Boilerplate](https://github.com/wpbones/WPKirk-Internationalization-Boilerplate) example plugin.
-- Added new [WP Bones Mantine Boilerplate](https://github.com/wpbones/WPKirk-Mantine-Boilerplate) example plugin.
-- Added new [WP Bones ReactJS Boilerplate](https://github.com/wpbones/WPKirk-ReactJS-Boilerplate) example plugin.
-- Added new [WP Bones Routes Boilerplate](https://github.com/wpbones/WPKirk-Routes-Boilerplate) example plugin.
+- Added new [WP Bones API Boilerplate](https://github.com/wpbones/Ondapresswp-API-Boilerplate) example plugin.
+- Added new [WP Bones Internationalization Boilerplate](https://github.com/wpbones/Ondapresswp-Internationalization-Boilerplate) example plugin.
+- Added new [WP Bones Mantine Boilerplate](https://github.com/wpbones/Ondapresswp-Mantine-Boilerplate) example plugin.
+- Added new [WP Bones ReactJS Boilerplate](https://github.com/wpbones/Ondapresswp-ReactJS-Boilerplate) example plugin.
+- Added new [WP Bones Routes Boilerplate](https://github.com/wpbones/Ondapresswp-Routes-Boilerplate) example plugin.
 - Added a new [Flags Package](https://wpbones.com/docs/Packages/flags) to manage the static feature flags in your plugin.
 
 ### 💎 Changed and Improved
@@ -157,8 +157,8 @@
 - The `bones` command displays the [WP-CLI](https://make.wordpress.org/cli/handbook/guides/installing/) version.
 - Minor fixes and improvements in the `bones` command.
 - Updated and improved the [Documentation](https://wpbones.com/docs).
-- Updated the [WPBones demo plugin](https://github.com/wpbones/WPKirk).
-- Updated the [WPBones Boilerplate plugin](https://github.com/wpbones/WPKirk-Boilerplate)
+- Updated the [WPBones demo plugin](https://github.com/wpbones/Ondapresswp).
+- Updated the [WPBones Boilerplate plugin](https://github.com/wpbones/Ondapresswp-Boilerplate)
 - Update the [Help Functions](https://wpbones.com/docs/helpers) documentation.
 
 ### 🐛 Fixed
@@ -172,7 +172,7 @@
 - Deprecated `withLocalizeScripts()` fluent methods in the [`View Class`](https://wpbones.com/docs/CoreClasses/view) - use `withLocalizeScript()` instead.
 - Deprecated `withAdminAppsScripts()` fluent methods in the [`View Class`](https://wpbones.com/docs/CoreClasses/view) - use `withAdminAppsScript()` instead.
 - Deprecated `getBasePath()`and `getBaseUri()` methods in the [`Plugin Class`](https://wpbones.com/docs/CoreClasses/plugin) - use `basePath` and `baseUri` properties instead.
-- In the [WPBones demo plugin](https://github.com/wpbones/WPKirk) and [WPBones Boilerplate plugin](https://github.com/wpbones/WPKirk-Boilerplate) we have renamed the `localization` folder to `languages`.
+- In the [WPBones demo plugin](https://github.com/wpbones/Ondapresswp) and [WPBones Boilerplate plugin](https://github.com/wpbones/Ondapresswp-Boilerplate) we have renamed the `localization` folder to `languages`.
 
 ## 🤝 Suggestions
 

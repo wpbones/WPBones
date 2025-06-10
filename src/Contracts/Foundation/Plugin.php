@@ -1,7 +1,7 @@
 <?php
 
-namespace WPKirk\WPBones\Contracts\Foundation;
+namespace Ondapresswp\WPBones\Contracts\Foundation;
 
-use WPKirk\WPBones\Contracts\Container\Container;
+use Ondapresswp\WPBones\Contracts\Container\Container;
 
 interface Plugin extends Container {}

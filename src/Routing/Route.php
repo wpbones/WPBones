@@ -1,6 +1,6 @@
 <?php
 
-namespace WPKirk\WPBones\Routing;
+namespace Ondapresswp\WPBones\Routing;
 
 if (!defined('ABSPATH')) {
   exit();

@@ -1,6 +1,6 @@
 <?php
 
-namespace WPKirk\WPBones\Database\Support;
+namespace Ondapresswp\WPBones\Database\Support;
 
 use ArrayObject;
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace WPKirk\WPBones\Foundation\Log;
+namespace Ondapresswp\WPBones\Foundation\Log;
 
 if (!defined('ABSPATH')) {
   exit();
@@ -18,7 +18,7 @@ class Log
   public static function getLog()
   {
     if (is_null(self::$instance)) {
-      self::$instance = WPKirk()->log();
+      self::$instance = Ondapresswp()->log();
     }
 
     return self::$instance;

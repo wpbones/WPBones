@@ -1,13 +1,14 @@
 <?php
 
-namespace WPKirk\WPBones\Routing;
+namespace Ondapresswp\WPBones\Routing;
 
 if (!defined('ABSPATH')) {
   exit();
 }
 
-use WPKirk\WPBones\Support\ServiceProvider;
-use WPKirk\WPBones\Support\Str;
+use Ondapresswp\WPBones\Support\ServiceProvider;
+use Ondapresswp\WPBones\Support\Str;
+use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 
 /**
  * Class AdminMenuProvider
@@ -15,7 +16,7 @@ use WPKirk\WPBones\Support\Str;
  * This class is a service provider for the WP Bones framework.
  * Here we're going to read the menu configuration file and register the menus.
  *
- * @package WPKirk\WPBones\Routing
+ * @package Ondapresswp\WPBones\Routing
  */
 
 class AdminMenuProvider extends ServiceProvider
@@ -59,8 +60,8 @@ class AdminMenuProvider extends ServiceProvider
 
                 if (substr($this->topLevelSlug, 0, 8) !== 'edit.php') {
                     $suffix = add_menu_page(
-                        __($menu['page_title'], WPBONES_TEXTDOMAIN),
-                        __($menu['menu_title'], WPBONES_TEXTDOMAIN),
+                        __($menu['page_title'], "ondapresswp"),
+                        __($menu['menu_title'], "ondapresswp"),
                         $menu['capability'],
                         $this->topLevelSlug,
                         isset($menu["callback"]) ? $menu["callback"] : '',
@@ -118,8 +119,8 @@ class AdminMenuProvider extends ServiceProvider
 
                         $subMenuHook = add_submenu_page(
                             $this->topLevelSlug,
-                            __($subMenu['page_title'], WPBONES_TEXTDOMAIN),
-                            __($subMenu['menu_title'], WPBONES_TEXTDOMAIN),
+                            __($subMenu['page_title'], "ondapresswp"),
+                            __($subMenu['menu_title'], "ondapresswp"),
                             $subMenu['capability'],
                             $submenuSlug,
                             $hook
@@ -129,7 +130,7 @@ class AdminMenuProvider extends ServiceProvider
                             [$controller, $method] = Str::parseCallback($subMenu['route']['load']);
 
                             add_action("load-{$subMenuHook}", function () use ($controller, $method) {
-                                $className = "WPKirk\\Http\\Controllers\\{$controller}";
+                                $className = "Ondapresswp\\Http\\Controllers\\{$controller}";
                                 $instance  = new $className();
 
                                 return $instance->{$method}();
@@ -140,7 +141,7 @@ class AdminMenuProvider extends ServiceProvider
                             $controller = $subMenu['route']['resource'];
 
                             add_action("load-{$subMenuHook}", function () use ($controller) {
-                                $className = "WPKirk\\Http\\Controllers\\{$controller}";
+                                $className = "Ondapresswp\\Http\\Controllers\\{$controller}";
                                 $instance  = new $className();
                                 if (method_exists($instance, 'load')) {
                                     return $instance->load();
@@ -157,8 +158,8 @@ class AdminMenuProvider extends ServiceProvider
                         }
                         add_submenu_page(
                             $this->topLevelSlug,
-                            __($menuInternal['name'], WPBONES_TEXTDOMAIN),
-                            __($menuInternal['name'], WPBONES_TEXTDOMAIN),
+                            __($menuInternal['name'], "ondapresswp"),
+                            __($menuInternal['name'], "ondapresswp"),
                             "read",
                             $menuInternal["url"],
                             ""

@@ -1,6 +1,6 @@
 <?php
 
-namespace WPKirk\WPBones\Support;
+namespace Ondapresswp\WPBones\Support;
 
 abstract class ServiceProvider
 {

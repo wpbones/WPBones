@@ -1,8 +1,8 @@
 <?php
 
-namespace WPKirk\WPBones\Foundation\Http;
+namespace Ondapresswp\WPBones\Foundation\Http;
 
-use WPKirk\WPBones\Support\Traits\HasAttributes;
+use Ondapresswp\WPBones\Support\Traits\HasAttributes;
 
 if (!defined('ABSPATH')) {
   exit();
@@ -10,7 +10,7 @@ if (!defined('ABSPATH')) {
 
 /**
  * @class   Request
- * @package WPKirk\WPBones\Foundation\Http
+ * @package Ondapresswp\WPBones\Foundation\Http
  *
  * @property string $method
  * @property bool   $isAjax

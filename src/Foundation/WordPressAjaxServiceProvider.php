@@ -1,10 +1,10 @@
 <?php
 
-namespace WPKirk\WPBones\Foundation;
+namespace Ondapresswp\WPBones\Foundation;
 
-use WPKirk\WPBones\Foundation\Http\Request;
-use WPKirk\WPBones\Support\ServiceProvider;
-use WPKirk\WPBones\Support\Traits\HasAttributes;
+use Ondapresswp\WPBones\Foundation\Http\Request;
+use Ondapresswp\WPBones\Support\ServiceProvider;
+use Ondapresswp\WPBones\Support\Traits\HasAttributes;
 
 if (!defined('ABSPATH')) {
   exit();
@@ -12,7 +12,7 @@ if (!defined('ABSPATH')) {
 
 /**
  * @class   WordPressAjaxServiceProvider
- * @package WPKirk\WPBones\Foundation
+ * @package Ondapresswp\WPBones\Foundation
  *
  * @property Request $request
  */

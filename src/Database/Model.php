@@ -1,56 +1,25 @@
 <?php
+namespace Ondapresswp\WPBones\Database;
 
-namespace WPKirk\WPBones\Database;
+use Illuminate\Database\Eloquent\Model as EloquentModel;
 
 /**
  * The Database Model provides a base class for all database models.
  *
- * @package WPKirk\WPBones\Database
+ * @package Ondapresswp\WPBones\Database
  *
  * @method static all()
  *
  */
-abstract class Model extends DB
+abstract class Model extends EloquentModel
 {
-  /**
-   * The table associated with the model.
-   *
-   * @var string
-   */
-  protected $table;
 
-  /**
-   * The primary key for the model.
-   *
-   * @var string
-   */
-  protected $primaryKey = 'id';
+ public function __construct()
+ {
 
-  public function __construct()
-  {
-    // get the class name
-    $this->table = DB::getTableName($this->table ?? get_called_class(), $this->usePrefix);
 
-    parent::__construct($this->table, $this->primaryKey, $this->usePrefix);
-  }
 
-  /*
-  |--------------------------------------------------------------------------
-  | Magic methods
-  |--------------------------------------------------------------------------
-  |
-  |
-  */
 
-  /**
-   * We will this magic method to handle all static/instance methods.
-   *
-   * @param string $name
-   * @param array  $arguments
-   * @return mixed
-   */
-  public static function __callStatic($name, $arguments)
-  {
-    return (new static())->$name(...$arguments);
-  }
+ }
+
 }

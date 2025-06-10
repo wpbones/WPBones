@@ -1,21 +1,21 @@
 <?php
 
-namespace WPKirk\WPBones\Foundation;
+namespace Ondapresswp\WPBones\Foundation;
 
 use Closure;
-use WPKirk\WPBones\Container\Container;
-use WPKirk\WPBones\Contracts\Foundation\Plugin as PluginContract;
-use WPKirk\WPBones\Database\WordPressOption;
-use WPKirk\WPBones\Foundation\Http\Request;
-use WPKirk\WPBones\Foundation\Log\LogServiceProvider;
-use WPKirk\WPBones\Routing\AdminMenuProvider;
-use WPKirk\WPBones\Routing\AdminRouteProvider;
-use WPKirk\WPBones\Routing\API\RestProvider;
-use WPKirk\WPBones\Routing\Pages\PageProvider;
-use WPKirk\WPBones\Support\Str;
-use WPKirk\WPBones\Support\Traits\HasAttributes;
-use WPKirk\WPBones\View\View;
-use WPKirk\WPBones\Database\Eloquent;
+use Ondapresswp\WPBones\Container\Container;
+use Ondapresswp\WPBones\Contracts\Foundation\Plugin as PluginContract;
+use Ondapresswp\WPBones\Database\WordPressOption;
+use Ondapresswp\WPBones\Foundation\Http\Request;
+use Ondapresswp\WPBones\Foundation\Log\LogServiceProvider;
+use Ondapresswp\WPBones\Routing\AdminMenuProvider;
+use Ondapresswp\WPBones\Routing\AdminRouteProvider;
+use Ondapresswp\WPBones\Routing\API\RestProvider;
+use Ondapresswp\WPBones\Routing\Pages\PageProvider;
+use Ondapresswp\WPBones\Support\Str;
+use Ondapresswp\WPBones\Support\Traits\HasAttributes;
+use Ondapresswp\WPBones\View\View;
+use Ondapresswp\WPBones\Database\Eloquent;
 
 if (!defined('ABSPATH')) {
   exit();
@@ -24,7 +24,7 @@ if (!defined('ABSPATH')) {
 /**
  * Main Plugin class.
  *
- * @package WPKirk\WPBones\Foundation
+ * @package Ondapresswp\WPBones\Foundation
  */
 class Plugin extends Container implements PluginContract
 {
@@ -103,10 +103,10 @@ class Plugin extends Container implements PluginContract
   public function boot(): Plugin
   {
     // simulate __FILE__
-    $this->file = $this->basePath . '/wp-kirk.php';
+    $this->file = $this->basePath . '/ondapresswp.php';
 
     $this->baseUri = rtrim(plugin_dir_url($this->file), '\/');
-
+    $basePath = $this->basePath;
     // Activation & Deactivation Hook
     register_activation_hook($this->file, [$this, '_activation']);
     register_deactivation_hook($this->file, [$this, '_deactivation']);
@@ -131,7 +131,7 @@ class Plugin extends Container implements PluginContract
     $this->provides['Log'] = (new LogServiceProvider($this))->register();
 
     // init Eloquent out of box
-    Eloquent::init();
+    Eloquent::init($this->basePath );
 
     // init api
     $this->initApi();
@@ -188,13 +188,13 @@ class Plugin extends Container implements PluginContract
      * Author = "Giovambattista Fazioli"
      * AuthorName = "Giovambattista Fazioli"
      * AuthorURI = "https://wpbones.com/"
-     * Description = "WPKirk is a WP Bones boilerplate plugin"
+     * Description = "Ondapresswp is a WP Bones boilerplate plugin"
      * DomainPath = "languages"
-     * Name = "WPKirk"
+     * Name = "Ondapresswp"
      * Network = false
      * PluginURI = "https://wpbones.com/"
-     * TextDomain = "wp-kirk"
-     * Title = "WPKirk"
+     * TextDomain = "ondapresswp"
+     * Title = "Ondapresswp"
      * Version = "1.0.0"
      */
 
@@ -236,13 +236,13 @@ class Plugin extends Container implements PluginContract
      * Author = "Giovambattista Fazioli"
      * AuthorName = "Giovambattista Fazioli"
      * AuthorURI = "https://wpbones.com/"
-     * Description = "WPKirk is a WP Bones boilerplate plugin"
+     * Description = "Ondapresswp is a WP Bones boilerplate plugin"
      * DomainPath = "languages"
-     * Name = "WPKirk"
+     * Name = "Ondapresswp"
      * Network = false
      * PluginURI = "https://wpbones.com/"
-     * TextDomain = "wp-kirk"
-     * Title = "WPKirk"
+     * TextDomain = "ondapresswp"
+     * Title = "Ondapresswp"
      * Version = "1.0.0"
      */
 
@@ -251,7 +251,7 @@ class Plugin extends Container implements PluginContract
 
     // Load plugin text domain
     load_plugin_textdomain(
-      'wp-kirk',
+      'ondapresswp',
       false,
       trailingslashit(basename($this->basePath)) . $this->pluginData['DomainPath']
     );
@@ -319,6 +319,7 @@ class Plugin extends Container implements PluginContract
 
     // Custom service provider
     $providers = $this->config('plugin.providers', []);
+
     foreach ($providers as $className) {
       try{
         $object = new $className($this);
@@ -491,7 +492,7 @@ class Plugin extends Container implements PluginContract
     foreach ($filenames as $file) {
       wp_enqueue_script(
         $this->slug . Str::slug($file),
-        WPKirk()->js . '/' . $file,
+        Ondapresswp()->js . '/' . $file,
         (array)$deps,
         $version ?? $this->Version,
         $footer
@@ -741,7 +742,7 @@ class Plugin extends Container implements PluginContract
 
     if (isset($controller) && isset($method)) {
       return function () use ($controller, $method) {
-        $className = "WPKirk\\Http\\Controllers\\{$controller}";
+        $className = "Ondapresswp\\Http\\Controllers\\{$controller}";
         $instance = new $className();
 
         if (method_exists($instance, 'render')) {

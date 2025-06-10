@@ -1,8 +1,8 @@
 <?php
 
-namespace WPKirk\WPBones\Console;
+namespace Ondapresswp\WPBones\Console;
 
-use WPKirk\WPBones\Support\Traits\HasAttributes;
+use Ondapresswp\WPBones\Support\Traits\HasAttributes;
 
 abstract class Command
 {

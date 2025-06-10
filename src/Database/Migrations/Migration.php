@@ -1,8 +1,8 @@
 <?php
 
-namespace WPKirk\WPBones\Database\Migrations;
+namespace Ondapresswp\WPBones\Database\Migrations;
 
-use WPKirk\WPBones\Database\DB;
+use Ondapresswp\WPBones\Database\DB;
 
 class Migration
 {
@@ -43,10 +43,11 @@ class Migration
         $table = DB::getTableName($tablename, $this->usePrefix);
 
         $sql = "CREATE TABLE {$table} {$schema}";
-
+global $wpdb;
         // add ";" at the end of the string $sql if missing
         $sql = rtrim($sql, ';') . ';';
-
+        $sql =  preg_replace('/REFERENCES\s+`?(\w+)`?/',"REFERENCES `{$wpdb->prefix}$1`" ,$sql);
+#ds($sql);
         require_once ABSPATH . 'wp-admin/includes/upgrade.php';
         dbDelta($sql);
     }

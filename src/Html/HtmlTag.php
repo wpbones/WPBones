@@ -1,8 +1,8 @@
 <?php
 
-namespace WPKirk\WPBones\Html;
+namespace Ondapresswp\WPBones\Html;
 
-use WPKirk\WPBones\Support\Traits\HasAttributes;
+use Ondapresswp\WPBones\Support\Traits\HasAttributes;
 
 abstract class HtmlTag
 {

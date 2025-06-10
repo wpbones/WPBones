@@ -74,14 +74,14 @@ class {ClassName} extends Widget
   {
     $instance = array_merge( $this->defaults(), $instance );
 
-    return WPKirk()->view( 'widgets.{Slug}-form' )
+    return Ondapresswp()->view( 'widgets.{Slug}-form' )
                    ->with( [ 'instance' => $instance, 'widget' => $this ] );
   }
 
 
   public function viewWidget( $args, $instance )
   {
-    return WPKirk()->view( 'widgets.{Slug}-index' )
+    return Ondapresswp()->view( 'widgets.{Slug}-index' )
                    ->with( [ 'args' => $args, 'instance' => $instance ] );
   }
 
