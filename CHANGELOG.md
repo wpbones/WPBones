@@ -1,5 +1,22 @@
 # Release Notes
 
+## 1.9.2 - March 28, 2025
+
+### ✨ Added
+
+- Added new option `--no-build` in the `php bones deploy` command to skip the build process during deployment.
+- Added new option `--pkgm=<package name>` in the `php bones deploy` command to set the package name for deployment.
+
+### 💎 Changed and Improved
+
+- Improved the `php bones` command to work also without a WordPress installation.
+
+### 🐛 Fixed
+
+- The creation path in some `php bones make` commands.
+
+---
+
 ## 1.9.1 - January 14, 2025
 
 ### 🐛 Fixed
