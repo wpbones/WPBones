@@ -59,7 +59,6 @@ abstract class ServiceProvider
     $result = [];
 
     foreach ($properties as $key => $prop) {
-
       if ($prop === 'register') {
         throw new \Exception('The property name "register" is reserved.');
       }

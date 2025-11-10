@@ -2,10 +2,6 @@
 
 namespace WPKirk\WPBones\Support;
 
-if (!defined('ABSPATH')) {
-  exit();
-}
-
 class Str
 {
   /**
