@@ -4,6 +4,39 @@ namespace WPKirk\WPBones\Console;
 
 use WPKirk\WPBones\Support\Traits\HasAttributes;
 
+// Standard Color Definitions
+define('WPBONES_KERNEL_COLOR_BLACK', "\033[0;30m");
+define('WPBONES_KERNEL_COLOR_RED', "\033[0;31m");
+define('WPBONES_KERNEL_COLOR_GREEN', "\033[0;32m");
+define('WPBONES_KERNEL_COLOR_YELLOW', "\033[0;33m");
+define('WPBONES_KERNEL_COLOR_BLUE', "\033[0;34m");
+define('WPBONES_KERNEL_COLOR_MAGENTA', "\033[0;35m");
+define('WPBONES_KERNEL_COLOR_CYAN', "\033[0;36m");
+define('WPBONES_KERNEL_COLOR_WHITE', "\033[0;37m");
+
+// Definition of bold colors
+define('WPBONES_KERNEL_COLOR_BOLD_BLACK', "\033[1;30m");
+define('WPBONES_KERNEL_COLOR_BOLD_RED', "\033[1;31m");
+define('WPBONES_KERNEL_COLOR_BOLD_GREEN', "\033[1;32m");
+define('WPBONES_KERNEL_COLOR_BOLD_YELLOW', "\033[1;33m");
+define('WPBONES_KERNEL_COLOR_BOLD_BLUE', "\033[1;34m");
+define('WPBONES_KERNEL_COLOR_BOLD_MAGENTA', "\033[1;35m");
+define('WPBONES_KERNEL_COLOR_BOLD_CYAN', "\033[1;36m");
+define('WPBONES_KERNEL_COLOR_BOLD_WHITE', "\033[1;37m");
+
+// Definition of Light Colors
+define('WPBONES_KERNEL_COLOR_LIGHT_BLACK', "\033[0;38;5;240m");
+define('WPBONES_KERNEL_COLOR_LIGHT_RED', "\033[0;38;5;203m");
+define('WPBONES_KERNEL_COLOR_LIGHT_GREEN', "\033[0;38;5;82m");
+define('WPBONES_KERNEL_COLOR_LIGHT_YELLOW', "\033[0;38;5;227m");
+define('WPBONES_KERNEL_COLOR_LIGHT_BLUE', "\033[0;38;5;117m");
+define('WPBONES_KERNEL_COLOR_LIGHT_MAGENTA', "\033[0;38;5;213m");
+define('WPBONES_KERNEL_COLOR_LIGHT_CYAN', "\033[0;38;5;159m");
+define('WPBONES_KERNEL_COLOR_LIGHT_WHITE', "\033[0;38;5;15m");
+
+// Definition for color reset
+define('WPBONES_KERNEL_COLOR_RESET', "\033[0m");
+
 abstract class Command
 {
   use HasAttributes;
@@ -60,7 +93,10 @@ abstract class Command
           // check "=" params
           if (str_ends_with($option, '=')) {
             $option = rtrim($option, '=');
-            $this->options[$option] = ['description' => $description, 'param' => true];
+            $this->options[$option] = [
+              'description' => $description,
+              'param' => true,
+            ];
           } else {
             $this->options[$option] = ['description' => $description];
           }
@@ -71,23 +107,83 @@ abstract class Command
   }
 
   /**
-   * Make a request to end user in the console and return the user input or the default value.
+   * Commodity to display a message in the console with color.
    *
-   * @param string $str     The question string.
-   * @param string $default Optional. A default value whether the user press return.
-   *
-   * @return string
+   * @param string $str The message to display.
+   * @param string $color The color to use. Default is 'white'.
    */
-  protected function ask(string $str, string $default = ''): string
+  protected function color($str, $color = WPBONES_KERNEL_COLOR_YELLOW)
   {
-    echo "\n\e[38;5;88m$str" . (empty($default) ? '' : " (default: {$default})") . "\e[0m ";
+    echo $color . $str . WPBONES_KERNEL_COLOR_RESET;
+  }
 
-    $handle = fopen('php://stdin', 'r');
-    $line = fgets($handle);
+  /**
+   * Commodity to display a message in the console.
+   *
+   * @param string $str The message to display.
+   * @param bool $newLine Optional. Whether to add a new line at the end.
+   */
+  protected function info(string $str, $newLine = true)
+  {
+    $this->color($str, WPBONES_KERNEL_COLOR_LIGHT_MAGENTA);
+    echo $newLine ? "\n" : '';
+  }
 
-    fclose($handle);
+  /**
+   * Commodity to display a message in the console.
+   *
+   * @param string $str The message to display.
+   * @param bool $newLine Optional. Whether to add a new line at the end.
+   */
+  protected function line(string $str, $newLine = true)
+  {
+    $this->color($str, WPBONES_KERNEL_COLOR_LIGHT_GREEN);
+    echo $newLine ? "\n" : '';
+  }
 
-    return trim($line, " \n\r");
+  /* Commodity to display an error message in the console. */
+  protected function error(string $str, $newLine = true)
+  {
+    echo '❌ ';
+    $this->color($str, WPBONES_KERNEL_COLOR_BOLD_RED);
+    echo $newLine ? "\n" : '';
+  }
+
+  /* Commodity to display an info message in the console. */
+  protected function warning(string $str, $newLine = true)
+  {
+    echo '❗ ';
+    $this->color($str, WPBONES_KERNEL_COLOR_BOLD_YELLOW);
+    echo $newLine ? "\n" : '';
+  }
+
+  /* Commodity to display a success message in the console. */
+  protected function success($str)
+  {
+    $this->color('✅ ' . $str, WPBONES_KERNEL_COLOR_GREEN);
+  }
+
+  /**
+   * Get input from console
+   *
+   * @param string $str The question to ask
+   * @param string|null $default The default value
+   */
+  protected function ask(string $str, ?string $default = ''): string
+  {
+    $str =
+      WPBONES_KERNEL_COLOR_GREEN .
+      "❓ $str" .
+      (empty($default) ? ': ' : " (default: {$default}): ") .
+      WPBONES_KERNEL_COLOR_RESET;
+
+    // Use readline to get the user input
+    $line = readline($str);
+
+    // Trim the input to remove extra spaces or newlines
+    $line = trim($line);
+
+    return $line ?: $default;
   }
 
   /**
@@ -135,17 +231,6 @@ abstract class Command
   }
 
   /**
-   * Display a colored line in the console.
-   *
-   * @param $str String to display.
-   */
-  protected function info(string $str): void
-  {
-    echo "\033[38;5;213m" . $str;
-    echo "\033[0m\n";
-  }
-
-  /**
    * Display the help well formatted.
    *
    */
@@ -170,17 +255,6 @@ abstract class Command
   }
 
   /**
-   * Display a colored line in the console.
-   *
-   * @param $str String to display.
-   */
-  protected function line(string $str): void
-  {
-    echo "\033[38;5;82m" . $str;
-    echo "\033[0m\n";
-  }
-
-  /**
    * Return the description of command console.
    *
    * @return string
@@ -198,6 +272,61 @@ abstract class Command
   public function setArgvAttribute($value): void
   {
     $this->argv = $value;
+  }
+
+  /**
+   * Load WordPress environment.
+   *
+   * @return void
+   */
+  protected function loadWordPress()
+  {
+    try {
+      // We have to load the WordPress environment.
+      $currentDir = $_SERVER['PWD'] ?? __DIR__;
+      $wpLoadPath = dirname(dirname(dirname($currentDir))) . '/wp-load.php';
+
+      if (!file_exists($wpLoadPath)) {
+        $this->wpLoaded = false;
+        return;
+      }
+
+      require $wpLoadPath;
+      $this->wpLoaded = true;
+    } catch (\Exception $e) {
+      $this->error("Error! Can't load WordPress (" . $e->getMessage() . ')');
+    }
+
+    try {
+      /**
+       * --------------------------------------------------------------------------
+       * Register The Auto Loader
+       * --------------------------------------------------------------------------
+       * Composer provides an auto-generated class loader for our app. We just
+       * need to use it! Requiring it here means we don't have to load classes
+       * manually. Feels great to relax.
+       */
+      if (file_exists(__DIR__ . '/vendor/autoload.php')) {
+        require __DIR__ . '/vendor/autoload.php';
+      }
+    } catch (\Exception $e) {
+      $this->error("Error! Can't load Composer autoload (" . $e->getMessage() . ')');
+      exit();
+    }
+
+    try {
+      /**
+       * --------------------------------------------------------------------------
+       * Load this plugin env
+       * --------------------------------------------------------------------------
+       */
+      if (file_exists(__DIR__ . '/bootstrap/plugin.php')) {
+        require_once __DIR__ . '/bootstrap/plugin.php';
+      }
+    } catch (\Exception $e) {
+      $this->error("Error! Can't load the plugin env (" . $e->getMessage() . ')');
+      exit();
+    }
   }
 
   /**

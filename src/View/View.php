@@ -4,10 +4,6 @@ namespace WPKirk\WPBones\View;
 
 use eftec\bladeone\BladeOne;
 
-if (!defined('ABSPATH')) {
-  exit();
-}
-
 class View
 {
   /**
@@ -449,7 +445,11 @@ class View
       foreach ($this->adminAppsScripts as $script) {
         $src = $this->container->apps . '/' . $script[0] . '.js';
         wp_enqueue_script($script[0], $src, $script[1], $script[2], true);
-        wp_set_script_translations($script[0], $this->container->TextDomain, $this->container->basePath . '/' . $this->container->DomainPath);
+        wp_set_script_translations(
+          $script[0],
+          $this->container->TextDomain,
+          $this->container->basePath . '/' . $this->container->DomainPath,
+        );
       }
     }
 
@@ -553,9 +553,7 @@ class View
     $exts = ['.blade.php', '.php'];
 
     foreach ($exts as $ext) {
-      if (
-        file_exists($this->container->basePath . '/resources/views/' . str_replace('.', '/', $this->key) . $ext)
-      ) {
+      if (file_exists($this->container->basePath . '/resources/views/' . str_replace('.', '/', $this->key) . $ext)) {
         return str_replace('.', '/', $this->key) . $ext;
       }
     }
