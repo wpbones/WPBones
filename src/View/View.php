@@ -235,15 +235,16 @@ class View
   /**
    * Load a new css resource in admin area.
    *
-   * @param string $name Name of style.
-   * @param array  $deps Optional. Array of slug deps
-   * @param array  $ver  Optional. Version.
+   * @param string       $name  Name of style.
+   * @param array        $deps  Optional. Array of slug deps.
+   * @param string|false $ver   Optional. Version.
+   * @param string       $media Optional. The media for which this stylesheet has been defined. Default 'all'.
    *
    * @return $this
    */
-  public function withAdminStyle($name, $deps = [], $ver = []): View
+  public function withAdminStyle($name, $deps = [], $ver = false, $media = 'all'): View
   {
-    $this->adminStyles[] = [$name, $deps, $ver];
+    $this->adminStyles[] = [$name, $deps, $ver, $media];
 
     return $this;
   }
@@ -251,33 +252,35 @@ class View
   /**
    * Load a new css resource in admin area.
    *
-   * @param string $name Name of style.
-   * @param array  $deps Optional. Array of slug deps
-   * @param array  $ver  Optional. Version.
+   * @param string       $name  Name of style.
+   * @param array        $deps  Optional. Array of slug deps.
+   * @param string|false $ver   Optional. Version.
+   * @param string       $media Optional. The media for which this stylesheet has been defined. Default 'all'.
    *
    * @deprecated 1.6.0
    *
    * @return $this
    */
-  public function withAdminStyles($name, $deps = [], $ver = []): View
+  public function withAdminStyles($name, $deps = [], $ver = false, $media = 'all'): View
   {
     _deprecated_function(__METHOD__, '1.6.0', 'withAdminStyle()');
 
-    return $this->withAdminStyle($name, $deps, $ver);
+    return $this->withAdminStyle($name, $deps, $ver, $media);
   }
 
   /**
    * Load a new Javascript resource in admin area.
    *
-   * @param string $name Name of script.
-   * @param array  $deps Optional. Array of slug deps
-   * @param array  $ver  Optional. Version.
+   * @param string       $name Name of script.
+   * @param array        $deps Optional. Array of slug deps.
+   * @param string|false $ver  Optional. Version.
+   * @param bool|array   $args Optional. Whether to enqueue the script in the footer. Default true.
    *
    * @return $this
    */
-  public function withAdminScript($name, $deps = [], $ver = []): View
+  public function withAdminScript($name, $deps = [], $ver = false, $args = true): View
   {
-    $this->adminScripts[] = [$name, $deps, $ver];
+    $this->adminScripts[] = [$name, $deps, $ver, $args];
 
     return $this;
   }
@@ -285,19 +288,20 @@ class View
   /**
    * Load a new Javascript resource in admin area.
    *
-   * @param string $name Name of script.
-   * @param array  $deps Optional. Array of slug deps
-   * @param array  $ver  Optional. Version.
+   * @param string       $name Name of script.
+   * @param array        $deps Optional. Array of slug deps.
+   * @param string|false $ver  Optional. Version.
+   * @param bool|array   $args Optional. Whether to enqueue the script in the footer. Default true.
    *
    * @deprecated 1.6.0
    *
    * @return $this
    */
-  public function withAdminScripts($name, $deps = [], $ver = []): View
+  public function withAdminScripts($name, $deps = [], $ver = false, $args = true): View
   {
     _deprecated_function(__METHOD__, '1.6.0', 'withAdminScript()');
 
-    return $this->withAdminScript($name, $deps, $ver);
+    return $this->withAdminScript($name, $deps, $ver, $args);
   }
 
   /**
@@ -352,15 +356,16 @@ class View
   /**
    * Load a new css resource in theme.
    *
-   * @param string $name Name of style.
-   * @param array  $deps Optional. Array of slug deps
-   * @param array  $ver  Optional. Version.
+   * @param string       $name  Name of style.
+   * @param array        $deps  Optional. Array of slug deps.
+   * @param string|false $ver   Optional. Version.
+   * @param string       $media Optional. The media for which this stylesheet has been defined. Default 'all'.
    *
    * @return $this
    */
-  public function withStyle($name, $deps = [], $ver = []): View
+  public function withStyle($name, $deps = [], $ver = false, $media = 'all'): View
   {
-    $this->styles[] = [$name, $deps, $ver];
+    $this->styles[] = [$name, $deps, $ver, $media];
 
     return $this;
   }
@@ -368,42 +373,56 @@ class View
   /**
    * Load a new css resource in theme.
    *
-   * @param string $name Name of style.
-   * @param array  $deps Optional. Array of slug deps
-   * @param array  $ver  Optional. Version.
+   * @param string       $name  Name of style.
+   * @param array        $deps  Optional. Array of slug deps.
+   * @param string|false $ver   Optional. Version.
+   * @param string       $media Optional. The media for which this stylesheet has been defined. Default 'all'.
    *
    * @deprecated 1.6.1
    *
    * @return $this
    */
-  public function withStyles($name, $deps = [], $ver = []): View
+  public function withStyles($name, $deps = [], $ver = false, $media = 'all'): View
   {
     _deprecated_function(__METHOD__, '1.6.1', 'withStyle()');
 
-    return $this->withStyle($name, $deps, $ver);
+    return $this->withStyle($name, $deps, $ver, $media);
   }
 
   /**
-   * Load a new css resource in theme.
+   * Load a new Javascript resource in theme.
    *
-   * @param string $name Name of script.
-   * @param array  $deps Optional. Array of slug deps
-   * @param array  $ver  Optional. Version.
+   * @param string       $name Name of script.
+   * @param array        $deps Optional. Array of slug deps.
+   * @param string|false $ver  Optional. Version.
+   * @param bool|array   $args Optional. Whether to enqueue the script in the footer. Default true.
    *
    * @return $this
    */
-  public function withScript($name, $deps = [], $ver = []): View
+  public function withScript($name, $deps = [], $ver = false, $args = true): View
   {
-    $this->scripts[] = [$name, $deps, $ver];
+    $this->scripts[] = [$name, $deps, $ver, $args];
 
     return $this;
   }
 
-  public function withScripts($name, $deps = [], $ver = []): View
+  /**
+   * Load a new Javascript resource in theme.
+   *
+   * @param string       $name Name of script.
+   * @param array        $deps Optional. Array of slug deps.
+   * @param string|false $ver  Optional. Version.
+   * @param bool|array   $args Optional. Whether to enqueue the script in the footer. Default true.
+   *
+   * @deprecated 1.6.1
+   *
+   * @return $this
+   */
+  public function withScripts($name, $deps = [], $ver = false, $args = true): View
   {
     _deprecated_function(__METHOD__, '1.6.1', 'withScript()');
 
-    return $this->withScript($name, $deps, $ver);
+    return $this->withScript($name, $deps, $ver, $args);
   }
 
   /**
@@ -437,7 +456,7 @@ class View
     if (!empty($this->adminScripts)) {
       foreach ($this->adminScripts as $script) {
         $src = $this->container->js . '/' . $script[0] . '.js';
-        wp_enqueue_script($script[0], $src, $script[1], $script[2], true);
+        wp_enqueue_script($script[0], $src, $script[1], $script[2], $script[3]);
       }
     }
 
@@ -476,7 +495,7 @@ class View
     if (!empty($this->adminStyles)) {
       foreach ($this->adminStyles as $style) {
         $src = $this->container->css . '/' . $style[0] . '.css';
-        wp_enqueue_style($style[0], $src, $style[1], $style[2]);
+        wp_enqueue_style($style[0], $src, $style[1], $style[2], $style[3]);
       }
     }
 
@@ -504,7 +523,7 @@ class View
     if (!empty($this->scripts)) {
       foreach ($this->scripts as $script) {
         $src = $this->container->js . '/' . $script[0] . '.js';
-        wp_enqueue_script($script[0], $src, $script[1], $script[2], true);
+        wp_enqueue_script($script[0], $src, $script[1], $script[2], $script[3]);
       }
     }
 
@@ -531,7 +550,7 @@ class View
     if (!empty($this->styles)) {
       foreach ($this->styles as $style) {
         $src = $this->container->css . '/' . $style[0] . '.css';
-        wp_enqueue_style($style[0], $src, $style[1], $style[2]);
+        wp_enqueue_style($style[0], $src, $style[1], $style[2], $style[3]);
       }
     }
 
