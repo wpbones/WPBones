@@ -615,6 +615,9 @@ namespace Bones\Traits {
     // WordPress loaded flag
     protected $wpLoaded = false;
 
+    // Plugin instance loaded from bootstrap/plugin.php
+    protected $plugin = null;
+
     /* Protected version of the do_action function */
     protected function do_action(...$args)
     {
@@ -687,7 +690,7 @@ namespace Bones\Traits {
          * --------------------------------------------------------------------------
          */
         if (file_exists(__DIR__ . '/bootstrap/plugin.php')) {
-          require_once __DIR__ . '/bootstrap/plugin.php';
+          $this->plugin = require __DIR__ . '/bootstrap/plugin.php';
         }
       } catch (Exception $e) {
         $this->error("Error! Can't load the plugin env (" . $e->getMessage() . ')');
@@ -1425,6 +1428,9 @@ namespace Bones {
         $extended = false;
 
         if ($this->kernel) {
+          if (!is_null($this->plugin)) {
+            $this->kernel->setPlugin($this->plugin);
+          }
           $extended = $this->kernel->handle($this->arguments());
         }
 
