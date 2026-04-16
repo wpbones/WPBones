@@ -790,8 +790,14 @@ namespace Bones {
     {
       $arguments = $this->arguments();
 
-      // load the console kernel
-      $this->loadKernel();
+      // Load the console kernel — skip for `rename`, which is the bootstrap
+      // command that brings vendor/plugin namespaces into sync. Loading the
+      // kernel here would resolve the plugin's Console\Kernel parent class
+      // against the freshly reinstalled vendor (still on the default
+      // `WPKirk\WPBones\...` prefix) and fatal with "class not found".
+      if (!in_array('rename', $arguments, true)) {
+        $this->loadKernel();
+      }
 
       // Check WP-CLI
       $output = shell_exec('wp --info 2>&1');
