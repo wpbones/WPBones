@@ -301,7 +301,7 @@ abstract class Command
     }
 
     $this->warning(
-      'Invalid plugin instance returned from bootstrap/plugin.php; expected object or null, got ' . get_debug_type($value)
+      'Invalid plugin instance; expected object or null, got ' . get_debug_type($value)
     );
     $this->plugin = null;
   }
