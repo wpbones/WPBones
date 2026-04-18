@@ -300,7 +300,7 @@ abstract class Command
       return;
     }
 
-    $this->warning('Invalid plugin instance returned from bootstrap/plugin.php');
+    $this->warning('Invalid plugin instance returned from bootstrap/plugin.php; expected object or null');
   }
 
   /**
