@@ -698,7 +698,10 @@ namespace Bones\Traits {
           if (is_object($plugin) || is_null($plugin)) {
             $this->plugin = $plugin;
           } else {
-            $this->warning('Invalid plugin instance returned from bootstrap/plugin.php; expected object or null');
+            $this->warning(
+              'Invalid plugin instance returned from bootstrap/plugin.php; expected object or null, got ' .
+                get_debug_type($plugin)
+            );
           }
         }
       } catch (Exception $e) {
