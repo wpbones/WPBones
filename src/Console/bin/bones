@@ -702,6 +702,7 @@ namespace Bones\Traits {
               'Invalid plugin instance returned from bootstrap/plugin.php; expected object or null, got ' .
                 get_debug_type($plugin)
             );
+            $this->plugin = null;
           }
         }
       } catch (Exception $e) {
