@@ -693,10 +693,10 @@ namespace Bones\Traits {
          * --------------------------------------------------------------------------
          */
         if (!$this->pluginBootstrapLoaded && file_exists(__DIR__ . '/bootstrap/plugin.php')) {
+          $this->pluginBootstrapLoaded = true;
           $plugin = require __DIR__ . '/bootstrap/plugin.php';
           if (is_object($plugin) || is_null($plugin)) {
             $this->plugin = $plugin;
-            $this->pluginBootstrapLoaded = true;
           } else {
             $this->warning('Invalid plugin instance returned from bootstrap/plugin.php');
           }
