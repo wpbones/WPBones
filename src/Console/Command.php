@@ -78,7 +78,7 @@ abstract class Command
    *
    * @var bool
    */
-  protected bool $pluginBootstrapLoaded = false;
+  protected bool $pluginBootstrapExecuted = false;
 
   /**
    *
@@ -351,8 +351,8 @@ abstract class Command
        * Load this plugin env
        * --------------------------------------------------------------------------
        */
-      if (!$this->pluginBootstrapLoaded && file_exists($currentDir . '/bootstrap/plugin.php')) {
-        $this->pluginBootstrapLoaded = true;
+      if (!$this->pluginBootstrapExecuted && file_exists($currentDir . '/bootstrap/plugin.php')) {
+        $this->pluginBootstrapExecuted = true;
         $this->setPluginAttribute(require $currentDir . '/bootstrap/plugin.php');
       }
     } catch (\Exception $e) {

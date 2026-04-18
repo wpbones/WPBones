@@ -619,7 +619,7 @@ namespace Bones\Traits {
     protected $plugin = null;
 
     // Whether bootstrap/plugin.php has already been executed.
-    protected bool $pluginBootstrapLoaded = false;
+    protected bool $pluginBootstrapExecuted = false;
 
     /* Protected version of the do_action function */
     protected function do_action(...$args)
@@ -692,8 +692,8 @@ namespace Bones\Traits {
          * Load this plugin env
          * --------------------------------------------------------------------------
          */
-        if (!$this->pluginBootstrapLoaded && file_exists(__DIR__ . '/bootstrap/plugin.php')) {
-          $this->pluginBootstrapLoaded = true;
+        if (!$this->pluginBootstrapExecuted && file_exists(__DIR__ . '/bootstrap/plugin.php')) {
+          $this->pluginBootstrapExecuted = true;
           $plugin = require __DIR__ . '/bootstrap/plugin.php';
           if (is_object($plugin) || is_null($plugin)) {
             $this->plugin = $plugin;
