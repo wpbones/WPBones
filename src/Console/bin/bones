@@ -693,8 +693,8 @@ namespace Bones\Traits {
          * --------------------------------------------------------------------------
          */
         if (!$this->pluginBootstrapExecuted && file_exists(__DIR__ . '/bootstrap/plugin.php')) {
-          $this->pluginBootstrapExecuted = true;
           $plugin = require __DIR__ . '/bootstrap/plugin.php';
+          $this->pluginBootstrapExecuted = true;
           if (is_object($plugin) || is_null($plugin)) {
             $this->plugin = $plugin;
           } else {

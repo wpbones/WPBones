@@ -352,8 +352,9 @@ abstract class Command
        * --------------------------------------------------------------------------
        */
       if (!$this->pluginBootstrapExecuted && file_exists($currentDir . '/bootstrap/plugin.php')) {
+        $plugin = require $currentDir . '/bootstrap/plugin.php';
         $this->pluginBootstrapExecuted = true;
-        $this->setPluginAttribute(require $currentDir . '/bootstrap/plugin.php');
+        $this->setPluginAttribute($plugin);
       }
     } catch (\Exception $e) {
       $this->error("Error! Can't load the plugin env (" . $e->getMessage() . ')');
