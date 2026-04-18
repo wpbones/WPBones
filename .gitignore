@@ -1,4 +1,4 @@
-/nodes_modules
+/node_modules
 release.sh
 vendor/
 .idea/
