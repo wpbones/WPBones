@@ -694,8 +694,12 @@ namespace Bones\Traits {
          */
         if (!$this->pluginBootstrapLoaded && file_exists(__DIR__ . '/bootstrap/plugin.php')) {
           $plugin = require __DIR__ . '/bootstrap/plugin.php';
-          $this->plugin = is_object($plugin) ? $plugin : null;
-          $this->pluginBootstrapLoaded = true;
+          if (is_object($plugin) || is_null($plugin)) {
+            $this->plugin = $plugin;
+            $this->pluginBootstrapLoaded = true;
+          } else {
+            $this->warning('Invalid plugin instance returned from bootstrap/plugin.php');
+          }
         }
       } catch (Exception $e) {
         $this->error("Error! Can't load the plugin env (" . $e->getMessage() . ')');
@@ -3179,4 +3183,3 @@ namespace Bones {
 
   BonesCommandLine::run();
 }
-

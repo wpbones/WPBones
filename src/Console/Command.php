@@ -293,11 +293,17 @@ abstract class Command
    *
    * @param mixed $value
    */
-  public function setPluginAttribute($value): void
+  public function setPluginAttribute($value): bool
   {
     if (is_object($value) || is_null($value)) {
       $this->plugin = $value;
+
+      return true;
     }
+
+    $this->warning('Invalid plugin instance returned from bootstrap/plugin.php');
+
+    return false;
   }
 
   /**
@@ -349,8 +355,7 @@ abstract class Command
        * --------------------------------------------------------------------------
        */
       if (!$this->pluginBootstrapLoaded && file_exists($currentDir . '/bootstrap/plugin.php')) {
-        $this->setPluginAttribute(require $currentDir . '/bootstrap/plugin.php');
-        $this->pluginBootstrapLoaded = true;
+        $this->pluginBootstrapLoaded = $this->setPluginAttribute(require $currentDir . '/bootstrap/plugin.php');
       }
     } catch (\Exception $e) {
       $this->error("Error! Can't load the plugin env (" . $e->getMessage() . ')');
