@@ -618,6 +618,9 @@ namespace Bones\Traits {
     // Plugin instance loaded from bootstrap/plugin.php
     protected $plugin = null;
 
+    // Whether bootstrap/plugin.php has already been executed.
+    protected bool $pluginBootstrapLoaded = false;
+
     /* Protected version of the do_action function */
     protected function do_action(...$args)
     {
@@ -689,8 +692,10 @@ namespace Bones\Traits {
          * Load this plugin env
          * --------------------------------------------------------------------------
          */
-        if (file_exists(__DIR__ . '/bootstrap/plugin.php')) {
-          $this->plugin = require __DIR__ . '/bootstrap/plugin.php';
+        if (!$this->pluginBootstrapLoaded && file_exists(__DIR__ . '/bootstrap/plugin.php')) {
+          $plugin = require __DIR__ . '/bootstrap/plugin.php';
+          $this->plugin = is_object($plugin) ? $plugin : null;
+          $this->pluginBootstrapLoaded = true;
         }
       } catch (Exception $e) {
         $this->error("Error! Can't load the plugin env (" . $e->getMessage() . ')');

@@ -74,6 +74,13 @@ abstract class Command
   protected $plugin = null;
 
   /**
+   * Whether bootstrap/plugin.php has already been executed.
+   *
+   * @var bool
+   */
+  protected bool $pluginBootstrapLoaded = false;
+
+  /**
    *
    */
   public function __construct()
@@ -288,7 +295,9 @@ abstract class Command
    */
   public function setPluginAttribute($value): void
   {
-    $this->plugin = $value;
+    if (is_object($value) || is_null($value)) {
+      $this->plugin = $value;
+    }
   }
 
   /**
@@ -339,8 +348,9 @@ abstract class Command
        * Load this plugin env
        * --------------------------------------------------------------------------
        */
-      if (file_exists($currentDir . '/bootstrap/plugin.php')) {
-        $this->plugin = require $currentDir . '/bootstrap/plugin.php';
+      if (!$this->pluginBootstrapLoaded && file_exists($currentDir . '/bootstrap/plugin.php')) {
+        $this->setPluginAttribute(require $currentDir . '/bootstrap/plugin.php');
+        $this->pluginBootstrapLoaded = true;
       }
     } catch (\Exception $e) {
       $this->error("Error! Can't load the plugin env (" . $e->getMessage() . ')');
