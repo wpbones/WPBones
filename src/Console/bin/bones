@@ -1318,6 +1318,7 @@ namespace Bones {
       $this->info('make');
       $this->line(' make:ajax               Create a new Ajax service provider class');
       $this->line(' make:api                Create a new API controller class');
+      $this->line(' make:app                Create a new React/TS app in resources/assets/apps');
       $this->line(' make:console            Create a new Bones command');
       $this->line(' make:controller         Create a new controller class');
       $this->line(' make:cpt                Create a new Custom Post Type service provider class');
@@ -1383,6 +1384,10 @@ namespace Bones {
       // make:api {className}
       elseif ($this->isCommand('make:api')) {
         $this->createAPIController($this->getCommandParams(0));
+      }
+      // make:app {appName}
+      elseif ($this->isCommand('make:app')) {
+        $this->createApp($this->getCommandParams(0));
       }
       // make:console {command_name}
       elseif ($this->isCommand('make:console')) {
@@ -3159,6 +3164,83 @@ namespace Bones {
       $this->line(" Created plugin/API/{$path}{$filename}");
 
       $this->optimize();
+    }
+
+    /**
+     * Scaffold a React/TS app under resources/assets/apps.
+     *
+     * Default (folder-based, best for apps with sub-components):
+     *   resources/assets/apps/<name>/index.tsx
+     *
+     * With --flat (single-file, best for tiny apps):
+     *   resources/assets/apps/<name>.tsx
+     *
+     * The entry is auto-discovered by the v2 webpack config — no package.json edits needed.
+     *
+     * @param string|null $appName Lowercase name, dashes allowed (e.g. "dashboard", "billing-widget").
+     */
+    protected function createApp(?string $appName = '')
+    {
+      if ($this->isHelp($appName)) {
+        $this->info('Usage:');
+        $this->line(' php bones make:app <name> [--flat]');
+        $this->info('Options:');
+        $this->line(' --flat   Create a single-file app (apps/<name>.tsx) instead of folder-based');
+        return;
+      }
+
+      if (empty($appName)) {
+        $appName = $this->ask('App name (lowercase, e.g. "dashboard")');
+      }
+
+      if (!preg_match('/^[a-z][a-z0-9-]*$/', $appName)) {
+        $this->error('Invalid app name. Use lowercase letters, digits, and dashes (must start with a letter).');
+        return;
+      }
+
+      $flat = in_array('--flat', $this->arguments(), true);
+
+      // PascalCase component name (dashboard-widget → DashboardWidget)
+      $componentName = str_replace(' ', '', ucwords(str_replace('-', ' ', $appName)));
+
+      // Resolve text domain from plugin header, fall back to a placeholder the user can replace.
+      $header = $this->extractPluginHeaderInfo(['Text Domain']);
+      $textDomain = $header['Text Domain'] ?? 'your-text-domain';
+
+      $content = $this->prepareStub('app', [
+        '{AppName}'       => $appName,
+        '{ComponentName}' => $componentName,
+        '{TextDomain}'    => $textDomain,
+      ]);
+
+      $this->mkdirIfNotExists('resources/assets/apps');
+
+      if ($flat) {
+        $filepath = "resources/assets/apps/{$appName}.tsx";
+        if (file_exists($filepath)) {
+          $this->error("File already exists: {$filepath}");
+          return;
+        }
+        file_put_contents($filepath, $content);
+        $this->line(" Created {$filepath}");
+      } else {
+        $folder = "resources/assets/apps/{$appName}";
+        if (file_exists($folder)) {
+          $this->error("Folder already exists: {$folder}");
+          return;
+        }
+        mkdir($folder, 0755, true);
+        $filepath = "{$folder}/index.tsx";
+        file_put_contents($filepath, $content);
+        $this->line(" Created {$filepath}");
+      }
+
+      $this->info("\nNext steps:");
+      $this->line(" 1. Add the mount point to your view:");
+      $this->line("    <div id=\"{$appName}-root\"></div>");
+      $this->line(" 2. Enqueue it from your controller:");
+      $this->line("    ->withAdminAppsScript('{$appName}')");
+      $this->line(" 3. Run yarn dev — webpack auto-discovers the new entry.");
     }
 
     /**
