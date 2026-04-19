@@ -3203,6 +3203,25 @@ namespace Bones {
         return;
       }
 
+      // Names that collide with scripts WordPress core registers. If we let
+      // the user pick one of these, wp_enqueue_script silently skips our
+      // bundle because the handle is already taken and the app never mounts
+      // in the browser. Block the name up-front instead of letting the user
+      // debug a ghost bug.
+      $reservedHandles = [
+        'dashboard', 'post', 'postbox', 'common', 'user', 'user-profile',
+        'utils', 'admin-bar', 'admin-comments', 'media-upload', 'media-views',
+        'jquery', 'jquery-core', 'jquery-ui-core', 'backbone', 'underscore',
+        'react', 'react-dom', 'react-jsx-runtime',
+        'wp-api', 'wp-element', 'wp-components', 'wp-data', 'wp-hooks', 'wp-i18n',
+        'wp-util', 'wp-a11y', 'wp-date',
+      ];
+      if (in_array($appName, $reservedHandles, true)) {
+        $this->error("'{$appName}' collides with a reserved WordPress script handle — wp_enqueue_script would silently drop your bundle.");
+        $this->line(" Pick a different name, e.g. {$appName}-app, my-{$appName}, or a plugin-specific prefix.");
+        return;
+      }
+
       $flat = in_array('--flat', $this->arguments(), true);
 
       // PascalCase component name (dashboard-widget → DashboardWidget)
