@@ -300,15 +300,11 @@ class View
    */
   public function withLocalizeScript($handle, $name, $l10n): View
   {
-    // Add to appropriate asset manager based on context
     if (is_admin()) {
       $this->adminAssets->addLocalizeScript($handle, $name, $l10n);
     } else {
       $this->frontendAssets->addLocalizeScript($handle, $name, $l10n);
     }
-
-    // Maintain backward compatibility with legacy array
-    $this->localizeScripts[] = [$handle, $name, $l10n];
 
     return $this;
   }
@@ -342,15 +338,11 @@ class View
    */
   public function withInlineScript($name, $data, $position = 'after'): View
   {
-    // Add to appropriate asset manager based on context
     if (is_admin()) {
       $this->adminAssets->addInlineScript($name, $data, $position);
     } else {
       $this->frontendAssets->addInlineScript($name, $data, $position);
     }
-
-    // Maintain backward compatibility with legacy array
-    $this->inlineScripts[] = [$name, $data, $position];
 
     return $this;
   }
@@ -365,15 +357,11 @@ class View
    */
   public function withInlineStyle($name, $data): View
   {
-    // Add to appropriate asset manager based on context
     if (is_admin()) {
       $this->adminAssets->addInlineStyle($name, $data);
     } else {
       $this->frontendAssets->addInlineStyle($name, $data);
     }
-
-    // Maintain backward compatibility with legacy array
-    $this->inlineStyles[] = [$name, $data];
 
     return $this;
   }
@@ -391,9 +379,6 @@ class View
   public function withAdminStyle($name, $deps = [], $ver = false, $media = 'all'): View
   {
     $this->adminAssets->addStyle($name, $deps, $ver, $media);
-
-    // Maintain backward compatibility with legacy array
-    $this->adminStyles[] = [$name, $deps, $ver, $media];
 
     return $this;
   }
@@ -430,9 +415,6 @@ class View
   public function withAdminScript($name, $deps = [], $ver = false, $args = true): View
   {
     $this->adminAssets->addScript($name, $deps, $ver, $args);
-
-    // Maintain backward compatibility with legacy array
-    $this->adminScripts[] = [$name, $deps, $ver, $args];
 
     return $this;
   }
@@ -487,15 +469,6 @@ class View
       $this->adminAppsAssets->addLocalizeScript($name, $variable, $data);
     }
 
-    // Maintain backward compatibility with legacy arrays
-    $this->adminAppsScripts[] = [$name, $dependencies, $version];
-    if ($module) {
-      $this->adminAppsModules[] = [$name, [], $version];
-    }
-    if ($variable) {
-      $this->localizeScripts[] = [$name, $variable, $data];
-    }
-
     return $this;
   }
 
@@ -530,9 +503,6 @@ class View
   public function withStyle($name, $deps = [], $ver = false, $media = 'all'): View
   {
     $this->frontendAssets->addStyle($name, $deps, $ver, $media);
-
-    // Maintain backward compatibility with legacy array
-    $this->styles[] = [$name, $deps, $ver, $media];
 
     return $this;
   }
@@ -569,9 +539,6 @@ class View
   public function withScript($name, $deps = [], $ver = false, $args = true): View
   {
     $this->frontendAssets->addScript($name, $deps, $ver, $args);
-
-    // Maintain backward compatibility with legacy array
-    $this->scripts[] = [$name, $deps, $ver, $args];
 
     return $this;
   }

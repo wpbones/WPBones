@@ -708,7 +708,7 @@ namespace Bones {
   define('WPBONES_MINIMAL_PHP_VERSION', '7.4');
 
   /* MARK: The WP Bones command line version. */
-  define('WPBONES_COMMAND_LINE_VERSION', '1.11.1');
+  define('WPBONES_COMMAND_LINE_VERSION', '2.0.0');
 
   use Bones\SemVer\Exceptions\InvalidVersionException;
   use Bones\SemVer\Version;
@@ -1315,9 +1315,11 @@ namespace Bones {
       $this->line(' version                 Update the Plugin version');
       $this->info('migrate');
       $this->line(' migrate:create          Create a new Migration');
+      $this->line(' migrate:to-v2           Migrate gulp-based plugin to v2 webpack infrastructure');
       $this->info('make');
       $this->line(' make:ajax               Create a new Ajax service provider class');
       $this->line(' make:api                Create a new API controller class');
+      $this->line(' make:app                Create a new React/TS app in resources/assets/apps');
       $this->line(' make:console            Create a new Bones command');
       $this->line(' make:controller         Create a new controller class');
       $this->line(' make:cpt                Create a new Custom Post Type service provider class');
@@ -1374,6 +1376,10 @@ namespace Bones {
       elseif ($this->isCommand('migrate:create')) {
         $this->createMigrate($this->getCommandParams(0));
       }
+      // migrate:to-v2
+      elseif ($this->isCommand('migrate:to-v2')) {
+        $this->migrateToV2();
+      }
       // -- make ---------------------------------------------
       //
       // make:ajax {className}
@@ -1383,6 +1389,10 @@ namespace Bones {
       // make:api {className}
       elseif ($this->isCommand('make:api')) {
         $this->createAPIController($this->getCommandParams(0));
+      }
+      // make:app {appName}
+      elseif ($this->isCommand('make:app')) {
+        $this->createApp($this->getCommandParams(0));
       }
       // make:console {command_name}
       elseif ($this->isCommand('make:console')) {
@@ -3159,6 +3169,250 @@ namespace Bones {
       $this->line(" Created plugin/API/{$path}{$filename}");
 
       $this->optimize();
+    }
+
+    /**
+     * Scaffold a React/TS app under resources/assets/apps.
+     *
+     * Default (folder-based, best for apps with sub-components):
+     *   resources/assets/apps/<name>/index.tsx
+     *
+     * With --flat (single-file, best for tiny apps):
+     *   resources/assets/apps/<name>.tsx
+     *
+     * The entry is auto-discovered by the v2 webpack config — no package.json edits needed.
+     *
+     * @param string|null $appName Lowercase name, dashes allowed (e.g. "dashboard", "billing-widget").
+     */
+    protected function createApp(?string $appName = '')
+    {
+      if ($this->isHelp($appName)) {
+        $this->info('Usage:');
+        $this->line(' php bones make:app <name> [--flat]');
+        $this->info('Options:');
+        $this->line(' --flat   Create a single-file app (apps/<name>.tsx) instead of folder-based');
+        return;
+      }
+
+      if (empty($appName)) {
+        $appName = $this->ask('App name (lowercase, e.g. "dashboard")');
+      }
+
+      if (!preg_match('/^[a-z][a-z0-9-]*$/', $appName)) {
+        $this->error('Invalid app name. Use lowercase letters, digits, and dashes (must start with a letter).');
+        return;
+      }
+
+      // Names that collide with scripts WordPress core registers. If we let
+      // the user pick one of these, wp_enqueue_script silently skips our
+      // bundle because the handle is already taken and the app never mounts
+      // in the browser. Block the name up-front instead of letting the user
+      // debug a ghost bug.
+      $reservedHandles = [
+        'dashboard', 'post', 'postbox', 'common', 'user', 'user-profile',
+        'utils', 'admin-bar', 'admin-comments', 'media-upload', 'media-views',
+        'jquery', 'jquery-core', 'jquery-ui-core', 'backbone', 'underscore',
+        'react', 'react-dom', 'react-jsx-runtime',
+        'wp-api', 'wp-element', 'wp-components', 'wp-data', 'wp-hooks', 'wp-i18n',
+        'wp-util', 'wp-a11y', 'wp-date',
+      ];
+      if (in_array($appName, $reservedHandles, true)) {
+        $this->error("'{$appName}' collides with a reserved WordPress script handle — wp_enqueue_script would silently drop your bundle.");
+        $this->line(" Pick a different name, e.g. {$appName}-app, my-{$appName}, or a plugin-specific prefix.");
+        return;
+      }
+
+      $flat = in_array('--flat', $this->arguments(), true);
+
+      // PascalCase component name (dashboard-widget → DashboardWidget)
+      $componentName = str_replace(' ', '', ucwords(str_replace('-', ' ', $appName)));
+
+      // Resolve text domain from plugin header, fall back to a placeholder the user can replace.
+      $header = $this->extractPluginHeaderInfo(['Text Domain']);
+      $textDomain = $header['Text Domain'] ?? 'your-text-domain';
+
+      $content = $this->prepareStub('app', [
+        '{AppName}'       => $appName,
+        '{ComponentName}' => $componentName,
+        '{TextDomain}'    => $textDomain,
+      ]);
+
+      $this->mkdirIfNotExists('resources/assets/apps');
+
+      if ($flat) {
+        $filepath = "resources/assets/apps/{$appName}.tsx";
+        if (file_exists($filepath)) {
+          $this->error("File already exists: {$filepath}");
+          return;
+        }
+        file_put_contents($filepath, $content);
+        $this->line(" Created {$filepath}");
+      } else {
+        $folder = "resources/assets/apps/{$appName}";
+        if (file_exists($folder)) {
+          $this->error("Folder already exists: {$folder}");
+          return;
+        }
+        mkdir($folder, 0755, true);
+        $filepath = "{$folder}/index.tsx";
+        file_put_contents($filepath, $content);
+        $this->line(" Created {$filepath}");
+      }
+
+      $this->info("\nNext steps:");
+      $this->line(" 1. Add the mount point to your view:");
+      $this->line("    <div id=\"{$appName}-root\"></div>");
+      $this->line(" 2. Enqueue it from your controller:");
+      $this->line("    ->withAdminAppsScript('{$appName}')");
+      $this->line(" 3. Run yarn dev — webpack auto-discovers the new entry.");
+    }
+
+    /**
+     * Migrate a v1.x plugin (gulp + run-s + wp-scripts split) to the v2 unified
+     * webpack infrastructure.
+     *
+     * The migration:
+     *  - Deletes gulpfile.js and package-lock.json (switching to yarn)
+     *  - Creates webpack.config.js, tsconfig.json, .prettierrc, jest.config.js
+     *  - Rewrites package.json scripts to the unified dev/build/test/format block
+     *  - Drops gulp-* and npm-run-all devDependencies
+     *  - Adds the v2 devDependency set (@wordpress/scripts 31+, typescript, glob,
+     *    less/less-loader, webpack-remove-empty-scripts, @wordpress/jest-preset-default,
+     *    @types/react, @types/react-dom)
+     *
+     * The migration does NOT touch resources/assets/ — the developer's code stays
+     * as-is. After the migration, run `yarn install && yarn build` to verify.
+     *
+     * @since 2.0.0
+     */
+    protected function migrateToV2(): void
+    {
+      $this->info('WP Bones — migrate to v2');
+      $this->line('');
+      $this->warning('This will modify your plugin build infrastructure:');
+      $this->line(' • Delete gulpfile.js and package-lock.json (switching to yarn)');
+      $this->line(' • Create webpack.config.js, tsconfig.json, .prettierrc, jest.config.js');
+      $this->line(' • Rewrite package.json scripts and devDependencies');
+      $this->line('');
+      $this->warning('Commit your current work first. The resources/assets/ folder is left untouched.');
+      $this->line('');
+
+      $answer = $this->ask('Continue? (y/N)');
+      if (strtolower(trim($answer)) !== 'y') {
+        $this->line('Migration aborted.');
+        return;
+      }
+
+      // 1. Delete gulp-era files
+      foreach (['gulpfile.js', 'package-lock.json'] as $file) {
+        if (file_exists($file)) {
+          unlink($file);
+          $this->line(" Removed {$file}");
+        }
+      }
+
+      // 2. Create v2 config files (skip if already present — don't clobber customizations)
+      $configs = [
+        'webpack.config.js' => 'webpack-config',
+        'tsconfig.json'     => 'tsconfig',
+        '.prettierrc'       => 'prettierrc',
+        'jest.config.js'    => 'jest-config',
+      ];
+      foreach ($configs as $file => $stub) {
+        if (file_exists($file)) {
+          $this->warning(" Kept existing {$file} (review manually)");
+          continue;
+        }
+        file_put_contents($file, $this->prepareStub($stub, []));
+        $this->line(" Created {$file}");
+      }
+
+      // 3. Rewrite package.json
+      if (file_exists('package.json')) {
+        $pkg = json_decode(file_get_contents('package.json'), true);
+        if (!is_array($pkg)) {
+          $this->error('package.json is not valid JSON, skipping rewrite.');
+        } else {
+          $previousScripts = $pkg['scripts'] ?? [];
+
+          $pkg['scripts'] = [
+            'dev'             => 'wp-scripts start',
+            'build'           => 'wp-scripts build',
+            'test'            => 'wp-scripts test-unit-js',
+            'test:watch'      => 'wp-scripts test-unit-js --watch',
+            'format'          => 'wp-scripts format',
+            'format:check'    => 'wp-scripts format --check',
+            'lint'            => 'wp-scripts lint-js resources/',
+            'lint:style'      => "wp-scripts lint-style 'resources/**/*.{css,scss}'",
+            'check-engines'   => 'wp-scripts check-engines',
+            'check-licenses'  => 'wp-scripts check-licenses',
+            'packages-update' => 'wp-scripts packages-update',
+          ];
+
+          // Preserve make-pot / make-json if the plugin had them
+          foreach (['make-pot', 'make-json'] as $preserve) {
+            if (isset($previousScripts[$preserve])) {
+              $pkg['scripts'][$preserve] = $previousScripts[$preserve];
+            }
+          }
+
+          // Drop gulp-era devDeps
+          $dropDevDeps = [
+            '@babel/core', '@babel/preset-env', '@babel/preset-react',
+            'gulp', 'gulp-babel', 'gulp-clean-css', 'gulp-less',
+            'gulp-sass', 'gulp-typescript', 'gulp-uglify', 'gulp-watch',
+            'sass', 'npm-run-all',
+          ];
+          foreach ($dropDevDeps as $dep) {
+            unset($pkg['devDependencies'][$dep]);
+          }
+
+          // v2-required devDeps — always overwritten so an old pinned version
+          // (e.g. @wordpress/scripts ^27) is bumped to the range v2 needs.
+          $addDevDeps = [
+            '@types/react'                     => '^18.3.0',
+            '@types/react-dom'                 => '^18.3.0',
+            '@wordpress/jest-preset-default'   => '^12.44.0',
+            '@wordpress/scripts'               => '^31.7.0',
+            'glob'                             => '^11.0.0',
+            'less'                             => '^4.6.4',
+            'less-loader'                      => '^12.2.0',
+            'typescript'                       => '^5.9.3',
+            'webpack-remove-empty-scripts'     => '^1.1.0',
+          ];
+          foreach ($addDevDeps as $dep => $version) {
+            $pkg['devDependencies'][$dep] = $version;
+          }
+
+          if (isset($pkg['devDependencies'])) {
+            ksort($pkg['devDependencies']);
+          }
+          if (isset($pkg['dependencies'])) {
+            ksort($pkg['dependencies']);
+          }
+
+          file_put_contents(
+            'package.json',
+            json_encode($pkg, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . "\n"
+          );
+          $this->line(' Rewrote package.json');
+        }
+      }
+
+      // 4. Summary + manual steps
+      $this->line('');
+      $this->success('✅ Migration to v2 complete.');
+      $this->line('');
+      $this->info('Next steps:');
+      $this->line(' 1. yarn install');
+      $this->line(' 2. yarn build     # verify everything compiles');
+      $this->line(' 3. yarn test      # verify tests still pass, if any');
+      $this->line('');
+      $this->warning('Review manually:');
+      $this->line(' • Custom gulp tasks (if you had any) must be re-implemented as webpack plugins');
+      $this->line(' • Old build:<name> / start:<name> scripts for individual apps are gone — ');
+      $this->line('   webpack auto-discovers everything under resources/assets/apps/.');
+      $this->line(' • File extensions: .jsx/.tsx files in apps/ are fine; plain .js with JSX must be renamed.');
     }
 
     /**
