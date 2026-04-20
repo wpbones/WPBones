@@ -301,7 +301,11 @@ class View
   public function withLocalizeScript($handle, $name, $l10n): View
   {
     if (is_admin()) {
-      $this->adminAssets->addLocalizeScript($handle, $name, $l10n);
+      if ($this->adminAppsAssetsHasHandle($handle)) {
+        $this->adminAppsAssets->addLocalizeScript($handle, $name, $l10n);
+      } else {
+        $this->adminAssets->addLocalizeScript($handle, $name, $l10n);
+      }
     } else {
       $this->frontendAssets->addLocalizeScript($handle, $name, $l10n);
     }
@@ -339,12 +343,29 @@ class View
   public function withInlineScript($name, $data, $position = 'after'): View
   {
     if (is_admin()) {
-      $this->adminAssets->addInlineScript($name, $data, $position);
+      // Route to the asset manager that owns the handle so wp_add_inline_script()
+      // runs after the matching wp_enqueue_script() — otherwise the handle is
+      // unknown and WordPress silently drops the inline script.
+      if ($this->adminAppsAssetsHasHandle($name)) {
+        $this->adminAppsAssets->addInlineScript($name, $data, $position);
+      } else {
+        $this->adminAssets->addInlineScript($name, $data, $position);
+      }
     } else {
       $this->frontendAssets->addInlineScript($name, $data, $position);
     }
 
     return $this;
+  }
+
+  protected function adminAppsAssetsHasHandle(string $name): bool
+  {
+    foreach ($this->adminAppsAssets->getScripts() as $script) {
+      if (($script['name'] ?? null) === $name) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /**

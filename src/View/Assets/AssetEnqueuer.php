@@ -60,12 +60,10 @@ abstract class AssetEnqueuer
    */
   public function enqueueScripts(): void
   {
-    if (!$this->assetManager->hasScripts()) {
-      return;
-    }
-
-    foreach ($this->assetManager->getScripts() as $script) {
-      $this->enqueueScript($script);
+    if ($this->assetManager->hasScripts()) {
+      foreach ($this->assetManager->getScripts() as $script) {
+        $this->enqueueScript($script);
+      }
     }
 
     $this->enqueueLocalizeScripts();
@@ -79,12 +77,10 @@ abstract class AssetEnqueuer
    */
   public function enqueueStyles(): void
   {
-    if (!$this->assetManager->hasStyles()) {
-      return;
-    }
-
-    foreach ($this->assetManager->getStyles() as $style) {
-      $this->enqueueStyle($style);
+    if ($this->assetManager->hasStyles()) {
+      foreach ($this->assetManager->getStyles() as $style) {
+        $this->enqueueStyle($style);
+      }
     }
 
     $this->enqueueInlineStyles();
