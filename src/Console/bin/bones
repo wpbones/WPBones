@@ -950,6 +950,50 @@ namespace Bones {
     }
 
     /**
+     * Detect the package manager used by the current plugin, based on the
+     * lockfile present in the plugin root. Unlike askPackageManager(), this
+     * inspects the *project* state, not what is installed on the host, so
+     * messages we print stay consistent with how the developer actually runs
+     * their plugin.
+     *
+     * Detection order: yarn.lock → pnpm-lock.yaml → package-lock.json.
+     * If no lockfile is found we default to yarn (v2 boilerplates are
+     * yarn-first and ship yarn.lock).
+     *
+     * @since 2.0.2
+     * @return string One of 'yarn', 'pnpm', 'npm'.
+     */
+    protected function detectProjectPackageManager(): string
+    {
+      if (file_exists('yarn.lock'))          return 'yarn';
+      if (file_exists('pnpm-lock.yaml'))     return 'pnpm';
+      if (file_exists('package-lock.json'))  return 'npm';
+      return 'yarn';
+    }
+
+    /**
+     * Format a package-manager command string (e.g. "yarn dev", "npm run dev",
+     * "pnpm dev"). npm requires `run` for any script that is not a built-in
+     * lifecycle verb; yarn and pnpm accept the bare script name.
+     *
+     * @since 2.0.2
+     * @param string $pm     Package manager: 'yarn', 'pnpm' or 'npm'.
+     * @param string $script Script name (e.g. 'dev', 'build', 'install').
+     * @return string
+     */
+    protected function packageManagerCommand(string $pm, string $script): string
+    {
+      if ($pm === 'npm') {
+        $lifecycle = ['install', 'start', 'test', 'restart', 'stop', 'ci'];
+        if (in_array($script, $lifecycle, true)) {
+          return "npm {$script}";
+        }
+        return "npm run {$script}";
+      }
+      return "{$pm} {$script}";
+    }
+
+    /**
      * Return the params after "php bones [command]".
      *
      * @param int|null $index Optional. Index of param.
@@ -3259,12 +3303,15 @@ namespace Bones {
         $this->line(" Created {$filepath}");
       }
 
+      $pm     = $this->detectProjectPackageManager();
+      $devCmd = $this->packageManagerCommand($pm, 'dev');
+
       $this->info("\nNext steps:");
       $this->line(" 1. Add the mount point to your view:");
       $this->line("    <div id=\"{$appName}-root\"></div>");
       $this->line(" 2. Enqueue it from your controller:");
       $this->line("    ->withAdminAppsScript('{$appName}')");
-      $this->line(" 3. Run yarn dev — webpack auto-discovers the new entry.");
+      $this->line(" 3. Run {$devCmd} — webpack auto-discovers the new entry.");
     }
 
     /**
@@ -3272,7 +3319,9 @@ namespace Bones {
      * webpack infrastructure.
      *
      * The migration:
-     *  - Deletes gulpfile.js, package-lock.json and pnpm-lock.yaml (switching to yarn)
+     *  - Deletes gulpfile.js, package-lock.json and pnpm-lock.yaml so the
+     *    developer can pick up a clean lockfile with their preferred PM
+     *    (yarn.lock is left untouched if already present)
      *  - Creates webpack.config.js, tsconfig.json, .prettierrc, jest.config.js
      *  - Rewrites package.json scripts to the unified dev/build/test/format block
      *  - Drops gulp-* and npm-run-all devDependencies
@@ -3281,7 +3330,9 @@ namespace Bones {
      *    @types/react, @types/react-dom)
      *
      * The migration does NOT touch resources/assets/ — the developer's code stays
-     * as-is. After the migration, run `yarn install && yarn build` to verify.
+     * as-is. The printed "Next steps" suggest install/build/test commands using
+     * the package manager detected from the project lockfile before deletion
+     * (yarn-first default when no lockfile is present).
      *
      * @since 2.0.0
      */
@@ -3290,7 +3341,7 @@ namespace Bones {
       $this->info('WP Bones — migrate to v2');
       $this->line('');
       $this->warning('This will modify your plugin build infrastructure:');
-      $this->line(' • Delete gulpfile.js, package-lock.json and pnpm-lock.yaml (switching to yarn)');
+      $this->line(' • Delete gulpfile.js, package-lock.json and pnpm-lock.yaml (yarn.lock is kept)');
       $this->line(' • Create webpack.config.js, tsconfig.json, .prettierrc, jest.config.js');
       $this->line(' • Rewrite package.json scripts and devDependencies');
       $this->line('');
@@ -3302,6 +3353,10 @@ namespace Bones {
         $this->line('Migration aborted.');
         return;
       }
+
+      // Detect the developer's PM *before* we delete their lockfile, so the
+      // "Next steps" we print at the end match the tooling they actually use.
+      $projectPm = $this->detectProjectPackageManager();
 
       // 1. Delete gulp-era files
       foreach (['gulpfile.js', 'package-lock.json', 'pnpm-lock.yaml'] as $file) {
@@ -3400,14 +3455,23 @@ namespace Bones {
       }
 
       // 4. Summary + manual steps
+      $installCmd = $this->packageManagerCommand($projectPm, 'install');
+      $buildCmd   = $this->packageManagerCommand($projectPm, 'build');
+      $testCmd    = $this->packageManagerCommand($projectPm, 'test');
+
       $this->line('');
       $this->success('✅ Migration to v2 complete.');
       $this->line('');
-      $this->info('Next steps:');
-      $this->line(' 1. yarn install');
-      $this->line(' 2. yarn build     # verify everything compiles');
-      $this->line(' 3. yarn test      # verify tests still pass, if any');
+      $this->info("Next steps ({$projectPm}):");
+      $this->line(" 1. {$installCmd}");
+      $this->line(" 2. {$buildCmd}     # verify everything compiles");
+      $this->line(" 3. {$testCmd}      # verify tests still pass, if any");
       $this->line('');
+      if ($projectPm !== 'yarn') {
+        $this->line("(Detected {$projectPm} lockfile — switch to yarn anytime by deleting your lockfile and running `yarn install`.)");
+        $this->line('');
+      }
+
       $this->warning('Review manually:');
       $this->line(' • Custom gulp tasks (if you had any) must be re-implemented as webpack plugins');
       $this->line(' • Old build:<name> / start:<name> scripts for individual apps are gone — ');
