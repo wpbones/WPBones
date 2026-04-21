@@ -3272,7 +3272,7 @@ namespace Bones {
      * webpack infrastructure.
      *
      * The migration:
-     *  - Deletes gulpfile.js and package-lock.json (switching to yarn)
+     *  - Deletes gulpfile.js, package-lock.json and pnpm-lock.yaml (switching to yarn)
      *  - Creates webpack.config.js, tsconfig.json, .prettierrc, jest.config.js
      *  - Rewrites package.json scripts to the unified dev/build/test/format block
      *  - Drops gulp-* and npm-run-all devDependencies
