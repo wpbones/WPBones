@@ -67,6 +67,20 @@ abstract class Command
   protected $argv = [];
 
   /**
+   * The plugin instance, available after calling loadWordPress().
+   *
+   * @var mixed
+   */
+  protected $plugin = null;
+
+  /**
+   * Whether bootstrap/plugin.php has already been executed.
+   *
+   * @var bool
+   */
+  protected bool $pluginBootstrapExecuted = false;
+
+  /**
    *
    */
   public function __construct()
@@ -275,15 +289,35 @@ abstract class Command
   }
 
   /**
+   * Set the plugin instance (injected by the Kernel or loadWordPress).
+   *
+   * @param mixed $value
+   */
+  public function setPluginAttribute($value): void
+  {
+    if (is_object($value) || is_null($value)) {
+      $this->plugin = $value;
+      return;
+    }
+
+    $this->warning(
+      'Invalid plugin instance; expected object or null, got ' . get_debug_type($value)
+    );
+    $this->plugin = null;
+  }
+
+  /**
    * Load WordPress environment.
    *
    * @return void
    */
   protected function loadWordPress()
   {
+    // Plugin root is the working directory when running `php bones`
+    $currentDir = $_SERVER['PWD'] ?? getcwd();
+
     try {
       // We have to load the WordPress environment.
-      $currentDir = $_SERVER['PWD'] ?? __DIR__;
       $wpLoadPath = dirname(dirname(dirname($currentDir))) . '/wp-load.php';
 
       if (!file_exists($wpLoadPath)) {
@@ -306,8 +340,8 @@ abstract class Command
        * need to use it! Requiring it here means we don't have to load classes
        * manually. Feels great to relax.
        */
-      if (file_exists(__DIR__ . '/vendor/autoload.php')) {
-        require __DIR__ . '/vendor/autoload.php';
+      if (file_exists($currentDir . '/vendor/autoload.php')) {
+        require $currentDir . '/vendor/autoload.php';
       }
     } catch (\Exception $e) {
       $this->error("Error! Can't load Composer autoload (" . $e->getMessage() . ')');
@@ -320,8 +354,10 @@ abstract class Command
        * Load this plugin env
        * --------------------------------------------------------------------------
        */
-      if (file_exists(__DIR__ . '/bootstrap/plugin.php')) {
-        require_once __DIR__ . '/bootstrap/plugin.php';
+      if (!$this->pluginBootstrapExecuted && file_exists($currentDir . '/bootstrap/plugin.php')) {
+        $plugin = require $currentDir . '/bootstrap/plugin.php';
+        $this->pluginBootstrapExecuted = true;
+        $this->setPluginAttribute($plugin);
       }
     } catch (\Exception $e) {
       $this->error("Error! Can't load the plugin env (" . $e->getMessage() . ')');

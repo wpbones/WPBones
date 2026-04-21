@@ -615,6 +615,12 @@ namespace Bones\Traits {
     // WordPress loaded flag
     protected $wpLoaded = false;
 
+    // Plugin instance loaded from bootstrap/plugin.php
+    protected $plugin = null;
+
+    // Whether bootstrap/plugin.php has already been executed.
+    protected bool $pluginBootstrapExecuted = false;
+
     /* Protected version of the do_action function */
     protected function do_action(...$args)
     {
@@ -686,8 +692,18 @@ namespace Bones\Traits {
          * Load this plugin env
          * --------------------------------------------------------------------------
          */
-        if (file_exists(__DIR__ . '/bootstrap/plugin.php')) {
-          require_once __DIR__ . '/bootstrap/plugin.php';
+        if (!$this->pluginBootstrapExecuted && file_exists(__DIR__ . '/bootstrap/plugin.php')) {
+          $plugin = require __DIR__ . '/bootstrap/plugin.php';
+          $this->pluginBootstrapExecuted = true;
+          if (is_object($plugin) || is_null($plugin)) {
+            $this->plugin = $plugin;
+          } else {
+            $this->warning(
+              'Invalid plugin instance returned from bootstrap/plugin.php; expected object or null, got ' .
+                get_debug_type($plugin)
+            );
+            $this->plugin = null;
+          }
         }
       } catch (Exception $e) {
         $this->error("Error! Can't load the plugin env (" . $e->getMessage() . ')');
@@ -1441,6 +1457,9 @@ namespace Bones {
         $extended = false;
 
         if ($this->kernel) {
+          if (!is_null($this->plugin)) {
+            $this->kernel->setPlugin($this->plugin);
+          }
           $extended = $this->kernel->handle($this->arguments());
         }
 
@@ -3428,4 +3447,3 @@ namespace Bones {
 
   BonesCommandLine::run();
 }
-
