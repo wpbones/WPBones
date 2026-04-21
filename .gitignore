@@ -2,3 +2,6 @@
 release.sh
 vendor/
 .idea/
+
+# Announcement post (local only)
+POST.md
