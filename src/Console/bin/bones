@@ -3290,7 +3290,7 @@ namespace Bones {
       $this->info('WP Bones — migrate to v2');
       $this->line('');
       $this->warning('This will modify your plugin build infrastructure:');
-      $this->line(' • Delete gulpfile.js and package-lock.json (switching to yarn)');
+      $this->line(' • Delete gulpfile.js, package-lock.json and pnpm-lock.yaml (switching to yarn)');
       $this->line(' • Create webpack.config.js, tsconfig.json, .prettierrc, jest.config.js');
       $this->line(' • Rewrite package.json scripts and devDependencies');
       $this->line('');
@@ -3304,7 +3304,7 @@ namespace Bones {
       }
 
       // 1. Delete gulp-era files
-      foreach (['gulpfile.js', 'package-lock.json'] as $file) {
+      foreach (['gulpfile.js', 'package-lock.json', 'pnpm-lock.yaml'] as $file) {
         if (file_exists($file)) {
           unlink($file);
           $this->line(" Removed {$file}");
