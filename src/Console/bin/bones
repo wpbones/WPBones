@@ -708,7 +708,7 @@ namespace Bones {
   define('WPBONES_MINIMAL_PHP_VERSION', '7.4');
 
   /* MARK: The WP Bones command line version. */
-  define('WPBONES_COMMAND_LINE_VERSION', '2.0.0');
+  define('WPBONES_COMMAND_LINE_VERSION', '2.0.3');
 
   use Bones\SemVer\Exceptions\InvalidVersionException;
   use Bones\SemVer\Version;
@@ -965,9 +965,15 @@ namespace Bones {
      */
     protected function detectProjectPackageManager(): string
     {
-      if (file_exists('yarn.lock'))          return 'yarn';
-      if (file_exists('pnpm-lock.yaml'))     return 'pnpm';
-      if (file_exists('package-lock.json'))  return 'npm';
+      if (file_exists('yarn.lock')) {
+        return 'yarn';
+      }
+      if (file_exists('pnpm-lock.yaml')) {
+        return 'pnpm';
+      }
+      if (file_exists('package-lock.json')) {
+        return 'npm';
+      }
       return 'yarn';
     }
 
@@ -3468,7 +3474,7 @@ namespace Bones {
       $this->line(" 3. {$testCmd}      # verify tests still pass, if any");
       $this->line('');
       if ($projectPm !== 'yarn') {
-        $this->line("(Detected {$projectPm} lockfile — switch to yarn anytime by deleting your lockfile and running `yarn install`.)");
+        $this->line("(Your {$projectPm} lockfile was removed during migration. To switch to yarn, run `yarn install` instead of step 1.)");
         $this->line('');
       }
 
