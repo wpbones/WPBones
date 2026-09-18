@@ -90,28 +90,41 @@ class DB
    * @return string
    *
    * @example
-   *          Model::tableName('User') returns 'wp_users'
+   *          Model::tableName('User') returns 'wp_user'
    *          Model::tableName('WPMyTable') returns 'wp_w_p_my_table'
    *          Model::tableName('WP_MyTable') returns 'wp_w_p_my_table'
+   *          Model::tableName('wp_users') returns 'wp_users'
    *
    * @since 1.7.0
    * If you set the $usePrefix to false, it will not use the WordPress prefix.
    * @example
-   *          Model::tableName('User', false) returns 'users'
-   *          Model::tableName('WPMyTable', false) returns 'wp_my_table'
-   *          Model::tableName('WP_MyTable', false) returns 'wp_my_table'
+   *          Model::tableName('User', false) returns 'user'
+   *          Model::tableName('WPMyTable', false) returns 'w_p_my_table'
+   *          Model::tableName('WP_MyTable', false) returns 'w_p_my_table'
    *
+   * A name that already starts with the prefix keeps it verbatim: the prefix is split
+   * off before the studly/snake conversion and put back unchanged, so a mixed-case
+   * prefix such as `qgQezmtYw_` is never rewritten (issue #63).
    */
   public static function getTableName(string $class, $usePrefix = true): string
   {
     global $wpdb;
 
     $paths = explode('\\', $class);
-    $only = array_pop($paths);
-    $name = Str::snake(Str::studly($only));
-    $prefix = $usePrefix ? $wpdb->prefix : '';
+    $name = array_pop($paths);
+    $prefix = $usePrefix ? (string) $wpdb->prefix : '';
 
-    return Str::startsWith($name, $prefix) ? $name : $prefix . $name;
+    // An explicit name that already carries the prefix keeps it verbatim (issue #63):
+    // only the part after the prefix goes through the conversion.
+    if ($prefix !== '' && Str::startsWith($name, $prefix)) {
+      return $prefix . Str::snake(Str::studly(substr($name, strlen($prefix))));
+    }
+
+    $name = Str::snake(Str::studly($name));
+
+    // A class-derived name whose snake form already starts with the prefix
+    // (WpBooks → wp_books) is not prefixed a second time — as it always was.
+    return $prefix !== '' && Str::startsWith($name, $prefix) ? $name : $prefix . $name;
   }
 
   /*
