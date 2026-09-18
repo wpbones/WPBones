@@ -52,13 +52,19 @@ class QueryBuilder
    * A plain column identifier, optionally table-qualified: `column` or `table.column`.
    * Expressions are refused on purpose: identifiers are quoted, never escaped.
    */
-  private const IDENTIFIER = '/^[A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z_][A-Za-z0-9_]*)?$/';
+  private const IDENTIFIER = '/^[A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z_][A-Za-z0-9_]*)?$/D';
 
   /**
    * A table name including the WordPress prefix. WordPress itself limits $table_prefix
    * to letters, digits and underscores; plugin tables follow the same rule.
    */
-  private const TABLE = '/^[A-Za-z0-9_]+$/';
+  private const TABLE = '/^[A-Za-z0-9_]+$/D';
+
+  /**
+   * A value that can be emitted bare as a numeric literal: an optional sign, digits,
+   * an optional decimal part, nothing else (the D modifier refuses a trailing newline).
+   */
+  private const NUMERIC = '/^-?\d+(?:\.\d+)?$/D';
 
   /**
    * Boolean connectors accepted between where clauses.
@@ -293,11 +299,70 @@ class QueryBuilder
    */
   private function validateTable(string $table): string
   {
+    $table = trim($table);
+
     if (!preg_match(self::TABLE, $table)) {
       throw new InvalidArgumentException(sprintf('Invalid table name "%s".', $table));
     }
 
     return $table;
+  }
+
+  /**
+   * Normalize the value list of whereIn()/whereBetween() and their variants: an array,
+   * or a comma-separated string whose parts are trimmed. Anything else is refused.
+   *
+   * @param mixed $value
+   * @throws InvalidArgumentException
+   */
+  private function normalizeList($value, string $method): array
+  {
+    if (is_string($value)) {
+      return array_map('trim', explode(',', $value));
+    }
+
+    if (!is_array($value)) {
+      throw new InvalidArgumentException(sprintf('%s() expects an array or a comma-separated string, %s given.', $method, gettype($value)));
+    }
+
+    return $value;
+  }
+
+  /**
+   * Return one scalar as a safe SQL literal.
+   *
+   * Integers, floats and strictly decimal strings are emitted bare, booleans as 1/0,
+   * null as NULL; everything else goes through $wpdb->_real_escape() and is quoted.
+   * Arrays are refused: IN and BETWEEN unpack theirs before getting here.
+   *
+   * @param mixed $value
+   * @throws InvalidArgumentException
+   */
+  private function formatScalar($value): string
+  {
+    if (is_array($value)) {
+      throw new InvalidArgumentException('A value cannot be an array here; use whereIn() or whereBetween().');
+    }
+
+    if ($value === null) {
+      return 'NULL';
+    }
+
+    if (is_bool($value)) {
+      return $value ? '1' : '0';
+    }
+
+    if (is_int($value) || is_float($value)) {
+      return (string) $value;
+    }
+
+    $value = (string) $value;
+
+    if (preg_match(self::NUMERIC, $value)) {
+      return $value;
+    }
+
+    return "'" . $this->wpdb->_real_escape($value) . "'";
   }
 
   /**
@@ -353,11 +418,11 @@ class QueryBuilder
       return '*';
     }
 
-    if (preg_match('/^([A-Za-z_][A-Za-z0-9_]*)\.\*$/', $column, $m)) {
+    if (preg_match('/^([A-Za-z_][A-Za-z0-9_]*)\.\*$/D', $column, $m)) {
       return '`' . $m[1] . '`.*';
     }
 
-    if (preg_match('/^(\S+)\s+as\s+([A-Za-z_][A-Za-z0-9_]*)$/i', $column, $m)) {
+    if (preg_match('/^(\S+)\s+as\s+([A-Za-z_][A-Za-z0-9_]*)$/iD', $column, $m)) {
       return $this->quoteIdentifier($m[1]) . ' AS `' . $m[2] . '`';
     }
 
@@ -430,30 +495,34 @@ class QueryBuilder
    */
   private function getWhere()
   {
-    $where = ' WHERE 1 ';
+    if ($this->wheres === []) {
+      return ' WHERE 1 ';
+    }
 
-    foreach ($this->wheres as $where_item) {
+    $sql = ' WHERE ';
+
+    foreach ($this->wheres as $index => $where_item) {
       $boolean = strtoupper($this->normalizeBoolean($where_item['boolean']));
       $column = $this->quoteIdentifier($where_item['column']);
       $operator = $this->getWhereOperator($where_item['operator']);
       $value = $where_item['value'];
 
-      // whereIn([]) can never match, whereNotIn([]) always does — same as Laravel.
       if ($value === [] && in_array($operator, ['IN', 'NOT IN'], true)) {
-        $where .= $boolean . ' ' . ($operator === 'IN' ? '0 = 1' : '1 = 1') . ' ';
-        continue;
+        // whereIn([]) can never match, whereNotIn([]) always does — same as Laravel.
+        $clause = $operator === 'IN' ? '0 = 1' : '1 = 1';
+      } elseif ($value === null && in_array($operator, ['=', '<>', '!='], true)) {
+        // `col = NULL` is never true in SQL; a null value means IS [NOT] NULL.
+        $clause = $column . ($operator === '=' ? ' IS NULL' : ' IS NOT NULL');
+      } else {
+        $clause = $column . ' ' . $operator . ' ' . $this->getWhereValue($value, $operator);
       }
 
-      // `col = NULL` is never true in SQL; a null value means IS [NOT] NULL.
-      if ($value === null && in_array($operator, ['=', '<>', '!='], true)) {
-        $where .= $boolean . ' ' . $column . ($operator === '=' ? ' IS NULL ' : ' IS NOT NULL ');
-        continue;
-      }
-
-      $where .= $boolean . ' ' . $column . ' ' . $operator . ' ' . $this->getWhereValue($value, $operator) . ' ';
+      // The first clause takes no connector: `WHERE 1 OR x` would match every row,
+      // so orWhere() as the opening clause used to turn delete() into a truncate.
+      $sql .= ($index === 0 ? '' : $boolean . ' ') . $clause . ' ';
     }
 
-    return $where;
+    return $sql;
   }
 
   /**
@@ -506,30 +575,10 @@ class QueryBuilder
   private function getFormatValue($value)
   {
     if (is_array($value)) {
-      return array_map(function ($value) {
-        return $this->getFormatValue($value);
-      }, $value);
+      return array_map([$this, 'formatScalar'], $value);
     }
 
-    if ($value === null) {
-      return 'NULL';
-    }
-
-    if (is_bool($value)) {
-      return $value ? '1' : '0';
-    }
-
-    if (is_int($value) || is_float($value)) {
-      return (string) $value;
-    }
-
-    $value = (string) $value;
-
-    if (preg_match('/^-?\d+(?:\.\d+)?$/', $value)) {
-      return $value;
-    }
-
-    return "'" . $this->wpdb->_real_escape($value) . "'";
+    return $this->formatScalar($value);
   }
 
   /**
@@ -627,7 +676,8 @@ class QueryBuilder
    */
   public function orderBy($column, $order = 'asc')
   {
-    $order = strtolower(trim((string) $order));
+    // null and '' used to mean the default direction; keep that.
+    $order = strtolower(trim((string) $order)) ?: 'asc';
 
     if (!in_array($order, self::DIRECTIONS, true)) {
       throw new InvalidArgumentException(sprintf('Order direction must be "asc" or "desc", "%s" given.', $order));
@@ -857,7 +907,7 @@ class QueryBuilder
    */
   public function whereIn($column, $value, $boolean = 'and')
   {
-    $value = is_string($value) ? explode(',', $value) : $value;
+    $value = $this->normalizeList($value, __FUNCTION__);
     $operator = 'IN';
     $this->wheres[] = compact('column', 'operator', 'value', 'boolean');
 
@@ -883,7 +933,7 @@ class QueryBuilder
    */
   public function whereNotIn($column, $value, $boolean = 'and')
   {
-    $value = is_string($value) ? explode(',', $value) : $value;
+    $value = $this->normalizeList($value, __FUNCTION__);
     $operator = 'NOT IN';
     $this->wheres[] = compact('column', 'operator', 'value', 'boolean');
 
@@ -909,7 +959,7 @@ class QueryBuilder
    */
   public function whereBetween($column, $value, $boolean = 'and')
   {
-    $value = is_string($value) ? explode(',', $value) : $value;
+    $value = $this->normalizeList($value, __FUNCTION__);
     $operator = 'BETWEEN';
     $this->wheres[] = compact('column', 'operator', 'value', 'boolean');
 
@@ -935,7 +985,7 @@ class QueryBuilder
    */
   public function whereNotBetween($column, $value, $boolean = 'and')
   {
-    $value = is_string($value) ? explode(',', $value) : $value;
+    $value = $this->normalizeList($value, __FUNCTION__);
     $operator = 'NOT BETWEEN';
     $this->wheres[] = compact('column', 'operator', 'value', 'boolean');
 
@@ -1007,8 +1057,9 @@ class QueryBuilder
    */
   public function insert($values)
   {
-    // here we can get a single or multiple array of values
-    if (count($values) !== count($values, COUNT_RECURSIVE)) {
+    // Several rows: every entry is itself a row. A single row with an array value is
+    // refused later by formatScalar(), instead of being mistaken for a row list.
+    if ($values !== [] && count(array_filter($values, 'is_array')) === count($values)) {
       $ids = [];
       foreach ($values as $value) {
         $ids[] = $this->insert($value);
@@ -1037,12 +1088,7 @@ class QueryBuilder
   private function getColumnsAndValues($values): array
   {
     $columns_string = implode(',', array_map([$this, 'quoteIdentifier'], array_keys($values)));
-    $values_string = implode(
-      ',',
-      array_map(function ($value) {
-        return "'" . $this->wpdb->_real_escape($value) . "'";
-      }, $values)
-    );
+    $values_string = implode(',', array_map([$this, 'formatScalar'], array_values($values)));
 
     return [$columns_string, $values_string];
   }
@@ -1057,7 +1103,7 @@ class QueryBuilder
     $set = implode(
       ',',
       array_map(function ($key) use ($values) {
-        return $this->quoteIdentifier($key) . ' = ' . $this->getFormatValue($values[$key]);
+        return $this->quoteIdentifier($key) . ' = ' . $this->formatScalar($values[$key]);
       }, array_keys($values))
     );
 

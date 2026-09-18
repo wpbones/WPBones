@@ -114,11 +114,17 @@ class DB
     $name = array_pop($paths);
     $prefix = $usePrefix ? (string) $wpdb->prefix : '';
 
+    // An explicit name that already carries the prefix keeps it verbatim (issue #63):
+    // only the part after the prefix goes through the conversion.
     if ($prefix !== '' && Str::startsWith($name, $prefix)) {
-      $name = substr($name, strlen($prefix));
+      return $prefix . Str::snake(Str::studly(substr($name, strlen($prefix))));
     }
 
-    return $prefix . Str::snake(Str::studly($name));
+    $name = Str::snake(Str::studly($name));
+
+    // A class-derived name whose snake form already starts with the prefix
+    // (WpBooks → wp_books) is not prefixed a second time — as it always was.
+    return $prefix !== '' && Str::startsWith($name, $prefix) ? $name : $prefix . $name;
   }
 
   /*
