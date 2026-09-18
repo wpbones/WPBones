@@ -1,0 +1,38 @@
+name: Tests
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  unit:
+    name: PHP ${{ matrix.php }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['8.1', '8.2', '8.3', '8.4']
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: none
+          tools: composer:v2
+
+      # Library: no lockfile is committed, so resolve per PHP version
+      # (PHPUnit 10.5 on 8.1, 11.x on 8.2+).
+      - run: composer update --prefer-dist --no-progress --no-interaction
+
+      - name: Unit suite
+        run: composer test
+
+      - name: Known defects (informational, expected to fail until fixed)
+        run: composer test:defects
+        continue-on-error: true

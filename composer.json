@@ -14,6 +14,11 @@
       "WPKirk\\WPBones\\": "src/"
     }
   },
+  "autoload-dev": {
+    "psr-4": {
+      "WPKirk\\WPBones\\Tests\\": "tests/"
+    }
+  },
   "description": "WordPress framework for Laravel developers",
   "homepage": "https://wpbones.com",
   "keywords": [
@@ -29,6 +34,19 @@
   "require": {
     "php": ">=8.1",
     "eftec/bladeone": "^4.13"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^10.5 || ^11.0"
+  },
+  "scripts": {
+    "test": "phpunit --exclude-group known-defect",
+    "test:defects": "phpunit --group known-defect",
+    "test:all": "phpunit"
+  },
+  "scripts-descriptions": {
+    "test": "Run the unit suite (known defects excluded, must be green).",
+    "test:defects": "Run only the tests that pin known, still-open defects (expected red).",
+    "test:all": "Run everything."
   },
   "support": {
     "issues": "https://github.com/wpbones/WPBones/issues",

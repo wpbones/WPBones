@@ -1,0 +1,6 @@
+# Keep the Packagist / GitHub archive to what a plugin needs at runtime.
+/.github          export-ignore
+/tests            export-ignore
+/phpunit.xml.dist export-ignore
+/.gitattributes   export-ignore
+/.editorconfig    export-ignore
