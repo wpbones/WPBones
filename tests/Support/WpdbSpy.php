@@ -11,6 +11,10 @@ namespace WPKirk\WPBones\Tests\Support;
  *
  * Only the members the framework touches are implemented; add more when a test needs
  * them, never speculatively.
+ *
+ * Not modelled: wpdb::_real_escape() replaces `%` with a placeholder token that
+ * wpdb::query() strips again through the `query` filter, so a LIKE pattern round-trips
+ * in production. Here `%` is left alone; assertions on LIKE values check quoting only.
  */
 final class WpdbSpy
 {
@@ -49,10 +53,14 @@ final class WpdbSpy
     return 0;
   }
 
-  /** Mirrors wpdb::_real_escape closely enough for assertions on quoting. */
-  public function _real_escape(string $value): string
+  /**
+   * Mirrors wpdb::_real_escape(): non-scalars become '', scalars are escaped.
+   *
+   * @param mixed $value
+   */
+  public function _real_escape($value): string
   {
-    return addslashes($value);
+    return is_scalar($value) ? addslashes((string) $value) : '';
   }
 
   public function reset(): void

@@ -29,6 +29,15 @@ final class DBTest extends TestCase
     $this->assertSame('wp_users', DB::getTableName('wp_users'));
   }
 
+  public function test_table_name_does_not_double_a_prefix_produced_by_the_conversion(): void
+  {
+    // Found by review: a class named WpBooks always mapped to wp_books, because the
+    // prefix check ran after the studly/snake conversion. Keep that.
+    $this->assertSame('wp_books', DB::getTableName('WpBooks'));
+    $this->assertSame('wp_users', DB::getTableName('Wp_Users'));
+    $this->assertSame('wp_my_table', DB::getTableName('WpMyTable'));
+  }
+
   public function test_table_name_can_skip_the_prefix(): void
   {
     $this->assertSame('books', DB::getTableName('Books', false));
@@ -42,7 +51,7 @@ final class DBTest extends TestCase
 
   public function test_table_name_converts_studly_names_as_documented(): void
   {
-    // Unchanged, documented behaviour: only an exact leading prefix is preserved.
+    // Unchanged, documented behaviour.
     $this->assertSame('wp_w_p_my_table', DB::getTableName('WPMyTable'));
     $this->assertSame('wp_w_p_my_table', DB::getTableName('WP_MyTable'));
     $this->assertSame('w_p_my_table', DB::getTableName('WPMyTable', false));
