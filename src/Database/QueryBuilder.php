@@ -34,12 +34,25 @@ class QueryBuilder
   protected $wpdb;
 
   /**
-   * List of columns and their types.
-   * That is the desc of the table.
+   * Table descriptions (the result of DESC) already fetched during this request,
+   * keyed by table name. Fetched lazily by getColumns(), never by the constructor.
    *
-   * @var array
+   * @var array<string, array<int, array<string, mixed>>>
    */
-  private $columns = [];
+  private static $descriptions = [];
+
+  /**
+   * Order directions accepted by orderBy().
+   *
+   * @var string[]
+   */
+  private const DIRECTIONS = ['asc', 'desc'];
+
+  /**
+   * A plain column identifier, optionally table-qualified: `column` or `table.column`.
+   * Expressions are refused on purpose: identifiers are quoted, never escaped.
+   */
+  private const IDENTIFIER = '/^[A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z_][A-Za-z0-9_]*)?$/';
 
   /**
    * The select columns.
@@ -139,9 +152,6 @@ class QueryBuilder
     $this->wpdb = $wpdb;
     $this->table = DB::getTableName($table, $usePrefix);
     $this->primaryKey = $primaryKey;
-
-    // init
-    $this->getTableDescription();
   }
 
   /*
@@ -161,12 +171,18 @@ class QueryBuilder
   */
 
   /**
-   * Get the table description.
+   * Fetch the table description with a DESC query.
    *
-   * @return void
+   * Do not call this directly: getColumns() caches the result per table for the whole
+   * request, so a Model that instantiates a builder per static call does not pay one
+   * round trip each time.
+   *
+   * @return array<int, array<string, mixed>>
    */
-  protected function getTableDescription()
+  protected function getTableDescription(): array
   {
+    $columns = [];
+
     if (!empty($this->table)) {
       $desc = $this->wpdb->get_results("DESC `{$this->table}`");
 
@@ -192,8 +208,8 @@ class QueryBuilder
        *      )
        */
 
-      foreach ($desc as $column) {
-        $this->columns[] = [
+      foreach ((array) $desc as $column) {
+        $columns[] = [
           'name' => $column->Field,
           'type' => $column->Type,
           'null' => $column->Null,
@@ -225,6 +241,73 @@ class QueryBuilder
        *      )
        */
     }
+
+    return $columns;
+  }
+
+  /**
+   * Return the table description, fetched once per table per request.
+   *
+   * @return array<int, array<string, mixed>> One entry per column: name, type, null, key, default, extra.
+   */
+  public function getColumns(): array
+  {
+    if (empty($this->table)) {
+      return [];
+    }
+
+    if (!array_key_exists($this->table, self::$descriptions)) {
+      self::$descriptions[$this->table] = $this->getTableDescription();
+    }
+
+    return self::$descriptions[$this->table];
+  }
+
+  /**
+   * Quote a column identifier with backticks.
+   *
+   * Only `column` and `table.column` are accepted. Anything else — an expression, a
+   * function call, a semicolon — is refused, because an identifier cannot be escaped,
+   * only validated. Use the dedicated methods (count(), select() with aliases) instead.
+   *
+   * @param mixed $identifier
+   * @throws InvalidArgumentException
+   */
+  private function quoteIdentifier($identifier): string
+  {
+    $identifier = is_scalar($identifier) ? trim((string) $identifier) : '';
+
+    if (!preg_match(self::IDENTIFIER, $identifier)) {
+      throw new InvalidArgumentException(sprintf('Invalid column identifier "%s".', $identifier));
+    }
+
+    return '`' . str_replace('.', '`.`', $identifier) . '`';
+  }
+
+  /**
+   * Quote one entry of a select list: `*`, `table.*`, `column`, `table.column`,
+   * or `column as alias`.
+   *
+   * @param mixed $column
+   * @throws InvalidArgumentException
+   */
+  private function quoteSelectColumn($column): string
+  {
+    $column = is_scalar($column) ? trim((string) $column) : '';
+
+    if ($column === '*') {
+      return '*';
+    }
+
+    if (preg_match('/^([A-Za-z_][A-Za-z0-9_]*)\.\*$/', $column, $m)) {
+      return '`' . $m[1] . '`.*';
+    }
+
+    if (preg_match('/^(\S+)\s+as\s+([A-Za-z_][A-Za-z0-9_]*)$/i', $column, $m)) {
+      return $this->quoteIdentifier($m[1]) . ' AS `' . $m[2] . '`';
+    }
+
+    return $this->quoteIdentifier($column);
   }
 
   /**
@@ -244,9 +327,9 @@ class QueryBuilder
    */
   public function all($columns = ['*'])
   {
-    $columns = $this->select_columns ?: $columns;
+    $columns = $this->select_columns ?: (is_array($columns) ? $columns : func_get_args());
     sort($columns);
-    $column_string = is_array($columns) ? implode(',', $columns) : implode(',', func_get_args());
+    $column_string = implode(',', array_map([$this, 'quoteSelectColumn'], $columns));
 
     $sql =
       "SELECT $column_string " .
@@ -294,15 +377,26 @@ class QueryBuilder
   private function getWhere()
   {
     $where = ' WHERE 1 ';
-    if (!empty($this->wheres)) {
-      foreach ($this->wheres as $where_item) {
-        $boolean = strtoupper($where_item['boolean']);
-        $column = $where_item['column'];
-        $operator = $this->getWhereOperator($where_item['operator']);
-        $value = $this->getWhereValue($where_item['value'], $operator);
 
-        $where .= $boolean . ' ' . $column . ' ' . $operator . ' ' . $value . ' ';
+    foreach ($this->wheres as $where_item) {
+      $boolean = strtoupper($where_item['boolean']);
+      $column = $this->quoteIdentifier($where_item['column']);
+      $operator = $this->getWhereOperator($where_item['operator']);
+      $value = $where_item['value'];
+
+      // whereIn([]) can never match, whereNotIn([]) always does — same as Laravel.
+      if ($value === [] && in_array($operator, ['IN', 'NOT IN'], true)) {
+        $where .= $boolean . ' ' . ($operator === 'IN' ? '0 = 1' : '1 = 1') . ' ';
+        continue;
       }
+
+      // `col = NULL` is never true in SQL; a null value means IS [NOT] NULL.
+      if ($value === null && in_array($operator, ['=', '<>', '!='], true)) {
+        $where .= $boolean . ' ' . $column . ($operator === '=' ? ' IS NULL ' : ' IS NOT NULL ');
+        continue;
+      }
+
+      $where .= $boolean . ' ' . $column . ' ' . $operator . ' ' . $this->getWhereValue($value, $operator) . ' ';
     }
 
     return $where;
@@ -326,22 +420,34 @@ class QueryBuilder
    */
   private function getWhereValue($value, $operator)
   {
-    if (is_array($value) && in_array($operator, ['IN', 'NOT IN'])) {
-      return '(' . implode(',', $value) . ')';
+    if (is_array($value) && in_array($operator, ['IN', 'NOT IN'], true)) {
+      return '(' . implode(',', $this->getFormatValue(array_values($value))) . ')';
     }
 
-    if (is_array($value) && in_array($operator, ['BETWEEN'])) {
-      return implode(' AND ', $this->getFormatValue($value));
+    if (is_array($value) && in_array($operator, ['BETWEEN', 'NOT BETWEEN'], true)) {
+      if (count($value) !== 2) {
+        throw new InvalidArgumentException(sprintf('%s needs exactly two values, %d given.', $operator, count($value)));
+      }
+
+      return implode(' AND ', $this->getFormatValue(array_values($value)));
+    }
+
+    if (is_array($value)) {
+      throw new InvalidArgumentException(sprintf('Operator "%s" does not accept an array value.', $operator));
     }
 
     return $this->getFormatValue($value);
   }
 
   /**
-   * Return the right format for the value.
+   * Return a value as a safe SQL literal.
+   *
+   * Integers, floats and strictly decimal strings are emitted bare; everything else is
+   * escaped through $wpdb->_real_escape() and quoted. Arrays are formatted element by
+   * element.
    *
    * @param mixed $value The value to format.
-   * @return mixed
+   * @return string|string[]
    */
   private function getFormatValue($value)
   {
@@ -351,7 +457,25 @@ class QueryBuilder
       }, $value);
     }
 
-    return is_numeric($value) ? $value : "'" . $value . "'";
+    if ($value === null) {
+      return 'NULL';
+    }
+
+    if (is_bool($value)) {
+      return $value ? '1' : '0';
+    }
+
+    if (is_int($value) || is_float($value)) {
+      return (string) $value;
+    }
+
+    $value = (string) $value;
+
+    if (preg_match('/^-?\d+(?:\.\d+)?$/', $value)) {
+      return $value;
+    }
+
+    return "'" . $this->wpdb->_real_escape($value) . "'";
   }
 
   /**
@@ -449,9 +573,13 @@ class QueryBuilder
    */
   public function orderBy($column, $order = 'asc')
   {
-    $order = strtolower($order);
+    $order = strtolower(trim((string) $order));
 
-    $this->orders[] = [$column, $order];
+    if (!in_array($order, self::DIRECTIONS, true)) {
+      throw new InvalidArgumentException(sprintf('Order direction must be "asc" or "desc", "%s" given.', $order));
+    }
+
+    $this->orders[] = [$this->quoteIdentifier($column), $order];
 
     return $this;
   }
@@ -532,11 +660,19 @@ class QueryBuilder
   {
     if ($useDefault) {
       return [$operator, '='];
-    } elseif ($this->invalidOperatorAndValue($operator, $value)) {
+    }
+
+    $normalized = strtolower(trim((string) $operator));
+
+    if (!in_array($normalized, $this->operators, true)) {
+      throw new InvalidArgumentException(sprintf('Illegal operator "%s".', (string) $operator));
+    }
+
+    if ($this->invalidOperatorAndValue($normalized, $value)) {
       throw new InvalidArgumentException('Illegal operator and value combination.');
     }
 
-    return [$value, $operator];
+    return [$value, $normalized];
   }
 
   /**
@@ -846,8 +982,7 @@ class QueryBuilder
    */
   private function getColumnsAndValues($values): array
   {
-    $columns = array_keys($values);
-    $columns_string = implode(',', $columns);
+    $columns_string = implode(',', array_map([$this, 'quoteIdentifier'], array_keys($values)));
     $values_string = implode(
       ',',
       array_map(function ($value) {
@@ -868,7 +1003,7 @@ class QueryBuilder
     $set = implode(
       ',',
       array_map(function ($key) use ($values) {
-        return "`$key` = " . (is_numeric($values[$key]) ? $values[$key] : "'$values[$key]'");
+        return $this->quoteIdentifier($key) . ' = ' . $this->getFormatValue($values[$key]);
       }, array_keys($values))
     );
 
