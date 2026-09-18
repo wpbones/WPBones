@@ -422,7 +422,7 @@ class Str
    * @param  int|null $length
    * @return string
    */
-  public static function substr(string $string, int $start, int $length = null): string
+  public static function substr(string $string, int $start, ?int $length = null): string
   {
     return mb_substr($string, $start, $length, 'UTF-8');
   }

@@ -33,8 +33,9 @@ final class StrTest extends TestCase
 
   public function test_substr_accepts_a_null_length(): void
   {
-    // Issue #82: the parameter is implicitly nullable; PHP 8.4 deprecates that form.
-    // Passing null explicitly is the call the fix must keep working.
+    // Issue #82: the parameter used to be implicitly nullable (`int $length = null`), which
+    // PHP 8.4 deprecates at compile time. Passing null explicitly is the call that must
+    // keep working now that it is `?int`; failOnDeprecation in phpunit.xml.dist guards it.
     $this->assertSame('ones', Str::substr('Bones', 1, null));
     $this->assertSame('on', Str::substr('Bones', 1, 2));
   }
