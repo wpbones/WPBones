@@ -55,6 +55,19 @@ class QueryBuilder
   private const IDENTIFIER = '/^[A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z_][A-Za-z0-9_]*)?$/';
 
   /**
+   * A table name including the WordPress prefix. WordPress itself limits $table_prefix
+   * to letters, digits and underscores; plugin tables follow the same rule.
+   */
+  private const TABLE = '/^[A-Za-z0-9_]+$/';
+
+  /**
+   * Boolean connectors accepted between where clauses.
+   *
+   * @var string[]
+   */
+  private const BOOLEANS = ['and', 'or'];
+
+  /**
    * The select columns.
    */
   private $select_columns = [];
@@ -150,7 +163,7 @@ class QueryBuilder
     global $wpdb;
 
     $this->wpdb = $wpdb;
-    $this->table = DB::getTableName($table, $usePrefix);
+    $this->table = $this->validateTable(DB::getTableName($table, $usePrefix));
     $this->primaryKey = $primaryKey;
   }
 
@@ -261,6 +274,47 @@ class QueryBuilder
     }
 
     return self::$descriptions[$this->table];
+  }
+
+  /**
+   * Forget every cached table description.
+   *
+   * Needed after a migration changes a table within the same request, and by tests.
+   */
+  public static function flushDescriptionCache(): void
+  {
+    self::$descriptions = [];
+  }
+
+  /**
+   * Refuse a table name that could not be interpolated safely inside backticks.
+   *
+   * @throws InvalidArgumentException
+   */
+  private function validateTable(string $table): string
+  {
+    if (!preg_match(self::TABLE, $table)) {
+      throw new InvalidArgumentException(sprintf('Invalid table name "%s".', $table));
+    }
+
+    return $table;
+  }
+
+  /**
+   * Normalize the connector between where clauses to `and` or `or`; refuse anything else.
+   *
+   * @param mixed $boolean
+   * @throws InvalidArgumentException
+   */
+  private function normalizeBoolean($boolean): string
+  {
+    $normalized = is_scalar($boolean) ? strtolower(trim((string) $boolean)) : '';
+
+    if (!in_array($normalized, self::BOOLEANS, true)) {
+      throw new InvalidArgumentException(sprintf('Boolean connector must be "and" or "or", "%s" given.', is_scalar($boolean) ? (string) $boolean : gettype($boolean)));
+    }
+
+    return $normalized;
   }
 
   /**
@@ -379,7 +433,7 @@ class QueryBuilder
     $where = ' WHERE 1 ';
 
     foreach ($this->wheres as $where_item) {
-      $boolean = strtoupper($where_item['boolean']);
+      $boolean = strtoupper($this->normalizeBoolean($where_item['boolean']));
       $column = $this->quoteIdentifier($where_item['column']);
       $operator = $this->getWhereOperator($where_item['operator']);
       $value = $where_item['value'];
@@ -1067,7 +1121,7 @@ class QueryBuilder
    */
   public function setTable($table)
   {
-    $this->table = $table;
+    $this->table = $this->validateTable(is_scalar($table) ? (string) $table : '');
   }
 
   public function getParentModel()

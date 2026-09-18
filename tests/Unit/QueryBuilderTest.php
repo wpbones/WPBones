@@ -18,9 +18,10 @@ final class QueryBuilderTest extends TestCase
     $this->wpdb = $GLOBALS['wpdb'];
     $this->wpdb->reset();
     $this->wpdb->prefix = 'wp_';
+    QueryBuilder::flushDescriptionCache();
   }
 
-  // ---------------------------------------------------------------- table description
+  // ---------------------------------------------------------------- table
 
   public function test_constructor_runs_no_query(): void
   {
@@ -31,11 +32,37 @@ final class QueryBuilderTest extends TestCase
 
   public function test_columns_are_described_once_per_table_per_request(): void
   {
-    // A table no other test describes, so the per-request cache starts empty here.
-    (new QueryBuilder('described_table'))->getColumns();
-    (new QueryBuilder('described_table'))->getColumns();
+    (new QueryBuilder('posts'))->getColumns();
+    (new QueryBuilder('posts'))->getColumns();
 
-    $this->assertSame(['DESC `wp_described_table`'], $this->wpdb->queries);
+    $this->assertSame(['DESC `wp_posts`'], $this->wpdb->queries);
+  }
+
+  public function test_flushing_the_description_cache_describes_again(): void
+  {
+    (new QueryBuilder('posts'))->getColumns();
+    QueryBuilder::flushDescriptionCache();
+    (new QueryBuilder('posts'))->getColumns();
+
+    $this->assertCount(2, $this->wpdb->queries);
+  }
+
+  public function test_constructor_refuses_a_table_name_that_is_not_an_identifier(): void
+  {
+    $this->expectException(InvalidArgumentException::class);
+    $this->expectExceptionMessage('Invalid table name');
+
+    new QueryBuilder('posts` WHERE 1; --');
+  }
+
+  public function test_set_table_accepts_a_prefixed_name_and_refuses_anything_else(): void
+  {
+    $builder = new QueryBuilder('posts');
+    $builder->setTable('wp_custom_table');
+    $this->assertSame('wp_custom_table', $builder->getTable());
+
+    $this->expectException(InvalidArgumentException::class);
+    $builder->setTable('wp_x`; DROP TABLE wp_posts; --');
   }
 
   // ---------------------------------------------------------------- select
@@ -180,6 +207,23 @@ final class QueryBuilderTest extends TestCase
     (new QueryBuilder('users'))->where('display_name', 'LIKE', 'T%')->get();
 
     $this->assertStringContainsString("`display_name` like 'T%' ", $this->wpdb->last());
+  }
+
+  public function test_where_boolean_connector_accepts_and_or_in_any_case(): void
+  {
+    (new QueryBuilder('posts'))->where('ID', '=', 1, 'OR')->whereIn('post_type', ['page'], 'And')->get();
+
+    $this->assertStringContainsString("WHERE 1 OR `ID` = 1 AND `post_type` IN ('page') ", $this->wpdb->last());
+  }
+
+  public function test_where_boolean_connector_refuses_anything_else(): void
+  {
+    // Found by review: the fourth argument used to be interpolated verbatim, so
+    // where('id', '=', 1, 'OR 1=1 #')->delete() would have emptied the table.
+    $this->expectException(InvalidArgumentException::class);
+    $this->expectExceptionMessage('Boolean connector must be "and" or "or"');
+
+    (new QueryBuilder('posts'))->where('ID', '=', 1, 'OR 1=1 #')->delete();
   }
 
   public function test_order_by_quotes_the_column_and_keeps_the_direction(): void
