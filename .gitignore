@@ -5,3 +5,8 @@ vendor/
 
 # Announcement post (local only)
 POST.md
+
+# Tests: library, no lockfile; local PHPUnit overrides and cache stay out
+/composer.lock
+/phpunit.xml
+/.phpunit.cache/
