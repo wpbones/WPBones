@@ -63,6 +63,12 @@ final class WpdbSpy
     return is_scalar($value) ? addslashes((string) $value) : '';
   }
 
+  /** What Migration reads in its constructor; not a query, so not recorded. */
+  public function get_charset_collate(): string
+  {
+    return 'DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_520_ci';
+  }
+
   public function reset(): void
   {
     $this->queries = [];

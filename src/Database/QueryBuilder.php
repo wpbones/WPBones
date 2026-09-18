@@ -55,12 +55,6 @@ class QueryBuilder
   private const IDENTIFIER = '/^[A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z_][A-Za-z0-9_]*)?$/D';
 
   /**
-   * A table name including the WordPress prefix. WordPress itself limits $table_prefix
-   * to letters, digits and underscores; plugin tables follow the same rule.
-   */
-  private const TABLE = '/^[A-Za-z0-9_]+$/D';
-
-  /**
    * A value that can be emitted bare as a numeric literal: an optional sign, digits,
    * an optional decimal part, nothing else (the D modifier refuses a trailing newline).
    */
@@ -294,18 +288,13 @@ class QueryBuilder
 
   /**
    * Refuse a table name that could not be interpolated safely inside backticks.
+   * The rule lives in DB::assertTableName(), shared with Seeder and Migration.
    *
    * @throws InvalidArgumentException
    */
   private function validateTable(string $table): string
   {
-    $table = trim($table);
-
-    if (!preg_match(self::TABLE, $table)) {
-      throw new InvalidArgumentException(sprintf('Invalid table name "%s".', $table));
-    }
-
-    return $table;
+    return DB::assertTableName($table);
   }
 
   /**

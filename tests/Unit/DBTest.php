@@ -65,4 +65,24 @@ final class DBTest extends TestCase
     $this->assertSame('qgQezmtYw_mytable', DB::getTableName('qgQezmtYw_mytable'));
     $this->assertSame('qgQezmtYw_my_plugin_books', DB::getTableName('WPKirk\\Models\\MyPluginBooks'));
   }
+
+  public function test_assert_table_name_accepts_letters_digits_and_underscores_and_trims(): void
+  {
+    $this->assertSame('wp_2_posts', DB::assertTableName('wp_2_posts'));
+    $this->assertSame('qgQezmtYw_mytable', DB::assertTableName(" qgQezmtYw_mytable\n"));
+  }
+
+  public function test_assert_table_name_refuses_anything_else(): void
+  {
+    foreach (['wp_x`; DROP TABLE wp_posts; --', 'db.table', 'wp-posts', '', 'wp posts'] as $bad) {
+      try {
+        DB::assertTableName($bad);
+      } catch (\InvalidArgumentException $e) {
+        $this->assertStringContainsString('Invalid table name', $e->getMessage());
+        continue;
+      }
+
+      $this->fail(sprintf('"%s" was accepted as a table name', $bad));
+    }
+  }
 }

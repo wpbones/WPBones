@@ -40,7 +40,8 @@ class Migration
 
     protected function create($tablename, $schema)
     {
-        $table = DB::getTableName($tablename, $this->usePrefix);
+        // Validated before anything reaches dbDelta(): the name is interpolated into SQL.
+        $table = DB::assertTableName(DB::getTableName($tablename, $this->usePrefix));
 
         $sql = "CREATE TABLE {$table} {$schema}";
 

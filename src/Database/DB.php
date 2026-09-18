@@ -127,6 +127,28 @@ class DB
     return $prefix !== '' && Str::startsWith($name, $prefix) ? $name : $prefix . $name;
   }
 
+  /**
+   * Refuse a table name that cannot be interpolated into SQL safely.
+   *
+   * WordPress limits $table_prefix to letters, digits and underscores, and plugin
+   * tables follow the same rule; an identifier can only be validated, not escaped.
+   * Shared by the QueryBuilder, Seeder and Migration.
+   *
+   * @param string $table The final table name, prefix included.
+   * @return string The trimmed name.
+   * @throws \InvalidArgumentException
+   */
+  public static function assertTableName(string $table): string
+  {
+    $table = trim($table);
+
+    if (!preg_match('/^[A-Za-z0-9_]+$/D', $table)) {
+      throw new \InvalidArgumentException(sprintf('Invalid table name "%s".', $table));
+    }
+
+    return $table;
+  }
+
   /*
   |--------------------------------------------------------------------------
   | Getter and setter
