@@ -57,7 +57,8 @@ abstract class Seeder
       throw new Exception('The tablename property is not set.');
     }
 
-    $this->tablename = DB::getTableName($this->tablename, $this->usePrefix);
+    // The name is interpolated into SQL below: refuse anything but a plain identifier.
+    $this->tablename = DB::assertTableName(DB::getTableName($this->tablename, $this->usePrefix));
 
     if ($this->runOnce && $this->count() > 0) {
       return;
@@ -73,7 +74,7 @@ abstract class Seeder
    */
   protected function count(): int
   {
-    return (int) $this->wpdb->get_var("SELECT COUNT(*) FROM {$this->tablename}");
+    return (int) $this->wpdb->get_var("SELECT COUNT(*) FROM `{$this->tablename}`");
   }
 
   /**
@@ -111,11 +112,11 @@ abstract class Seeder
   protected function truncate($tablename = '')
   {
     if (empty($tablename)) {
-      return $this->wpdb->query("TRUNCATE TABLE {$this->tablename}");
+      return $this->wpdb->query("TRUNCATE TABLE `{$this->tablename}`");
     }
 
-    $table = DB::getTableName($tablename);
+    $table = DB::assertTableName(DB::getTableName($tablename));
 
-    return $this->wpdb->query("TRUNCATE TABLE {$table}");
+    return $this->wpdb->query("TRUNCATE TABLE `{$table}`");
   }
 }

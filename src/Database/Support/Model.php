@@ -54,7 +54,16 @@ class Model
    */
   protected function newQueryBuilder()
   {
-    return new QueryBuilder($this->queryBuilder->getTable(), $this->queryBuilder->getPrimaryKey());
+    // getTable() is already the final name — prefixed, or deliberately unprefixed when
+    // the row came from DB::tableWithoutPrefix(). Passing it back through the prefix
+    // logic used to add the prefix a second time on save()/delete(), so the builder is
+    // created without prefix handling and given the name verbatim.
+    $table = $this->queryBuilder->getTable();
+
+    $builder = new QueryBuilder($table, $this->queryBuilder->getPrimaryKey(), false);
+    $builder->setTable($table);
+
+    return $builder;
   }
 
   /**
