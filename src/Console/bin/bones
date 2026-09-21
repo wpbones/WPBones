@@ -2247,7 +2247,7 @@ namespace Bones {
 
         if (strtolower($answer) === 'y') {
           $this->startProgress("Build for production by using '{$packageManager} run build'");
-          shell_exec("{$packageManager} run build");
+          $this->runBuild($packageManager);
           $this->processCompleted("Build completed\n");
           $this->do_action('wpbones_console_deploy_after_build_assets', $this, $path);
         } else {
@@ -2256,7 +2256,7 @@ namespace Bones {
             $this->info('⏭︎ Skip build assets');
           } else {
             $this->startProgress("Build for production by using '{$answer} run build'");
-            shell_exec("{$answer} run build");
+            $this->runBuild($answer);
             $this->endProgress();
             $this->do_action('wpbones_console_deploy_after_build_assets', $this, $path);
           }
@@ -2264,6 +2264,43 @@ namespace Bones {
       } else {
         $this->warning('No package manager found. The build assets will be skipped');
       }
+    }
+
+    /**
+     * Run the production build and abort the deploy if it fails.
+     *
+     * This used to be a bare shell_exec(), which returns stdout and drops the exit
+     * status on the floor. A build that failed still printed "Build completed", the
+     * deploy went on to package whatever happened to be sitting in public/, and the
+     * command exited 0 — so a broken release looked exactly like a good one. Aborting
+     * is the right answer rather than warning: everything after this point copies the
+     * build output into the release package.
+     *
+     * @since 2.0.6
+     * @param string $packageManager The package manager used to run the build.
+     *
+     * @return void
+     */
+    protected function runBuild($packageManager)
+    {
+      $output = [];
+      $status = 0;
+
+      exec("{$packageManager} run build 2>&1", $output, $status);
+
+      if ($status === 0) {
+        return;
+      }
+
+      $this->error("\nBuild failed: '{$packageManager} run build' exited with status {$status}.");
+
+      foreach (array_slice($output, -20) as $line) {
+        $this->line('   ' . $line);
+      }
+
+      $this->error('Deploy aborted: the package would have shipped whatever was already in public/.');
+
+      exit(1);
     }
 
     /**
