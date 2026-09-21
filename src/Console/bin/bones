@@ -2672,12 +2672,62 @@ namespace Bones {
 
         file_put_contents($mainPluginFilename, $new_index_php_content);
 
+        // The asset pipeline keeps its own copy of the version. Without these the
+        // command reported success while package.json silently drifted behind.
+        $this->updateJsonVersion('package.json', (string) $version, 1);
+        $this->updateJsonVersion('package-lock.json', (string) $version, 2);
+
         $this->processCompleted("Version updated to {$version}");
 
         return;
       }
 
       $this->warning("Version is already {$version}");
+    }
+
+    /**
+     * Update the plugin's own "version" entries in a JSON file, leaving the rest alone.
+     *
+     * package.json has one; a package-lock.json has two, `version` at the top and
+     * `packages[""].version`, and then one for every installed dependency. Everything
+     * from the first "node_modules/" key on is the dependency tree and must not move,
+     * so the replacement only ever looks at the text before it.
+     *
+     * The file is edited as text rather than decoded and re-encoded: npm writes two
+     * space indentation and PHP's JSON_PRETTY_PRINT writes four, so a round trip would
+     * rewrite every line of the file to change one number.
+     *
+     * @since 2.0.6
+     * @param string $filename The file to update, relative to the plugin root.
+     * @param string $version  The new version.
+     * @param int    $limit    How many entries to replace at most.
+     *
+     * @return void
+     */
+    protected function updateJsonVersion($filename, $version, $limit)
+    {
+      if (!file_exists($filename)) {
+        return;
+      }
+
+      $content = file_get_contents($filename);
+
+      $boundary = strpos($content, '"node_modules/');
+      $head = $boundary === false ? $content : substr($content, 0, $boundary);
+      $tail = $boundary === false ? '' : substr($content, $boundary);
+
+      $count = 0;
+      $head = preg_replace('/("version"\s*:\s*")[^"]*(")/', '${1}' . $version . '${2}', $head, $limit, $count);
+
+      if ($count === 0) {
+        $this->warning("→ {$filename} has no \"version\" entry, left as it is");
+
+        return;
+      }
+
+      file_put_contents($filename, $head . $tail);
+
+      $this->info("→ {$filename} > {$version} (" . $count . ($count === 1 ? ' entry)' : ' entries)'));
     }
 
     /**
