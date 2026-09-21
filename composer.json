@@ -36,7 +36,8 @@
     "eftec/bladeone": "^4.13"
   },
   "require-dev": {
-    "phpunit/phpunit": "^10.5 || ^11.0"
+    "phpunit/phpunit": "^10.5 || ^11.0",
+    "brain/monkey": "^2.7"
   },
   "scripts": {
     "test": "phpunit --exclude-group known-defect",

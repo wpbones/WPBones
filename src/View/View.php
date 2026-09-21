@@ -62,6 +62,17 @@ class View
   protected AssetManager $adminAppsAssets;
 
   /**
+   * Admin localize/inline calls waiting to be routed to an asset manager.
+   *
+   * The handle they attach to may be registered after they are declared, so the
+   * destination cannot be decided when the method is called — only when the enqueue
+   * hook runs. Each entry is [type, arguments].
+   *
+   * @var array
+   */
+  protected array $pendingAdminAssets = [];
+
+  /**
    * BladeOne instance for template rendering.
    *
    * @var BladeOne
@@ -301,11 +312,7 @@ class View
   public function withLocalizeScript($handle, $name, $l10n): View
   {
     if (is_admin()) {
-      if ($this->adminAppsAssetsHasHandle($handle)) {
-        $this->adminAppsAssets->addLocalizeScript($handle, $name, $l10n);
-      } else {
-        $this->adminAssets->addLocalizeScript($handle, $name, $l10n);
-      }
+      $this->pendingAdminAssets[] = ['localizeScript', [$handle, $name, $l10n]];
     } else {
       $this->frontendAssets->addLocalizeScript($handle, $name, $l10n);
     }
@@ -343,14 +350,7 @@ class View
   public function withInlineScript($name, $data, $position = 'after'): View
   {
     if (is_admin()) {
-      // Route to the asset manager that owns the handle so wp_add_inline_script()
-      // runs after the matching wp_enqueue_script() — otherwise the handle is
-      // unknown and WordPress silently drops the inline script.
-      if ($this->adminAppsAssetsHasHandle($name)) {
-        $this->adminAppsAssets->addInlineScript($name, $data, $position);
-      } else {
-        $this->adminAssets->addInlineScript($name, $data, $position);
-      }
+      $this->pendingAdminAssets[] = ['inlineScript', [$name, $data, $position]];
     } else {
       $this->frontendAssets->addInlineScript($name, $data, $position);
     }
@@ -369,6 +369,67 @@ class View
   }
 
   /**
+   * Whether an admin apps stylesheet was registered under this handle.
+   *
+   * @param string $name The style handle.
+   *
+   * @return bool
+   */
+  protected function adminAppsAssetsHasStyleHandle(string $name): bool
+  {
+    foreach ($this->adminAppsAssets->getStyles() as $style) {
+      if (($style['name'] ?? null) === $name) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Send every staged localize/inline call to the asset manager that owns its handle.
+   *
+   * Routing has to happen here rather than in the fluent methods: the chain is read
+   * left to right, so a payload is often described before the script it belongs to is
+   * declared, and at that moment the apps manager knows nothing about the handle. Put
+   * in the wrong manager, wp_localize_script() and wp_add_inline_script() run before
+   * the matching wp_enqueue_script() and WordPress discards them in silence.
+   *
+   * Called from both admin hooks and safe to call twice — the queue is drained first.
+   *
+   * @return void
+   */
+  protected function resolvePendingAdminAssets(): void
+  {
+    if ($this->pendingAdminAssets === []) {
+      return;
+    }
+
+    $pending = $this->pendingAdminAssets;
+    $this->pendingAdminAssets = [];
+
+    foreach ($pending as [$type, $arguments]) {
+      $handle = $arguments[0];
+
+      switch ($type) {
+        case 'localizeScript':
+          $manager = $this->adminAppsAssetsHasHandle($handle) ? $this->adminAppsAssets : $this->adminAssets;
+          $manager->addLocalizeScript(...$arguments);
+          break;
+
+        case 'inlineScript':
+          $manager = $this->adminAppsAssetsHasHandle($handle) ? $this->adminAppsAssets : $this->adminAssets;
+          $manager->addInlineScript(...$arguments);
+          break;
+
+        case 'inlineStyle':
+          $manager = $this->adminAppsAssetsHasStyleHandle($handle) ? $this->adminAppsAssets : $this->adminAssets;
+          $manager->addInlineStyle(...$arguments);
+          break;
+      }
+    }
+  }
+
+  /**
    * Add extra style to a registered stylesheet.
    *
    * @param string $name The style handle to attach inline style to.
@@ -379,7 +440,7 @@ class View
   public function withInlineStyle($name, $data): View
   {
     if (is_admin()) {
-      $this->adminAssets->addInlineStyle($name, $data);
+      $this->pendingAdminAssets[] = ['inlineStyle', [$name, $data]];
     } else {
       $this->frontendAssets->addInlineStyle($name, $data);
     }
@@ -619,6 +680,8 @@ class View
    */
   protected function admin_enqueue_scripts()
   {
+    $this->resolvePendingAdminAssets();
+
     // Use new asset managers
     if ($this->adminAssets->hasScripts() || $this->adminAssets->hasLocalizeScripts() || $this->adminAssets->hasInlineScripts()) {
       $enqueuer = new AdminAssetEnqueuer($this->container, $this->adminAssets);
@@ -675,6 +738,8 @@ class View
    */
   protected function admin_print_styles()
   {
+    $this->resolvePendingAdminAssets();
+
     // Use new asset managers
     if ($this->adminAssets->hasStyles() || $this->adminAssets->hasInlineStyles()) {
       $enqueuer = new AdminAssetEnqueuer($this->container, $this->adminAssets);
