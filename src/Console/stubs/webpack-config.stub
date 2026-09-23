@@ -21,6 +21,27 @@ const defaultConfig = require('@wordpress/scripts/config/webpack.config');
  */
 const IGNORE_DECLARATIONS = { ignore: '**/*.d.ts' };
 
+/**
+ * `@wordpress/scripts` ships loader rules for `.css` and `.scss`/`.sass` only, so a `.less` entry
+ * found below failed with "You may need an appropriate loader". This rule reuses the loaders of
+ * the scss rule (CSS extraction, css-loader, PostCSS) with `less-loader` in place of
+ * `sass-loader`, so LESS output is minified and gets its `-rtl.css` like SCSS does.
+ */
+const sassRule = defaultConfig.module.rules.find((rule) => rule.test instanceof RegExp && rule.test.test('.scss'));
+if (!sassRule) {
+  throw new Error('webpack.config.js: no .scss rule in the @wordpress/scripts config to build the .less rule from.');
+}
+const lessRule = {
+  test: /\.less$/,
+  use: [
+    ...sassRule.use.filter((loader) => !String(loader.loader ?? loader).includes('sass-loader')),
+    {
+      loader: require.resolve('less-loader'),
+      options: { sourceMap: defaultConfig.mode !== 'production' },
+    },
+  ],
+};
+
 function autoEntries() {
   const entries = {};
 
@@ -54,6 +75,10 @@ function autoEntries() {
 module.exports = {
   ...defaultConfig,
   entry: autoEntries(),
+  module: {
+    ...defaultConfig.module,
+    rules: [...defaultConfig.module.rules, lessRule],
+  },
   output: {
     ...defaultConfig.output,
     path: path.resolve(__dirname, 'public'),
