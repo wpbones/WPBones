@@ -45,3 +45,7 @@
 >  - [WP Bones community on Discord](https://discord.gg/5bdVyycU8F)
 >  - [WP Bones GitHub Discussion](https://github.com/wpbones/WPBones/discussions)
 >  - [WP Bones GitHub Roadmap](https://github.com/orgs/wpbones/projects/4)
+
+## License
+
+WP Bones is licensed under the [LGPL-3.0-or-later](LICENSE). The LGPL is written as a set of additional permissions on top of the GNU GPL version 3, so the GPL text ships beside it in [COPYING](COPYING).
