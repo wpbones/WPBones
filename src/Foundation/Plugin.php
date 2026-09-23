@@ -89,6 +89,17 @@ class Plugin extends Container implements PluginContract
   }
 
   /**
+   * The instance Plugin::boot() registered, or null before bootstrap/plugin.php has run.
+   *
+   * Code that runs after WordPress has loaded the plugin, such as a bones console command,
+   * reaches the existing instance through this instead of building a second one.
+   */
+  public static function getInstance(): ?Plugin
+  {
+    return static::$instance;
+  }
+
+  /**
    * Boot the plugin.
    *
    * @access private

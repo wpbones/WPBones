@@ -2,6 +2,7 @@
 
 namespace WPKirk\WPBones\Console;
 
+use WPKirk\WPBones\Foundation\Plugin;
 use WPKirk\WPBones\Support\Traits\HasAttributes;
 
 // Standard Color Definitions
@@ -72,13 +73,6 @@ abstract class Command
    * @var mixed
    */
   protected $plugin = null;
-
-  /**
-   * Whether bootstrap/plugin.php has already been executed.
-   *
-   * @var bool
-   */
-  protected bool $pluginBootstrapExecuted = false;
 
   /**
    *
@@ -354,10 +348,13 @@ abstract class Command
        * Load this plugin env
        * --------------------------------------------------------------------------
        */
-      if (!$this->pluginBootstrapExecuted && file_exists($currentDir . '/bootstrap/plugin.php')) {
-        $plugin = require $currentDir . '/bootstrap/plugin.php';
-        $this->pluginBootstrapExecuted = true;
-        $this->setPluginAttribute($plugin);
+      if (file_exists($currentDir . '/bootstrap/plugin.php')) {
+        // require_once, not require: when the plugin is active, WordPress has already run
+        // bootstrap/plugin.php, and running it again would build a second Plugin and fire
+        // "<slug>_loaded" twice. Either way the instance to use is the one Plugin::boot()
+        // registered.
+        require_once $currentDir . '/bootstrap/plugin.php';
+        $this->setPluginAttribute(Plugin::getInstance());
       }
     } catch (\Exception $e) {
       $this->error("Error! Can't load the plugin env (" . $e->getMessage() . ')');
