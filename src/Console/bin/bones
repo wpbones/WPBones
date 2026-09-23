@@ -3737,10 +3737,13 @@ namespace Bones {
             ksort($pkg['dependencies']);
           }
 
-          file_put_contents(
-            'package.json',
-            json_encode($pkg, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . "\n"
-          );
+          // npm and yarn indent package.json with two spaces; JSON_PRETTY_PRINT writes four, which
+          // turned the migration into a whole-file diff. Halve the leading indentation back.
+          $json = json_encode($pkg, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+          $json = preg_replace_callback('/^(?: {4})+/m', function ($match) {
+            return str_repeat('  ', strlen($match[0]) / 4);
+          }, $json);
+          file_put_contents('package.json', $json . "\n");
           $this->line(' Rewrote package.json');
         }
       }
@@ -3751,7 +3754,7 @@ namespace Bones {
       $testCmd    = $this->packageManagerCommand($projectPm, 'test');
 
       $this->line('');
-      $this->success('✅ Migration to v2 complete.');
+      $this->success('Migration to v2 complete.');
       $this->line('');
       $this->info("Next steps ({$projectPm}):");
       $this->line(" 1. {$installCmd}");
