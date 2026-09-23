@@ -2003,6 +2003,9 @@ namespace Bones {
       // Check if there is '--keep-ignored' in the arguments array.
       $keep_ignored = in_array('--keep-ignored', $argv, true);
 
+      // Check if there is '--keep-dev' in the arguments array.
+      $keep_dev = in_array('--keep-dev', $argv, true);
+
       // Check if there is '--pkgm=<package-manager>' in the arguments array,
       // and get the <package-manager> name.
       $package_name = $this->getOptionValue($argv, '--pkgm=');
@@ -2014,6 +2017,7 @@ namespace Bones {
         '--create-zip',
         '--no-build',
         '--keep-ignored',
+        '--keep-dev',
         '--pkgm=' . $package_name,
       ]);
 
@@ -2038,6 +2042,9 @@ namespace Bones {
         $this->info(
           "  --keep-ignored\t\tPackages files that git ignores as well (they are left out by default).",
         );
+        $this->info(
+          "  --keep-dev\t\t\tPackages Composer's require-dev packages as well (they are removed by default).",
+        );
         exit(0);
       }
 
@@ -2048,14 +2055,16 @@ namespace Bones {
         exit(1);
       }
 
-      $this->do_action('wpbones_console_deploy_start', $this, $path);
-
-      // Alternative method to customize the deployment.
+      // Alternative method to customize the deployment. It is included BEFORE the first hook fires:
+      // until 2.0.6 wpbones_console_deploy_start ran first, so a deploy.php callback for it was
+      // registered after the action and never ran.
       if ($this->wpLoaded) {
         @include 'deploy.php';
       } else {
         $this->warning('This plugin looks like is not inside a WordPress. The "deploy.php" won\'t be use');
       }
+
+      $this->do_action('wpbones_console_deploy_start', $this, $path);
 
       /**
        * Filter the list of files and folders that won't be skipped during the deployment.
@@ -2173,6 +2182,10 @@ namespace Bones {
       $this->startProgress("Copying to 📁 {$path}");
       $this->xcopy(__DIR__, $path);
       $this->endProgress();
+
+      if (!$keep_dev) {
+        $this->pruneDevPackages($path);
+      }
 
       /**
        * Fires when the console deploy is completed.
@@ -2449,6 +2462,101 @@ namespace Bones {
       }
 
       return array_values(array_unique($entries));
+    }
+
+    /**
+     * Remove Composer's require-dev packages from the deployed copy.
+     *
+     * The deploy copies vendor/ as it is on disk, and a working copy normally has the dev tree
+     * installed (PHPUnit, Brain Monkey, ...): 2.0.6 shipped all of it unless the plugin ran
+     * `composer install --no-dev` itself. The source directory is never touched: Composer runs in
+     * the copy, with --no-scripts (post-autoload-dump would copy bones and rename namespaces again)
+     * and --no-plugins, against the plugin's own composer.lock. Nothing happens when installed.json
+     * lists no dev package, i.e. when the dev tree is not installed or there is none.
+     */
+    protected function pruneDevPackages(string $path): void
+    {
+      $installed = __DIR__ . '/vendor/composer/installed.json';
+
+      if (!is_file($installed)) {
+        return;
+      }
+
+      $data = json_decode((string) file_get_contents($installed), true);
+      $dev = is_array($data) ? $data['dev-package-names'] ?? [] : [];
+
+      if (empty($dev)) {
+        return;
+      }
+
+      $list = implode(', ', $dev);
+
+      if (!is_file(__DIR__ . '/composer.lock')) {
+        $this->error(
+          "The package would ship Composer's dev packages ({$list}) and there is no composer.lock to remove them against. Run `composer install --no-dev` before deploying, or pass --keep-dev.",
+        );
+        exit(1);
+      }
+
+      $composer = $this->composerCommand();
+
+      if ($composer === null) {
+        $this->error(
+          "The package would ship Composer's dev packages ({$list}) and Composer was not found to remove them. Install Composer, or pass --keep-dev.",
+        );
+        exit(1);
+      }
+
+      // The copy needs composer.json and composer.lock to be pruned; they stay only if they were
+      // deployed anyway (--wp).
+      $added = [];
+      foreach (['composer.json', 'composer.lock'] as $file) {
+        if (!is_file("{$path}/{$file}")) {
+          copy(__DIR__ . "/{$file}", "{$path}/{$file}");
+          $added[] = "{$path}/{$file}";
+        }
+      }
+
+      $this->startProgress('Removing ' . count($dev) . " Composer dev package(s) from the package: {$list}");
+      exec(
+        $composer .
+          ' install --no-dev --no-scripts --no-plugins --no-interaction --no-progress --optimize-autoloader --working-dir=' .
+          escapeshellarg($path) .
+          ' 2>&1',
+        $output,
+        $status,
+      );
+      $this->endProgress();
+
+      foreach ($added as $file) {
+        unlink($file);
+      }
+
+      if ($status !== 0) {
+        $this->error("`composer install --no-dev` failed in the package, which still holds the dev packages:\n" . implode("\n", $output));
+        exit(1);
+      }
+    }
+
+    /**
+     * The command that runs Composer: a composer.phar in the plugin root, else `composer` on PATH.
+     */
+    protected function composerCommand(): ?string
+    {
+      if (is_file(__DIR__ . '/composer.phar')) {
+        return escapeshellarg(PHP_BINARY) . ' ' . escapeshellarg(__DIR__ . '/composer.phar');
+      }
+
+      // `command -v` is POSIX. cmd.exe has `where`, which lists every match — the extensionless
+      // shell script of the Composer installer before composer.bat — so on Windows it only proves
+      // Composer is on PATH, and the bare name lets cmd.exe pick composer.bat through PATHEXT.
+      if (PHP_OS_FAMILY === 'Windows') {
+        return trim((string) shell_exec('where composer 2>NUL')) !== '' ? 'composer' : null;
+      }
+
+      $found = trim((string) shell_exec('command -v composer 2>/dev/null'));
+
+      return $found !== '' ? escapeshellarg($found) : null;
     }
 
     protected function skip(string $value): bool
