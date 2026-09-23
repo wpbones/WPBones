@@ -21,6 +21,20 @@ class Kernel
     return !empty($this->instances);
   }
 
+  /**
+   * Inject the plugin instance into all registered command instances.
+   *
+   * @param mixed $plugin
+   */
+  public function setPlugin($plugin): void
+  {
+    foreach ($this->instances as $commands) {
+      foreach ($commands as $command) {
+        $command->plugin = $plugin;
+      }
+    }
+  }
+
   public function handle($argv)
   {
     // wpkirk:sample
