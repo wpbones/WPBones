@@ -27,7 +27,8 @@ final class DeployDevPackagesTest extends TestCase
   {
     parent::setUp();
 
-    if (trim((string) shell_exec('command -v composer 2>/dev/null')) === '') {
+    $lookup = PHP_OS_FAMILY === 'Windows' ? 'where composer 2>NUL' : 'command -v composer 2>/dev/null';
+    if (trim((string) shell_exec($lookup)) === '') {
       $this->markTestSkipped('composer is not available');
     }
 

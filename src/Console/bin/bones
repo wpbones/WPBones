@@ -2547,6 +2547,13 @@ namespace Bones {
         return escapeshellarg(PHP_BINARY) . ' ' . escapeshellarg(__DIR__ . '/composer.phar');
       }
 
+      // `command -v` is POSIX. cmd.exe has `where`, which lists every match — the extensionless
+      // shell script of the Composer installer before composer.bat — so on Windows it only proves
+      // Composer is on PATH, and the bare name lets cmd.exe pick composer.bat through PATHEXT.
+      if (PHP_OS_FAMILY === 'Windows') {
+        return trim((string) shell_exec('where composer 2>NUL')) !== '' ? 'composer' : null;
+      }
+
       $found = trim((string) shell_exec('command -v composer 2>/dev/null'));
 
       return $found !== '' ? escapeshellarg($found) : null;
