@@ -115,6 +115,27 @@ final class VersionCommandTest extends TestCase
     $this->assertSame('1.0.0', $package['dependencies']['left-pad'], 'a dependency constraint was rewritten');
   }
 
+  /**
+   * Issue #102: a lockfile v1 (npm 6) has no "node_modules/" keys, so the boundary that
+   * protects the dependency tree found nothing and the second replacement landed on the
+   * first dependency's version.
+   */
+  public function test_a_v1_lockfile_keeps_its_first_dependency(): void
+  {
+    file_put_contents(
+      $this->fixture . '/package-lock.json',
+      "{\n  \"name\": \"fixture\",\n  \"version\": \"1.0.0\",\n  \"lockfileVersion\": 1,\n  \"requires\": true,\n  \"dependencies\": {\n    \"left-pad\": {\n      \"version\": \"1.3.0\",\n      \"resolved\": \"https://registry.npmjs.org/left-pad/-/left-pad-1.3.0.tgz\"\n    }\n  }\n}\n"
+    );
+
+    [, $output] = $this->bones('version', '1.2.3');
+
+    $lock = json_decode($this->read('package-lock.json'), true);
+
+    $this->assertSame('1.2.3', $lock['version'], $output);
+    $this->assertSame('1.3.0', $lock['dependencies']['left-pad']['version'], 'a dependency was rewritten');
+    $this->assertStringContainsString('package-lock.json > 1.2.3 (1 entry)', $output);
+  }
+
   public function test_it_names_the_files_it_changed(): void
   {
     [, $output] = $this->bones('version', '1.2.3');
