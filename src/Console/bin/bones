@@ -1030,12 +1030,18 @@ namespace Bones {
      */
     protected function resolvePath(string $path): string
     {
+      // On Windows "\foo" is the root of the current drive, not a path without one: give it the
+      // drive, or it compares as a folder that contains nothing (Codex review of #111).
+      if (PHP_OS_FAMILY === 'Windows' && preg_match('#^[\\\\/](?![\\\\/])#', $path)) {
+        $path = substr((string) getcwd(), 0, 2) . $path;
+      }
+
       if (!preg_match('#^([A-Za-z]:)?[\\\\/]#', $path)) {
         $path = getcwd() . DIRECTORY_SEPARATOR . $path;
       }
 
       $segments = preg_split('#[\\\\/]+#', $path, -1, PREG_SPLIT_NO_EMPTY);
-      $drive = isset($segments[0]) && preg_match('/^[A-Za-z]:$/', $segments[0]) ? array_shift($segments) : '';
+      $drive = isset($segments[0]) && preg_match('/^[A-Za-z]:$/', $segments[0]) ? strtoupper(array_shift($segments)) : '';
 
       // One segment at a time, the way the filesystem does it: a symlink is followed BEFORE the
       // ".." after it applies, so `out/alias/..` climbs from wherever alias points. Collapsing
@@ -1086,6 +1092,12 @@ namespace Bones {
       $source = $this->resolvePath(__DIR__);
       $target = $this->resolvePath($path);
       $sep = DIRECTORY_SEPARATOR;
+
+      // Windows paths are case-insensitive: C:\Plugin and c:\plugin are one folder.
+      if (PHP_OS_FAMILY === 'Windows') {
+        $source = strtolower($source);
+        $target = strtolower($target);
+      }
 
       if ($target === $source) {
         $this->error("Deploy refused: '{$path}' is the plugin itself.");
