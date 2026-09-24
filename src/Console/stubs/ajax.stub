@@ -1,6 +1,6 @@
 <?php
 
-namespace {Namespace}\Ajax;
+namespace {Namespace}\Ajax{Path};
 
 if (! defined('ABSPATH')) {
     exit;

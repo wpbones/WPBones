@@ -1,6 +1,6 @@
 <?php
 
-namespace {Namespace}\CustomPostTypes;
+namespace {Namespace}\CustomPostTypes{Path};
 
 if (! defined('ABSPATH')) {
     exit;

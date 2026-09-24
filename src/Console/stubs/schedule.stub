@@ -1,6 +1,6 @@
 <?php
 
-namespace {Namespace}\Providers;
+namespace {Namespace}\Providers{Path};
 
 if (! defined('ABSPATH')) {
     exit;

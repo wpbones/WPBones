@@ -1,6 +1,6 @@
 <?php
 
-namespace {Namespace}\Shortcodes;
+namespace {Namespace}\Shortcodes{Path};
 
 if (! defined('ABSPATH')) {
     exit;
