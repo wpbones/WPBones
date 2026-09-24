@@ -704,8 +704,8 @@ namespace Bones\Traits {
  */
 
 namespace Bones {
-  /* The minimum PHP version required to run Bones. */
-  define('WPBONES_MINIMAL_PHP_VERSION', '7.4');
+  /* The minimum PHP version required to run Bones: keep it equal to composer.json's "php". */
+  define('WPBONES_MINIMAL_PHP_VERSION', '8.1');
 
   /* MARK: The WP Bones command line version. */
   define('WPBONES_COMMAND_LINE_VERSION', '2.0.8');
