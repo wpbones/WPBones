@@ -74,6 +74,24 @@ final class DeploySafetyTest extends TestCase
     $this->assertStringContainsString('is the plugin itself', $run['stderr']);
   }
 
+  /**
+   * A symlink followed by "..": the filesystem resolves the link first, so the ".." climbs from
+   * wherever the link points. Collapsing ".." first (the first version of the guard) checked
+   * out/ while deleteDirectory() emptied the plugin (Codex review of #111).
+   */
+  public function test_a_symlink_followed_by_dot_dot_cannot_reach_the_plugin(): void
+  {
+    mkdir($this->bones->plugin . '/sub');
+    mkdir($this->bones->root . '/out');
+    symlink($this->bones->plugin . '/sub', $this->bones->root . '/out/alias');
+
+    $run = $this->bones->run(['deploy', '../out/alias/..', '--no-build', '--force']);
+
+    $this->assertNotSame(0, $run['status'], $run['output']);
+    $this->assertNothingWasDeleted($run['output']);
+    $this->assertStringContainsString('is the plugin itself', $run['stderr']);
+  }
+
   public function test_a_folder_inside_the_plugin_is_refused(): void
   {
     $run = $this->bones->run(['deploy', 'build', '--no-build']);

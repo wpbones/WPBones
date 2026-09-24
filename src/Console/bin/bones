@@ -466,6 +466,9 @@ namespace Bones\Traits {
 
   trait Console
   {
+    /** Set by ask() once stdin has ended: no answer will ever come. */
+    protected bool $inputEnded = false;
+
     /**
      * Commodity to display a message in the console with color.
      *
@@ -560,10 +563,18 @@ namespace Bones\Traits {
       // Use readline to get the user input
       $line = readline($str);
 
-      // Trim the input to remove extra spaces or newlines
-      $line = trim($line);
+      // false is the end of input (Ctrl-D, or a pipe that ran dry): the default answers, and the
+      // caller can tell that nobody will ever answer a question asked in a loop.
+      if ($line === false) {
+        $this->inputEnded = true;
+        echo "\n";
+      }
 
-      return $line ?: $default;
+      // Trim the input to remove extra spaces or newlines
+      $line = trim((string) $line);
+
+      // A null default used to come back as null from a function declared to return string.
+      return $line !== '' ? $line : (string) $default;
     }
 
     /**
@@ -1025,34 +1036,36 @@ namespace Bones {
 
       $segments = preg_split('#[\\\\/]+#', $path, -1, PREG_SPLIT_NO_EMPTY);
       $drive = isset($segments[0]) && preg_match('/^[A-Za-z]:$/', $segments[0]) ? array_shift($segments) : '';
-      $resolved = [];
+
+      // One segment at a time, the way the filesystem does it: a symlink is followed BEFORE the
+      // ".." after it applies, so `out/alias/..` climbs from wherever alias points. Collapsing
+      // ".." first checked a different folder from the one deleteDirectory() would empty.
+      $current = $drive . DIRECTORY_SEPARATOR;
+      $exists = true;
 
       foreach ($segments as $segment) {
+        if ($segment === '.') {
+          continue;
+        }
+
         if ($segment === '..') {
-          array_pop($resolved);
-        } elseif ($segment !== '.') {
-          $resolved[] = $segment;
+          $current = dirname($current);
+          continue;
         }
+
+        $next = rtrim($current, '\\/') . DIRECTORY_SEPARATOR . $segment;
+
+        if ($exists && ($real = realpath($next)) !== false) {
+          $current = $real;
+          continue;
+        }
+
+        // Past the part that exists there is no link left to follow.
+        $exists = false;
+        $current = $next;
       }
 
-      $missing = [];
-
-      while (true) {
-        $candidate = $drive . DIRECTORY_SEPARATOR . implode(DIRECTORY_SEPARATOR, $resolved);
-        $real = realpath($candidate);
-
-        if ($real !== false) {
-          $full = rtrim($real, '\\/') . DIRECTORY_SEPARATOR . implode(DIRECTORY_SEPARATOR, array_reverse($missing));
-
-          return rtrim($full, '\\/') === '' ? DIRECTORY_SEPARATOR : rtrim($full, '\\/');
-        }
-
-        if (empty($resolved)) {
-          return $candidate;
-        }
-
-        $missing[] = array_pop($resolved);
-      }
+      return $current;
     }
 
     /**
@@ -1612,7 +1625,7 @@ namespace Bones {
       }
       // optimize
       elseif ($this->isCommand('optimize')) {
-        $this->optimize();
+        exit($this->optimize());
       }
       // plugin
       elseif ($this->isCommand('plugin')) {
@@ -1959,6 +1972,12 @@ namespace Bones {
         $plugin_name = $this->ask('Plugin name', $plugin_name);
         $namespace = $this->ask('Namespace', $namespace);
 
+        // With nothing left to read the loop would ask forever.
+        if (empty($plugin_name) && $this->inputEnded) {
+          $this->error('No plugin name given: nothing was renamed.');
+          exit(1);
+        }
+
         // both plugin name and namespace don't have to contains 'WP Kirk' or 'WPKirk'
         if (strpos($plugin_name, 'WP Kirk') !== false || strpos($plugin_name, 'WPKirk') !== false) {
           $this->warning('Plugin name cannot contain "WP Kirk" or "WPKirk"');
@@ -2101,10 +2120,12 @@ namespace Bones {
       if ($status !== 0) {
         $this->warning("composer dump-autoload -o exited with status {$status}: run it by hand to see why.");
 
-        return;
+        return $status;
       }
 
       $this->processCompleted('Optimize process completed!');
+
+      return 0;
     }
 
     /**
@@ -3513,7 +3534,7 @@ namespace Bones {
 
       foreach ($views as $view => $html) {
         if (file_exists($view)) {
-          $this->line(" Kept {$view}");
+          $this->line(" Kept {$view} (shared by every widget of the plugin: --force does not overwrite it)");
           continue;
         }
 
@@ -3609,9 +3630,9 @@ namespace Bones {
         $appName = $this->ask('App name (lowercase, e.g. "dashboard")');
       }
 
-      if (!preg_match('/^[a-z][a-z0-9-]*$/', $appName)) {
+      if (!preg_match('/^[a-z][a-z0-9-]*$/', (string) $appName)) {
         $this->error('Invalid app name. Use lowercase letters, digits, and dashes (must start with a letter).');
-        return;
+        exit(1);
       }
 
       // Names that collide with scripts WordPress core registers. If we let
@@ -3630,7 +3651,7 @@ namespace Bones {
       if (in_array($appName, $reservedHandles, true)) {
         $this->error("'{$appName}' collides with a reserved WordPress script handle — wp_enqueue_script would silently drop your bundle.");
         $this->line(" Pick a different name, e.g. {$appName}-app, my-{$appName}, or a plugin-specific prefix.");
-        return;
+        exit(1);
       }
 
       $flat = in_array('--flat', $this->arguments(), true);
@@ -3654,7 +3675,7 @@ namespace Bones {
         $filepath = "resources/assets/apps/{$appName}.tsx";
         if (file_exists($filepath)) {
           $this->error("File already exists: {$filepath}");
-          return;
+          exit(1);
         }
         file_put_contents($filepath, $content);
         $this->line(" Created {$filepath}");
@@ -3662,7 +3683,7 @@ namespace Bones {
         $folder = "resources/assets/apps/{$appName}";
         if (file_exists($folder)) {
           $this->error("Folder already exists: {$folder}");
-          return;
+          exit(1);
         }
         mkdir($folder, 0755, true);
         $filepath = "{$folder}/index.tsx";

@@ -84,6 +84,30 @@ final class ExitCodeTest extends TestCase
     $this->assertSame('WP Kirk,WPKirk', file_get_contents($this->bones->plugin . '/namespace'));
   }
 
+  public function test_a_rename_nobody_answers_ends_instead_of_asking_forever(): void
+  {
+    $run = $this->bones->run(['rename'], '', 10);
+
+    $this->assertFalse($run['timedOut'], 'rename kept asking after its input ended');
+    $this->assertSame(1, $run['status'], $run['output']);
+    $this->assertSame('WP Kirk,WPKirk', file_get_contents($this->bones->plugin . '/namespace'));
+  }
+
+  public function test_optimize_reports_a_failed_composer(): void
+  {
+    // No composer.json in the fixture: `composer dump-autoload` fails.
+    $run = $this->bones->run(['optimize']);
+
+    $this->assertNotSame(0, $run['status'], $run['output']);
+  }
+
+  public function test_make_app_fails_on_a_missing_or_invalid_name(): void
+  {
+    $this->assertSame(1, $this->bones->run(['make:app'], '')['status']);
+    $this->assertSame(1, $this->bones->run(['make:app', 'Not Valid'])['status']);
+    $this->assertSame(1, $this->bones->run(['make:app', 'dashboard'])['status'], 'a reserved WordPress handle was accepted');
+  }
+
   public function test_a_declined_migration_fails(): void
   {
     $run = $this->bones->run(['migrate:to-v2'], "n\n");
