@@ -49,15 +49,57 @@ class Eloquent
             ];
         }
 
-        return [
+        return self::mysql(DB_HOST);
+    }
+
+    /**
+     * A MySQL connection that talks to the database the way WordPress does.
+     *
+     * The host goes through $wpdb->parse_db_host(), as in wpdb::db_connect(): DB_HOST may carry a
+     * port (`localhost:3307`), a socket (`localhost:/tmp/mysql.sock`) or an IPv6 address. The
+     * charset and collation are the ones WordPress settled on ($wpdb->charset, $wpdb->collate),
+     * which it raises to utf8mb4 even when DB_CHARSET says utf8: the tables are utf8mb4, and a utf8
+     * connection can neither write an emoji into them nor read one back.
+     *
+     * @param string $dbHost The DB_HOST setting.
+     *
+     * @return array
+     */
+    protected static function mysql(string $dbHost): array
+    {
+        global $wpdb;
+
+        $connection = [
             'driver' => 'mysql',
-            'host' => DB_HOST,
+            'host' => $dbHost,
             'database' => DB_NAME,
             'username' => DB_USER,
             'password' => DB_PASSWORD,
-            'charset' => 'utf8',
-            'collation' => 'utf8_unicode_ci',
+            'charset' => is_object($wpdb) && !empty($wpdb->charset) ? $wpdb->charset : 'utf8mb4',
             'prefix' => '',
         ];
+
+        // No collation means the charset's default one; an empty one would be sent as `collate ''`.
+        if (is_object($wpdb) && !empty($wpdb->collate)) {
+            $connection['collation'] = $wpdb->collate;
+        }
+
+        $parsed = is_object($wpdb) && method_exists($wpdb, 'parse_db_host') ? $wpdb->parse_db_host($dbHost) : false;
+
+        if (is_array($parsed)) {
+            [$host, $port, $socket, $isIpv6] = $parsed;
+
+            $connection['host'] = $isIpv6 && extension_loaded('mysqlnd') ? "[$host]" : $host;
+
+            if ($port) {
+                $connection['port'] = $port;
+            }
+
+            if ($socket) {
+                $connection['unix_socket'] = $socket;
+            }
+        }
+
+        return $connection;
     }
 }

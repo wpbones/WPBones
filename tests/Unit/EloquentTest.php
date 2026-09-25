@@ -12,35 +12,143 @@ use WPKirk\WPBones\Database\Eloquent;
 /**
  * Eloquent::connection() reads WordPress's database constants, and a process can define a
  * constant only once, so every test runs in a process of its own.
+ *
+ * $wpdb is a stand-in that answers parse_db_host() the way WordPress does for the DB_HOST under
+ * test (its real parser is exercised live by eloquent-live-smoke.sh): these tests are about how
+ * that answer becomes Laravel's connection.
  */
 final class EloquentTest extends TestCase
 {
-  private const MYSQL = [
-    'driver' => 'mysql',
-    'host' => 'db.example',
-    'database' => 'wordpress',
-    'username' => 'wp',
-    'password' => 'secret',
-    'charset' => 'utf8',
-    'collation' => 'utf8_unicode_ci',
-    'prefix' => '',
-  ];
-
-  private function defineMysqlConstants(): void
+  private function defineMysqlConstants(string $host = 'db.example'): void
   {
-    define('DB_HOST', 'db.example');
+    define('DB_HOST', $host);
     define('DB_NAME', 'wordpress');
     define('DB_USER', 'wp');
     define('DB_PASSWORD', 'secret');
   }
 
+  /**
+   * @param array|false $parsed What $wpdb->parse_db_host() returns.
+   */
+  private function wordpress(array|false $parsed, string $charset = 'utf8mb4', string $collate = 'utf8mb4_unicode_520_ci'): object
+  {
+    return $GLOBALS['wpdb'] = new class($parsed, $charset, $collate) {
+      public ?string $parsedHost = null;
+
+      public function __construct(private array|false $parsed, public string $charset, public string $collate)
+      {
+      }
+
+      public function parse_db_host($host)
+      {
+        $this->parsedHost = $host;
+
+        return $this->parsed;
+      }
+    };
+  }
+
+  private function mysql(array $overrides = []): array
+  {
+    return array_merge(
+      [
+        'driver' => 'mysql',
+        'host' => 'db.example',
+        'database' => 'wordpress',
+        'username' => 'wp',
+        'password' => 'secret',
+        'charset' => 'utf8mb4',
+        'prefix' => '',
+        'collation' => 'utf8mb4_unicode_520_ci',
+      ],
+      $overrides
+    );
+  }
+
   #[RunInSeparateProcess]
   #[PreserveGlobalState(false)]
-  public function test_mysql_is_the_default_and_unchanged(): void
+  public function test_mysql_uses_the_charset_and_collation_wordpress_settled_on(): void
+  {
+    // Measured on wpbones.test: DB_CHARSET is 'utf8', and WordPress raised it to utf8mb4.
+    define('DB_CHARSET', 'utf8');
+    $this->defineMysqlConstants();
+    $wpdb = $this->wordpress(['db.example', null, null, false]);
+
+    $this->assertEquals($this->mysql(), Eloquent::connection());
+    $this->assertSame('db.example', $wpdb->parsedHost);
+  }
+
+  #[RunInSeparateProcess]
+  #[PreserveGlobalState(false)]
+  public function test_a_port_in_db_host_becomes_the_port(): void
+  {
+    $this->defineMysqlConstants('db.example:3307');
+    $wpdb = $this->wordpress(['db.example', 3307, null, false]);
+
+    $this->assertEquals($this->mysql(['port' => 3307]), Eloquent::connection());
+    $this->assertSame('db.example:3307', $wpdb->parsedHost);
+  }
+
+  #[RunInSeparateProcess]
+  #[PreserveGlobalState(false)]
+  public function test_a_socket_in_db_host_becomes_the_unix_socket(): void
+  {
+    $this->defineMysqlConstants('localhost:/tmp/mysql.sock');
+    $this->wordpress(['localhost', null, '/tmp/mysql.sock', false]);
+
+    $this->assertEquals(
+      $this->mysql(['host' => 'localhost', 'unix_socket' => '/tmp/mysql.sock']),
+      Eloquent::connection()
+    );
+  }
+
+  #[RunInSeparateProcess]
+  #[PreserveGlobalState(false)]
+  public function test_an_ipv6_host_is_bracketed_as_wordpress_does_for_mysqlnd(): void
+  {
+    $this->defineMysqlConstants('[::1]:3306');
+    $this->wordpress(['::1', 3306, null, true]);
+
+    $host = extension_loaded('mysqlnd') ? '[::1]' : '::1';
+
+    $this->assertEquals($this->mysql(['host' => $host, 'port' => 3306]), Eloquent::connection());
+  }
+
+  #[RunInSeparateProcess]
+  #[PreserveGlobalState(false)]
+  public function test_an_empty_collation_is_left_out(): void
   {
     $this->defineMysqlConstants();
+    $this->wordpress(['db.example', null, null, false], 'utf8mb4', '');
 
-    $this->assertSame(self::MYSQL, Eloquent::connection());
+    $connection = Eloquent::connection();
+
+    $this->assertArrayNotHasKey('collation', $connection);
+    $this->assertSame('utf8mb4', $connection['charset']);
+  }
+
+  #[RunInSeparateProcess]
+  #[PreserveGlobalState(false)]
+  public function test_a_db_host_wordpress_cannot_parse_is_passed_as_it_is(): void
+  {
+    $this->defineMysqlConstants('db.example');
+    $this->wordpress(false);
+
+    $this->assertEquals($this->mysql(), Eloquent::connection());
+  }
+
+  #[RunInSeparateProcess]
+  #[PreserveGlobalState(false)]
+  public function test_without_wpdb_the_connection_still_defaults_to_utf8mb4(): void
+  {
+    $this->defineMysqlConstants('db.example:3307');
+    $GLOBALS['wpdb'] = null;
+
+    $connection = Eloquent::connection();
+
+    $this->assertSame('db.example:3307', $connection['host']);
+    $this->assertSame('utf8mb4', $connection['charset']);
+    $this->assertArrayNotHasKey('collation', $connection);
   }
 
   #[RunInSeparateProcess]
@@ -51,8 +159,9 @@ final class EloquentTest extends TestCase
     define('DB_ENGINE', 'mysql');
     define('FQDB', '/site/wp-content/database/.ht.sqlite');
     $this->defineMysqlConstants();
+    $this->wordpress(['db.example', null, null, false]);
 
-    $this->assertSame(self::MYSQL, Eloquent::connection());
+    $this->assertEquals($this->mysql(), Eloquent::connection());
   }
 
   #[RunInSeparateProcess]
@@ -84,7 +193,8 @@ final class EloquentTest extends TestCase
   {
     define('DB_ENGINE', 'sqlite');
     $this->defineMysqlConstants();
+    $this->wordpress(['db.example', null, null, false]);
 
-    $this->assertSame(self::MYSQL, Eloquent::connection());
+    $this->assertEquals($this->mysql(), Eloquent::connection());
   }
 }
