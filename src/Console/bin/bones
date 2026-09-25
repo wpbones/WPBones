@@ -624,6 +624,9 @@ namespace Bones\Traits {
     // WordPress loaded flag
     protected $wpLoaded = false;
 
+    /* The plugin folder as the shell spells it, symlinks included: see BonesCommandLine. */
+    abstract protected function pluginPathAsTyped(): string;
+
     /* Protected version of the do_action function */
     protected function do_action(...$args)
     {
@@ -673,7 +676,7 @@ namespace Bones\Traits {
     {
       try {
         // We have to load the WordPress environment.
-        $currentDir = $_SERVER['PWD'] ?? __DIR__;
+        $currentDir = $this->pluginPathAsTyped();
         $wpLoadPath = dirname(dirname(dirname($currentDir))) . '/wp-load.php';
 
         if (!file_exists($wpLoadPath)) {
@@ -786,6 +789,13 @@ namespace Bones {
      */
     protected ?string $wpCliVersion = null;
 
+    /**
+     * The folder bones was run from, before it moved into the plugin.
+     *
+     * @since 2.1.0
+     */
+    protected string $invokedFrom = '';
+
     public function __construct()
     {
       $this->boot();
@@ -797,6 +807,13 @@ namespace Bones {
      */
     public function boot()
     {
+      // Up to 2.0.12 half of the paths were the shell's and half the plugin's, so run from
+      // anywhere but the plugin root bones could not read `namespace` and died on a TypeError.
+      // Every relative path now means the plugin; a path typed on the command line still means
+      // what the shell meant (pathFromCommandLine()).
+      $this->invokedFrom = getcwd() ?: __DIR__;
+      chdir(__DIR__);
+
       $arguments = $this->arguments();
 
       // Load the console kernel — skip for `rename`, which is the bootstrap
@@ -1072,6 +1089,70 @@ namespace Bones {
       }
 
       return $current;
+    }
+
+    /**
+     * A path typed on the command line, as the shell meant it.
+     *
+     * bones works from the plugin folder since 2.1.0, so a relative path typed somewhere else is
+     * anchored to the folder it was typed in. Typed from the plugin root it comes back as it was.
+     *
+     * @since 2.1.0
+     */
+    protected function pathFromCommandLine(string $path): string
+    {
+      if ($path === '' || $this->resolvePath($this->invokedFrom) === $this->resolvePath(__DIR__)) {
+        return $path;
+      }
+
+      // On Windows "\foo" is the root of the drive it was typed on.
+      if (PHP_OS_FAMILY === 'Windows' && preg_match('#^[\\\\/](?![\\\\/])#', $path)) {
+        return substr($this->invokedFrom, 0, 2) . $path;
+      }
+
+      if (preg_match('#^([A-Za-z]:)?[\\\\/]#', $path)) {
+        return $path;
+      }
+
+      return rtrim($this->invokedFrom, '\\/') . DIRECTORY_SEPARATOR . $path;
+    }
+
+    /**
+     * The plugin folder as the shell spells it, symlinks included.
+     *
+     * A plugin developed elsewhere and symlinked into wp-content/plugins reaches WordPress only
+     * through that spelling: __DIR__ is the physical folder. Up to 2.0.12 the shell's PWD stood
+     * for it, which is right only when bones is run from the plugin root.
+     *
+     * @since 2.1.0
+     */
+    protected function pluginPathAsTyped(): string
+    {
+      $pwd = (string) ($_SERVER['PWD'] ?? getenv('PWD'));
+      $base = $pwd !== '' && realpath($pwd) === realpath($this->invokedFrom) ? $pwd : $this->invokedFrom;
+      $script = (string) ($_SERVER['argv'][0] ?? 'bones');
+      $folder = preg_match('#^([A-Za-z]:)?[\\\\/]#', $script)
+        ? dirname($script)
+        : $base . DIRECTORY_SEPARATOR . dirname($script);
+
+      // "." and ".." as written, without following links: following them is what realpath() does.
+      $segments = [];
+      foreach (preg_split('#[\\\\/]+#', $folder) as $index => $segment) {
+        if ($segment === '.' || ($segment === '' && $index > 0)) {
+          continue;
+        }
+
+        if ($segment === '..' && count($segments) > 1) {
+          array_pop($segments);
+          continue;
+        }
+
+        $segments[] = $segment;
+      }
+
+      $typed = implode(DIRECTORY_SEPARATOR, $segments);
+
+      return $typed !== '' && realpath($typed) === realpath(__DIR__) ? $typed : __DIR__;
     }
 
     /**
@@ -2318,6 +2399,8 @@ namespace Bones {
         $this->error('The path is empty!');
         exit(1);
       }
+
+      $path = $this->pathFromCommandLine($path);
 
       // Checked before anything is built: the folder the deploy is about to delete and refill.
       $this->assertSafeDeployDestination($is_create_zip ? $path . '-tmp' : $path, $force);

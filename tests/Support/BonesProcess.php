@@ -59,16 +59,71 @@ final class BonesProcess
    */
   public function run(array $arguments, string $stdin = '', int $timeout = 20): array
   {
-    $command = escapeshellarg(PHP_BINARY) . ' bones ' . implode(' ', array_map('escapeshellarg', $arguments));
+    return $this->execute($this->plugin, 'bones', $arguments, $stdin, $timeout);
+  }
+
+  /**
+   * Run `php fixture-plugin/bones` from the folder that holds the plugin, the way a shell in
+   * the parent directory would.
+   *
+   * @param string[] $arguments What follows `php fixture-plugin/bones`.
+   *
+   * @return array{status:int, stdout:string, stderr:string, output:string, timedOut:bool}
+   */
+  public function runFromParent(array $arguments, string $stdin = '', int $timeout = 20): array
+  {
+    return $this->execute($this->root, basename($this->plugin) . '/bones', $arguments, $stdin, $timeout);
+  }
+
+  /**
+   * Put a `composer` first on the PATH of every later run: it appends its arguments to
+   * composer.log beside the plugin and exits with $status.
+   */
+  public function withFakeComposer(int $status): self
+  {
+    $bin = $this->root . '/fake-bin';
+
+    if (!is_dir($bin)) {
+      mkdir($bin, 0777, true);
+    }
+
+    file_put_contents(
+      $bin . '/composer',
+      "#!/bin/sh\necho \"$*\" >> " . escapeshellarg($this->root . '/composer.log') . "\nexit {$status}\n"
+    );
+    chmod($bin . '/composer', 0755);
+
+    return $this;
+  }
+
+  /** What the fake composer was called with, one call per line. */
+  public function composerCalls(): array
+  {
+    $log = $this->root . '/composer.log';
+
+    return is_file($log) ? array_values(array_filter(explode("\n", (string) file_get_contents($log)))) : [];
+  }
+
+  /**
+   * @return array{status:int, stdout:string, stderr:string, output:string, timedOut:bool}
+   */
+  private function execute(string $cwd, string $script, array $arguments, string $stdin, int $timeout): array
+  {
+    $command = escapeshellarg(PHP_BINARY) . ' ' . escapeshellarg($script) . ' ' . implode(' ', array_map('escapeshellarg', $arguments));
+    $path = getenv('PATH') ?: '/usr/bin:/bin';
+
+    if (is_dir($this->root . '/fake-bin')) {
+      $path = $this->root . '/fake-bin:' . $path;
+    }
 
     $process = proc_open(
       $command,
       [0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']],
       $pipes,
-      $this->plugin,
+      $cwd,
       // proc_open inherits the parent environment, so PWD would still name the test
       // runner's directory, and that is what the CLI reads to locate WordPress.
-      ['PWD' => $this->plugin, 'PATH' => getenv('PATH') ?: '/usr/bin:/bin', 'HOME' => getenv('HOME') ?: '/tmp']
+      ['PWD' => $cwd, 'PATH' => $path, 'HOME' => getenv('HOME') ?: '/tmp']
     );
 
     fwrite($pipes[0], $stdin);
@@ -137,8 +192,13 @@ final class BonesProcess
     rmdir($this->root);
   }
 
+  /**
+   * The WPBones tree whose `bones` and stubs are under test: this checkout, or the one named by
+   * BONES_SOURCE, which is how a test is shown to fail on a previous release
+   * (`git archive v2.0.12 src | tar -x -C /tmp/v2012`, then `BONES_SOURCE=/tmp/v2012`).
+   */
   private static function source(): string
   {
-    return dirname(__DIR__, 2);
+    return getenv('BONES_SOURCE') ?: dirname(__DIR__, 2);
   }
 }
