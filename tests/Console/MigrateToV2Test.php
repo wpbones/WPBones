@@ -25,7 +25,8 @@ final class MigrateToV2Test extends TestCase
   {
     parent::setUp();
 
-    $root = dirname(__DIR__, 2);
+    // BONES_SOURCE: another WPBones tree, to show a test failing on a previous release (BonesProcess).
+    $root = getenv('BONES_SOURCE') ?: dirname(__DIR__, 2);
     $this->fixture = sys_get_temp_dir() . '/wpbones-migrate-' . bin2hex(random_bytes(6));
 
     mkdir($this->fixture . '/vendor/wpbones/wpbones/src/Console', 0777, true);
@@ -101,6 +102,28 @@ JSON);
     $this->assertStringContainsString('"author": "José Müller"', $json, 'non-ASCII was escaped');
     $this->assertSame('wp-scripts build', json_decode($json, true)['scripts']['build']);
     $this->assertFileDoesNotExist($this->fixture . '/gulpfile.js');
+  }
+
+  /**
+   * `wp-scripts format` drops --check and always passes --write, so up to 2.0.12 the migrated
+   * `format:check` rewrote the plugin, compiled bundles included, and exited 0.
+   */
+  public function test_format_check_never_writes_and_format_leaves_the_build_alone(): void
+  {
+    [$status, $output] = $this->migrate();
+
+    $this->assertSame(0, $status, $output);
+    $scripts = json_decode((string) file_get_contents($this->fixture . '/package.json'), true)['scripts'];
+
+    $this->assertStringStartsWith('prettier --check ', $scripts['format:check']);
+    $this->assertStringNotContainsString('--write', $scripts['format:check']);
+    $this->assertStringNotContainsString('wp-scripts format', $scripts['format:check']);
+    $this->assertStringContainsString('--ignore-path .prettierignore', $scripts['format:check']);
+    $this->assertSame('wp-scripts format', $scripts['format']);
+
+    $ignore = (string) file_get_contents($this->fixture . '/.prettierignore');
+    $this->assertMatchesRegularExpression('#^public/$#m', $ignore, 'format would rewrite the compiled bundles');
+    $this->assertMatchesRegularExpression('#^vendor/$#m', $ignore);
   }
 
   public function test_the_success_line_carries_one_check_mark(): void

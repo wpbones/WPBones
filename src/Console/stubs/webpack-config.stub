@@ -27,9 +27,13 @@ const IGNORE_DECLARATIONS = { ignore: '**/*.d.ts' };
  * the scss rule (CSS extraction, css-loader, PostCSS) with `less-loader` in place of
  * `sass-loader`, so LESS output is minified and gets its `-rtl.css` like SCSS does.
  */
-const sassRule = defaultConfig.module.rules.find((rule) => rule.test instanceof RegExp && rule.test.test('.scss'));
+const sassRule = defaultConfig.module.rules.find(
+  (rule) => rule.test instanceof RegExp && rule.test.test('.scss')
+);
 if (!sassRule) {
-  throw new Error('webpack.config.js: no .scss rule in the @wordpress/scripts config to build the .less rule from.');
+  throw new Error(
+    'webpack.config.js: no .scss rule in the @wordpress/scripts config to build the .less rule from.'
+  );
 }
 const lessRule = {
   test: /\.less$/,
@@ -46,10 +50,12 @@ function autoEntries() {
   const entries = {};
 
   // React/TS apps — folder-based (for apps with multiple files)
-  glob.sync('resources/assets/apps/*/index.{ts,tsx,js,jsx}', IGNORE_DECLARATIONS).forEach((file) => {
-    const name = path.basename(path.dirname(file));
-    entries[`apps/${name}`] = `./${file}`;
-  });
+  glob
+    .sync('resources/assets/apps/*/index.{ts,tsx,js,jsx}', IGNORE_DECLARATIONS)
+    .forEach((file) => {
+      const name = path.basename(path.dirname(file));
+      entries[`apps/${name}`] = `./${file}`;
+    });
 
   // React/TS apps — single-file (for lightweight apps)
   glob.sync('resources/assets/apps/*.{ts,tsx,js,jsx}', IGNORE_DECLARATIONS).forEach((file) => {

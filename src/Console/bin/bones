@@ -3849,7 +3849,7 @@ namespace Bones {
      *  - Deletes gulpfile.js, package-lock.json and pnpm-lock.yaml so the
      *    developer can pick up a clean lockfile with their preferred PM
      *    (yarn.lock is left untouched if already present)
-     *  - Creates webpack.config.js, tsconfig.json, .prettierrc, jest.config.js
+     *  - Creates webpack.config.js, tsconfig.json, .prettierrc, .prettierignore, jest.config.js
      *  - Rewrites package.json scripts to the unified dev/build/test/format block
      *  - Drops gulp-* and npm-run-all devDependencies
      *  - Adds the v2 devDependency set (@wordpress/scripts 31+, typescript, glob,
@@ -3869,7 +3869,7 @@ namespace Bones {
       $this->line('');
       $this->warning('This will modify your plugin build infrastructure:');
       $this->line(' • Delete gulpfile.js, package-lock.json and pnpm-lock.yaml (yarn.lock is kept)');
-      $this->line(' • Create webpack.config.js, tsconfig.json, .prettierrc, jest.config.js');
+      $this->line(' • Create webpack.config.js, tsconfig.json, .prettierrc, .prettierignore, jest.config.js');
       $this->line(' • Rewrite package.json scripts and devDependencies');
       $this->line('');
       $this->warning('Commit your current work first. The resources/assets/ folder is left untouched.');
@@ -3898,6 +3898,7 @@ namespace Bones {
         'webpack.config.js' => 'webpack-config',
         'tsconfig.json'     => 'tsconfig',
         '.prettierrc'       => 'prettierrc',
+        '.prettierignore'   => 'prettierignore',
         'jest.config.js'    => 'jest-config',
       ];
       foreach ($configs as $file => $stub) {
@@ -3923,7 +3924,10 @@ namespace Bones {
             'test'            => 'wp-scripts test-unit-js',
             'test:watch'      => 'wp-scripts test-unit-js --watch',
             'format'          => 'wp-scripts format',
-            'format:check'    => 'wp-scripts format --check',
+            // `wp-scripts format` drops --check and always writes (scripts/format.js, 31.8.0): up to
+            // 2.0.12 this "check" rewrote the files, the compiled bundles included, and exited 0.
+            // Same files, same ignore file, same Prettier, and nothing written.
+            'format:check'    => 'prettier --check --ignore-path .prettierignore "**/*.{js,jsx,json,ts,tsx,yml,yaml}"',
             'lint'            => 'wp-scripts lint-js resources/',
             'lint:style'      => "wp-scripts lint-style 'resources/**/*.{css,scss}'",
             'check-engines'   => 'wp-scripts check-engines',

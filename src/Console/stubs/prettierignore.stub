@@ -1,0 +1,13 @@
+# Read by `format` (wp-scripts format) and `format:check` (prettier --check): what neither may touch.
+
+# Compiled by the build: formatting it rewrites the bundles.
+public/
+build/
+
+# Composer's own files, which it writes in its own format.
+vendor/
+composer.json
+composer.lock
+
+# Written by `wp i18n make-json`.
+languages/*.json
