@@ -2315,20 +2315,33 @@ namespace Bones {
       }
     }
 
-    /* Execute composer update */
+    /**
+     * Update the framework: `composer update wpbones/wpbones --with-dependencies`.
+     *
+     * Up to 2.0.12 vendor/wpbones/wpbones was deleted first and a full `composer update` ran after:
+     * when Composer failed (no network, a conflict) the plugin was left with no framework at all.
+     * Composer replaces the package by itself, renamed files included: measured with Composer 2.10
+     * on a dist install and on a git clone carrying 82 files changed by the rename.
+     *
+     * @since 2.1.0 Only the framework and its dependencies, and nothing is deleted first.
+     */
     protected function update()
     {
       if ($this->isHelp()) {
-        $this->line("Will run the composer update. Useful if there is a new version of WP Bones\n");
+        $this->line("Will run composer update wpbones/wpbones --with-dependencies: the framework and the packages it needs.");
+        $this->line("To update every package, run composer update.\n");
         $this->info('Usage:');
         $this->line(' php bones update');
         exit();
       }
-      // delete the current vendor/wpbones/wpbones folder
-      $this->deleteDirectory('vendor/wpbones/wpbones');
 
-      // update composer module
-      exit($this->runShell('composer update'));
+      $status = $this->runShell('composer update wpbones/wpbones --with-dependencies');
+
+      if ($status !== 0) {
+        $this->error("composer update exited with status {$status}.");
+      }
+
+      exit($status);
     }
 
     /**
