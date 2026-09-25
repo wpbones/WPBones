@@ -307,7 +307,8 @@ abstract class Command
    */
   protected function loadWordPress()
   {
-    // Plugin root is the working directory when running `php bones`
+    // The plugin folder: bones moves there and sets PWD to it before any command runs (2.1.0;
+    // before, PWD was the shell's folder, so a command worked only from the plugin root).
     $currentDir = $_SERVER['PWD'] ?? getcwd();
 
     try {

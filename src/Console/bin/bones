@@ -796,6 +796,13 @@ namespace Bones {
      */
     protected string $invokedFrom = '';
 
+    /**
+     * The plugin folder as the shell spells it: see pluginPathAsTyped().
+     *
+     * @since 2.1.0
+     */
+    protected ?string $pluginPath = null;
+
     public function __construct()
     {
       $this->boot();
@@ -812,7 +819,14 @@ namespace Bones {
       // Every relative path now means the plugin; a path typed on the command line still means
       // what the shell meant (pathFromCommandLine()).
       $this->invokedFrom = getcwd() ?: __DIR__;
+      $plugin = $this->pluginPathAsTyped();
       chdir(__DIR__);
+
+      // What a shell's `cd` into the plugin leaves behind. Command::loadWordPress(), which custom
+      // commands use, looks for WordPress and vendor/autoload.php through PWD, and so may anything
+      // bones runs.
+      $_SERVER['PWD'] = $plugin;
+      putenv("PWD={$plugin}");
 
       $arguments = $this->arguments();
 
@@ -1128,6 +1142,11 @@ namespace Bones {
      */
     protected function pluginPathAsTyped(): string
     {
+      // Worked out once, in boot(), before PWD is made to name the plugin.
+      if ($this->pluginPath !== null) {
+        return $this->pluginPath;
+      }
+
       $pwd = (string) ($_SERVER['PWD'] ?? getenv('PWD'));
       $base = $pwd !== '' && realpath($pwd) === realpath($this->invokedFrom) ? $pwd : $this->invokedFrom;
       $script = (string) ($_SERVER['argv'][0] ?? 'bones');
@@ -1152,7 +1171,7 @@ namespace Bones {
 
       $typed = implode(DIRECTORY_SEPARATOR, $segments);
 
-      return $typed !== '' && realpath($typed) === realpath(__DIR__) ? $typed : __DIR__;
+      return $this->pluginPath = $typed !== '' && realpath($typed) === realpath(__DIR__) ? $typed : __DIR__;
     }
 
     /**

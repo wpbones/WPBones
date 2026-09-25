@@ -60,6 +60,24 @@ final class WorkingDirectoryTest extends TestCase
     $this->assertStringContainsString('Stable tag: 1.2.0', (string) file_get_contents($this->bones->plugin . '/readme.txt'));
   }
 
+  /**
+   * Custom commands find WordPress and vendor/autoload.php through PWD (Command::loadWordPress()),
+   * so bones leaves it as a `cd` into the plugin would: the folder as the shell spells it, here
+   * through the /var symlink macOS puts in front of /private/var.
+   */
+  public function test_pwd_and_the_working_directory_name_the_plugin(): void
+  {
+    $run = $this->bones->runFromParent(['tinker'], "echo \$_SERVER['PWD'] . '|' . getenv('PWD') . '|' . getcwd();\nexit\n");
+
+    $this->assertSame(0, $run['status'], $run['output']);
+    $stdout = (string) preg_replace('/\e\[[0-9;]*[A-Za-z]/', '', $run['stdout']);
+    $this->assertSame(1, preg_match('/^([^|\n]+)\|([^|\n]+)\|([^|\n]+)$/m', $stdout, $paths), $stdout);
+
+    $this->assertSame($this->bones->plugin, $paths[1], 'PWD is the plugin as the shell spells it');
+    $this->assertSame($this->bones->plugin, $paths[2], 'and so is the PWD child processes inherit');
+    $this->assertSame(realpath($this->bones->plugin), realpath($paths[3]), 'the working directory is the plugin');
+  }
+
   public function test_a_relative_deploy_path_means_the_folder_it_was_typed_in(): void
   {
     $run = $this->bones->runFromParent(['deploy', 'out', '--no-build']);
