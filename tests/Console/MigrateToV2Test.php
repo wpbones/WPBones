@@ -107,8 +107,12 @@ JSON);
   /**
    * `wp-scripts format` drops --check and always passes --write, so up to 2.0.12 the migrated
    * `format:check` rewrote the plugin, compiled bundles included, and exited 0.
+   *
+   * This checks the configuration the migration writes. Running it needs node_modules, which this
+   * suite does not install: the scripts were run with yarn on a migrated boilerplate (check exit 1
+   * on an unformatted file and nothing written, `format` leaving public/ alone) and with pnpm 12.
    */
-  public function test_format_check_never_writes_and_format_leaves_the_build_alone(): void
+  public function test_format_check_is_a_prettier_check_and_the_ignore_file_covers_the_build(): void
   {
     [$status, $output] = $this->migrate();
 

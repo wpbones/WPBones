@@ -195,7 +195,8 @@ final class BonesProcess
   /**
    * The WPBones tree whose `bones` and stubs are under test: this checkout, or the one named by
    * BONES_SOURCE, which is how a test is shown to fail on a previous release
-   * (`git archive v2.0.12 src | tar -x -C /tmp/v2012`, then `BONES_SOURCE=/tmp/v2012`).
+   * (`mkdir -p /tmp/v2012 && git archive v2.0.12 src | tar -x -C /tmp/v2012`, then
+   * `BONES_SOURCE=/tmp/v2012`).
    */
   private static function source(): string
   {

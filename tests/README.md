@@ -45,7 +45,7 @@ that outlives its timeout. It can run bones from the folder above the plugin
 To show that a test fails on a previous release, point `BONES_SOURCE` at that release's tree:
 
 ```sh
-git archive v2.0.12 src | tar -x -C /tmp/v2012
+mkdir -p /tmp/v2012 && git archive v2.0.12 src | tar -x -C /tmp/v2012
 BONES_SOURCE=/tmp/v2012 vendor/bin/phpunit tests/Console/RenameTest.php   # expected red
 ```
 
