@@ -35,13 +35,29 @@ run and CI stay green, and it is run separately by `composer test:defects`, wher
 expected to fail until the defect is fixed. Fixing the defect means moving the test out
 of the group, not deleting it.
 
+## Console tests
+
+`tests/Console` drives the real `bones` file as a process: `Support/BonesProcess.php` copies it
+into a throwaway plugin under the system temp folder, runs it with `proc_open`, and kills a run
+that outlives its timeout. It can run bones from the folder above the plugin
+(`runFromParent()`) and put a fake `composer` first on the PATH (`withFakeComposer()`).
+
+To show that a test fails on a previous release, point `BONES_SOURCE` at that release's tree:
+
+```sh
+git archive v2.0.12 src | tar -x -C /tmp/v2012
+BONES_SOURCE=/tmp/v2012 vendor/bin/phpunit tests/Console/RenameTest.php   # expected red
+```
+
 ## Layout
 
 ```
 tests/
-  bootstrap.php          constants, autoload, $wpdb spy
-  Support/WpdbSpy.php    the $wpdb stand-in
-  Unit/                  one class per framework class under test
+  bootstrap.php               constants, autoload, $wpdb spy
+  Support/WpdbSpy.php         the $wpdb stand-in
+  Support/BonesProcess.php    a throwaway plugin and bones run against it
+  Unit/                       one class per framework class under test
+  Console/                    the bones CLI, as a process
 ```
 
 Tests are `export-ignore`d in `.gitattributes`, so they never reach a plugin's `vendor/`.
