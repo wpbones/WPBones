@@ -3886,7 +3886,7 @@ namespace Bones {
      *  - Drops gulp-* and npm-run-all devDependencies
      *  - Adds the v2 devDependency set (@wordpress/scripts 31+, typescript, glob,
      *    less/less-loader, webpack-remove-empty-scripts, @wordpress/jest-preset-default,
-     *    @types/react, @types/react-dom)
+     *    @types/react, @types/react-dom, prettier as wp-prettier)
      *
      * The migration does NOT touch resources/assets/ — the developer's code stays
      * as-is. The printed "Next steps" suggest install/build/test commands using
@@ -3995,6 +3995,11 @@ namespace Bones {
             'glob'                             => '^11.0.0',
             'less'                             => '^4.6.4',
             'less-loader'                      => '^12.2.0',
+            // format:check runs `prettier` itself, and pnpm 12 links only the binaries of direct
+            // dependencies (measured: 12.6.0 answered "prettier: command not found", 10.34.5 did
+            // not). The alias is the one @wordpress/scripts 31 declares, and the one its `format`
+            // asks projects to install.
+            'prettier'                         => 'npm:wp-prettier@3.0.3',
             'typescript'                       => '^5.9.3',
             'webpack-remove-empty-scripts'     => '^1.1.0',
           ];

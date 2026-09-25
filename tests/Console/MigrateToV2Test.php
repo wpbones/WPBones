@@ -121,6 +121,10 @@ JSON);
     $this->assertStringContainsString('--ignore-path .prettierignore', $scripts['format:check']);
     $this->assertSame('wp-scripts format', $scripts['format']);
 
+    // A direct dependency, or pnpm 12 has no `prettier` binary for the script to run.
+    $devDependencies = json_decode((string) file_get_contents($this->fixture . '/package.json'), true)['devDependencies'];
+    $this->assertSame('npm:wp-prettier@3.0.3', $devDependencies['prettier'] ?? null);
+
     $ignore = (string) file_get_contents($this->fixture . '/.prettierignore');
     $this->assertMatchesRegularExpression('#^public/$#m', $ignore, 'format would rewrite the compiled bundles');
     $this->assertMatchesRegularExpression('#^vendor/$#m', $ignore);
