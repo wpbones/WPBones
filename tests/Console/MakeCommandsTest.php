@@ -157,6 +157,31 @@ final class MakeCommandsTest extends TestCase
     $this->assertSame('<h2>edited</h2>', file_get_contents($form));
   }
 
+  /**
+   * Up to 2.0.12 every widget got the id_base "{slug}-demo-widget", so a second widget shared the
+   * first one's settings (WordPress stores them in the option widget_{id_base}), and the stub's
+   * `deccription` key meant no description ever showed on the Widgets screen.
+   */
+  public function test_each_widget_gets_its_own_id_and_a_description(): void
+  {
+    $this->assertSame(0, $this->bones->run(['make:widget', 'RecentPosts'])['status']);
+    $this->assertSame(0, $this->bones->run(['make:widget', 'Shop/Latest'])['status']);
+
+    $first = (string) file_get_contents($this->bones->plugin . '/plugin/Widgets/RecentPosts.php');
+    $second = (string) file_get_contents($this->bones->plugin . '/plugin/Widgets/Shop/Latest.php');
+
+    $this->assertStringContainsString("\$id_base = 'wp-kirk-recent-posts';", $first);
+    $this->assertStringContainsString("\$name = 'WP Kirk Recent Posts';", $first);
+    $this->assertStringContainsString("'description' => 'The Recent Posts widget of WP Kirk'", $first);
+    $this->assertStringContainsString("\$id_base = 'wp-kirk-shop-latest';", $second);
+    $this->assertStringNotContainsString('deccription', $first);
+
+    foreach (['RecentPosts.php', 'Shop/Latest.php'] as $file) {
+      exec(escapeshellarg(PHP_BINARY) . ' -l ' . escapeshellarg($this->bones->plugin . '/plugin/Widgets/' . $file) . ' 2>&1', $lint, $status);
+      $this->assertSame(0, $status, implode("\n", $lint));
+    }
+  }
+
   public function test_migrate_create_without_a_name_fails_cleanly(): void
   {
     $run = $this->bones->run(['migrate:create']);

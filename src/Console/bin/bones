@@ -3654,14 +3654,27 @@ namespace Bones {
         return;
       }
 
+      $className = $this->validateClassName($this->askClassNameIfEmpty($className));
+
       // current plugin name
       [$pluginName] = $this->getPluginNameAndNamespace();
 
       $slug = $this->getPluginId();
 
-      $class = $this->generateClass($this->askClassNameIfEmpty($className), 'widget', 'plugin/Widgets', [
+      // Up to 2.0.12 every widget of a plugin got the id_base "{slug}-demo-widget" and the same name,
+      // so a second widget shared the first one's settings (WordPress keeps them in the option
+      // widget_{id_base}). Both now come from the class: Shop/RecentPosts is "{slug}-shop-recent-posts",
+      // "Recent Posts".
+      $words = '/(?<=[a-z0-9])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])/';
+      $segments = explode('/', $className);
+      $widgetId = strtolower(str_replace('_', '-', (string) preg_replace($words, '-', implode('-', $segments))));
+      $widgetName = trim(str_replace('_', ' ', (string) preg_replace($words, ' ', end($segments))));
+
+      $class = $this->generateClass($className, 'widget', 'plugin/Widgets', [
         '{PluginName}' => $pluginName,
         '{Slug}' => $slug,
+        '{WidgetId}' => $widgetId,
+        '{WidgetName}' => $widgetName,
       ]);
 
       // The views are named after the plugin, not the widget: a second widget finds them in place
