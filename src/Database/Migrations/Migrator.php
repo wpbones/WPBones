@@ -235,9 +235,21 @@ class Migrator
       return get_class($e) . ': ' . $e->getMessage();
     }
 
+    // What Migration::create() already judged: the table and its columns are there.
+    $tolerated = method_exists($migration, 'toleratedErrors') ? $migration->toleratedErrors() : [];
+
     foreach (array_slice($GLOBALS['EZSQL_ERROR'] ?? [], $errors) as $error) {
+      $index = array_search($error, $tolerated, true);
+
+      if ($index !== false) {
+        unset($tolerated[$index]);
+
+        continue;
+      }
+
       // dbDelta() describes each table before creating it, so a new table always leaves a
-      // "doesn't exist" error behind on the way to being created.
+      // "doesn't exist" error behind on the way to being created, also when a migration calls
+      // dbDelta() itself.
       if (stripos(ltrim((string) ($error['query'] ?? '')), 'DESCRIBE ') === 0) {
         continue;
       }
