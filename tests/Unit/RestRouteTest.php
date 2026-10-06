@@ -48,7 +48,8 @@ final class RestRouteTest extends TestCase
       $this->notices[] = [$function, $message, $version];
     });
     Functions\when('__')->returnArg();
-    Functions\when('rest_authorization_required_code')->justReturn(401);
+    // Not 401: a hard-coded status would pass a stub that returns the usual one.
+    Functions\when('rest_authorization_required_code')->justReturn(418);
 
     if (!class_exists(\WP_Error::class)) {
       require dirname(__DIR__) . '/Support/WP_Error.php';
@@ -94,7 +95,7 @@ final class RestRouteTest extends TestCase
     $refusal = ($args['/settings']['permission_callback'])();
     $this->assertInstanceOf(\WP_Error::class, $refusal);
     $this->assertSame('rest_forbidden', $refusal->get_error_code());
-    $this->assertSame(['status' => 401], $refusal->get_error_data());
+    $this->assertSame(['status' => 418], $refusal->get_error_data());
     $this->assertCount(1, $this->notices);
     [$function, $message, $version] = $this->notices[0];
     $this->assertSame('Route::post', $function);

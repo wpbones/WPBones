@@ -4177,14 +4177,15 @@ namespace Bones {
 
         foreach ($entries as $key => $keys) {
           if (!in_array('capability', $keys, true)) {
-            $lines[] = "{$file}: the {$what} {$key} declares no capability, so since 3.0 it needs manage_options ({$read})";
+            $lines[] = "{$file}: the {$what} {$key} declares no capability, so since 3.0 it needs manage_options ({$read})"
+              . ($what === 'menu' ? '; declare it on the menu itself: with read on an item only, a subscriber sees the menu and cannot open its first page' : '');
           }
         }
       }
 
       foreach (glob('pages/*.php') ?: [] as $file) {
-        if (!preg_match('/\bpublic\s+(?:static\s+)?function\s+capability\s*\(\s*\)/i', (string) file_get_contents($file))) {
-          $lines[] = "{$file} declares no capability(), so since 3.0 it needs manage_options (returning {$read})";
+        if (!$this->declaresPageCapability((string) file_get_contents($file))) {
+          $lines[] = "{$file} declares no capability() (public, without required arguments), so since 3.0 it needs manage_options (returning {$read}; ignore this line if it inherits one)";
         }
       }
 
@@ -4224,19 +4225,37 @@ namespace Bones {
 
     /**
      * The entries of the array a config file returns, each with the string keys it holds itself (not
-     * those of the arrays inside it): ['my_page' => ['title', 'capability', 'route']]. Null when the
-     * file returns something else than a literal array (a variable, a call), which cannot be read.
+     * those of the arrays inside it): ['my_page' => ['title', 'capability', 'route']]. A `capability`
+     * of null or '' is left out, as the providers fall back to the default for it.
+     *
+     * Null when the file cannot be read this way: it returns something else than a literal array (a
+     * variable, a call), it has more than one top-level return, or an entry's key is not a literal
+     * string (a constant, an interpolation).
      */
     protected function configEntries(string $code): ?array
     {
       $tokens = $this->codeTokens($code);
       $count = count($tokens);
-      $i = 0;
 
-      while ($i < $count && !(is_array($tokens[$i]) && $tokens[$i][0] === T_RETURN)) {
-        $i++;
+      // The file's own return: not one inside a block, such as an ABSPATH guard's.
+      $returns = [];
+      $braces = 0;
+
+      foreach ($tokens as $i => $token) {
+        if ($token === '{' || (is_array($token) && in_array($token[0], [T_CURLY_OPEN, T_DOLLAR_OPEN_CURLY_BRACES], true))) {
+          $braces++;
+        } elseif ($token === '}') {
+          $braces--;
+        } elseif ($braces === 0 && is_array($token) && $token[0] === T_RETURN) {
+          $returns[] = $i;
+        }
       }
 
+      if (count($returns) !== 1) {
+        return null;
+      }
+
+      $i = $returns[0];
       $first = $tokens[$i + 1] ?? null;
 
       if (!($first === '[' || (is_array($first) && $first[0] === T_ARRAY))) {
@@ -4248,14 +4267,15 @@ namespace Bones {
       $depth = 0;
 
       for ($i++; $i < $count; $i++) {
-        $text = is_array($tokens[$i]) ? $tokens[$i][1] : $tokens[$i];
+        $token = $tokens[$i];
+        $text = is_array($token) ? $token[1] : $token;
 
-        if ($text === '[' || $text === '(') {
+        if (in_array($text, ['[', '(', '{'], true) || (is_array($token) && in_array($token[0], [T_CURLY_OPEN, T_DOLLAR_OPEN_CURLY_BRACES, T_ATTRIBUTE], true))) {
           $depth++;
           continue;
         }
 
-        if ($text === ']' || $text === ')') {
+        if (in_array($text, [']', ')', '}'], true)) {
           if (--$depth === 0) {
             break;
           }
@@ -4266,24 +4286,118 @@ namespace Bones {
           break;
         }
 
-        $isKey = is_array($tokens[$i]) && $tokens[$i][0] === T_CONSTANT_ENCAPSED_STRING
+        // An entry's key that is not a literal string cannot be named, nor its keys told apart.
+        if ($depth === 1 && is_array($token) && $token[0] === T_DOUBLE_ARROW) {
+          $before = $tokens[$i - 1];
+
+          if (!(is_array($before) && $before[0] === T_CONSTANT_ENCAPSED_STRING)) {
+            return null;
+          }
+        }
+
+        $isKey = is_array($token) && $token[0] === T_CONSTANT_ENCAPSED_STRING
           && is_array($tokens[$i + 1] ?? null) && $tokens[$i + 1][0] === T_DOUBLE_ARROW;
 
         if (!$isKey) {
           continue;
         }
 
-        $key = substr($tokens[$i][1], 1, -1);
+        $key = substr($token[1], 1, -1);
 
         if ($depth === 1) {
           $current = $key;
           $entries[$key] = [];
         } elseif ($depth === 2 && $current !== null) {
+          if ($key === 'capability' && $this->isEmptyValue($tokens, $i + 2)) {
+            continue;
+          }
+
           $entries[$current][] = $key;
         }
       }
 
       return $entries;
+    }
+
+    /**
+     * Whether the value starting at $at is a bare null or an empty string, followed by the end of its
+     * element.
+     */
+    protected function isEmptyValue(array $tokens, int $at): bool
+    {
+      $value = $tokens[$at] ?? null;
+      $after = $tokens[$at + 1] ?? null;
+
+      if (!in_array($after, [',', ']', ')'], true) || !is_array($value)) {
+        return false;
+      }
+
+      return ($value[0] === T_STRING && strtolower($value[1]) === 'null')
+        || ($value[0] === T_CONSTANT_ENCAPSED_STRING && strlen($value[1]) === 2);
+    }
+
+    /**
+     * Whether a pages/ class declares a capability() that the provider calls: public, by its own
+     * name, and callable without arguments. One it inherits cannot be seen from here.
+     */
+    protected function declaresPageCapability(string $code): bool
+    {
+      $tokens = $this->codeTokens($code);
+      $count = count($tokens);
+
+      foreach ($tokens as $i => $token) {
+        if (!is_array($token) || $token[0] !== T_FUNCTION) {
+          continue;
+        }
+
+        $at = ($tokens[$i + 1] ?? null) === '&' ? $i + 2 : $i + 1;
+        $name = $tokens[$at] ?? null;
+
+        if (!is_array($name) || strcasecmp($name[1], 'capability') !== 0 || ($tokens[$at + 1] ?? null) !== '(') {
+          continue;
+        }
+
+        for ($k = $i - 1; $k >= 0 && is_array($tokens[$k]) && in_array($tokens[$k][0], [T_PUBLIC, T_PROTECTED, T_PRIVATE, T_STATIC, T_FINAL, T_ABSTRACT], true); $k--) {
+          if (in_array($tokens[$k][0], [T_PROTECTED, T_PRIVATE], true)) {
+            return false;
+          }
+        }
+
+        // Count the parameters without a default value.
+        $required = 0;
+        $depth = 0;
+        $param = $default = $variadic = false;
+
+        for ($j = $at + 2; $j < $count; $j++) {
+          $text = is_array($tokens[$j]) ? $tokens[$j][1] : $tokens[$j];
+
+          if ($depth === 0 && ($text === ')' || $text === ',')) {
+            $required += $param && !$default && !$variadic ? 1 : 0;
+            $param = $default = $variadic = false;
+
+            if ($text === ')') {
+              break;
+            }
+            continue;
+          }
+
+          if (in_array($text, ['(', '['], true)) {
+            $depth++;
+          } elseif (in_array($text, [')', ']'], true)) {
+            $depth--;
+          } elseif ($depth === 0 && $text === '=') {
+            $default = true;
+          } elseif ($depth === 0 && is_array($tokens[$j]) && $tokens[$j][0] === T_ELLIPSIS) {
+            $variadic = true;
+          } elseif ($depth === 0 && is_array($tokens[$j]) && $tokens[$j][0] === T_VARIABLE) {
+            $param = true;
+          }
+        }
+
+        return $required === 0;
+      }
+
+      return false;
     }
 
     /**
@@ -4341,7 +4455,9 @@ namespace Bones {
     /**
      * The Route:: calls in an API route file that pass no permission_callback, as [line, call,
      * literal]: literal is false when the options are not a literal array, which cannot be read. Only a
-     * key of the options counts, not the string anywhere in the call.
+     * key of the options counts, not the string anywhere in the call, and a null value is no callback.
+     * The class may be imported under another name (`use …\Route as Api`), in any case; a call nested
+     * in another's arguments is read too.
      */
     protected function routesWithoutPermission(string $code): array
     {
@@ -4349,9 +4465,23 @@ namespace Bones {
       $count = count($tokens);
       $found = [];
 
+      // The names Route goes by in this file: its own, and the aliases a use statement gives it.
+      $names = ['route'];
+
+      foreach ($tokens as $i => $token) {
+        if (is_array($token) && $token[0] === T_AS
+          && is_array($tokens[$i - 1] ?? null) && preg_match('/(^|\\\\)Route$/i', $tokens[$i - 1][1])
+          && is_array($tokens[$i + 1] ?? null) && $tokens[$i + 1][0] === T_STRING) {
+          $names[] = strtolower($tokens[$i + 1][1]);
+        }
+      }
+
       for ($i = 0; $i + 3 < $count; $i++) {
-        $isCall = is_array($tokens[$i]) && in_array($tokens[$i][0], [T_STRING, T_NAME_QUALIFIED, T_NAME_FULLY_QUALIFIED], true)
-          && preg_match('/(^|\\\\)Route$/', $tokens[$i][1])
+        $class = is_array($tokens[$i]) && in_array($tokens[$i][0], [T_STRING, T_NAME_QUALIFIED, T_NAME_FULLY_QUALIFIED], true)
+          ? strtolower(ltrim(strrchr('\\' . $tokens[$i][1], '\\'), '\\'))
+          : null;
+
+        $isCall = $class !== null && in_array($class, $names, true)
           && is_array($tokens[$i + 1]) && $tokens[$i + 1][0] === T_DOUBLE_COLON
           && is_array($tokens[$i + 2]) && in_array(strtolower($tokens[$i + 2][1]), ['get', 'post', 'put', 'patch', 'delete', 'request'], true)
           && $tokens[$i + 3] === '(';
@@ -4370,13 +4500,14 @@ namespace Bones {
         $options = null;
 
         for ($j = $i + 3; $j < $count; $j++) {
-          $text = is_array($tokens[$j]) ? $tokens[$j][1] : $tokens[$j];
+          $token = $tokens[$j];
+          $text = is_array($token) ? $token[1] : $token;
 
           if ($depth === 1 && $argument === $optionsAt && $options === null && $text !== ',' && $text !== ')') {
-            $options = $text === '[' || (is_array($tokens[$j]) && $tokens[$j][0] === T_ARRAY) ? 'literal' : 'other';
+            $options = $text === '[' || (is_array($token) && $token[0] === T_ARRAY) ? 'literal' : 'other';
           }
 
-          if (in_array($text, ['(', '[', '{'], true) || (is_array($tokens[$j]) && in_array($tokens[$j][0], [T_CURLY_OPEN, T_DOLLAR_OPEN_CURLY_BRACES], true))) {
+          if (in_array($text, ['(', '[', '{'], true) || (is_array($token) && in_array($token[0], [T_CURLY_OPEN, T_DOLLAR_OPEN_CURLY_BRACES, T_ATTRIBUTE], true))) {
             $depth++;
           } elseif (in_array($text, [')', ']', '}'], true)) {
             if (--$depth === 0) {
@@ -4384,15 +4515,16 @@ namespace Bones {
             }
           } elseif ($text === ',' && $depth === 1) {
             $argument++;
-          } elseif (is_array($tokens[$j]) && $tokens[$j][0] === T_CONSTANT_ENCAPSED_STRING) {
+          } elseif (is_array($token) && $token[0] === T_CONSTANT_ENCAPSED_STRING) {
             // The path is the first argument, or the second of request(), whose first is the verbs.
             if ($path === null && $depth === 1 && $argument === ($method === 'request' ? 1 : 0)) {
-              $path = $tokens[$j][1];
+              $path = $token[1];
             }
 
             $isKey = is_array($tokens[$j + 1] ?? null) && $tokens[$j + 1][0] === T_DOUBLE_ARROW;
 
-            if ($argument === $optionsAt && $depth === 2 && $isKey && substr($tokens[$j][1], 1, -1) === 'permission_callback') {
+            if ($argument === $optionsAt && $depth === 2 && $isKey && substr($token[1], 1, -1) === 'permission_callback'
+              && !$this->isEmptyValue($tokens, $j + 2)) {
               $permission = true;
             }
           }
@@ -4403,8 +4535,6 @@ namespace Bones {
         } elseif (!$permission) {
           $found[] = [$tokens[$i][2], 'Route::' . $method . '(' . ($path ?? '…') . ')', true];
         }
-
-        $i = $j;
       }
 
       return $found;

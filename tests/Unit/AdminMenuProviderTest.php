@@ -17,7 +17,12 @@ use WPKirk\WPBones\Routing\AdminMenuProvider;
  */
 final class AdminMenuProviderTest extends TestCase
 {
-  /** The capability each add_menu_page() and add_submenu_page() call received, by slug. */
+  /**
+   * The capability each call received, as "menu:<slug>" for add_menu_page() and "item:<slug>"
+   * for add_submenu_page(): the first item shares the menu's slug, and one key per slug let it
+   * overwrite the menu's (the independent review of #125 hard-coded `read` in add_menu_page()
+   * and every test still passed).
+   */
   private array $capabilities = [];
 
   private string $basePath;
@@ -31,12 +36,12 @@ final class AdminMenuProviderTest extends TestCase
 
     Functions\when('sanitize_title')->alias(fn($title) => strtolower(preg_replace('/[^A-Za-z0-9_]+/', '-', (string) $title)));
     Functions\when('add_menu_page')->alias(function ($pageTitle, $menuTitle, $capability, $slug) {
-      $this->capabilities[$slug] = $capability;
+      $this->capabilities["menu:{$slug}"] = $capability;
 
       return "toplevel_page_{$slug}";
     });
     Functions\when('add_submenu_page')->alias(function ($parent, $pageTitle, $menuTitle, $capability, $slug) {
-      $this->capabilities[$slug] = $capability;
+      $this->capabilities["item:{$slug}"] = $capability;
 
       return "{$parent}_page_{$slug}";
     });
@@ -90,6 +95,18 @@ final class AdminMenuProviderTest extends TestCase
   {
     $this->register(['my_plugin' => $this->menu()]);
 
+    $this->assertSame('manage_options', $this->capabilities['menu:my_plugin']);
+    $this->assertSame('manage_options', $this->capabilities['item:my_plugin']);
+    $this->assertSame(['manage_options'], array_values(array_unique($this->capabilities)));
+    $this->assertCount(3, $this->capabilities);
+  }
+
+  /** A menu under a post type's: no top-level page, and its items take the menu's default. */
+  public function test_items_under_a_post_type_menu_ask_for_manage_options(): void
+  {
+    $this->register(['edit.php?post_type=book' => $this->menu()]);
+
+    $this->assertArrayNotHasKey('menu:edit.php?post_type=book', $this->capabilities);
     $this->assertSame(['manage_options'], array_values(array_unique($this->capabilities)));
     $this->assertCount(2, $this->capabilities);
   }
@@ -98,6 +115,7 @@ final class AdminMenuProviderTest extends TestCase
   {
     $this->register(['my_plugin' => $this->menu(['capability' => 'read'])]);
 
+    $this->assertSame('read', $this->capabilities['menu:my_plugin']);
     $this->assertSame(['read'], array_values(array_unique($this->capabilities)));
   }
 
@@ -108,7 +126,8 @@ final class AdminMenuProviderTest extends TestCase
 
     $this->register(['my_plugin' => $menu]);
 
-    $this->assertSame('read', $this->capabilities['my_plugin']);
+    $this->assertSame('read', $this->capabilities['menu:my_plugin']);
+    $this->assertSame('read', $this->capabilities['item:my_plugin']);
     $this->assertSame('manage_options', end($this->capabilities));
   }
 }

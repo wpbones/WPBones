@@ -212,6 +212,94 @@ final class MigrateToV3AccessTest extends TestCase
     $this->assertStringContainsString("route.php:5: Route::get('/variable') passes options that are not a literal array", $run['output']);
   }
 
+  /**
+   * From the independent review of #125: each of these made the report say "Nothing to change".
+   */
+  public function test_a_key_that_is_not_a_literal_makes_the_config_unreadable(): void
+  {
+    $this->put('config/routes.php', <<<'PHP'
+      <?php
+      return [
+        'open_page' => ['title' => 'Open', 'route' => ['get' => 'A@b']],
+        Pages::ADMIN => ['title' => 'Admin', 'capability' => 'manage_options', 'route' => ['get' => 'A@c']],
+      ];
+      PHP);
+
+    $run = $this->convert();
+
+    $this->assertStringContainsString('config/routes.php does not return a literal array', $run['output']);
+  }
+
+  public function test_an_early_return_inside_a_block_is_not_the_config(): void
+  {
+    $this->put('config/routes.php', <<<'PHP'
+      <?php
+      if (!defined('ABSPATH')) {
+        return [];
+      }
+
+      return [
+        'open_page' => ['title' => 'Open', 'route' => ['get' => 'A@b']],
+      ];
+      PHP);
+
+    $run = $this->convert();
+
+    $this->assertStringContainsString('config/routes.php: the page open_page declares no capability', $run['output']);
+  }
+
+  public function test_an_empty_capability_is_reported_like_a_missing_one(): void
+  {
+    $this->put('config/routes.php', "<?php\nreturn [\n  'a' => ['title' => 'A', 'capability' => null, 'route' => ['get' => 'A@b']],\n  'b' => ['title' => 'B', 'capability' => '', 'route' => ['get' => 'A@c']],\n];\n");
+    $this->put('api/v/v1/route.php', "<?php\nRoute::get('/null', fn() => 1, ['permission_callback' => null]);\n");
+
+    $run = $this->convert();
+
+    $this->assertStringContainsString('the page a declares no capability', $run['output']);
+    $this->assertStringContainsString('the page b declares no capability', $run['output']);
+    $this->assertStringContainsString("Route::get('/null') has no permission_callback", $run['output']);
+  }
+
+  public function test_an_aliased_lowercase_or_nested_route_is_read_too(): void
+  {
+    $this->put('api/v/v1/route.php', <<<'PHP'
+      <?php
+      use WPKirk\WPBones\Routing\API\Route as Api;
+
+      Api::post('/aliased', fn() => 1);
+      route::get('/lowercase', fn() => 1);
+      Route::get('/outer', function () {
+        Route::get('/inner', fn() => 1);
+      }, ['permission_callback' => '__return_true']);
+      Route::get('/attribute', #[Pure] fn() => 1, ['permission_callback' => '__return_true']);
+      PHP);
+
+    $run = $this->convert();
+
+    $this->assertStringContainsString("Route::post('/aliased') has no permission_callback", $run['output']);
+    $this->assertStringContainsString("Route::get('/lowercase') has no permission_callback", $run['output']);
+    $this->assertStringContainsString("Route::get('/inner') has no permission_callback", $run['output']);
+    $this->assertStringNotContainsString("'/outer'", $run['output']);
+    $this->assertStringNotContainsString("'/attribute'", $run['output']);
+  }
+
+  public function test_a_pages_capability_method_is_read_from_the_tokens(): void
+  {
+    $this->put('pages/Commented.php', "<?php\nclass Commented extends Page {\n  // public function capability() { return 'read'; }\n}\n");
+    $this->put('pages/Implicit.php', "<?php\nclass Implicit extends Page {\n  function capability() { return 'read'; }\n}\n");
+    $this->put('pages/Hidden.php', "<?php\nclass Hidden extends Page {\n  protected function capability() { return 'read'; }\n}\n");
+    $this->put('pages/Needy.php', "<?php\nclass Needy extends Page {\n  public function capability(\$user) { return 'read'; }\n}\n");
+    $this->put('pages/Optional.php', "<?php\nclass Optional extends Page {\n  public function capability(\$user = null) { return 'read'; }\n}\n");
+
+    $run = $this->convert();
+
+    $this->assertStringContainsString('pages/Commented.php declares no capability()', $run['output']);
+    $this->assertStringNotContainsString('pages/Implicit.php', $run['output']);
+    $this->assertStringContainsString('pages/Hidden.php declares no capability()', $run['output']);
+    $this->assertStringContainsString('pages/Needy.php declares no capability()', $run['output']);
+    $this->assertStringNotContainsString('pages/Optional.php', $run['output']);
+  }
+
   public function test_a_plugin_that_declares_everything_has_nothing_to_review(): void
   {
     $this->put('config/routes.php', "<?php\nreturn ['p' => ['title' => 'P', 'capability' => 'read', 'route' => ['get' => 'A@b']]];\n");
