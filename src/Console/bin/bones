@@ -4221,24 +4221,41 @@ namespace Bones {
         }
       }
 
-      // Since 3.0 a request to an admin page that is not a GET carries the plugin's nonce.
-      if (is_dir('resources/views')) {
-        $views = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator('resources/views', \FilesystemIterator::SKIP_DOTS));
+      // Since 3.0 a request to an admin page that is not a GET carries the plugin's nonce: each POST
+      // form, in the views and in the pages/ classes that print their own, holds csrfField().
+      foreach (['resources/views', 'pages'] as $folder) {
+        if (!is_dir($folder)) {
+          continue;
+        }
 
-        foreach ($views as $entry) {
+        $files = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($folder, \FilesystemIterator::SKIP_DOTS));
+
+        foreach ($files as $entry) {
           if ($entry->getExtension() !== 'php') {
             continue;
           }
 
           $code = (string) file_get_contents($entry->getPathname());
-
-          if (strpos($code, 'csrfField(') !== false || !preg_match('/<form\b[^>]*\bmethod\s*=\s*["\']?post\b/i', $code, $form, PREG_OFFSET_CAPTURE)) {
-            continue;
-          }
-
           $file = str_replace(DIRECTORY_SEPARATOR, '/', $entry->getPathname());
-          $line = substr_count(substr($code, 0, $form[0][1]), "\n") + 1;
-          $lines[] = "{$file}:{$line}: a POST form without \$plugin->csrfField(): since 3.0 the page refuses the request (a route that takes requests from elsewhere says 'csrf' => false)";
+
+          preg_match_all('/<form\b[^>]*>/i', $code, $forms, PREG_OFFSET_CAPTURE);
+
+          foreach ($forms[0] as [$tag, $at]) {
+            if (!preg_match('/\bmethod\s*=\s*["\']?post\b/i', $tag)) {
+              continue;
+            }
+
+            // The form's own markup: up to its </form>, or the end of the file.
+            $close = stripos($code, '</form', $at);
+            $body = substr($code, $at, $close === false ? null : $close - $at);
+
+            if (strpos($body, 'csrfField(') !== false) {
+              continue;
+            }
+
+            $line = substr_count(substr($code, 0, $at), "\n") + 1;
+            $lines[] = "{$file}:{$line}: a POST form without \$plugin->csrfField(): since 3.0 the page refuses the request (a route that takes requests from elsewhere says 'csrf' => false)";
+          }
         }
       }
 

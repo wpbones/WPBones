@@ -78,6 +78,22 @@ class PageProvider extends ServiceProvider
   }
 
   /**
+   * Whether a page declares a public, argument-free csrf() that returns false.
+   *
+   * @param object $page
+   */
+  private function optsOutOfCsrf($page): bool
+  {
+    if (!method_exists($page, 'csrf')) {
+      return false;
+    }
+
+    $method = new \ReflectionMethod($page, 'csrf');
+
+    return $method->isPublic() && $method->getNumberOfRequiredParameters() === 0 && $page->csrf() === false;
+  }
+
+  /**
    * Scan the 'pages' directory and load all the classes found.
    */
   private function initCustomRoutes()
@@ -103,8 +119,9 @@ class PageProvider extends ServiceProvider
 
         $this->authorizeAdminPage($hookName, $this->capabilityOf($page));
 
-        // A page that takes requests from elsewhere has a public csrf() returning false.
-        if (!(method_exists($page, 'csrf') && (new \ReflectionMethod($page, 'csrf'))->isPublic() && $page->csrf() === false)) {
+        // A page that takes requests from elsewhere has a public csrf() returning false: declared,
+        // public and argument-free, as capability() (a csrf($token) of its own is not that).
+        if (!$this->optsOutOfCsrf($page)) {
           Csrf::guard($hookName, $this->plugin->csrfAction());
         }
 

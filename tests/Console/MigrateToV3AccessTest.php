@@ -314,6 +314,19 @@ final class MigrateToV3AccessTest extends TestCase
     $this->assertStringNotContainsString('search.php', $run['output']);
   }
 
+  /** Each form on its own (Codex on #129): one form with the field does not cover another. */
+  public function test_each_post_form_is_checked_on_its_own_and_pages_classes_too(): void
+  {
+    $this->put('resources/views/dashboard/two.php', "<form method=\"post\">\n  <?php echo \$plugin->csrfField(); ?>\n</form>\n<form method=\"post\">\n</form>\n");
+    $this->put('pages/Inline.php', "<?php\nclass Inline extends Page {\n  public function render() { return '<form method=\"post\"></form>'; }\n}\n");
+
+    $run = $this->convert();
+
+    $this->assertStringNotContainsString('two.php:1:', $run['output']);
+    $this->assertStringContainsString('resources/views/dashboard/two.php:4: a POST form without', $run['output']);
+    $this->assertStringContainsString('pages/Inline.php:3: a POST form without', $run['output']);
+  }
+
   /** Since 3.0 a logged Ajax action needs $nonceHash: providers without one are listed. */
   public function test_ajax_providers_with_logged_actions_and_no_nonce_are_listed(): void
   {

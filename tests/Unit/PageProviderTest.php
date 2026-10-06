@@ -227,6 +227,17 @@ final class PageProviderTest extends TestCase
     $this->assertSame(['manage_options'], $this->asked);
   }
 
+  /** A csrf($token) of the page's own is not the opt-out, and is not called (Codex on #129). */
+  public function test_a_csrf_method_with_required_arguments_is_not_called(): void
+  {
+    $this->register('own', "  public function capability() { return 'read'; }\n  public function csrf(\$token) { throw new \\LogicException('called'); }\n");
+    $this->granted = ['read'];
+
+    $this->fire('load-toplevel_page_own');
+
+    $this->assertSame(['read'], $this->asked);
+  }
+
   /** The same null title as a route page: see AdminRouteProviderTest. */
   public function test_the_page_gives_wordpress_its_title_on_load(): void
   {
