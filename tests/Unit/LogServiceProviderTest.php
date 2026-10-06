@@ -6,6 +6,8 @@ namespace WPKirk\WPBones\Tests\Unit;
 
 use Brain\Monkey;
 use Brain\Monkey\Functions;
+use PHPUnit\Framework\Attributes\PreserveGlobalState;
+use PHPUnit\Framework\Attributes\RunInSeparateProcess;
 use PHPUnit\Framework\TestCase;
 use WPKirk\WPBones\Foundation\Log\LogServiceProvider;
 
@@ -39,6 +41,7 @@ final class LogServiceProviderTest extends TestCase
     Functions\when('wp_upload_dir')->alias(fn() => ['basedir' => $this->uploads, 'error' => false]);
     Functions\when('wp_mkdir_p')->alias(fn($dir) => is_dir($dir) || mkdir($dir, 0755, true));
     Functions\when('trailingslashit')->alias(fn($path) => rtrim($path, '/\\') . '/');
+    Functions\when('get_site_option')->justReturn('');
   }
 
   protected function tearDown(): void
@@ -81,9 +84,26 @@ final class LogServiceProviderTest extends TestCase
 
   private function hash(): string
   {
-    $key = (defined('AUTH_SALT') ? AUTH_SALT : '') . ABSPATH;
+    $key = defined('AUTH_SALT') && AUTH_SALT ? AUTH_SALT : '';
 
     return substr(hash_hmac('sha256', 'wpbones-log-my-plugin', $key), 0, 12);
+  }
+
+  /**
+   * The name is keyed with AUTH_SALT and nothing else: not ABSPATH, which differs between a web
+   * request and WP-CLI, and between releases of an atomic deploy (review of #128). In a process of
+   * its own, so that the constant does not leak into the other tests.
+   */
+  #[RunInSeparateProcess]
+  #[PreserveGlobalState(false)]
+  public function test_the_name_is_keyed_with_auth_salt_only(): void
+  {
+    define('AUTH_SALT', 'a-salt-for-this-test');
+
+    $this->logger(['plugin.logging.type' => 'single'])->debug('hello');
+
+    $expected = substr(hash_hmac('sha256', 'wpbones-log-my-plugin', 'a-salt-for-this-test'), 0, 12);
+    $this->assertFileExists($this->uploads . "/wpbones/my-plugin/logs/debug-{$expected}.log");
   }
 
   /** wp_hash() is pluggable and not loaded when the plugin boots: the provider must not call it. */

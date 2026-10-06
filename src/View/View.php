@@ -202,6 +202,9 @@ class View
 
       // A direct request for a compiled view runs it out of context instead of reading it.
       $this->blade->setCompiledExtension('.php');
+
+      // An error throws: BladeOne's showError() would close a buffer it did not open, the page's.
+      $this->blade->throwOnError = true;
     }
 
     return $this->blade;

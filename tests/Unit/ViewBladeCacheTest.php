@@ -107,6 +107,28 @@ final class ViewBladeCacheTest extends TestCase
     }
   }
 
+  /**
+   * BladeOne's showError() closes a buffer it did not open, the page's own: with throwOnError it
+   * throws instead, and render(true) restores the level (review of #128).
+   */
+  public function test_a_blade_error_throws_instead_of_eating_the_page_s_buffer(): void
+  {
+    file_put_contents($this->plugin->basePath . '/resources/views/pages/missing.blade.php', "@include('pages.nowhere')");
+    $level = ob_get_level();
+    ob_start();
+    echo 'PAGE';
+
+    try {
+      (new View($this->plugin, 'pages.missing'))->render(true);
+      $this->fail('A missing include did not throw.');
+    } catch (\Throwable $e) {
+      $this->assertSame($level + 1, ob_get_level());
+      $this->assertSame('PAGE', ob_get_contents());
+    } finally {
+      ob_end_clean();
+    }
+  }
+
   public function test_a_plain_php_view_creates_no_cache_folder_at_all(): void
   {
     $html = (new View($this->plugin, 'plain'))->render(true);

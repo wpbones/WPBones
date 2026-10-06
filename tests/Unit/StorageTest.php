@@ -110,6 +110,43 @@ final class StorageTest extends TestCase
     $this->assertNull(Storage::path('my_plugin_slug', 'views'));
   }
 
+  /** Apache 2.4's own form, `Require all denied`, is a rule too (it has no "deny" in it). */
+  public function test_an_htaccess_with_only_require_all_denied_is_accepted(): void
+  {
+    mkdir($this->uploads . '/wpbones', 0755, true);
+    file_put_contents($this->uploads . '/wpbones/.htaccess', "Require all denied\n");
+
+    $this->assertNotNull(Storage::path('my_plugin_slug', 'views'));
+  }
+
+  /** wp_mkdir_p() answers false when another request made the folder first: the folder is there. */
+  public function test_a_folder_another_request_made_first_is_used(): void
+  {
+    Functions\when('wp_mkdir_p')->alias(function ($dir) {
+      @mkdir($dir, 0755, true);
+
+      return false;
+    });
+
+    $this->assertSame($this->uploads . '/wpbones/my_plugin_slug/views', Storage::path('my_plugin_slug', 'views'));
+  }
+
+  /** For an uninstall.php: the plugin's folder goes, and only that one. */
+  public function test_delete_removes_the_plugins_folder_only(): void
+  {
+    Storage::path('my_plugin_slug', 'logs');
+    Storage::path('other_plugin', 'logs');
+    file_put_contents($this->uploads . '/wpbones/my_plugin_slug/logs/debug.log', 'x');
+
+    Storage::delete('my_plugin_slug');
+
+    $this->assertDirectoryDoesNotExist($this->uploads . '/wpbones/my_plugin_slug');
+    $this->assertDirectoryExists($this->uploads . '/wpbones/other_plugin/logs');
+
+    Storage::delete('../../');
+    $this->assertDirectoryExists($this->uploads . '/wpbones');
+  }
+
   /** An .htaccess that denies nothing, an empty one left by a full disk for instance, is no rule. */
   public function test_an_htaccess_that_denies_nothing_means_no_folder(): void
   {

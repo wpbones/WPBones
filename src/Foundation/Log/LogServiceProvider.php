@@ -143,7 +143,10 @@ class LogServiceProvider extends ServiceProvider
       }
 
       $this->logPath = trailingslashit($logs);
-      $key = (defined('AUTH_SALT') ? AUTH_SALT : '') . ABSPATH;
+      // AUTH_SALT only: ABSPATH differs between a web request and WP-CLI, and between the
+      // releases of an atomic deploy. The salt WordPress keeps in the options when wp-config.php
+      // defines none.
+      $key = defined('AUTH_SALT') && AUTH_SALT ? AUTH_SALT : (string) get_site_option('auth_salt', '');
       $this->filename .= '-' . substr(hash_hmac('sha256', 'wpbones-log-' . $folder, $key), 0, 12);
     } else {
       $this->logPath = trailingslashit($this->logPath);

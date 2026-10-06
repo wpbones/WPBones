@@ -56,7 +56,8 @@ class Storage
     $root = trailingslashit($base) . 'wpbones';
     $path = "{$root}/{$plugin}/{$folder}";
 
-    if (!is_dir($path) && !wp_mkdir_p($path)) {
+    // wp_mkdir_p() answers false when another request made the folder first: it is there all the same.
+    if (!is_dir($path) && !wp_mkdir_p($path) && !is_dir($path)) {
       return null;
     }
 
@@ -80,15 +81,55 @@ class Storage
         "<IfModule mod_authz_core.c>\n  Require all denied\n</IfModule>\n" .
         "<IfModule !mod_authz_core.c>\n  Order allow,deny\n  Deny from all\n</IfModule>\n";
 
-      if (@file_put_contents($htaccess, $rule) !== strlen($rule)) {
-        @unlink($htaccess);
+      // Written aside and renamed into place, so that a request never reads it half written.
+      $draft = $htaccess . '.' . uniqid('', true);
 
-        return null;
+      if (@file_put_contents($draft, $rule) !== strlen($rule) || !@rename($draft, $htaccess)) {
+        @unlink($draft);
+
+        if (!file_exists($htaccess)) {
+          return null;
+        }
       }
-    } elseif (stripos((string) @file_get_contents($htaccess), 'deny') === false) {
+    }
+
+    // `Deny from all` (Apache 2.2) or `Require all denied` (2.4): either is a rule.
+    if (!preg_match('/\bden(?:y|ied)\b/i', (string) @file_get_contents($htaccess))) {
       return null;
     }
 
     return $path;
+  }
+
+  /**
+   * Remove a plugin's folder, for its uninstall.php: `Storage::delete(basename(__DIR__))`.
+   *
+   * @param string $plugin The plugin's folder name, as given to path().
+   */
+  public static function delete(string $plugin): void
+  {
+    $plugin = preg_replace('/[^A-Za-z0-9_-]/', '', $plugin);
+    $uploads = wp_upload_dir(null, false);
+
+    if ($plugin === '' || !empty($uploads['error']) || empty($uploads['basedir'])) {
+      return;
+    }
+
+    $dir = trailingslashit($uploads['basedir']) . "wpbones/{$plugin}";
+
+    if (!is_dir($dir) || is_link($dir)) {
+      return;
+    }
+
+    $entries = new \RecursiveIteratorIterator(
+      new \RecursiveDirectoryIterator($dir, \FilesystemIterator::SKIP_DOTS),
+      \RecursiveIteratorIterator::CHILD_FIRST
+    );
+
+    foreach ($entries as $entry) {
+      $entry->isDir() && !$entry->isLink() ? @rmdir($entry->getPathname()) : @unlink($entry->getPathname());
+    }
+
+    @rmdir($dir);
   }
 }
