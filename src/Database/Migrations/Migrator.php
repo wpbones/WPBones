@@ -257,17 +257,31 @@ class Migrator
         }
       }
 
+      // The version moves last: until it does, the next request finishes the update again. A
+      // version the database will not store is a failure like any other, so that the update's
+      // work is retried by an administrator now and then, not by every visit.
+      if ($this->repository->version() !== $this->version) {
+        if (!$this->repository->setVersion($this->version)) {
+          $result->failed = 'the stored version';
+          $result->error = "the database did not store the version {$this->version}";
+
+          $this->repository->setFailure([
+            'migration' => $result->failed,
+            'message' => $result->error,
+            'version' => $this->version,
+            'time' => time(),
+          ]);
+
+          $this->log("{$result->error}: an administrator's next visit tries again");
+
+          return $result;
+        }
+
+        $result->advanced = true;
+      }
+
       // Also on a site that never failed: the empty value keeps the option autoloaded.
       $this->repository->setFailure(null);
-
-      // The version moves last: until it does, the next request finishes the update again.
-      if ($this->repository->version() !== $this->version) {
-        if ($this->repository->setVersion($this->version)) {
-          $result->advanced = true;
-        } else {
-          $this->log("the version {$this->version} could not be stored: the next request tries again");
-        }
-      }
 
       return $result;
     } finally {

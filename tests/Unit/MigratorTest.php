@@ -165,14 +165,18 @@ final class MigratorTest extends TestCase
     $result = $this->migrator()->migrate();
 
     $this->assertSame(['2026_01_01_000000_first'], $result->ran);
-    $this->assertFalse($result->advanced, 'plugin/updated.php is left to the request that stores it');
-    $this->assertStringContainsString('the version 1.0.0 could not be stored', (string) file_get_contents($this->log));
+    $this->assertFalse($result->advanced);
+    $this->assertSame('the stored version', $result->failed);
+    $this->assertStringContainsString('the database did not store the version 1.0.0', (string) file_get_contents($this->log));
+    $this->assertSame('the stored version', $this->repository->failure['migration'], 'recorded, so a public page does not retry it');
+    $this->assertFalse($this->migrator()->isDue());
 
     $this->repository->versionFails = false;
     $again = $this->migrator()->migrate();
 
     $this->assertSame([], $again->ran);
     $this->assertTrue($again->advanced);
+    $this->assertNull($this->repository->failure);
   }
 
   public function test_the_update_is_finished_under_the_lock_before_the_version_moves(): void
@@ -189,7 +193,7 @@ final class MigratorTest extends TestCase
 
     $this->assertSame(['1.0.0'], $seen, 'with the version it came from');
     $this->assertTrue($result->advanced);
-    $this->assertSame(['lock', 'refresh', 'finish', 'failure cleared', 'version 1.1.0', 'unlock'], $this->repository->calls);
+    $this->assertSame(['lock', 'refresh', 'finish', 'version 1.1.0', 'failure cleared', 'unlock'], $this->repository->calls);
   }
 
   public function test_the_first_run_finishes_with_no_previous_version(): void
@@ -511,7 +515,7 @@ final class MigratorTest extends TestCase
     $this->migrator()->migrate();
 
     $this->assertSame(
-      ['lock', 'refresh', 'touch', 'log 2026_01_01_000000_first', 'failure cleared', 'version 1.0.0', 'unlock'],
+      ['lock', 'refresh', 'touch', 'log 2026_01_01_000000_first', 'version 1.0.0', 'failure cleared', 'unlock'],
       $this->repository->calls,
       'the lock is touched before each migration; the failure option is written even empty, to stay autoloaded'
     );
