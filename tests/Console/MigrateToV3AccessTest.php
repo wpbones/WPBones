@@ -349,6 +349,16 @@ final class MigrateToV3AccessTest extends TestCase
     $this->assertStringContainsString('plugin/Ajax/Prefs.php:5: unslashes what useHTTPPost() returns', $run['output']);
   }
 
+  /** A form tag with PHP inside it, as the Options boilerplate writes its action. */
+  public function test_a_form_tag_with_php_inside_is_read(): void
+  {
+    $this->put('resources/views/dashboard/resource.php', "<?php \$mid = 'x'; ?>\n<div>\n  <form action=\"#<?php echo \$mid ?>\" method=\"post\">\n    <button>POST</button>\n  </form>\n</div>\n");
+
+    $run = $this->convert();
+
+    $this->assertStringContainsString('resources/views/dashboard/resource.php:3: a POST form without', $run['output']);
+  }
+
   /** Since 3.0 a logged Ajax action needs $nonceHash: providers without one are listed. */
   public function test_ajax_providers_with_logged_actions_and_no_nonce_are_listed(): void
   {

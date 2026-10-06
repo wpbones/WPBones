@@ -4306,22 +4306,40 @@ namespace Bones {
      */
     protected function postForms(string $code, bool $inStrings): array
     {
-      $found = [];
+      // Where the markup is: a view's HTML, and a pages/ class's strings.
+      $kinds = $inStrings ? [T_INLINE_HTML, T_CONSTANT_ENCAPSED_STRING, T_ENCAPSED_AND_WHITESPACE] : [T_INLINE_HTML];
+      $ranges = [];
       $offset = 0;
 
       foreach (token_get_all($code) as $token) {
         $text = is_array($token) ? $token[1] : $token;
-        $kinds = $inStrings ? [T_INLINE_HTML, T_CONSTANT_ENCAPSED_STRING, T_ENCAPSED_AND_WHITESPACE] : [T_INLINE_HTML];
 
-        if (is_array($token) && in_array($token[0], $kinds, true) && preg_match_all('/<form\b[^>]*>/i', $text, $forms, PREG_OFFSET_CAPTURE)) {
-          foreach ($forms[0] as [$tag, $at]) {
-            if (preg_match('/\bmethod\s*=\s*\\\\?["\']?post\b/i', $tag)) {
-              $found[] = $offset + $at;
-            }
-          }
+        if (is_array($token) && in_array($token[0], $kinds, true)) {
+          $ranges[] = [$offset, $offset + strlen($text)];
         }
 
         $offset += strlen($text);
+      }
+
+      // A tag may hold PHP of its own, an echo in its action: the > that closes the PHP does not
+      // close the tag. (Not quoted here: a PHP close tag ends a // comment.)
+      preg_match_all('/<form\b(?:<\?(?:php|=).*?\?>|[^>])*>/is', $code, $forms, PREG_OFFSET_CAPTURE);
+
+      $found = [];
+
+      foreach ($forms[0] as [$tag, $at]) {
+        $inMarkup = false;
+
+        foreach ($ranges as [$from, $to]) {
+          if ($at >= $from && $at < $to) {
+            $inMarkup = true;
+            break;
+          }
+        }
+
+        if ($inMarkup && preg_match('/\bmethod\s*=\s*\\\\?["\']?post\b/i', $tag)) {
+          $found[] = $at;
+        }
       }
 
       return $found;
