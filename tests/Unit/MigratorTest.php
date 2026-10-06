@@ -104,6 +104,15 @@ final class MigratorTest extends TestCase
     $this->assertTrue($this->migrator('1.0.0')->isDue());
   }
 
+  public function test_version_changed_compares_the_stored_version_with_the_plugins(): void
+  {
+    $this->assertTrue($this->migrator('1.0.0')->versionChanged(), 'never migrated');
+
+    $this->repository->version = '1.0.0';
+    $this->assertFalse($this->migrator('1.0.0')->versionChanged());
+    $this->assertTrue($this->migrator('1.0.1')->versionChanged());
+  }
+
   public function test_after_a_failure_only_an_administrator_retries_and_not_at_once(): void
   {
     $this->repository->failure = ['migration' => 'x', 'message' => 'boom', 'version' => '1.0.0', 'time' => time()];

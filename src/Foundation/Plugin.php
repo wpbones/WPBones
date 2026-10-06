@@ -121,7 +121,8 @@ class Plugin extends Container implements PluginContract
     register_activation_hook($this->file, [$this, '_activation']);
     register_deactivation_hook($this->file, [$this, '_deactivation']);
 
-    // Migrations, and the end of an update: before the plugin's own init, whatever its priority.
+    // Migrations, and the end of an update: before the plugin's own init (10, unless
+    // config/plugin.php sets another priority).
     // Not on plugins_loaded: a migration that seeds translated text would load the text domain
     // before after_setup_theme, which WordPress 6.7 reports as too early.
     add_action('init', [$this, '_migrate'], 1);
@@ -566,22 +567,34 @@ class Plugin extends Container implements PluginContract
    */
   public function runMigrations(): MigrationResult
   {
-    $migrator = $this->migrator();
+    $this->warnAboutSeeders();
 
-    if (glob("{$this->basePath}/database/seeders/*.php")) {
-      error_log(
-        sprintf(
-          '[WP Bones] %s: database/seeders/ does not run since WP Bones 3.0; php bones migrate:to-v3 turns the seeders into migrations',
-          $this->Name
-        )
-      );
-    }
-
-    $result = $migrator->migrate();
+    $result = $this->migrator()->migrate();
 
     $this->finishMigration($result);
 
     return $result;
+  }
+
+  /**
+   * A plugin moved to 3.0 without `php bones migrate:to-v3` still has seeders that never run.
+   */
+  protected function warnAboutSeeders(): void
+  {
+    if (!glob("{$this->basePath}/database/seeders/*.php")) {
+      return;
+    }
+
+    if (empty($this->pluginData)) {
+      $this->initPluginData();
+    }
+
+    error_log(
+      sprintf(
+        '[WP Bones] %s: database/seeders/ does not run since WP Bones 3.0; php bones migrate:to-v3 turns the seeders into migrations',
+        $this->Name
+      )
+    );
   }
 
   protected function finishMigration(MigrationResult $result): void
@@ -608,6 +621,12 @@ class Plugin extends Container implements PluginContract
   public function _migration_notice()
   {
     if (!current_user_can('manage_options')) {
+      return;
+    }
+
+    // A failure keeps the stored version behind the plugin's: when they match there is nothing to
+    // show, and no query to make on every admin page.
+    if (!$this->migrator()->versionChanged()) {
       return;
     }
 
@@ -648,6 +667,7 @@ class Plugin extends Container implements PluginContract
     // include your own activation
     $activation = include_once "{$this->basePath}/plugin/activation.php";
 
+    $this->warnAboutSeeders();
     $this->migrator()->migrate();
   }
 
