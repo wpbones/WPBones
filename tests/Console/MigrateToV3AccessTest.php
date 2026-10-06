@@ -152,6 +152,47 @@ final class MigrateToV3AccessTest extends TestCase
     $this->assertSame($before, file_get_contents($this->bones->plugin . '/api/vendor/v1/route.php'));
   }
 
+  /** RestProvider reads its folder from api.custom.path (Codex, round 1 on #125). */
+  public function test_the_rest_folder_named_in_config_api_is_the_one_scanned(): void
+  {
+    $this->put('config/api.php', "<?php\nreturn ['custom' => ['path' => '/routes-api', 'enabled' => true]];\n");
+    $this->put('routes-api/vendor/v1/route.php', "<?php\nRoute::get('/elsewhere', fn() => 1);\n");
+    $this->put('api/vendor/v1/route.php', "<?php\nRoute::get('/not-loaded', fn() => 1);\n");
+
+    $run = $this->convert();
+
+    $this->assertStringContainsString("routes-api/vendor/v1/route.php:2: Route::get('/elsewhere') has no permission_callback", $run['output']);
+    $this->assertStringNotContainsString('/not-loaded', $run['output']);
+  }
+
+  /** A config the tokens cannot read is a review item, never "nothing to change" (Codex, round 1). */
+  public function test_a_config_that_does_not_return_a_literal_array_is_flagged(): void
+  {
+    $this->put('config/routes.php', "<?php\n\$pages = ['p' => ['title' => 'P', 'route' => ['get' => 'A@b']]];\nreturn \$pages;\n");
+
+    $run = $this->convert();
+
+    $this->assertStringContainsString('config/routes.php does not return a literal array', $run['output']);
+    $this->assertStringNotContainsString('Nothing to change', $run['output']);
+  }
+
+  /** Only the options argument counts: a callback that mentions the key is not a declaration. */
+  public function test_permission_callback_counts_only_as_a_key_of_the_options(): void
+  {
+    $this->put('api/vendor/v1/route.php', <<<'PHP'
+      <?php
+      Route::get('/mentions', function () {
+        return ['permission_callback' => 'none of my business'];
+      });
+      Route::get('/variable', fn() => 1, $options);
+      PHP);
+
+    $run = $this->convert();
+
+    $this->assertStringContainsString("route.php:2: Route::get('/mentions') has no permission_callback", $run['output']);
+    $this->assertStringContainsString("route.php:5: Route::get('/variable') passes options that are not a literal array", $run['output']);
+  }
+
   public function test_a_plugin_that_declares_everything_has_nothing_to_review(): void
   {
     $this->put('config/routes.php', "<?php\nreturn ['p' => ['title' => 'P', 'capability' => 'read', 'route' => ['get' => 'A@b']]];\n");

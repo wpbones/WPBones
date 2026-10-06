@@ -4168,7 +4168,14 @@ namespace Bones {
           continue;
         }
 
-        foreach ($this->configEntries((string) file_get_contents($file)) as $key => $keys) {
+        $entries = $this->configEntries((string) file_get_contents($file));
+
+        if ($entries === null) {
+          $lines[] = "{$file} does not return a literal array, so it was not read: since 3.0 a {$what} without a capability needs manage_options ({$read}), check them by hand";
+          continue;
+        }
+
+        foreach ($entries as $key => $keys) {
           if (!in_array('capability', $keys, true)) {
             $lines[] = "{$file}: the {$what} {$key} declares no capability, so since 3.0 it needs manage_options ({$read})";
           }
@@ -4181,8 +4188,21 @@ namespace Bones {
         }
       }
 
-      if (is_dir('api')) {
-        $files = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator('api', \FilesystemIterator::SKIP_DOTS));
+      // RestProvider loads the routes from api.custom.path, /api by default.
+      $api = 'api';
+
+      if (is_file('config/api.php')) {
+        $code = implode(' ', array_map(fn($token) => is_array($token) ? $token[1] : $token, $this->codeTokens((string) file_get_contents('config/api.php'))));
+
+        if (preg_match('/[\'"]path[\'"]\s*=>\s*[\'"]([^\'"]*)[\'"]/', $code, $match)) {
+          $api = trim($match[1], '/') ?: 'api';
+        } elseif (preg_match('/[\'"]path[\'"]\s*=>/', $code)) {
+          $lines[] = "config/api.php: the REST route folder is not a literal path, so only api/ was read: check the routes elsewhere by hand";
+        }
+      }
+
+      if (is_dir($api)) {
+        $files = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($api, \FilesystemIterator::SKIP_DOTS));
 
         foreach ($files as $entry) {
           if ($entry->getExtension() !== 'php') {
@@ -4191,8 +4211,10 @@ namespace Bones {
 
           $file = str_replace(DIRECTORY_SEPARATOR, '/', $entry->getPathname());
 
-          foreach ($this->routesWithoutPermission((string) file_get_contents($entry->getPathname())) as [$line, $call]) {
-            $lines[] = "{$file}:{$line}: {$call} has no permission_callback, so since 3.0 it refuses every request ('permission_callback' => '__return_true' keeps it public)";
+          foreach ($this->routesWithoutPermission((string) file_get_contents($entry->getPathname())) as [$line, $call, $literal]) {
+            $lines[] = $literal
+              ? "{$file}:{$line}: {$call} has no permission_callback, so since 3.0 it refuses every request ('permission_callback' => '__return_true' keeps it public)"
+              : "{$file}:{$line}: {$call} passes options that are not a literal array: since 3.0 a route without a permission_callback refuses every request, check it by hand";
           }
         }
       }
@@ -4202,9 +4224,10 @@ namespace Bones {
 
     /**
      * The entries of the array a config file returns, each with the string keys it holds itself (not
-     * those of the arrays inside it): ['my_page' => ['title', 'capability', 'route']].
+     * those of the arrays inside it): ['my_page' => ['title', 'capability', 'route']]. Null when the
+     * file returns something else than a literal array (a variable, a call), which cannot be read.
      */
-    protected function configEntries(string $code): array
+    protected function configEntries(string $code): ?array
     {
       $tokens = $this->codeTokens($code);
       $count = count($tokens);
@@ -4212,6 +4235,12 @@ namespace Bones {
 
       while ($i < $count && !(is_array($tokens[$i]) && $tokens[$i][0] === T_RETURN)) {
         $i++;
+      }
+
+      $first = $tokens[$i + 1] ?? null;
+
+      if (!($first === '[' || (is_array($first) && $first[0] === T_ARRAY))) {
+        return null;
       }
 
       $entries = [];
@@ -4258,7 +4287,9 @@ namespace Bones {
     }
 
     /**
-     * The Route:: calls in an API route file that pass no permission_callback, as [line, call].
+     * The Route:: calls in an API route file that pass no permission_callback, as [line, call,
+     * literal]: literal is false when the options are not a literal array, which cannot be read. Only a
+     * key of the options counts, not the string anywhere in the call.
      */
     protected function routesWithoutPermission(string $code): array
     {
@@ -4282,9 +4313,16 @@ namespace Bones {
         $argument = 0;
         $path = null;
         $permission = false;
+        // The options are the third argument, the fourth of request(): null while none is seen.
+        $optionsAt = $method === 'request' ? 3 : 2;
+        $options = null;
 
         for ($j = $i + 3; $j < $count; $j++) {
           $text = is_array($tokens[$j]) ? $tokens[$j][1] : $tokens[$j];
+
+          if ($depth === 1 && $argument === $optionsAt && $options === null && $text !== ',' && $text !== ')') {
+            $options = $text === '[' || (is_array($tokens[$j]) && $tokens[$j][0] === T_ARRAY) ? 'literal' : 'other';
+          }
 
           if (in_array($text, ['(', '[', '{'], true) || (is_array($tokens[$j]) && in_array($tokens[$j][0], [T_CURLY_OPEN, T_DOLLAR_OPEN_CURLY_BRACES], true))) {
             $depth++;
@@ -4300,14 +4338,18 @@ namespace Bones {
               $path = $tokens[$j][1];
             }
 
-            if (substr($tokens[$j][1], 1, -1) === 'permission_callback') {
+            $isKey = is_array($tokens[$j + 1] ?? null) && $tokens[$j + 1][0] === T_DOUBLE_ARROW;
+
+            if ($argument === $optionsAt && $depth === 2 && $isKey && substr($tokens[$j][1], 1, -1) === 'permission_callback') {
               $permission = true;
             }
           }
         }
 
-        if (!$permission) {
-          $found[] = [$tokens[$i][2], 'Route::' . $method . '(' . ($path ?? '…') . ')'];
+        if ($options === 'other') {
+          $found[] = [$tokens[$i][2], 'Route::' . $method . '(' . ($path ?? '…') . ')', false];
+        } elseif (!$permission) {
+          $found[] = [$tokens[$i][2], 'Route::' . $method . '(' . ($path ?? '…') . ')', true];
         }
 
         $i = $j;
