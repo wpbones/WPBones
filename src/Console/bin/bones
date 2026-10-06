@@ -866,6 +866,13 @@ namespace Bones {
         }
         $this->deploy($this->getCommandParams());
       }
+      // migrate, migrate:status
+      elseif ($this->isCommand('migrate') || $this->isCommand('migrate:status')) {
+        if (!$this->isHelp()) {
+          $this->loadWordPress();
+        }
+        $this->isCommand('migrate') ? $this->migrate() : $this->migrateStatus();
+      }
 
       // go ahead...and run the command need workpress
       else {
@@ -1702,7 +1709,9 @@ namespace Bones {
       $this->line(' update                  Update the Framework');
       $this->line(' version                 Update the Plugin version');
       $this->info('migrate');
+      $this->line(' migrate                 Run the migrations that have not run on this site');
       $this->line(' migrate:create          Create a new Migration');
+      $this->line(' migrate:status          List the migrations and whether each one ran');
       $this->line(' migrate:to-v2           Migrate gulp-based plugin to v2 webpack infrastructure');
       $this->info('make');
       $this->line(' make:ajax               Create a new Ajax service provider class');
@@ -3350,6 +3359,116 @@ namespace Bones {
           $this->color(" Not found \n", WPBONES_COLOR_RED);
         }
       }
+    }
+
+    /**
+     * Run the migrations that have not run on this site, the same way the plugin does by itself
+     * when its version changes. The way to run one added during development, before a version bump.
+     *
+     * @since 3.0.0
+     */
+    protected function migrate()
+    {
+      if ($this->isHelp()) {
+        $this->info('Use php bones migrate');
+        $this->line('Runs the migrations in database/migrations/ that have not run on this site, in file name order.');
+
+        return;
+      }
+
+      $result = $this->migratingPlugin()->runMigrations();
+
+      if ($result->locked) {
+        $this->error('Another request is running the migrations right now: try again in a moment.');
+        exit(1);
+      }
+
+      foreach ($result->ran as $name) {
+        $this->line(" ✓ {$name}");
+      }
+
+      foreach ($result->outOfOrder as $name) {
+        $this->warning("{$name} ran after migrations whose names sort later: check that it does not depend on them.");
+      }
+
+      if ($result->failed !== null) {
+        $this->error("✗ {$result->failed}: {$result->error}");
+        $this->line('The migrations after it did not run. Fix it and run php bones migrate again.');
+        exit(1);
+      }
+
+      if ($result->ran === []) {
+        // An active plugin runs them itself while WordPress loads, when its version changed.
+        $this->info('Nothing to migrate. php bones migrate:status lists what ran.');
+
+        return;
+      }
+
+      $this->success(sprintf('%d migration%s ran.', count($result->ran), count($result->ran) === 1 ? '' : 's'));
+    }
+
+    /**
+     * List the migrations, and for each one whether it ran on this site.
+     *
+     * @since 3.0.0
+     */
+    protected function migrateStatus()
+    {
+      if ($this->isHelp()) {
+        $this->info('Use php bones migrate:status');
+
+        return;
+      }
+
+      $migrator = $this->migratingPlugin()->migrator();
+      $status = $migrator->status();
+
+      if ($status === []) {
+        $this->info('No migrations in database/migrations/.');
+      }
+
+      foreach ($status as $name => $state) {
+        if ($state['ran']) {
+          $this->line(" ✓ {$name}  (batch {$state['batch']}, version {$state['version']})");
+        } elseif ($state['outOfOrder']) {
+          $this->warning(" · {$name}  (pending, and it sorts before a migration that already ran)");
+        } else {
+          $this->line(" · {$name}  (pending)");
+        }
+      }
+
+      $failure = $migrator->failure();
+
+      if ($failure !== null) {
+        $this->error("The last run stopped at {$failure['migration']}: {$failure['message']}");
+      }
+
+      if (glob('database/seeders/*.php')) {
+        $this->warning('database/seeders/ does not run since WP Bones 3.0: php bones migrate:to-v3 turns the seeders into migrations.');
+      }
+    }
+
+    /**
+     * The plugin, booted inside the WordPress the migrations will write to.
+     *
+     * @since 3.0.0
+     */
+    protected function migratingPlugin()
+    {
+      if (!$this->wpLoaded) {
+        $this->error('No WordPress found above this plugin: the migrations need its database.');
+        exit(1);
+      }
+
+      $class = $this->getNamespace() . '\\WPBones\\Foundation\\Plugin';
+      $plugin = class_exists($class) ? $class::getInstance() : null;
+
+      if (!$plugin || !method_exists($plugin, 'migrator')) {
+        $this->error('This plugin runs a WP Bones older than 3.0, which has no migrator: run php bones update.');
+        exit(1);
+      }
+
+      return $plugin;
     }
 
     /**

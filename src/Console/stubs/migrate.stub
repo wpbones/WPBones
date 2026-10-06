@@ -4,8 +4,13 @@ if (! defined('ABSPATH')) {
     exit;
 }
 
-use {Namespace}\WPBones\Database\Migrations\Migration;
+use {Namespace}\WPBones\Database\Migration;
 
+/*
+ * Runs once on every site, in file name order, the first time the plugin loads after it
+ * arrives (php bones migrate runs it on this site now). Once released, leave it as it is:
+ * a change to the table goes in a new migration.
+ */
 return new class extends Migration
 {
 
@@ -13,8 +18,8 @@ return new class extends Migration
   {
     // Create your table, for example:
 
-    $this->create("my_plugin_products",
-      "( 
+    $this->create("{Tablename}",
+      "(
          id bigint(20) unsigned NOT NULL auto_increment,
          user_id bigint(20) unsigned NOT NULL default '0',
          name varchar(20) NOT NULL default '',
@@ -22,8 +27,6 @@ return new class extends Migration
          price bigint(20) unsigned NOT NULL default '0',
          created_at datetime NOT NULL default '0000-00-00 00:00:00',
          updated_at datetime NOT NULL default '0000-00-00 00:00:00',
-         foo_bar varchar(20) NOT NULL default '1',
-         `foo-bar` varchar(20) NOT NULL default '2',
          PRIMARY KEY  (id),
          KEY user_id (user_id)
          ) {$this->charsetCollate};");
