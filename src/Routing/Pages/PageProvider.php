@@ -77,7 +77,9 @@ class PageProvider extends ServiceProvider
         $admin_page_hooks[$page_slug] = $page->title();
         $hookName = get_plugin_page_hookname($page_slug, '');
 
-        $this->authorizeAdminPage($hookName, $page->capability());
+        // capability() is optional, and not declared by Page: a subclass may already have
+        // one with another signature, and a class here never had to extend Page.
+        $this->authorizeAdminPage($hookName, is_callable([$page, 'capability']) ? $page->capability() : 'read');
 
         add_action("load-toplevel_page_{$page_slug}", function () use ($page) {
           // A page with no menu entry has no title for get_admin_page_title(), and

@@ -7,6 +7,7 @@ namespace WPKirk\WPBones\Tests\Unit;
 use Brain\Monkey;
 use Brain\Monkey\Actions;
 use Brain\Monkey\Functions;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use WPKirk\WPBones\Routing\AdminRouteProvider;
 
@@ -27,6 +28,9 @@ final class AdminRouteProviderTest extends TestCase
   /** The capabilities the current user has. */
   private array $granted = [];
 
+  /** The messages _doing_it_wrong() received. */
+  private array $notices = [];
+
   private string $basePath;
 
   protected function setUp(): void
@@ -37,6 +41,7 @@ final class AdminRouteProviderTest extends TestCase
     $this->added = [];
     $this->asked = [];
     $this->granted = [];
+    $this->notices = [];
 
     Functions\when('plugin_basename')->returnArg();
     Functions\when('get_plugin_page_hookname')->alias(fn($slug) => "toplevel_page_{$slug}");
@@ -48,6 +53,9 @@ final class AdminRouteProviderTest extends TestCase
     });
     Functions\when('wp_die')->alias(function ($message = '', $status = 0) {
       throw new \RuntimeException((string) $message, (int) $status);
+    });
+    Functions\when('_doing_it_wrong')->alias(function ($function, $message) {
+      $this->notices[] = $message;
     });
 
     foreach (['load-toplevel_page_my_page', 'toplevel_page_my_page'] as $hook) {
@@ -111,6 +119,10 @@ final class AdminRouteProviderTest extends TestCase
     $this->register(['capability' => 'manage_options']);
     $this->granted = ['read'];
 
+    // As wp-admin/includes/menu.php does before its own refusal: multisite hangs its
+    // "you have no role here" splash on this action.
+    Actions\expectDone('admin_page_access_denied')->once();
+
     try {
       $this->fire('load-toplevel_page_my_page');
       $this->fail('A subscriber opened a page declared manage_options.');
@@ -154,7 +166,7 @@ final class AdminRouteProviderTest extends TestCase
     $this->assertCount(1, array_keys($priorities, PHP_INT_MIN, true));
   }
 
-  public function test_a_page_without_a_capability_needs_read_as_before(): void
+  public function test_a_page_without_a_capability_asks_for_read(): void
   {
     $this->register([]);
     $this->granted = ['read'];
@@ -186,5 +198,33 @@ final class AdminRouteProviderTest extends TestCase
     $this->fire('load-toplevel_page_my_page');
 
     $this->assertSame(['read'], $this->asked);
+    $this->assertSame([], $this->notices);
+  }
+
+  /**
+   * A cast would ask WordPress for `Array` (no one has it) or for `1` (a user level that
+   * contributors pass). A capability is a string: anything else is reported, and the page
+   * asks for `read`, which is what it was open to before.
+   */
+  #[DataProvider('capabilitiesThatAreNotStrings')]
+  public function test_a_capability_that_is_not_a_string_falls_back_to_read_with_a_notice($capability): void
+  {
+    $this->register(['capability' => $capability]);
+    $this->granted = ['read'];
+
+    $this->fire('load-toplevel_page_my_page');
+
+    $this->assertSame(['read'], $this->asked);
+    $this->assertCount(1, $this->notices);
+    $this->assertStringContainsString('my_page', $this->notices[0]);
+  }
+
+  public static function capabilitiesThatAreNotStrings(): array
+  {
+    return [
+      'an array' => [['manage_options']],
+      'true' => [true],
+      'an integer' => [1],
+    ];
   }
 }

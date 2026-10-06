@@ -90,7 +90,31 @@ final class RestRouteTest extends TestCase
     $this->assertSame('Route::post', $function);
     $this->assertStringContainsString('/wpkirk/v1/settings', $message);
     $this->assertStringContainsString("'permission_callback' => '__return_true'", $message);
-    $this->assertSame('2.1.2', $version);
+    // No version: _doing_it_wrong() would print it as the WordPress version that added the message.
+    $this->assertSame('', $version);
+  }
+
+  /** The notice belongs to rest_api_init, where WordPress registers routes, not to the route file. */
+  public function test_the_notice_waits_for_rest_api_init(): void
+  {
+    Route::post('/settings', fn() => 'saved');
+
+    $this->assertSame([], $this->notices);
+
+    $this->registerRoutes();
+
+    $this->assertCount(1, $this->notices);
+  }
+
+  /** WordPress's own check is isset(): a null callback is a missing one, there and here. */
+  public function test_a_null_permission_callback_counts_as_missing(): void
+  {
+    Route::post('/settings', fn() => 'saved', ['permission_callback' => null]);
+
+    $args = $this->registerRoutes();
+
+    $this->assertSame('__return_true', $args['/settings']['permission_callback']);
+    $this->assertCount(1, $this->notices);
   }
 
   public function test_request_without_a_permission_callback_gives_one_notice_per_verb(): void

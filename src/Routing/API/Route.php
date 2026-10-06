@@ -74,7 +74,8 @@ class Route
           "The WP Bones REST route %s has no permission_callback, so anyone can call it. Pass 'permission_callback' => '__return_true' if it is meant to be public. From WP Bones 3.0 a route without one will not be public.",
           $route
         ),
-        '2.1.2'
+        // No version: WordPress would print it as its own version that added the message.
+        ''
       );
 
       $options['permission_callback'] = '__return_true';

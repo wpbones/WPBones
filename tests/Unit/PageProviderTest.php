@@ -71,14 +71,14 @@ final class PageProviderTest extends TestCase
    * Write `pages/<slug>.php` with a Page subclass under a fresh class name (a class can
    * be declared once per process) and register the folder.
    */
-  private function register(string $slug, string $body = ''): void
+  private function register(string $slug, string $body = '', string $extends = ' extends Page'): void
   {
     $class = 'TestPage' . bin2hex(random_bytes(6));
 
     file_put_contents(
       "{$this->basePath}/pages/{$slug}.php",
       "<?php\n\nuse WPKirk\\WPBones\\Routing\\Pages\\Support\\Page;\n\n" .
-        "class {$class} extends Page\n{\n" .
+        "class {$class}{$extends}\n{\n" .
         "  public function title() { return 'A page'; }\n\n" .
         "  public function render() { return 'rendered'; }\n\n" .
         "{$body}}\n"
@@ -157,12 +157,26 @@ final class PageProviderTest extends TestCase
     $this->assertSame('', $output);
   }
 
-  public function test_a_page_that_says_nothing_needs_read_as_before(): void
+  public function test_a_page_that_says_nothing_asks_for_read(): void
   {
     $this->register('about');
     $this->granted = ['read'];
 
     $this->fire('load-toplevel_page_about');
+
+    $this->assertSame(['read'], $this->asked);
+  }
+
+  /**
+   * PageProvider never required `extends Page`: it calls title() and render(). A class that
+   * only has those two must still load, and ask for `read`, not stop wp-admin with a fatal.
+   */
+  public function test_a_class_that_does_not_extend_page_asks_for_read(): void
+  {
+    $this->register('legacy', '', '');
+    $this->granted = ['read'];
+
+    $this->fire('load-toplevel_page_legacy');
 
     $this->assertSame(['read'], $this->asked);
   }
