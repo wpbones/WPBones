@@ -235,9 +235,14 @@ class Migrator
       // Also on a site that never failed: the empty value keeps the option autoloaded.
       $this->repository->setFailure(null);
 
+      // Only the request that stored the new version finishes the update; one that could not
+      // leaves it to the next request, so plugin/updated.php runs once.
       if ($this->repository->version() !== $this->version) {
-        $this->repository->setVersion($this->version);
-        $result->advanced = true;
+        if ($this->repository->setVersion($this->version)) {
+          $result->advanced = true;
+        } else {
+          $this->log("the version {$this->version} could not be stored: the next request tries again");
+        }
       }
 
       return $result;

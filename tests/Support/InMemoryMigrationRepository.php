@@ -25,6 +25,9 @@ final class InMemoryMigrationRepository implements MigrationRepository
   /** True when the database refuses the ledger write. */
   public bool $logFails = false;
 
+  /** True when the database refuses the version write. */
+  public bool $versionFails = false;
+
   /**
    * What "another request" writes while this one waits for the lock: applied by refresh().
    *
@@ -96,10 +99,17 @@ final class InMemoryMigrationRepository implements MigrationRepository
     return true;
   }
 
-  public function setVersion(string $version): void
+  public function setVersion(string $version): bool
   {
     $this->calls[] = "version {$version}";
+
+    if ($this->versionFails) {
+      return false;
+    }
+
     $this->version = $version;
+
+    return true;
   }
 
   public function setFailure(?array $failure): void

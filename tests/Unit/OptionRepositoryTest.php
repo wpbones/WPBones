@@ -292,6 +292,16 @@ final class OptionRepositoryTest extends TestCase
     $this->assertSame([], $this->deleted);
   }
 
+  public function test_a_version_write_the_database_refused_is_reported(): void
+  {
+    Functions\when('update_option')->justReturn(false);
+
+    $this->assertFalse((new OptionRepository('my_plugin_slug'))->setVersion('1.1.0'));
+
+    $this->wpdb->values = ['my_plugin_slug_db_version' => '1.1.0'];
+    $this->assertTrue((new OptionRepository('my_plugin_slug'))->setVersion('1.1.0'), 'unchanged is not refused');
+  }
+
   public function test_an_empty_failure_reads_as_none(): void
   {
     Functions\when('get_option')->justReturn('');

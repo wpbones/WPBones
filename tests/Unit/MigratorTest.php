@@ -157,6 +157,24 @@ final class MigratorTest extends TestCase
     $this->assertSame('2026_01_01_000000_first', $this->repository->failure['migration']);
   }
 
+  public function test_a_version_that_cannot_be_stored_does_not_finish_the_update(): void
+  {
+    $this->migration('2026_01_01_000000_first');
+    $this->repository->versionFails = true;
+
+    $result = $this->migrator()->migrate();
+
+    $this->assertSame(['2026_01_01_000000_first'], $result->ran);
+    $this->assertFalse($result->advanced, 'plugin/updated.php is left to the request that stores it');
+    $this->assertStringContainsString('the version 1.0.0 could not be stored', (string) file_get_contents($this->log));
+
+    $this->repository->versionFails = false;
+    $again = $this->migrator()->migrate();
+
+    $this->assertSame([], $again->ran);
+    $this->assertTrue($again->advanced);
+  }
+
   public function test_a_site_migrated_for_this_version_is_not_due(): void
   {
     $this->repository->version = '1.0.0';

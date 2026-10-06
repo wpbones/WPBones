@@ -61,7 +61,10 @@ interface MigrationRepository
    */
   public function log(string $migration, int $batch, string $version): bool;
 
-  public function setVersion(string $version): void;
+  /**
+   * @return bool False when it could not be stored.
+   */
+  public function setVersion(string $version): bool;
 
   /**
    * @param array{migration: string, message: string, version: string, time: int}|null $failure

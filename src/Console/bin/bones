@@ -4050,7 +4050,12 @@ namespace Bones {
         $rewritten = str_replace(["use {$old};", "\\{$old}"], ["use {$new};", "\\{$new}"], $code);
 
         if ($rewritten !== $code) {
-          file_put_contents($file, $rewritten);
+          if (file_put_contents($file, $rewritten) === false) {
+            $review[] = "{$file}: could not be written, still on the 2.x base class";
+            $this->warning(" Could not write {$file}");
+            continue;
+          }
+
           $this->line(" Updated {$file}");
           $changed++;
         }
@@ -4087,7 +4092,22 @@ namespace Bones {
           $review[] = "{$target}: it sorts before {$latest}, which 2.x ran first: rename it so that it comes after";
         }
 
-        file_put_contents($target, $code);
+        // The seeder goes only once its migration is on disk and parses: nothing is lost.
+        if (file_put_contents($target, $code) === false) {
+          $review[] = "{$file}: kept, {$target} could not be written";
+          $this->warning(" Kept {$file}: could not write {$target}");
+          continue;
+        }
+
+        exec(escapeshellarg(PHP_BINARY) . ' -l ' . escapeshellarg($target) . ' 2>&1', $lint, $status);
+
+        if ($status !== 0) {
+          unlink($target);
+          $review[] = "{$file}: kept, the migration made from it did not parse (" . trim(implode(' ', $lint)) . '): convert it by hand';
+          $this->warning(" Kept {$file}: the migration made from it did not parse");
+          continue;
+        }
+
         unlink($file);
         $this->line(" Converted {$file} into {$target}");
         $changed++;
