@@ -11,8 +11,8 @@ namespace WPKirk\WPBones\Database;
  * update that brings a plugin onto 3.0: the 2.x code that runs it includes database/seeders/*.php,
  * and would find this class missing. Creating a seeder does nothing.
  *
- * @deprecated 3.0.0 Write a migration: \WPKirk\WPBones\Database\Migration has insert(), truncate()
- *             and isEmpty().
+ * @deprecated 3.0.0 Write a migration: \WPKirk\WPBones\Database\Migration has insert(), truncate(),
+ *             count(), isEmpty() and query(), with the table named in each call.
  */
 abstract class Seeder
 {

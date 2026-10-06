@@ -20,7 +20,8 @@ use RuntimeException;
  * 3.0 creating the object runs nothing: up() used to be called by the constructor, so including a
  * file was the same as running it, every time.
  *
- * Seed data is a migration too: insert() and isEmpty() are here for that.
+ * Seed data is a migration too: insert(), truncate(), count(), isEmpty() and query() are here for
+ * that, as they were on the 2.x Seeder, with the table named in each call.
  *
  * @since 3.0.0
  */
@@ -202,15 +203,39 @@ abstract class Migration
   }
 
   /**
+   * The number of rows in a table.
+   *
+   * @param string $tablename The table name, without the WordPress prefix.
+   */
+  protected function count($tablename): int
+  {
+    global $wpdb;
+
+    return (int) $wpdb->get_var("SELECT COUNT(*) FROM `{$this->table($tablename)}`");
+  }
+
+  /**
    * Whether a table has no rows: what a seed that must not repeat itself checks first.
    *
    * @param string $tablename The table name, without the WordPress prefix.
    */
   protected function isEmpty($tablename): bool
   {
+    return $this->count($tablename) === 0;
+  }
+
+  /**
+   * Run any SQL statement.
+   *
+   * @param string $sql
+   *
+   * @return int|bool
+   */
+  protected function query($sql)
+  {
     global $wpdb;
 
-    return (int) $wpdb->get_var("SELECT COUNT(*) FROM `{$this->table($tablename)}`") === 0;
+    return $wpdb->query($sql);
   }
 
   /**
