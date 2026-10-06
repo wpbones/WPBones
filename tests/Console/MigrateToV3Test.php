@@ -281,6 +281,19 @@ final class MigrateToV3Test extends TestCase
     $this->assertSame([], glob($this->bones->plugin . '/database/migrations/*.php') ?: []);
   }
 
+  public function test_a_deployed_copy_without_the_namespace_file_is_refused_cleanly(): void
+  {
+    unlink($this->bones->plugin . '/namespace');
+    $this->put('database/seeders/BookSeeder.php', "<?php\nreturn new class extends \\WPKirk\\WPBones\\Database\\Seeder { public function run() {} };\n");
+
+    $run = $this->convert();
+
+    $this->assertSame(1, $run['status'], $run['output']);
+    $this->assertStringContainsString("run php bones migrate:to-v3 in the plugin's source folder", $run['output']);
+    $this->assertStringNotContainsString('TypeError', $run['output']);
+    $this->assertFileExists($this->bones->plugin . '/database/seeders/BookSeeder.php');
+  }
+
   public function test_answering_no_changes_nothing(): void
   {
     $this->put('database/seeders/BookSeeder.php', "<?php\nreturn new class extends \\WPKirk\\WPBones\\Database\\Seeder { protected \$tablename = 'b'; public function run() {} };\n");
