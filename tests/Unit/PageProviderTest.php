@@ -181,6 +181,31 @@ final class PageProviderTest extends TestCase
     $this->assertSame(['read'], $this->asked);
   }
 
+  /**
+   * is_callable() is true through __call() as well (Codex, round 2): a page that forwards
+   * unknown methods must not be asked for a capability it never declared.
+   */
+  public function test_a_page_with_call_but_no_capability_method_asks_for_read(): void
+  {
+    $this->register('magic', "  public function __call(\$name, \$args) { throw new \\LogicException(\$name); }\n");
+    $this->granted = ['read'];
+
+    $this->fire('load-toplevel_page_magic');
+
+    $this->assertSame(['read'], $this->asked);
+  }
+
+  /** A capability() that needs arguments is not the method this check can call. */
+  public function test_a_capability_method_with_required_arguments_is_not_called(): void
+  {
+    $this->register('args', "  public function capability(\$user) { return 'manage_options'; }\n");
+    $this->granted = ['read'];
+
+    $this->fire('load-toplevel_page_args');
+
+    $this->assertSame(['read'], $this->asked);
+  }
+
   /** The same null title as a route page: see AdminRouteProviderTest. */
   public function test_the_page_gives_wordpress_its_title_on_load(): void
   {
