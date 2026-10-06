@@ -4021,6 +4021,7 @@ namespace Bones {
       $this->warning('This will rewrite your database folder:');
       $this->line(' • database/migrations/*.php move to the 3.0 base class, WPBones\Database\Migration');
       $this->line(' • every database/seeders/*.php becomes a migration, and the seeder file is deleted');
+      $this->line(' • it lists the pages, menus and REST routes that 3.0 gives to administrators only (nothing is rewritten)');
       $this->line('');
       $this->warning('Commit your current work first, so that git diff shows what changed.');
       $this->line('');
@@ -4121,6 +4122,9 @@ namespace Bones {
         rmdir('database/seeders');
       }
 
+      // 3. Who may open what: listed, never rewritten.
+      $review = array_merge($review, $this->accessChangesInV3());
+
       $this->line('');
 
       if ($changed === 0 && $review === []) {
@@ -4143,6 +4147,184 @@ namespace Bones {
       $this->info('Next steps:');
       $this->line(' 1. git diff, and php -l on the new files');
       $this->line(' 2. php bones migrate:status on a site that runs the plugin');
+    }
+
+    /**
+     * The pages, menus and REST routes that declare nothing, which 2.x opened to every logged-in user
+     * (or, for a REST route, to everyone) and 3.0 gives to administrators only: one line each. Read
+     * from the tokens, not by including the files, which need WordPress.
+     *
+     * @since 3.0.0
+     */
+    protected function accessChangesInV3(): array
+    {
+      $lines = [];
+      $read = "'read' keeps it open to every logged-in user";
+
+      foreach (['routes' => 'page', 'menus' => 'menu'] as $config => $what) {
+        $file = "config/{$config}.php";
+
+        if (!is_file($file)) {
+          continue;
+        }
+
+        foreach ($this->configEntries((string) file_get_contents($file)) as $key => $keys) {
+          if (!in_array('capability', $keys, true)) {
+            $lines[] = "{$file}: the {$what} {$key} declares no capability, so since 3.0 it needs manage_options ({$read})";
+          }
+        }
+      }
+
+      foreach (glob('pages/*.php') ?: [] as $file) {
+        if (!preg_match('/\bpublic\s+(?:static\s+)?function\s+capability\s*\(\s*\)/i', (string) file_get_contents($file))) {
+          $lines[] = "{$file} declares no capability(), so since 3.0 it needs manage_options (returning {$read})";
+        }
+      }
+
+      if (is_dir('api')) {
+        $files = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator('api', \FilesystemIterator::SKIP_DOTS));
+
+        foreach ($files as $entry) {
+          if ($entry->getExtension() !== 'php') {
+            continue;
+          }
+
+          $file = str_replace(DIRECTORY_SEPARATOR, '/', $entry->getPathname());
+
+          foreach ($this->routesWithoutPermission((string) file_get_contents($entry->getPathname())) as [$line, $call]) {
+            $lines[] = "{$file}:{$line}: {$call} has no permission_callback, so since 3.0 it refuses every request ('permission_callback' => '__return_true' keeps it public)";
+          }
+        }
+      }
+
+      return $lines;
+    }
+
+    /**
+     * The entries of the array a config file returns, each with the string keys it holds itself (not
+     * those of the arrays inside it): ['my_page' => ['title', 'capability', 'route']].
+     */
+    protected function configEntries(string $code): array
+    {
+      $tokens = $this->codeTokens($code);
+      $count = count($tokens);
+      $i = 0;
+
+      while ($i < $count && !(is_array($tokens[$i]) && $tokens[$i][0] === T_RETURN)) {
+        $i++;
+      }
+
+      $entries = [];
+      $current = null;
+      $depth = 0;
+
+      for ($i++; $i < $count; $i++) {
+        $text = is_array($tokens[$i]) ? $tokens[$i][1] : $tokens[$i];
+
+        if ($text === '[' || $text === '(') {
+          $depth++;
+          continue;
+        }
+
+        if ($text === ']' || $text === ')') {
+          if (--$depth === 0) {
+            break;
+          }
+          continue;
+        }
+
+        if ($text === ';' && $depth === 0) {
+          break;
+        }
+
+        $isKey = is_array($tokens[$i]) && $tokens[$i][0] === T_CONSTANT_ENCAPSED_STRING
+          && is_array($tokens[$i + 1] ?? null) && $tokens[$i + 1][0] === T_DOUBLE_ARROW;
+
+        if (!$isKey) {
+          continue;
+        }
+
+        $key = substr($tokens[$i][1], 1, -1);
+
+        if ($depth === 1) {
+          $current = $key;
+          $entries[$key] = [];
+        } elseif ($depth === 2 && $current !== null) {
+          $entries[$current][] = $key;
+        }
+      }
+
+      return $entries;
+    }
+
+    /**
+     * The Route:: calls in an API route file that pass no permission_callback, as [line, call].
+     */
+    protected function routesWithoutPermission(string $code): array
+    {
+      $tokens = $this->codeTokens($code);
+      $count = count($tokens);
+      $found = [];
+
+      for ($i = 0; $i + 3 < $count; $i++) {
+        $isCall = is_array($tokens[$i]) && in_array($tokens[$i][0], [T_STRING, T_NAME_QUALIFIED, T_NAME_FULLY_QUALIFIED], true)
+          && preg_match('/(^|\\\\)Route$/', $tokens[$i][1])
+          && is_array($tokens[$i + 1]) && $tokens[$i + 1][0] === T_DOUBLE_COLON
+          && is_array($tokens[$i + 2]) && in_array(strtolower($tokens[$i + 2][1]), ['get', 'post', 'put', 'patch', 'delete', 'request'], true)
+          && $tokens[$i + 3] === '(';
+
+        if (!$isCall) {
+          continue;
+        }
+
+        $method = strtolower($tokens[$i + 2][1]);
+        $depth = 0;
+        $argument = 0;
+        $path = null;
+        $permission = false;
+
+        for ($j = $i + 3; $j < $count; $j++) {
+          $text = is_array($tokens[$j]) ? $tokens[$j][1] : $tokens[$j];
+
+          if (in_array($text, ['(', '[', '{'], true) || (is_array($tokens[$j]) && in_array($tokens[$j][0], [T_CURLY_OPEN, T_DOLLAR_OPEN_CURLY_BRACES], true))) {
+            $depth++;
+          } elseif (in_array($text, [')', ']', '}'], true)) {
+            if (--$depth === 0) {
+              break;
+            }
+          } elseif ($text === ',' && $depth === 1) {
+            $argument++;
+          } elseif (is_array($tokens[$j]) && $tokens[$j][0] === T_CONSTANT_ENCAPSED_STRING) {
+            // The path is the first argument, or the second of request(), whose first is the verbs.
+            if ($path === null && $depth === 1 && $argument === ($method === 'request' ? 1 : 0)) {
+              $path = $tokens[$j][1];
+            }
+
+            if (substr($tokens[$j][1], 1, -1) === 'permission_callback') {
+              $permission = true;
+            }
+          }
+        }
+
+        if (!$permission) {
+          $found[] = [$tokens[$i][2], 'Route::' . $method . '(' . ($path ?? '…') . ')'];
+        }
+
+        $i = $j;
+      }
+
+      return $found;
+    }
+
+    /**
+     * The tokens of a PHP source without whitespace and comments.
+     */
+    protected function codeTokens(string $code): array
+    {
+      return array_values(array_filter(
+        token_get_all($code),
+        fn($token) => !is_array($token) || !in_array($token[0], [T_WHITESPACE, T_COMMENT, T_DOC_COMMENT], true)
+      ));
     }
 
     /**

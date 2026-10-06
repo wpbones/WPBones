@@ -1,0 +1,166 @@
+<?php
+
+declare(strict_types=1);
+
+namespace WPKirk\WPBones\Tests\Console;
+
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\TestCase;
+use WPKirk\WPBones\Tests\Support\BonesProcess;
+
+/**
+ * `bones migrate:to-v3` lists what 3.0 closes (audit S2, S3, S9): the pages, menus and REST routes
+ * that declare no capability or permission_callback, which 2.x opened to every logged-in user, or to
+ * everyone, and 3.0 gives to administrators only. It names them and changes nothing: who may open
+ * a page is the author's decision, and these files are arbitrary PHP.
+ */
+#[Group('console')]
+final class MigrateToV3AccessTest extends TestCase
+{
+  private BonesProcess $bones;
+
+  protected function setUp(): void
+  {
+    parent::setUp();
+
+    $this->bones = new BonesProcess();
+  }
+
+  protected function tearDown(): void
+  {
+    $this->bones->remove();
+    parent::tearDown();
+  }
+
+  private function put(string $path, string $code): void
+  {
+    $file = $this->bones->plugin . '/' . $path;
+
+    if (!is_dir(dirname($file))) {
+      mkdir(dirname($file), 0777, true);
+    }
+
+    file_put_contents($file, $code);
+  }
+
+  private function convert(): array
+  {
+    return $this->bones->run(['migrate:to-v3'], "y\n");
+  }
+
+  public function test_route_pages_without_a_capability_are_listed(): void
+  {
+    $this->put('config/routes.php', <<<'PHP'
+      <?php
+      if (!defined('ABSPATH')) {
+        exit();
+      }
+
+      return [
+        'open_page' => [
+          'title' => __('Open', 'wp-kirk'),
+          'route' => ['get' => 'Dashboard\DashboardController@open'],
+        ],
+        'admin_page' => [
+          'title' => __('Admin', 'wp-kirk'),
+          'capability' => 'manage_options',
+          'route' => ['get' => 'Dashboard\DashboardController@admin'],
+        ],
+        'read_page' => array(
+          'title' => 'Read',
+          'capability' => 'read',
+          'route' => array('get' => 'Dashboard\DashboardController@read'),
+        ),
+      ];
+      PHP);
+    $before = file_get_contents($this->bones->plugin . '/config/routes.php');
+
+    $run = $this->convert();
+
+    $this->assertSame(0, $run['status'], $run['output']);
+    $this->assertStringContainsString("config/routes.php: the page open_page declares no capability", $run['output']);
+    $this->assertStringNotContainsString('admin_page', $run['output']);
+    $this->assertStringNotContainsString('read_page', $run['output']);
+    $this->assertSame($before, file_get_contents($this->bones->plugin . '/config/routes.php'));
+  }
+
+  /** A menu's capability covers its items: an item without one is not listed on its own. */
+  public function test_menus_without_a_capability_are_listed(): void
+  {
+    $this->put('config/menus.php', <<<'PHP'
+      <?php
+      return [
+        'my_plugin_slug_menu' => [
+          'menu_title' => 'My plugin',
+          'items' => [
+            ['menu_title' => 'Dashboard', 'capability' => 'read', 'route' => ['get' => 'A@b']],
+          ],
+        ],
+        'my_other_menu' => [
+          'menu_title' => 'Other',
+          'capability' => 'read',
+          'items' => [
+            ['menu_title' => 'Settings', 'route' => ['get' => 'A@c']],
+          ],
+        ],
+      ];
+      PHP);
+
+    $run = $this->convert();
+
+    $this->assertStringContainsString('config/menus.php: the menu my_plugin_slug_menu declares no capability', $run['output']);
+    $this->assertStringNotContainsString('my_other_menu', $run['output']);
+  }
+
+  public function test_pages_folder_classes_without_a_capability_method_are_listed(): void
+  {
+    $this->put('pages/OpenPage.php', "<?php\nclass OpenPage extends Page { public function title() { return 'x'; } public function render() { return ''; } }\n");
+    $this->put('pages/AdminPage.php', "<?php\nclass AdminPage extends Page { public function title() { return 'x'; }\n public function capability(): string { return 'read'; }\n public function render() { return ''; } }\n");
+
+    $run = $this->convert();
+
+    $this->assertStringContainsString('pages/OpenPage.php declares no capability()', $run['output']);
+    $this->assertStringNotContainsString('pages/AdminPage.php', $run['output']);
+  }
+
+  public function test_rest_routes_without_a_permission_callback_are_listed_with_their_line(): void
+  {
+    $this->put('api/vendor/v1/route.php', <<<'PHP'
+      <?php
+      use WPKirk\WPBones\Routing\API\Route;
+
+      Route::get('/open', function () {
+        return 'Hello World!';
+      });
+
+      Route::get('/public', fn() => 'hi', ['permission_callback' => '__return_true']);
+
+      Route::post('/closed', '\WPKirk\API\Controller@store', [
+        'permission_callback' => fn() => current_user_can('manage_options'),
+      ]);
+
+      Route::request(['get', 'post'], '/multiple', '\WPKirk\API\Controller@multiple');
+      PHP);
+    $before = file_get_contents($this->bones->plugin . '/api/vendor/v1/route.php');
+
+    $run = $this->convert();
+
+    $this->assertStringContainsString("api/vendor/v1/route.php:4: Route::get('/open') has no permission_callback", $run['output']);
+    $this->assertStringContainsString("api/vendor/v1/route.php:14: Route::request('/multiple') has no permission_callback", $run['output']);
+    $this->assertStringNotContainsString("'/public'", $run['output']);
+    $this->assertStringNotContainsString("'/closed'", $run['output']);
+    $this->assertSame($before, file_get_contents($this->bones->plugin . '/api/vendor/v1/route.php'));
+  }
+
+  public function test_a_plugin_that_declares_everything_has_nothing_to_review(): void
+  {
+    $this->put('config/routes.php', "<?php\nreturn ['p' => ['title' => 'P', 'capability' => 'read', 'route' => ['get' => 'A@b']]];\n");
+    $this->put('config/menus.php', "<?php\nreturn [];\n");
+    $this->put('api/v/v1/route.php', "<?php\nRoute::get('/x', fn() => 1, ['permission_callback' => '__return_true']);\n");
+
+    $run = $this->convert();
+
+    $this->assertSame(0, $run['status'], $run['output']);
+    $this->assertStringContainsString('Nothing to change', $run['output']);
+  }
+}
