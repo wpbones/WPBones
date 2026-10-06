@@ -300,6 +300,39 @@ final class MigrateToV3AccessTest extends TestCase
     $this->assertStringNotContainsString('pages/Optional.php', $run['output']);
   }
 
+  /** Since 3.0 a POST to an admin page carries $plugin->csrfField(): forms without it are listed. */
+  public function test_post_forms_without_the_csrf_field_are_listed(): void
+  {
+    $this->put('resources/views/dashboard/index.php', "<h1>Options</h1>\n<form action=\"\" method=\"post\">\n  <?php wp_nonce_field('Options'); ?>\n</form>\n");
+    $this->put('resources/views/dashboard/ok.blade.php', "<form method='POST'>\n  {!! \$plugin->csrfField() !!}\n</form>\n");
+    $this->put('resources/views/dashboard/search.php', "<form method=\"get\">\n</form>\n");
+
+    $run = $this->convert();
+
+    $this->assertStringContainsString('resources/views/dashboard/index.php:2: a POST form without $plugin->csrfField()', $run['output']);
+    $this->assertStringNotContainsString('ok.blade.php', $run['output']);
+    $this->assertStringNotContainsString('search.php', $run['output']);
+  }
+
+  /** Since 3.0 a logged Ajax action needs $nonceHash: providers without one are listed. */
+  public function test_ajax_providers_with_logged_actions_and_no_nonce_are_listed(): void
+  {
+    $this->put('plugin/Ajax/OpenAjax.php', "<?php\nclass OpenAjax extends WordPressAjaxServiceProvider {\n  protected \$logged = ['save'];\n}\n");
+    $this->put('plugin/Ajax/SafeAjax.php', "<?php\nclass SafeAjax extends WordPressAjaxServiceProvider {\n  protected \$logged = ['save'];\n  protected \$nonceHash = 'my-plugin';\n}\n");
+    $this->put('plugin/Ajax/PublicAjax.php', "<?php\nclass PublicAjax extends WordPressAjaxServiceProvider {\n  protected \$trusted = ['ping'];\n}\n");
+    $this->put('plugin/Ajax/ChildAjax.php', "<?php\nclass ChildAjax extends AjaxServiceProvider {\n  protected \$logged = ['save'];\n}\n");
+    $this->put('plugin/Ajax/QualifiedAjax.php', "<?php\nclass QualifiedAjax extends \\WPKirk\\WPBones\\Foundation\\WordPressAjaxServiceProvider {\n  protected \$logged = ['save'];\n}\n");
+
+    $run = $this->convert();
+
+    $this->assertStringContainsString('plugin/Ajax/OpenAjax.php has logged Ajax actions and no $nonceHash', $run['output']);
+    $this->assertStringNotContainsString('SafeAjax', $run['output']);
+    $this->assertStringNotContainsString('PublicAjax', $run['output']);
+    // A child of the plugin's own base class may inherit its nonce: not listed.
+    $this->assertStringNotContainsString('ChildAjax', $run['output']);
+    $this->assertStringContainsString('plugin/Ajax/QualifiedAjax.php has logged Ajax actions', $run['output']);
+  }
+
   public function test_a_plugin_that_declares_everything_has_nothing_to_review(): void
   {
     $this->put('config/routes.php', "<?php\nreturn ['p' => ['title' => 'P', 'capability' => 'read', 'route' => ['get' => 'A@b']]];\n");

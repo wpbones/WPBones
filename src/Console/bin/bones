@@ -4021,7 +4021,8 @@ namespace Bones {
       $this->warning('This will rewrite your database folder:');
       $this->line(' • database/migrations/*.php move to the 3.0 base class, WPBones\Database\Migration');
       $this->line(' • every database/seeders/*.php becomes a migration, and the seeder file is deleted');
-      $this->line(' • it lists the pages, menus and REST routes that 3.0 gives to administrators only (nothing is rewritten)');
+      $this->line(' • it lists the pages, menus and REST routes that 3.0 gives to administrators only, the POST forms');
+      $this->line('   without $plugin->csrfField(), and the Ajax providers without a nonce (nothing is rewritten)');
       $this->line('');
       $this->warning('Commit your current work first, so that git diff shows what changed.');
       $this->line('');
@@ -4217,6 +4218,51 @@ namespace Bones {
               ? "{$file}:{$line}: {$call} has no permission_callback, so since 3.0 it refuses every request ('permission_callback' => '__return_true' keeps it public)"
               : "{$file}:{$line}: {$call} passes options that are not a literal array: since 3.0 a route without a permission_callback refuses every request, check it by hand";
           }
+        }
+      }
+
+      // Since 3.0 a request to an admin page that is not a GET carries the plugin's nonce.
+      if (is_dir('resources/views')) {
+        $views = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator('resources/views', \FilesystemIterator::SKIP_DOTS));
+
+        foreach ($views as $entry) {
+          if ($entry->getExtension() !== 'php') {
+            continue;
+          }
+
+          $code = (string) file_get_contents($entry->getPathname());
+
+          if (strpos($code, 'csrfField(') !== false || !preg_match('/<form\b[^>]*\bmethod\s*=\s*["\']?post\b/i', $code, $form, PREG_OFFSET_CAPTURE)) {
+            continue;
+          }
+
+          $file = str_replace(DIRECTORY_SEPARATOR, '/', $entry->getPathname());
+          $line = substr_count(substr($code, 0, $form[0][1]), "\n") + 1;
+          $lines[] = "{$file}:{$line}: a POST form without \$plugin->csrfField(): since 3.0 the page refuses the request (a route that takes requests from elsewhere says 'csrf' => false)";
+        }
+      }
+
+      // Since 3.0 a logged Ajax action needs a nonce to check.
+      if (is_dir('plugin')) {
+        $classes = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator('plugin', \FilesystemIterator::SKIP_DOTS));
+
+        foreach ($classes as $entry) {
+          if ($entry->getExtension() !== 'php') {
+            continue;
+          }
+
+          $code = (string) file_get_contents($entry->getPathname());
+
+          // Only a direct child of the framework's provider: one of the plugin's own base classes
+          // may set $nonceHash for all its children, which a file alone cannot show.
+          if (!preg_match('/\bextends\s+\\\\?(?:[\w\\\\]+\\\\)?WordPressAjaxServiceProvider\b/', $code)
+            || !preg_match('/\$logged\s*=\s*(?:\[|array\s*\()\s*[\'"]/i', $code)
+            || preg_match('/\$nonceHash\s*=\s*[\'"][^\'"]+[\'"]/', $code)) {
+            continue;
+          }
+
+          $file = str_replace(DIRECTORY_SEPARATOR, '/', $entry->getPathname());
+          $lines[] = "{$file} has logged Ajax actions and no \$nonceHash: since 3.0 they refuse every request until it sets one and its requests send the nonce";
         }
       }
 
