@@ -30,6 +30,8 @@ final class ViewAssetRoutingTest extends TestCase
     parent::setUp();
     Monkey\setUp();
     Functions\when('is_admin')->justReturn(true);
+    // View makes its Blade cache folder with WordPress's function (since 2.1.3).
+    Functions\when('wp_mkdir_p')->alias(fn($dir) => is_dir($dir) || mkdir($dir, 0755, true));
 
     // Record rather than stub: the order these run in is what the issue is about.
     $this->calls = [];

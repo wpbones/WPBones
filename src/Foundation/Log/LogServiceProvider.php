@@ -3,6 +3,7 @@
 namespace WPKirk\WPBones\Foundation\Log;
 
 use WPKirk\WPBones\Support\ServiceProvider;
+use WPKirk\WPBones\Support\Storage;
 
 if (!defined('ABSPATH')) {
   exit();
@@ -96,7 +97,8 @@ class LogServiceProvider extends ServiceProvider
 
     // first check if log storage is enabled
     $this->log = $plugin->config('plugin.logging.type', 'errorlog');
-    $this->logPath = $plugin->config('plugin.logging.path', "{$plugin->basePath}/storage/logs/");
+    $ownPath = $plugin->config('plugin.logging.path');
+    $this->logPath = $ownPath ?: "{$plugin->basePath}/storage/logs/";
     $this->dailyFormat = $plugin->config('plugin.logging.daily_format', 'Y-m-d');
 
     // Check if the date format is prefixed with a string
@@ -114,15 +116,22 @@ class LogServiceProvider extends ServiceProvider
       $this->log = $plugin->config('plugin.log', 'errorlog');
     }
 
-    if (in_array($this->log, [false, 'false', 'FALSE', 'none', 'N', 'n', 'off', 'OFF'], true)) {
+    // "errorlog" is error_log() only, as documented: up to 2.1.2 it also appended to a daily file
+    // in <plugin>/storage/logs, which the web server serves as text.
+    if ($this->log === 'errorlog' || in_array($this->log, [false, 'false', 'FALSE', 'none', 'N', 'n', 'off', 'OFF'], true)) {
       $this->log = false;
 
       return;
     }
 
-    // create if it doesn't exist
-    if (!file_exists($this->logPath)) {
-      mkdir($this->logPath, 0777, true);
+    // Made with WordPress's permissions (it was 0777); the default folder, inside the plugin, is
+    // also closed to the web as far as a file can say so.
+    if ($ownPath) {
+      if (!file_exists($this->logPath)) {
+        wp_mkdir_p($this->logPath);
+      }
+    } else {
+      Storage::prepare(rtrim($this->logPath, '/'));
     }
 
     // get the right filename

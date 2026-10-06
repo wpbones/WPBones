@@ -3,6 +3,7 @@
 namespace WPKirk\WPBones\View;
 
 use eftec\bladeone\BladeOne;
+use WPKirk\WPBones\Support\Storage;
 use WPKirk\WPBones\View\Assets\AssetManager;
 use WPKirk\WPBones\View\Assets\AdminAssetEnqueuer;
 use WPKirk\WPBones\View\Assets\AdminAppsAssetEnqueuer;
@@ -188,10 +189,20 @@ class View
    */
   protected function initializeBlade(): void
   {
+    static $prepared = [];
+
     $cache = $this->container->basePath . '/.cache';
 
-    if (!file_exists($cache)) {
-      mkdir($cache, 0777, true);
+    // Once per request and folder: made with WordPress's permissions (it was 0777), closed to
+    // the web, and rid of the .bladec files up to 2.1.2 compiled, which the server served as text.
+    if (!isset($prepared[$cache])) {
+      $prepared[$cache] = true;
+
+      Storage::prepare($cache);
+
+      foreach (glob($cache . '/*.bladec') ?: [] as $stale) {
+        @unlink($stale);
+      }
     }
 
     // Initialize BladeOne
@@ -200,6 +211,9 @@ class View
       $cache,
       BladeOne::MODE_AUTO
     );
+
+    // A direct request for a compiled view runs it out of context instead of reading its PHP.
+    $this->blade->setCompiledExtension('.php');
   }
 
   /**
