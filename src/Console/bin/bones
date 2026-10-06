@@ -1713,6 +1713,7 @@ namespace Bones {
       $this->line(' migrate:create          Create a new Migration');
       $this->line(' migrate:status          List the migrations and whether each one ran');
       $this->line(' migrate:to-v2           Migrate gulp-based plugin to v2 webpack infrastructure');
+      $this->line(' migrate:to-v3           Convert a 2.x plugin to the breaking changes of WP Bones 3');
       $this->info('make');
       $this->line(' make:ajax               Create a new Ajax service provider class');
       $this->line(' make:api                Create a new API controller class');
@@ -1777,6 +1778,10 @@ namespace Bones {
       // migrate:to-v2
       elseif ($this->isCommand('migrate:to-v2')) {
         $this->migrateToV2();
+      }
+      // migrate:to-v3
+      elseif ($this->isCommand('migrate:to-v3')) {
+        $this->migrateToV3();
       }
       // -- make ---------------------------------------------
       //
@@ -3990,6 +3995,294 @@ namespace Bones {
       $this->line(" 2. Enqueue it from your controller:");
       $this->line("    ->withAdminAppsScript('{$appName}')");
       $this->line(" 3. Run {$devCmd} — webpack auto-discovers the new entry.");
+    }
+
+    /**
+     * Convert a 2.x plugin to the breaking changes of WP Bones 3.0. Run it after
+     * `composer update wpbones/wpbones` has brought 3.0 in; running it again changes nothing.
+     *
+     * Migrations (wpbones/WPBones#40): each file in database/migrations/ now runs once per site,
+     * so the files move to the new base class name; each seeder in database/seeders/ becomes a
+     * migration, because seeders do not run any more. A seeder with $runOnce only seeds an empty
+     * table, as it did.
+     *
+     * @since 3.0.0
+     */
+    protected function migrateToV3(): void
+    {
+      if ($this->isHelp()) {
+        $this->info('Use php bones migrate:to-v3');
+
+        return;
+      }
+
+      $this->info('WP Bones — migrate to v3');
+      $this->line('');
+      $this->warning('This will rewrite your database folder:');
+      $this->line(' • database/migrations/*.php move to the 3.0 base class, WPBones\Database\Migration');
+      $this->line(' • every database/seeders/*.php becomes a migration, and the seeder file is deleted');
+      $this->line('');
+      $this->warning('Commit your current work first, so that git diff shows what changed.');
+      $this->line('');
+
+      $answer = $this->ask('Continue? (y/N)');
+      if (strtolower(trim((string) $answer)) !== 'y') {
+        $this->error('Migration aborted: nothing was changed.');
+        exit(1);
+      }
+
+      // An editor may have left a new line at the end of the namespace file.
+      $namespace = trim($this->getNamespace());
+      $old = "{$namespace}\\WPBones\\Database\\Migrations\\Migration";
+      $new = "{$namespace}\\WPBones\\Database\\Migration";
+      $changed = 0;
+      $review = [];
+
+      // 1. Migrations: the base class.
+      foreach (glob('database/migrations/*.php') ?: [] as $file) {
+        $code = (string) file_get_contents($file);
+        $rewritten = str_replace(["use {$old};", "\\{$old}"], ["use {$new};", "\\{$new}"], $code);
+
+        if ($rewritten !== $code) {
+          file_put_contents($file, $rewritten);
+          $this->line(" Updated {$file}");
+          $changed++;
+        }
+      }
+
+      // 2. Seeders: each becomes a migration that sorts after every migration there is, as 2.x ran
+      // them after all of them, in the order they ran (glob order), one second apart. After today,
+      // or after the latest migration when its name carries a later timestamp.
+      $time = time();
+      $latest = basename((string) max(glob('database/migrations/*.php') ?: ['']), '.php');
+
+      if (preg_match('/^(\d{4})_(\d{2})_(\d{2})_(\d{2})(\d{2})(\d{2})/', $latest, $stamp)) {
+        $time = max($time, (int) mktime((int) $stamp[4], (int) $stamp[5], (int) $stamp[6], (int) $stamp[2], (int) $stamp[3], (int) $stamp[1]) + 1);
+      }
+
+      foreach (glob('database/seeders/*.php') ?: [] as $file) {
+        [$code, $notes] = $this->seederToMigration($file, $namespace);
+
+        if ($code === null) {
+          $review[] = "{$file}: {$notes[0]}";
+          $this->warning(" Kept {$file}: {$notes[0]}");
+          continue;
+        }
+
+        // BookSeeder → book_seeder: the name says where it came from.
+        $name = strtolower((string) preg_replace('/(?<=[a-z0-9])[A-Z]|(?<=[A-Z])[A-Z](?=[a-z])/', '_$0', basename($file, '.php')));
+        $target = sprintf('database/migrations/%s_%s.php', date('Y_m_d_His', $time++), $name);
+
+        if (!is_dir('database/migrations')) {
+          mkdir('database/migrations', 0755, true);
+        }
+
+        if ($latest !== '' && strcmp(basename($target, '.php'), $latest) <= 0) {
+          $review[] = "{$target}: it sorts before {$latest}, which 2.x ran first: rename it so that it comes after";
+        }
+
+        file_put_contents($target, $code);
+        unlink($file);
+        $this->line(" Converted {$file} into {$target}");
+        $changed++;
+
+        foreach ($notes as $note) {
+          $review[] = "{$target}: {$note}";
+        }
+      }
+
+      if (is_dir('database/seeders') && (glob('database/seeders/*') ?: []) === []) {
+        rmdir('database/seeders');
+      }
+
+      $this->line('');
+
+      if ($changed === 0 && $review === []) {
+        $this->success('Nothing to change: this plugin is already on the 3.0 layout.');
+
+        return;
+      }
+
+      $this->success('Migration to v3 complete.');
+
+      if ($review !== []) {
+        $this->line('');
+        $this->warning('Review manually:');
+        foreach ($review as $line) {
+          $this->line(" • {$line}");
+        }
+      }
+
+      $this->line('');
+      $this->info('Next steps:');
+      $this->line(' 1. git diff, and php -l on the new files');
+      $this->line(' 2. php bones migrate:status on a site that runs the plugin');
+    }
+
+    /**
+     * A 2.x seeder rewritten as a 3.0 migration: the body of run() becomes up(), and the helpers
+     * that used the seeder's own table (insert(), truncate(), count()) name it.
+     *
+     * @return array{0: ?string, 1: string[]} The migration's code, or null when the seeder is not
+     *                                        one this can convert, and the notes for the review.
+     */
+    protected function seederToMigration(string $file, string $namespace): array
+    {
+      $source = (string) file_get_contents($file);
+      $tokens = token_get_all($source);
+
+      // The seeder's settings.
+      $table = preg_match('/\$tablename\s*=\s*([\'"])([A-Za-z0-9_]+)\1\s*;/', $source, $m) ? $m[2] : null;
+      $usePrefix = !preg_match('/\$usePrefix\s*=\s*false\s*;/i', $source);
+      $runOnce = (bool) preg_match('/\$runOnce\s*=\s*true\s*;/i', $source);
+
+      // The methods it declares, and where run() begins and ends.
+      $methods = [];
+      $body = null;
+      $count = count($tokens);
+
+      for ($i = 0; $i < $count; $i++) {
+        if (!is_array($tokens[$i]) || $tokens[$i][0] !== T_FUNCTION) {
+          continue;
+        }
+
+        $j = $i + 1;
+        while ($j < $count && is_array($tokens[$j]) && $tokens[$j][0] === T_WHITESPACE) {
+          $j++;
+        }
+
+        if (!is_array($tokens[$j]) || $tokens[$j][0] !== T_STRING) {
+          continue; // a closure
+        }
+
+        $methods[] = $tokens[$j][1];
+
+        if ($tokens[$j][1] !== 'run' || $body !== null) {
+          continue;
+        }
+
+        // The opening brace of run(), then its match.
+        while ($j < $count && $tokens[$j] !== '{') {
+          $j++;
+        }
+
+        $depth = 0;
+        for ($k = $j; $k < $count; $k++) {
+          $text = is_array($tokens[$k]) ? $tokens[$k][1] : $tokens[$k];
+
+          if ($tokens[$k] === '{' || (is_array($tokens[$k]) && in_array($tokens[$k][0], [T_CURLY_OPEN, T_DOLLAR_OPEN_CURLY_BRACES], true))) {
+            $depth++;
+          } elseif ($tokens[$k] === '}') {
+            $depth--;
+
+            if ($depth === 0) {
+              $body = array_slice($tokens, $j + 1, $k - $j - 1);
+              break;
+            }
+          }
+        }
+      }
+
+      if ($body === null) {
+        return [null, ['no run() method found: convert it by hand']];
+      }
+
+      if ($methods !== ['run']) {
+        return [null, ['it declares methods besides run(): convert it by hand']];
+      }
+
+      // The body, with the table named where the 2.x helpers took it for granted.
+      $code = '';
+      $usesTable = false;
+      $needsTable = false;
+      $n = count($body);
+
+      for ($i = 0; $i < $n; $i++) {
+        $token = $body[$i];
+        $text = is_array($token) ? $token[1] : $token;
+
+        if (is_array($token) && $token[0] === T_VARIABLE && $text === '$this') {
+          // $this->name( or $this->name
+          $j = $i + 1;
+          $arrow = $j < $n && is_array($body[$j]) && $body[$j][0] === T_OBJECT_OPERATOR;
+          $member = $arrow && $j + 1 < $n && is_array($body[$j + 1]) && $body[$j + 1][0] === T_STRING ? $body[$j + 1][1] : null;
+
+          if ($member === 'tablename') {
+            $usesTable = true;
+          }
+
+          if (in_array($member, ['insert', 'truncate', 'count'], true)) {
+            $k = $j + 2;
+            while ($k < $n && is_array($body[$k]) && $body[$k][0] === T_WHITESPACE) {
+              $k++;
+            }
+
+            if ($k < $n && $body[$k] === '(') {
+              $m = $k + 1;
+              while ($m < $n && is_array($body[$m]) && $body[$m][0] === T_WHITESPACE) {
+                $m++;
+              }
+
+              // insert($sql) gains the table first; truncate() and count() only when called bare.
+              if ($member === 'insert' || $body[$m] === ')') {
+                $needsTable = true;
+                // No space before a line break: the argument may start on the next line.
+                $separator = $body[$m] === ')' ? '' : ($m > $k + 1 && str_contains($body[$k + 1][1], "\n") ? ',' : ', ');
+                $code .= "\$this->{$member}(" . var_export((string) $table, true) . $separator;
+                $i = $k;
+                continue;
+              }
+            }
+          }
+        }
+
+        $code .= $text;
+      }
+
+      if (($needsTable || $usesTable || $runOnce) && $table === null) {
+        return [null, ['it uses its table but sets no $tablename: convert it by hand']];
+      }
+
+      $notes = [];
+      $properties = '';
+      $prelude = '';
+
+      if (!$usePrefix) {
+        $properties .= "  protected \$usePrefix = false;\n\n";
+      }
+
+      if ($usesTable) {
+        $properties .= "  /** The prefixed table name, as the 2.x seeder had it in \$this->tablename. */\n  protected \$tablename;\n\n";
+        $prelude .= "    \$this->tablename = \$this->table('{$table}');\n\n";
+      }
+
+      if ($runOnce) {
+        $prelude .= "    // The seeder had \$runOnce: it seeded the table only while it was empty, and so does this.\n";
+        $prelude .= "    if (!\$this->isEmpty('{$table}')) {\n      return;\n    }\n\n";
+      } else {
+        $notes[] = 'it ran on every activation and update until 2.x and runs once now: if it refreshed reference data, refresh it with a new migration when the data changes';
+      }
+
+      // The use statements the seeder had, but its base class.
+      $uses = [];
+      foreach (preg_split('/\R/', $source) as $line) {
+        if (preg_match('/^use\s+([^;]+);/', trim($line), $use) && !preg_match('/\\\\WPBones\\\\Database\\\\Seeder$/', trim($use[1]))) {
+          $uses[] = trim($line);
+        }
+      }
+
+      $migration = "<?php\n\nif (!defined('ABSPATH')) {\n  exit();\n}\n\n";
+      $migration .= "use {$namespace}\\WPBones\\Database\\Migration;\n";
+      $migration .= $uses === [] ? '' : implode("\n", $uses) . "\n";
+      $migration .= "\n/*\n * Converted from " . $file . " by php bones migrate:to-v3.\n */\n";
+      $migration .= "return new class extends Migration {\n";
+      $migration .= $properties;
+      $migration .= "  public function up()\n  {\n";
+      $migration .= $prelude;
+      $migration .= rtrim(ltrim($code, "\r\n"), " \t\r\n") . "\n";
+      $migration .= "  }\n};\n";
+
+      return [$migration, $notes];
     }
 
     /**

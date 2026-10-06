@@ -32,11 +32,14 @@ final class WpdbSpy
     return [];
   }
 
+  /** What get_var() answers, e.g. a COUNT(*). */
+  public mixed $var = 0;
+
   public function get_var(string $sql): mixed
   {
     $this->queries[] = $sql;
 
-    return 0;
+    return $this->var;
   }
 
   public function get_row(string $sql): mixed
@@ -94,6 +97,7 @@ final class WpdbSpy
   {
     $this->queries = [];
     $this->columns = [];
+    $this->var = 0;
   }
 
   public function last(): string
