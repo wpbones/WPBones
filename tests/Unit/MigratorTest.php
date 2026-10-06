@@ -175,6 +175,71 @@ final class MigratorTest extends TestCase
     $this->assertTrue($again->advanced);
   }
 
+  public function test_the_update_is_finished_under_the_lock_before_the_version_moves(): void
+  {
+    $this->migration('2026_01_01_000000_first');
+    $this->migrator('1.0.0')->migrate();
+    $this->repository->calls = [];
+
+    $seen = [];
+    $result = $this->migrator('1.1.0')->migrate(false, false, function (?string $previous) use (&$seen) {
+      $seen[] = $previous;
+      $this->repository->calls[] = 'finish';
+    });
+
+    $this->assertSame(['1.0.0'], $seen, 'with the version it came from');
+    $this->assertTrue($result->advanced);
+    $this->assertSame(['lock', 'refresh', 'finish', 'failure cleared', 'version 1.1.0', 'unlock'], $this->repository->calls);
+  }
+
+  public function test_the_first_run_finishes_with_no_previous_version(): void
+  {
+    $seen = [];
+    $this->migrator('1.0.0')->migrate(false, false, function (?string $previous) use (&$seen) {
+      $seen[] = $previous;
+    });
+
+    $this->assertSame([null], $seen);
+  }
+
+  public function test_no_version_change_means_no_update_to_finish(): void
+  {
+    $this->migrator('1.0.0')->migrate();
+
+    $calls = 0;
+    $this->migration('2026_01_01_000000_during_development');
+    $this->migrator('1.0.0')->migrate(false, false, function () use (&$calls) {
+      $calls++;
+    });
+
+    $this->assertSame(0, $calls);
+  }
+
+  public function test_an_update_that_fails_to_finish_is_finished_again_next_time(): void
+  {
+    $this->migrator('1.0.0')->migrate();
+
+    $result = $this->migrator('1.1.0')->migrate(false, false, function () {
+      throw new \RuntimeException('updated.php broke');
+    });
+
+    $this->assertFalse($result->ok());
+    $this->assertSame('plugin/updated.php', $result->failed);
+    $this->assertSame('RuntimeException: updated.php broke', $result->error);
+    $this->assertFalse($result->advanced);
+    $this->assertSame('1.0.0', $this->repository->version, 'the version stays, so the update is not over');
+    $this->assertSame('plugin/updated.php', $this->repository->failure['migration']);
+
+    $finished = 0;
+    $again = $this->migrator('1.1.0')->migrate(false, false, function () use (&$finished) {
+      $finished++;
+    });
+
+    $this->assertSame(1, $finished);
+    $this->assertTrue($again->advanced);
+    $this->assertNull($this->repository->failure);
+  }
+
   public function test_a_site_migrated_for_this_version_is_not_due(): void
   {
     $this->repository->version = '1.0.0';

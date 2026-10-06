@@ -565,23 +565,21 @@ class Plugin extends Container implements PluginContract
   }
 
   /**
-   * Run the pending migrations and, in the request that moved the stored version, finish the
-   * update: align the options and run plugin/updated.php, which receives the version it came from
-   * as $previousVersion. On a site migrated for the first time there is no previous version, and
-   * plugin/updated.php does not run. Activation and `php bones migrate` call this too, and run
+   * Run the pending migrations and, when the version changed, finish the update (finishUpdate())
+   * before the new version is stored. Activation and `php bones migrate` call this too, and run
    * whatever the state; a page load runs it as $automatic, see Migrator::migrate().
+   *
+   * @param bool $activating True from the activation hook: a first activation installs.
    *
    * @since 3.0.0
    */
-  public function runMigrations(bool $automatic = false, bool $byAdministrator = false): MigrationResult
+  public function runMigrations(bool $automatic = false, bool $byAdministrator = false, bool $activating = false): MigrationResult
   {
     $this->warnAboutSeeders();
 
-    $result = $this->migrator()->migrate($automatic, $byAdministrator);
-
-    $this->finishMigration($result);
-
-    return $result;
+    return $this->migrator()->migrate($automatic, $byAdministrator, function (?string $previous) use ($activating) {
+      $this->finishUpdate($previous, $activating);
+    });
   }
 
   /**
@@ -605,16 +603,25 @@ class Plugin extends Container implements PluginContract
     );
   }
 
-  protected function finishMigration(MigrationResult $result): void
+  /**
+   * The update's own work, called by the Migrator once the migrations ran and before it stores
+   * the new version, so that a failure here is tried again: align the options, then run
+   * plugin/updated.php, which receives the version the update came from as $previousVersion.
+   *
+   * $previousVersion is null when that version is unknown: the first run on 3.0 of a site updated
+   * from 2.x, which kept no version, or a network site the plugin never ran on. A first activation
+   * is an installation, not an update: there plugin/updated.php does not run.
+   */
+  protected function finishUpdate(?string $previous, bool $activating): void
   {
-    if (!$result->advanced) {
+    $this->options->delta();
+
+    if ($activating && $previous === null) {
       return;
     }
 
-    $this->options->delta();
-
-    if ($result->previous !== null && file_exists("{$this->basePath}/plugin/updated.php")) {
-      $previousVersion = $result->previous;
+    if (file_exists("{$this->basePath}/plugin/updated.php")) {
+      $previousVersion = $previous;
 
       include "{$this->basePath}/plugin/updated.php";
     }
@@ -670,7 +677,7 @@ class Plugin extends Container implements PluginContract
     // include your own activation
     $activation = include_once "{$this->basePath}/plugin/activation.php";
 
-    $this->runMigrations();
+    $this->runMigrations(false, false, true);
   }
 
   /**

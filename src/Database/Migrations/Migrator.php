@@ -165,9 +165,14 @@ class Migrator
    *                              it asks again, since another request may have finished, or
    *                              failed, in the meantime. Activation and `php bones migrate` run
    *                              whatever the state.
-   * @param bool $byAdministrator What isDue() was asked with.
+   * @param bool          $byAdministrator What isDue() was asked with.
+   * @param callable|null $finish          The update's own work, called with the previous version
+   *                                       (null when unknown) once the migrations ran and before
+   *                                       the version moves, still under the lock: when it throws,
+   *                                       the failure is recorded and the next run finishes the
+   *                                       update again.
    */
-  public function migrate(bool $automatic = false, bool $byAdministrator = false): MigrationResult
+  public function migrate(bool $automatic = false, bool $byAdministrator = false, ?callable $finish = null): MigrationResult
   {
     if (!$this->repository->lock()) {
       return new MigrationResult(null, true);
@@ -232,11 +237,30 @@ class Migrator
         }
       }
 
+      if ($finish !== null && $this->repository->version() !== $this->version) {
+        try {
+          $finish($result->previous);
+        } catch (Throwable $e) {
+          $result->failed = 'plugin/updated.php';
+          $result->error = get_class($e) . ': ' . $e->getMessage();
+
+          $this->repository->setFailure([
+            'migration' => $result->failed,
+            'message' => $result->error,
+            'version' => $this->version,
+            'time' => time(),
+          ]);
+
+          $this->log("the migrations ran, but finishing the update failed and will run again: {$result->error}");
+
+          return $result;
+        }
+      }
+
       // Also on a site that never failed: the empty value keeps the option autoloaded.
       $this->repository->setFailure(null);
 
-      // Only the request that stored the new version finishes the update; one that could not
-      // leaves it to the next request, so plugin/updated.php runs once.
+      // The version moves last: until it does, the next request finishes the update again.
       if ($this->repository->version() !== $this->version) {
         if ($this->repository->setVersion($this->version)) {
           $result->advanced = true;
