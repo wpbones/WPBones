@@ -127,6 +127,16 @@ final class LogServiceProviderTest extends TestCase
     $this->assertDirectoryDoesNotExist($this->uploads . '/wpbones');
   }
 
+  public function test_without_a_writable_uploads_folder_a_single_log_goes_to_error_log_only(): void
+  {
+    Functions\when('wp_upload_dir')->justReturn(['basedir' => '', 'error' => 'Unable to create directory']);
+
+    $this->logger(['plugin.logging.type' => 'single'])->debug('hello');
+
+    $this->assertDirectoryDoesNotExist($this->uploads . '/wpbones');
+    $this->assertStringContainsString('hello', (string) file_get_contents($this->uploads . '/php-error.log'));
+  }
+
   public function test_errorlog_writes_no_file_and_creates_no_folder(): void
   {
     $this->logger(['plugin.logging.type' => 'errorlog']);

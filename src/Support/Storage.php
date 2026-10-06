@@ -14,6 +14,10 @@ if (!defined('ABSPATH')) {
  * the uploads directory, which WordPress keeps writable, in wpbones/<plugin>/<folder>: an
  * index.php in every folder, a deny-all .htaccess at the top for the servers that read it.
  *
+ * There is no fallback: when uploads cannot be written, or the deny rule cannot be put in place,
+ * path() answers null and the caller does without (a shared temporary folder would let other
+ * local users read the logs and plant compiled views, Codex on #128).
+ *
  * @since 3.0.0
  */
 class Storage
@@ -25,9 +29,9 @@ class Storage
    *                       plugin boots, unlike its slug, which is read from the header on init.
    * @param string $folder What goes in it: `views`, `logs`.
    *
-   * @return string The absolute path, without a trailing slash.
+   * @return string|null The absolute path, without a trailing slash; null when it cannot be had.
    */
-  public static function path(string $plugin, string $folder): string
+  public static function path(string $plugin, string $folder): ?string
   {
     // Whatever it is given, it never names a folder outside wpbones/.
     $plugin = preg_replace('/[^A-Za-z0-9_-]/', '', $plugin) ?: 'plugin';
@@ -36,14 +40,12 @@ class Storage
     $uploads = wp_upload_dir(null, false);
     $base = empty($uploads['error']) && !empty($uploads['basedir']) ? $uploads['basedir'] : '';
 
-    $path = self::create($base, $plugin, $folder);
-
-    // No uploads directory, or one that cannot be written: the system's temporary folder.
-    return $path ?? (self::create(get_temp_dir(), $plugin, $folder) ?? untrailingslashit(get_temp_dir()));
+    return self::create($base, $plugin, $folder);
   }
 
   /**
-   * Create base/wpbones/plugin/folder with its index files; null when it cannot be written.
+   * Create base/wpbones/plugin/folder with its index files and the deny rule; null when the folder
+   * cannot be written or the rule is not there.
    */
   private static function create(string $base, string $plugin, string $folder): ?string
   {
@@ -68,14 +70,19 @@ class Storage
       }
     }
 
-    // Left alone once it exists: the site's owner may have written their own.
+    // Left alone once it exists: the site's owner may have written their own. Without it, Apache
+    // would serve what this folder holds: no folder then.
     if (!file_exists("{$root}/.htaccess")) {
-      @file_put_contents(
+      $written = @file_put_contents(
         "{$root}/.htaccess",
         "# Generated files of WP Bones plugins: not for the web.\n" .
           "<IfModule mod_authz_core.c>\n  Require all denied\n</IfModule>\n" .
           "<IfModule !mod_authz_core.c>\n  Order allow,deny\n  Deny from all\n</IfModule>\n"
       );
+
+      if ($written === false) {
+        return null;
+      }
     }
 
     return $path;

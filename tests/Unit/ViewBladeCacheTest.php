@@ -82,6 +82,17 @@ final class ViewBladeCacheTest extends TestCase
     $this->assertDirectoryDoesNotExist($this->plugin->basePath . '/.cache');
   }
 
+  public function test_a_blade_view_without_a_writable_uploads_folder_fails_loudly(): void
+  {
+    Functions\when('wp_upload_dir')->justReturn(['basedir' => '', 'error' => 'Unable to create directory']);
+
+    $this->expectException(\RuntimeException::class);
+    $this->expectExceptionMessage('cannot compile Blade views');
+
+    // render(true) buffers the view, and closes the buffer when it throws.
+    (new View($this->plugin, 'pages.hello'))->render(true);
+  }
+
   public function test_a_plain_php_view_creates_no_cache_folder_at_all(): void
   {
     $html = (new View($this->plugin, 'plain'))->render(true);

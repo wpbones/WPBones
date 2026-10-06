@@ -99,15 +99,28 @@ final class StorageTest extends TestCase
     $this->assertStringNotContainsString('..', substr($path, strlen($this->uploads)));
   }
 
-  public function test_without_an_uploads_directory_it_falls_back_to_the_temp_folder(): void
+  /**
+   * No fallback (Codex on #128): a shared temporary folder would let other local users read the
+   * logs and plant compiled views.
+   */
+  public function test_without_an_uploads_directory_there_is_no_folder(): void
   {
     Functions\when('wp_upload_dir')->justReturn(['basedir' => '', 'error' => 'Unable to create directory']);
+    Functions\expect('get_temp_dir')->never();
 
-    $path = Storage::path('my_plugin_slug', 'views');
+    $this->assertNull(Storage::path('my_plugin_slug', 'views'));
+  }
 
-    $this->assertStringStartsWith(sys_get_temp_dir() . '/wpbones/my_plugin_slug/views', $path);
-    $this->assertDirectoryExists($path);
+  /** Without its deny rule the folder is not used: Apache would serve what it holds. */
+  public function test_a_deny_rule_that_cannot_be_written_means_no_folder(): void
+  {
+    mkdir($this->uploads . '/wpbones/my_plugin_slug/views', 0755, true);
+    chmod($this->uploads . '/wpbones', 0555);
 
-    $this->remove(sys_get_temp_dir() . '/wpbones');
+    try {
+      $this->assertNull(Storage::path('my_plugin_slug', 'views'));
+    } finally {
+      chmod($this->uploads . '/wpbones', 0755);
+    }
   }
 }

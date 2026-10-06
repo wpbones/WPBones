@@ -133,7 +133,16 @@ class LogServiceProvider extends ServiceProvider
       // The plugin's folder name, not its slug: the slug is read from the header on init, after
       // this provider is made.
       $folder = basename($plugin->basePath);
-      $this->logPath = trailingslashit(Storage::path($folder, 'logs'));
+      $logs = Storage::path($folder, 'logs');
+
+      // No folder to write to: error_log() only, as "errorlog".
+      if ($logs === null) {
+        $this->log = false;
+
+        return;
+      }
+
+      $this->logPath = trailingslashit($logs);
       $key = (defined('AUTH_SALT') ? AUTH_SALT : '') . ABSPATH;
       $this->filename .= '-' . substr(hash_hmac('sha256', 'wpbones-log-' . $folder, $key), 0, 12);
     } else {

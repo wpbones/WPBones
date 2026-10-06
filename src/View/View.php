@@ -192,11 +192,13 @@ class View
   protected function blade(): BladeOne
   {
     if ($this->blade === null) {
-      $this->blade = new BladeOne(
-        $this->container->basePath . '/resources/views',
-        Storage::path(basename($this->container->basePath), 'views'),
-        BladeOne::MODE_AUTO
-      );
+      $cache = Storage::path(basename($this->container->basePath), 'views');
+
+      if ($cache === null) {
+        throw new \RuntimeException('WP Bones cannot compile Blade views: the uploads directory, where they go since 3.0, cannot be written.');
+      }
+
+      $this->blade = new BladeOne($this->container->basePath . '/resources/views', $cache, BladeOne::MODE_AUTO);
 
       // A direct request for a compiled view runs it out of context instead of reading it.
       $this->blade->setCompiledExtension('.php');
@@ -271,10 +273,14 @@ class View
     }
 
     if ($this->container->isAjax() || $asHTML) {
+      // Closed even when the view throws: a buffer left open swallows the rest of the page.
       ob_start();
-      $func();
-      $content = ob_get_contents();
-      ob_end_clean();
+      try {
+        $func();
+        $content = ob_get_contents();
+      } finally {
+        ob_end_clean();
+      }
 
       return $content;
     }
