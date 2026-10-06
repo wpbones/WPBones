@@ -7,6 +7,7 @@ if (!defined('ABSPATH')) {
 }
 
 use WPKirk\WPBones\Support\ServiceProvider;
+use WPKirk\WPBones\Support\Traits\AuthorizesAdminPages;
 
 /**
  * This provider is used to register all custom pages.
@@ -14,6 +15,8 @@ use WPKirk\WPBones\Support\ServiceProvider;
  */
 class PageProvider extends ServiceProvider
 {
+  use AuthorizesAdminPages;
+
   // register
   public function register()
   {
@@ -73,6 +76,8 @@ class PageProvider extends ServiceProvider
 
         $admin_page_hooks[$page_slug] = $page->title();
         $hookName = get_plugin_page_hookname($page_slug, '');
+
+        $this->authorizeAdminPage($hookName, $page->capability());
 
         add_action("load-toplevel_page_{$page_slug}", function () use ($page) {
           add_filter(

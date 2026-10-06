@@ -34,6 +34,18 @@ abstract class Page
   abstract public function title();
 
   /**
+   * Return the capability a user needs to open the page.
+   *
+   * Override it to restrict the page: the default, `read`, lets in any logged-in user.
+   *
+   * @return string
+   */
+  public function capability()
+  {
+    return 'read';
+  }
+
+  /**
    * Render the page
    */
   abstract public function render();

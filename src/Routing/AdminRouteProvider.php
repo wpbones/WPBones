@@ -8,6 +8,7 @@ if (!defined('ABSPATH')) {
 
 use WPKirk\WPBones\Support\ServiceProvider;
 use WPKirk\WPBones\Support\Str;
+use WPKirk\WPBones\Support\Traits\AuthorizesAdminPages;
 
 /**
  * Class AdminRouteProvider
@@ -20,6 +21,8 @@ use WPKirk\WPBones\Support\Str;
 
 class AdminRouteProvider extends ServiceProvider
 {
+  use AuthorizesAdminPages;
+
   // register
   public function register()
   {
@@ -35,6 +38,8 @@ class AdminRouteProvider extends ServiceProvider
 
         if (!empty($hookName)) {
           if ($hook = $this->plugin->getCallableHook($page['route'])) {
+            $this->authorizeAdminPage($hookName, $page['capability'] ?? 'read');
+
             add_action("load-toplevel_page_{$page_slug}", function () use ($page) {
               add_filter(
                 'admin_title',
