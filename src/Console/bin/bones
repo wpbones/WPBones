@@ -4025,6 +4025,12 @@ namespace Bones {
       $this->warning('Commit your current work first, so that git diff shows what changed.');
       $this->line('');
 
+      // A deployed copy has no namespace file: the conversion belongs in the plugin's sources.
+      if (!file_exists('namespace')) {
+        $this->error('No namespace file here: run php bones migrate:to-v3 in the plugin\'s source folder, not in a deployed copy.');
+        exit(1);
+      }
+
       $answer = $this->ask('Continue? (y/N)');
       if (strtolower(trim((string) $answer)) !== 'y') {
         $this->error('Migration aborted: nothing was changed.');
