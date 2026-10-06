@@ -201,7 +201,7 @@ final class MakeCommandsTest extends TestCase
     $this->assertParses($files[0]);
   }
 
-  public function test_migrate_create_creates_the_table_it_was_asked_for(): void
+  public function test_migrate_create_writes_the_table_it_was_asked_for_on_the_3x_base_class(): void
   {
     $this->bones->run(['migrate:create', 'books']);
 
@@ -210,5 +210,16 @@ final class MakeCommandsTest extends TestCase
     // Up to 2.1.0 the stub ignored the name: every migration created my_plugin_products.
     $this->assertStringContainsString('$this->create("books",', $file);
     $this->assertStringNotContainsString('my_plugin_products', $file);
+    $this->assertStringContainsString('use WPKirk\\WPBones\\Database\\Migration;', $file);
+  }
+
+  public function test_migrate_and_migrate_status_need_wordpress_and_say_so(): void
+  {
+    foreach (['migrate', 'migrate:status'] as $command) {
+      $run = $this->bones->run([$command]);
+
+      $this->assertSame(1, $run['status'], "{$command}: " . $run['output']);
+      $this->assertStringContainsString('No WordPress found above this plugin', $run['output'], $command);
+    }
   }
 }
