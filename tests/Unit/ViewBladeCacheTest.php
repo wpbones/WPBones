@@ -93,6 +93,20 @@ final class ViewBladeCacheTest extends TestCase
     (new View($this->plugin, 'pages.hello'))->render(true);
   }
 
+  /** A view that throws with a buffer of its own still open: render(true) restores the level. */
+  public function test_render_restores_the_buffer_level_when_a_view_throws_inside_a_buffer(): void
+  {
+    file_put_contents($this->plugin->basePath . '/resources/views/broken.php', '<?php ob_start(); throw new \\LogicException("broken");');
+    $level = ob_get_level();
+
+    try {
+      (new View($this->plugin, 'broken'))->render(true);
+      $this->fail('The view did not throw.');
+    } catch (\LogicException $e) {
+      $this->assertSame($level, ob_get_level());
+    }
+  }
+
   public function test_a_plain_php_view_creates_no_cache_folder_at_all(): void
   {
     $html = (new View($this->plugin, 'plain'))->render(true);

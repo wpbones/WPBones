@@ -273,13 +273,17 @@ class View
     }
 
     if ($this->container->isAjax() || $asHTML) {
-      // Closed even when the view throws: a buffer left open swallows the rest of the page.
+      // Back to the level it found even when the view throws, with a Blade @section or @push left
+      // open inside it: a buffer left open swallows the rest of the page.
+      $level = ob_get_level();
       ob_start();
       try {
         $func();
         $content = ob_get_contents();
       } finally {
-        ob_end_clean();
+        while (ob_get_level() > $level) {
+          ob_end_clean();
+        }
       }
 
       return $content;

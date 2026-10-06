@@ -70,19 +70,23 @@ class Storage
       }
     }
 
-    // Left alone once it exists: the site's owner may have written their own. Without it, Apache
-    // would serve what this folder holds: no folder then.
-    if (!file_exists("{$root}/.htaccess")) {
-      $written = @file_put_contents(
-        "{$root}/.htaccess",
-        "# Generated files of WP Bones plugins: not for the web.\n" .
-          "<IfModule mod_authz_core.c>\n  Require all denied\n</IfModule>\n" .
-          "<IfModule !mod_authz_core.c>\n  Order allow,deny\n  Deny from all\n</IfModule>\n"
-      );
+    // Left alone once it exists, as the site's owner may have written their own, but only if it
+    // denies: without a rule, Apache would serve what this folder holds, so then there is no folder.
+    // A short write (a full disk) is removed rather than left to pass for a rule (Codex on #128).
+    $htaccess = "{$root}/.htaccess";
 
-      if ($written === false) {
+    if (!file_exists($htaccess)) {
+      $rule = "# Generated files of WP Bones plugins: not for the web.\n" .
+        "<IfModule mod_authz_core.c>\n  Require all denied\n</IfModule>\n" .
+        "<IfModule !mod_authz_core.c>\n  Order allow,deny\n  Deny from all\n</IfModule>\n";
+
+      if (@file_put_contents($htaccess, $rule) !== strlen($rule)) {
+        @unlink($htaccess);
+
         return null;
       }
+    } elseif (stripos((string) @file_get_contents($htaccess), 'deny') === false) {
+      return null;
     }
 
     return $path;

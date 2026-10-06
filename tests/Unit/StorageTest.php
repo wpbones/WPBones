@@ -83,11 +83,10 @@ final class StorageTest extends TestCase
   public function test_an_existing_htaccess_is_left_as_the_site_owner_wrote_it(): void
   {
     mkdir($this->uploads . '/wpbones', 0755, true);
-    file_put_contents($this->uploads . '/wpbones/.htaccess', "# mine\n");
+    file_put_contents($this->uploads . '/wpbones/.htaccess', "# mine\nDeny from all\n");
 
-    Storage::path('my_plugin_slug', 'views');
-
-    $this->assertSame("# mine\n", file_get_contents($this->uploads . '/wpbones/.htaccess'));
+    $this->assertNotNull(Storage::path('my_plugin_slug', 'views'));
+    $this->assertSame("# mine\nDeny from all\n", file_get_contents($this->uploads . '/wpbones/.htaccess'));
   }
 
   /** A slug comes from the plugin's header: it never gets to name a folder outside wpbones/. */
@@ -107,6 +106,15 @@ final class StorageTest extends TestCase
   {
     Functions\when('wp_upload_dir')->justReturn(['basedir' => '', 'error' => 'Unable to create directory']);
     Functions\expect('get_temp_dir')->never();
+
+    $this->assertNull(Storage::path('my_plugin_slug', 'views'));
+  }
+
+  /** An .htaccess that denies nothing, an empty one left by a full disk for instance, is no rule. */
+  public function test_an_htaccess_that_denies_nothing_means_no_folder(): void
+  {
+    mkdir($this->uploads . '/wpbones', 0755, true);
+    file_put_contents($this->uploads . '/wpbones/.htaccess', '');
 
     $this->assertNull(Storage::path('my_plugin_slug', 'views'));
   }
