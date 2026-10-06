@@ -560,6 +560,13 @@ class Plugin extends Container implements PluginContract
    */
   public function _activation()
   {
+    // Activation comes after init, which is where the header is read (#51): without this the
+    // slug was empty here, so the options delta below wrote to an options row with no name, and
+    // $this->Version was null in plugin/activation.php.
+    if (empty($this->pluginData)) {
+      $this->initPluginData();
+    }
+
     // updates/align the plugin options
     $this->options->delta();
 

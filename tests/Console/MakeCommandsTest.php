@@ -200,4 +200,15 @@ final class MakeCommandsTest extends TestCase
     $this->assertCount(1, $files, $run['output']);
     $this->assertParses($files[0]);
   }
+
+  public function test_migrate_create_creates_the_table_it_was_asked_for(): void
+  {
+    $this->bones->run(['migrate:create', 'books']);
+
+    $file = (string) file_get_contents((glob($this->bones->plugin . '/database/migrations/*_create_books_table.php') ?: [''])[0]);
+
+    // Up to 2.1.0 the stub ignored the name: every migration created my_plugin_products.
+    $this->assertStringContainsString('$this->create("books",', $file);
+    $this->assertStringNotContainsString('my_plugin_products', $file);
+  }
 }

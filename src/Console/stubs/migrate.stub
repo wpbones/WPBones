@@ -13,7 +13,7 @@ return new class extends Migration
   {
     // Create your table, for example:
 
-    $this->create("my_plugin_products",
+    $this->create("{Tablename}",
       "( 
          id bigint(20) unsigned NOT NULL auto_increment,
          user_id bigint(20) unsigned NOT NULL default '0',
