@@ -1,0 +1,113 @@
+<?php
+
+declare(strict_types=1);
+
+namespace WPKirk\WPBones\Tests\Unit;
+
+use Brain\Monkey;
+use Brain\Monkey\Functions;
+use PHPUnit\Framework\TestCase;
+use WPKirk\WPBones\Support\Storage;
+
+/**
+ * Audit S6/S7 (2026-09-18): compiled Blade views and log files were written inside the plugin
+ * folder, created 0777, where the web server serves them as text (a compiled view was fetched
+ * with curl), and where a read-only plugin folder breaks Blade. Since 3.0 the plugin's generated
+ * files go under the uploads directory, wpbones/<plugin folder>/<folder>, closed to the web as far as a
+ * file can say so: an index.php in every folder, a deny-all .htaccess at the top.
+ */
+final class StorageTest extends TestCase
+{
+  private string $uploads;
+
+  protected function setUp(): void
+  {
+    parent::setUp();
+    Monkey\setUp();
+
+    $this->uploads = sys_get_temp_dir() . '/wpbones-uploads-' . bin2hex(random_bytes(6));
+    mkdir($this->uploads);
+
+    Functions\when('wp_upload_dir')->alias(fn() => ['basedir' => $this->uploads, 'error' => false]);
+    Functions\when('wp_mkdir_p')->alias(fn($dir) => is_dir($dir) || mkdir($dir, 0755, true));
+    Functions\when('trailingslashit')->alias(fn($path) => rtrim($path, '/\\') . '/');
+    Functions\when('get_temp_dir')->justReturn(sys_get_temp_dir() . '/');
+  }
+
+  protected function tearDown(): void
+  {
+    $this->remove($this->uploads);
+    Monkey\tearDown();
+    parent::tearDown();
+  }
+
+  private function remove(string $dir): void
+  {
+    if (!is_dir($dir)) {
+      return;
+    }
+
+    $entries = new \RecursiveIteratorIterator(
+      new \RecursiveDirectoryIterator($dir, \FilesystemIterator::SKIP_DOTS),
+      \RecursiveIteratorIterator::CHILD_FIRST
+    );
+
+    foreach ($entries as $entry) {
+      $entry->isDir() ? rmdir($entry->getPathname()) : unlink($entry->getPathname());
+    }
+
+    rmdir($dir);
+  }
+
+  public function test_the_folder_is_under_uploads_by_plugin_folder(): void
+  {
+    $path = Storage::path('my_plugin_slug', 'views');
+
+    $this->assertSame($this->uploads . '/wpbones/my_plugin_slug/views', $path);
+    $this->assertDirectoryExists($path);
+  }
+
+  public function test_every_level_has_an_index_and_the_top_denies_the_web(): void
+  {
+    Storage::path('my_plugin_slug', 'logs');
+
+    foreach (['/wpbones', '/wpbones/my_plugin_slug', '/wpbones/my_plugin_slug/logs'] as $level) {
+      $this->assertFileExists($this->uploads . $level . '/index.php', $level);
+    }
+
+    $htaccess = (string) file_get_contents($this->uploads . '/wpbones/.htaccess');
+    $this->assertStringContainsString('Require all denied', $htaccess);
+    $this->assertStringContainsString('Deny from all', $htaccess);
+  }
+
+  public function test_an_existing_htaccess_is_left_as_the_site_owner_wrote_it(): void
+  {
+    mkdir($this->uploads . '/wpbones', 0755, true);
+    file_put_contents($this->uploads . '/wpbones/.htaccess', "# mine\n");
+
+    Storage::path('my_plugin_slug', 'views');
+
+    $this->assertSame("# mine\n", file_get_contents($this->uploads . '/wpbones/.htaccess'));
+  }
+
+  /** A slug comes from the plugin's header: it never gets to name a folder outside wpbones/. */
+  public function test_a_slug_or_folder_cannot_climb_out(): void
+  {
+    $path = Storage::path('../../evil/slug', '../views');
+
+    $this->assertStringStartsWith($this->uploads . '/wpbones/', $path);
+    $this->assertStringNotContainsString('..', substr($path, strlen($this->uploads)));
+  }
+
+  public function test_without_an_uploads_directory_it_falls_back_to_the_temp_folder(): void
+  {
+    Functions\when('wp_upload_dir')->justReturn(['basedir' => '', 'error' => 'Unable to create directory']);
+
+    $path = Storage::path('my_plugin_slug', 'views');
+
+    $this->assertStringStartsWith(sys_get_temp_dir() . '/wpbones/my_plugin_slug/views', $path);
+    $this->assertDirectoryExists($path);
+
+    $this->remove(sys_get_temp_dir() . '/wpbones');
+  }
+}

@@ -74,11 +74,11 @@ class View
   protected array $pendingAdminAssets = [];
 
   /**
-   * BladeOne instance for template rendering.
+   * BladeOne instance for template rendering: see blade().
    *
-   * @var BladeOne
+   * @var BladeOne|null
    */
-  protected BladeOne $blade;
+  protected ?BladeOne $blade = null;
 
   /**
    * Legacy property for backward compatibility.
@@ -178,42 +178,31 @@ class View
     $this->adminAssets = new AssetManager();
     $this->frontendAssets = new AssetManager();
     $this->adminAppsAssets = new AssetManager();
-
-    $this->initializeBlade();
   }
 
   /**
-   * Initialize the Blade templating engine.
+   * The Blade engine, made when a Blade view first renders.
    *
-   * @return void
+   * Since 3.0 it compiles into the uploads directory (Support\Storage), as .php files. Up to 2.x
+   * every View made <plugin>/.cache, Blade or not, inside the plugin folder the web server serves:
+   * 0777 with .bladec files read as text up to 2.1.2, .php files behind an .htaccess in 2.1.3.
+   *
+   * @return BladeOne
    */
-  protected function initializeBlade(): void
+  protected function blade(): BladeOne
   {
-    static $prepared = [];
+    if ($this->blade === null) {
+      $this->blade = new BladeOne(
+        $this->container->basePath . '/resources/views',
+        Storage::path(basename($this->container->basePath), 'views'),
+        BladeOne::MODE_AUTO
+      );
 
-    $cache = $this->container->basePath . '/.cache';
-
-    // Once per request and folder: made with WordPress's permissions (it was 0777), closed to
-    // the web, and rid of the .bladec files up to 2.1.2 compiled, which the server served as text.
-    if (!isset($prepared[$cache])) {
-      $prepared[$cache] = true;
-
-      Storage::prepare($cache);
-
-      foreach (glob($cache . '/*.bladec') ?: [] as $stale) {
-        @unlink($stale);
-      }
+      // A direct request for a compiled view runs it out of context instead of reading it.
+      $this->blade->setCompiledExtension('.php');
     }
 
-    // Initialize BladeOne
-    $this->blade = new BladeOne(
-      $this->container->basePath . '/resources/views',
-      $cache,
-      BladeOne::MODE_AUTO
-    );
-
-    // A direct request for a compiled view runs it out of context instead of reading its PHP.
-    $this->blade->setCompiledExtension('.php');
+    return $this->blade;
   }
 
   /**
@@ -255,7 +244,7 @@ class View
 
       // Render the blade file
       $func = function () {
-        echo $this->blade->run($this->filename(), $this->data);
+        echo $this->blade()->run($this->filename(), $this->data);
       };
     }
     // Use a php file

@@ -97,8 +97,7 @@ class LogServiceProvider extends ServiceProvider
 
     // first check if log storage is enabled
     $this->log = $plugin->config('plugin.logging.type', 'errorlog');
-    $ownPath = $plugin->config('plugin.logging.path');
-    $this->logPath = $ownPath ?: "{$plugin->basePath}/storage/logs/";
+    $this->logPath = $plugin->config('plugin.logging.path');
     $this->dailyFormat = $plugin->config('plugin.logging.daily_format', 'Y-m-d');
 
     // Check if the date format is prefixed with a string
@@ -116,26 +115,36 @@ class LogServiceProvider extends ServiceProvider
       $this->log = $plugin->config('plugin.log', 'errorlog');
     }
 
-    // "errorlog" is error_log() only, as documented: up to 2.1.2 it also appended to a daily file
-    // in <plugin>/storage/logs, which the web server serves as text.
+    // "errorlog" means error_log() only, as documented; up to 2.1.2 it also wrote a daily file.
     if ($this->log === 'errorlog' || in_array($this->log, [false, 'false', 'FALSE', 'none', 'N', 'n', 'off', 'OFF'], true)) {
       $this->log = false;
 
       return;
     }
 
-    // Made with WordPress's permissions (it was 0777); the default folder, inside the plugin, is
-    // also closed to the web as far as a file can say so.
-    if ($ownPath) {
+    // get the right filename
+    $this->filename = $this->log == 'single' ? 'debug' : $this->dailyFormat;
+
+    if (empty($this->logPath)) {
+      // Since 3.0 the default folder is under uploads, not <plugin>/storage/logs, where the web
+      // server served the files; the name carries a hash keyed with the site's AUTH_SALT, so that
+      // it cannot be guessed where the folder's .htaccess is not read. Not wp_hash(): it is
+      // pluggable, and the plugin boots before pluggable.php is loaded.
+      // The plugin's folder name, not its slug: the slug is read from the header on init, after
+      // this provider is made.
+      $folder = basename($plugin->basePath);
+      $this->logPath = trailingslashit(Storage::path($folder, 'logs'));
+      $key = (defined('AUTH_SALT') ? AUTH_SALT : '') . ABSPATH;
+      $this->filename .= '-' . substr(hash_hmac('sha256', 'wpbones-log-' . $folder, $key), 0, 12);
+    } else {
+      $this->logPath = trailingslashit($this->logPath);
+
       if (!file_exists($this->logPath)) {
         wp_mkdir_p($this->logPath);
       }
-    } else {
-      Storage::prepare(rtrim($this->logPath, '/'));
     }
 
-    // get the right filename
-    $this->filename = $this->log == 'single' ? 'debug.log' : $this->dailyFormat . '.log';
+    $this->filename .= '.log';
 
     // complete log path
     $this->path = "{$this->logPath}{$this->filename}";

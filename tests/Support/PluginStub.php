@@ -22,6 +22,8 @@ final class PluginStub
 
   public string $TextDomain = 'stub';
 
+  public string $slug = 'stub_slug';
+
   public string $DomainPath = 'languages';
 
   public function __construct(?string $basePath = null)
@@ -39,9 +41,9 @@ final class PluginStub
   }
 
   /**
-   * Remove the throwaway base path. View's constructor creates a `.cache` directory
-   * under it for BladeOne, so a test that forgets this leaves a tree behind on every
-   * run — 32 of them after one suite, the first time this stub was used.
+   * Remove the throwaway base path and what the test wrote under it. Up to 2.x View's
+   * constructor created a `.cache` directory there for BladeOne, and a test that forgot
+   * this left a tree behind on every run: 32 of them after one suite.
    */
   public function cleanup(): void
   {
