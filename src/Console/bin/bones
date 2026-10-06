@@ -4137,10 +4137,19 @@ namespace Bones {
       $source = (string) file_get_contents($file);
       $tokens = token_get_all($source);
 
-      // The seeder's settings.
-      $table = preg_match('/\$tablename\s*=\s*([\'"])([A-Za-z0-9_]+)\1\s*;/', $source, $m) ? $m[2] : null;
-      $usePrefix = !preg_match('/\$usePrefix\s*=\s*false\s*;/i', $source);
-      $runOnce = (bool) preg_match('/\$runOnce\s*=\s*true\s*;/i', $source);
+      // The seeder's settings, read from its code and not from its comments: a commented-out
+      // `$runOnce = true;` must not add a guard.
+      $code = '';
+      foreach ($tokens as $token) {
+        if (!is_array($token) || !in_array($token[0], [T_COMMENT, T_DOC_COMMENT], true)) {
+          $code .= is_array($token) ? $token[1] : $token;
+        }
+      }
+
+      $table = preg_match('/\$tablename\s*=\s*([\'"])([A-Za-z0-9_]+)\1\s*;/', $code, $m) ? $m[2] : null;
+      $usePrefix = !preg_match('/\$usePrefix\s*=\s*false\s*;/i', $code);
+      $runOnce = (bool) preg_match('/\$runOnce\s*=\s*true\s*;/i', $code);
+      $fileNamespace = preg_match('/^\s*namespace\s+([A-Za-z0-9_\\\\]+)\s*;/m', $code, $m) ? $m[1] : null;
 
       // The methods it declares, and where run() begins and ends.
       $methods = [];
@@ -4200,25 +4209,41 @@ namespace Bones {
       // The body, with the table named where the 2.x helpers took it for granted.
       $code = '';
       $usesTable = false;
+      $usesWpdb = false;
       $needsTable = false;
+      $truncatesByName = false;
       $n = count($body);
+
+      // The index of the next token that is not white space.
+      $next = function (int $from) use ($body, $n): int {
+        while ($from < $n && is_array($body[$from]) && $body[$from][0] === T_WHITESPACE) {
+          $from++;
+        }
+
+        return $from;
+      };
 
       for ($i = 0; $i < $n; $i++) {
         $token = $body[$i];
         $text = is_array($token) ? $token[1] : $token;
 
         if (is_array($token) && $token[0] === T_VARIABLE && $text === '$this') {
-          // $this->name( or $this->name
-          $j = $i + 1;
-          $arrow = $j < $n && is_array($body[$j]) && $body[$j][0] === T_OBJECT_OPERATOR;
-          $member = $arrow && $j + 1 < $n && is_array($body[$j + 1]) && $body[$j + 1][0] === T_STRING ? $body[$j + 1][1] : null;
+          // $this->name, also spelled `$this -> name` or `$this?->name`
+          $j = $next($i + 1);
+          $arrow = $j < $n && is_array($body[$j]) && in_array($body[$j][0], [T_OBJECT_OPERATOR, T_NULLSAFE_OBJECT_OPERATOR], true);
+          $at = $arrow ? $next($j + 1) : $n;
+          $member = $at < $n && is_array($body[$at]) && $body[$at][0] === T_STRING ? $body[$at][1] : null;
 
           if ($member === 'tablename') {
             $usesTable = true;
           }
 
+          if ($member === 'wpdb') {
+            $usesWpdb = true;
+          }
+
           if (in_array($member, ['insert', 'truncate', 'count'], true)) {
-            $k = $j + 2;
+            $k = $at + 1;
             while ($k < $n && is_array($body[$k]) && $body[$k][0] === T_WHITESPACE) {
               $k++;
             }
@@ -4227,6 +4252,10 @@ namespace Bones {
               $m = $k + 1;
               while ($m < $n && is_array($body[$m]) && $body[$m][0] === T_WHITESPACE) {
                 $m++;
+              }
+
+              if ($member === 'truncate' && $body[$m] !== ')') {
+                $truncatesByName = true;
               }
 
               // insert($sql) gains the table first; truncate() and count() only when called bare.
@@ -4262,6 +4291,15 @@ namespace Bones {
         $prelude .= "    \$this->tablename = \$this->table('{$table}');\n\n";
       }
 
+      if ($usesWpdb) {
+        $properties .= "  /** The wpdb object, as the 2.x seeder had it in \$this->wpdb. */\n  protected \$wpdb;\n\n";
+        $prelude .= "    \$this->wpdb = \$GLOBALS['wpdb'];\n\n";
+      }
+
+      if (!$usePrefix && $truncatesByName) {
+        $notes[] = "it calls truncate() with a table name and has \$usePrefix = false: 2.x prefixed that name anyway, a migration does not, so check which table it empties";
+      }
+
       if ($runOnce) {
         $prelude .= "    // The seeder had \$runOnce: it seeded the table only while it was empty, and so does this.\n";
         $prelude .= "    if (!\$this->isEmpty('{$table}')) {\n      return;\n    }\n\n";
@@ -4277,7 +4315,9 @@ namespace Bones {
         }
       }
 
-      $migration = "<?php\n\nif (!defined('ABSPATH')) {\n  exit();\n}\n\n";
+      // A namespace declaration has to come first, before the ABSPATH guard.
+      $migration = "<?php\n\n" . ($fileNamespace === null ? '' : "namespace {$fileNamespace};\n\n");
+      $migration .= "if (!defined('ABSPATH')) {\n  exit();\n}\n\n";
       $migration .= "use {$namespace}\\WPBones\\Database\\Migration;\n";
       $migration .= $uses === [] ? '' : implode("\n", $uses) . "\n";
       $migration .= "\n/*\n * Converted from " . $file . " by php bones migrate:to-v3.\n */\n";

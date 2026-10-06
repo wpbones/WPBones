@@ -22,6 +22,16 @@ final class InMemoryMigrationRepository implements MigrationRepository
   /** True while "another request" holds the lock. */
   public bool $heldElsewhere = false;
 
+  /** True when the database refuses the ledger write. */
+  public bool $logFails = false;
+
+  /**
+   * What "another request" writes while this one waits for the lock: applied by refresh().
+   *
+   * @var array{version?: ?string, failure?: ?array}
+   */
+  public array $writtenMeanwhile = [];
+
   public bool $locked = false;
 
   /** @var string[] the calls that matter for ordering, in order */
@@ -48,6 +58,11 @@ final class InMemoryMigrationRepository implements MigrationRepository
     return $this->locked = true;
   }
 
+  public function touch(): void
+  {
+    $this->calls[] = 'touch';
+  }
+
   public function unlock(): void
   {
     $this->calls[] = 'unlock';
@@ -57,6 +72,10 @@ final class InMemoryMigrationRepository implements MigrationRepository
   public function refresh(): void
   {
     $this->calls[] = 'refresh';
+
+    foreach ($this->writtenMeanwhile as $property => $value) {
+      $this->{$property} = $value;
+    }
   }
 
   public function ran(): array
@@ -64,10 +83,17 @@ final class InMemoryMigrationRepository implements MigrationRepository
     return $this->ran;
   }
 
-  public function log(string $migration, int $batch, string $version): void
+  public function log(string $migration, int $batch, string $version): bool
   {
     $this->calls[] = "log {$migration}";
+
+    if ($this->logFails) {
+      return false;
+    }
+
     $this->ran[$migration] = ['batch' => $batch, 'version' => $version, 'time' => time()];
+
+    return true;
   }
 
   public function setVersion(string $version): void

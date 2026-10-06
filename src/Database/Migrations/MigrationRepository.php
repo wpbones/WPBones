@@ -31,6 +31,14 @@ interface MigrationRepository
    */
   public function lock(): bool;
 
+  /**
+   * Tell the others the lock is still held, so a long run is not taken for an abandoned one.
+   */
+  public function touch(): void;
+
+  /**
+   * Release the lock this request holds, and only that one.
+   */
   public function unlock(): void;
 
   /**
@@ -46,7 +54,12 @@ interface MigrationRepository
    */
   public function ran(): array;
 
-  public function log(string $migration, int $batch, string $version): void;
+  /**
+   * Record that a migration ran.
+   *
+   * @return bool False when it could not be stored: it would run again.
+   */
+  public function log(string $migration, int $batch, string $version): bool;
 
   public function setVersion(string $version): void;
 

@@ -230,6 +230,69 @@ final class MigrationTest extends TestCase
     $this->assertSame([], $migration->toleratedErrors());
   }
 
+  public function test_constraints_are_not_columns(): void
+  {
+    $this->dbDelta();
+    $this->wpdb->columns = ['id', 'book_id'];
+
+    $migration = new class extends Migration {
+      public function up()
+      {
+        $this->create(
+          'reviews',
+          "(
+            id bigint(20) unsigned NOT NULL auto_increment,
+            book_id bigint(20) unsigned NOT NULL,
+            PRIMARY KEY  (id),
+            CONSTRAINT fk_book FOREIGN KEY (book_id) REFERENCES wp_books (id),
+            FOREIGN KEY (book_id) REFERENCES wp_books (id),
+            CHECK (book_id > 0)
+          )"
+        );
+      }
+    };
+
+    $migration->up();
+
+    $this->assertSame([], $migration->toleratedErrors(), 'nothing reported missing');
+  }
+
+  public function test_a_helper_the_database_refuses_throws_with_the_reason(): void
+  {
+    $this->wpdb->queryResult = false;
+    $this->wpdb->last_error = "Data too long for column 'name' at row 1";
+
+    $migration = new class extends Migration {
+      public function up()
+      {
+        $this->insert('books', "(name) VALUES ('" . str_repeat('x', 300) . "')");
+      }
+    };
+
+    $this->expectException(RuntimeException::class);
+    $this->expectExceptionMessage("The database refused INSERT: Data too long for column 'name' at row 1");
+
+    $migration->up();
+  }
+
+  public function test_count_throws_when_the_table_cannot_be_read(): void
+  {
+    $this->wpdb->var = null;
+    $this->wpdb->last_error = "Table 'wp.wp_books' doesn't exist";
+
+    $migration = new class extends Migration {
+      public function up()
+      {
+        $this->isEmpty('books');
+      }
+    };
+
+    $this->expectException(RuntimeException::class);
+    $this->expectExceptionMessage("Could not count the rows of wp_books: Table 'wp.wp_books' doesn't exist");
+
+    $migration->up();
+  }
+
   public function test_seed_helpers_write_to_the_prefixed_quoted_table(): void
   {
     $migration = new class extends Migration {

@@ -89,6 +89,74 @@ final class MigratorTest extends TestCase
     $this->assertTrue($this->migrator()->isDue());
   }
 
+  public function test_a_failure_of_an_older_version_does_not_hold_back_the_next_one(): void
+  {
+    // 1.1.0 failed; 1.1.1 ships the fix, and every page may run it.
+    $this->repository->version = '1.0.0';
+    $this->repository->failure = ['migration' => 'x', 'message' => 'boom', 'version' => '1.1.0', 'time' => time()];
+
+    $this->assertTrue($this->migrator('1.1.1')->isDue());
+    $this->assertFalse($this->migrator('1.1.0')->isDue(), 'the version that failed is still held back');
+  }
+
+  public function test_a_failure_with_the_version_unchanged_is_retried_by_an_administrator_too(): void
+  {
+    // A migration added during development, without a version bump, failed.
+    $this->repository->version = '1.0.0';
+    $this->repository->failure = ['migration' => 'x', 'message' => 'boom', 'version' => '1.0.0', 'time' => time() - Migrator::RETRY_AFTER];
+
+    $this->assertFalse($this->migrator('1.0.0')->isDue());
+    $this->assertTrue($this->migrator('1.0.0')->isDue(true));
+  }
+
+  public function test_an_automatic_run_stops_when_another_request_failed_while_it_waited(): void
+  {
+    $this->migration('2026_01_01_000000_first');
+    $this->repository->writtenMeanwhile = ['failure' => ['migration' => '2026_01_01_000000_first', 'message' => 'boom', 'version' => '1.0.0', 'time' => time()]];
+
+    $result = $this->migrator()->migrate(true);
+
+    $this->assertTrue($result->ok());
+    $this->assertSame([], $this->ran(), 'a public page does not rerun what just failed');
+  }
+
+  public function test_an_automatic_run_stops_when_another_request_finished_while_it_waited(): void
+  {
+    $this->migration('2026_01_01_000000_first');
+    $this->repository->writtenMeanwhile = ['version' => '1.0.0'];
+
+    $this->migrator('1.0.0')->migrate(true);
+
+    $this->assertSame([], $this->ran());
+  }
+
+  public function test_activation_and_the_cli_run_whatever_the_state(): void
+  {
+    $this->migration('2026_01_01_000000_first');
+    $this->repository->writtenMeanwhile = ['failure' => ['migration' => 'other', 'message' => 'boom', 'version' => '1.0.0', 'time' => time()]];
+
+    $result = $this->migrator()->migrate();
+
+    $this->assertTrue($result->ok());
+    $this->assertSame(['2026_01_01_000000_first'], $this->ran());
+    $this->assertNull($this->repository->failure, 'and a complete run clears the failure');
+  }
+
+  public function test_a_migration_whose_record_cannot_be_stored_stops_the_run_and_keeps_the_version(): void
+  {
+    $this->migration('2026_01_01_000000_first');
+    $this->migration('2026_01_02_000000_second');
+    $this->repository->logFails = true;
+
+    $result = $this->migrator()->migrate();
+
+    $this->assertSame('2026_01_01_000000_first', $result->failed);
+    $this->assertStringContainsString('could not be recorded', (string) $result->error);
+    $this->assertSame(['2026_01_01_000000_first'], $this->ran(), 'the second did not run');
+    $this->assertNull($this->repository->version);
+    $this->assertSame('2026_01_01_000000_first', $this->repository->failure['migration']);
+  }
+
   public function test_a_site_migrated_for_this_version_is_not_due(): void
   {
     $this->repository->version = '1.0.0';
@@ -359,7 +427,11 @@ final class MigratorTest extends TestCase
 
     $this->migrator()->migrate();
 
-    $this->assertSame(['lock', 'refresh', 'log 2026_01_01_000000_first', 'version 1.0.0', 'unlock'], $this->repository->calls);
+    $this->assertSame(
+      ['lock', 'refresh', 'touch', 'log 2026_01_01_000000_first', 'failure cleared', 'version 1.0.0', 'unlock'],
+      $this->repository->calls,
+      'the lock is touched before each migration; the failure option is written even empty, to stay autoloaded'
+    );
   }
 
   public function test_the_lock_is_released_when_a_migration_fails(): void

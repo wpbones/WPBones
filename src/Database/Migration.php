@@ -147,7 +147,7 @@ abstract class Migration
 
   /**
    * The column names a schema declares, lowercase, read the way dbDelta() reads them: one per
-   * line, the first word, keys left out.
+   * line, the first word, keys and constraints left out.
    *
    * @return string[]
    */
@@ -165,7 +165,7 @@ abstract class Migration
       preg_match('|^([^ ]*)|', $line, $first);
       $name = strtolower(trim($first[1] ?? '', '`'));
 
-      if (!in_array($name, ['', 'primary', 'index', 'fulltext', 'unique', 'key', 'spatial'], true)) {
+      if (!in_array($name, ['', 'primary', 'index', 'fulltext', 'unique', 'key', 'spatial', 'constraint', 'foreign', 'check'], true)) {
         $columns[] = $name;
       }
     }
@@ -179,13 +179,13 @@ abstract class Migration
    * @param string $tablename The table name, without the WordPress prefix.
    * @param string $sql       Everything after `INSERT INTO table`.
    *
-   * @return int|bool The number of rows inserted, false on error.
+   * @return int The number of rows inserted.
+   *
+   * @throws RuntimeException When the database refuses it.
    */
   protected function insert($tablename, $sql)
   {
-    global $wpdb;
-
-    return $wpdb->query("INSERT INTO `{$this->table($tablename)}` {$sql}");
+    return $this->query("INSERT INTO `{$this->table($tablename)}` {$sql}");
   }
 
   /**
@@ -193,13 +193,13 @@ abstract class Migration
    *
    * @param string $tablename The table name, without the WordPress prefix.
    *
-   * @return int|bool
+   * @return int
+   *
+   * @throws RuntimeException When the database refuses it.
    */
   protected function truncate($tablename)
   {
-    global $wpdb;
-
-    return $wpdb->query("TRUNCATE TABLE `{$this->table($tablename)}`");
+    return $this->query("TRUNCATE TABLE `{$this->table($tablename)}`");
   }
 
   /**
@@ -211,7 +211,13 @@ abstract class Migration
   {
     global $wpdb;
 
-    return (int) $wpdb->get_var("SELECT COUNT(*) FROM `{$this->table($tablename)}`");
+    $count = $wpdb->get_var("SELECT COUNT(*) FROM `{$this->table($tablename)}`");
+
+    if ($count === null) {
+      throw new RuntimeException("Could not count the rows of {$this->table($tablename)}: " . ($wpdb->last_error ?? ''));
+    }
+
+    return (int) $count;
   }
 
   /**
@@ -227,15 +233,27 @@ abstract class Migration
   /**
    * Run any SQL statement.
    *
+   * It throws when wpdb answers false, which it also does without recording an error: a value too
+   * long for its column, or one the charset cannot hold. The Migrator would not see those.
+   *
    * @param string $sql
    *
-   * @return int|bool
+   * @return int|bool What wpdb::query() answers: rows affected, or true for a statement that
+   *                  affects none.
+   *
+   * @throws RuntimeException When the database refuses it.
    */
   protected function query($sql)
   {
     global $wpdb;
 
-    return $wpdb->query($sql);
+    $result = $wpdb->query($sql);
+
+    if ($result === false) {
+      throw new RuntimeException('The database refused ' . strtok(trim($sql), " \n") . ': ' . (($wpdb->last_error ?? '') ?: 'no reason given'));
+    }
+
+    return $result;
   }
 
   /**
