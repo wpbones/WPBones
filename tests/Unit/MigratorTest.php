@@ -276,6 +276,20 @@ final class MigratorTest extends TestCase
     $this->assertSame(['2026_01_01_000000_create_books'], $result->ran);
   }
 
+  public function test_errors_create_tolerated_are_not_a_failure_but_one_more_is(): void
+  {
+    $error = "['query' => 'ALTER TABLE wp_books ALTER COLUMN `id` SET DEFAULT \\'\\'', 'error_str' => 'Invalid default value']";
+
+    // What Migration::create() does when dbDelta() fails at something cosmetic.
+    $this->migration('2026_01_01_000000_tolerated', "\$GLOBALS['EZSQL_ERROR'][] = {$error}; \$this->toleratedErrors[] = {$error};");
+    $this->migration('2026_01_02_000000_same_error_twice', "\$GLOBALS['EZSQL_ERROR'][] = {$error}; \$GLOBALS['EZSQL_ERROR'][] = {$error}; \$this->toleratedErrors[] = {$error};");
+
+    $result = $this->migrator()->migrate();
+
+    $this->assertSame(['2026_01_01_000000_tolerated'], $result->ran);
+    $this->assertSame('2026_01_02_000000_same_error_twice', $result->failed, 'a tolerated error excuses one occurrence, not two');
+  }
+
   public function test_errors_from_before_the_migration_are_not_blamed_on_it(): void
   {
     $GLOBALS['EZSQL_ERROR'][] = ['query' => 'SELECT nope', 'error_str' => 'an earlier error'];

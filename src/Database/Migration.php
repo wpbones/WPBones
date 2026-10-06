@@ -2,6 +2,8 @@
 
 namespace WPKirk\WPBones\Database;
 
+use RuntimeException;
+
 /**
  * A migration: one change to the database, run once per site.
  *
@@ -38,6 +40,14 @@ abstract class Migration
    */
   protected $usePrefix = true;
 
+  /**
+   * The database errors dbDelta() left behind while create() still got the table and every
+   * column it declares: see create().
+   *
+   * @var array<int, array{query: string, error_str: string}>
+   */
+  protected array $toleratedErrors = [];
+
   public function __construct()
   {
     global $wpdb;
@@ -61,11 +71,23 @@ abstract class Migration
   /**
    * Create a table, or bring an existing one to this schema, through dbDelta().
    *
+   * Put each column on its own line: dbDelta() splits the schema on new lines.
+   *
+   * It fails, by throwing, when the table or one of the columns it declares is not there
+   * afterwards. Anything else dbDelta() could not apply to an existing table, say a default it
+   * tries to change and MySQL refuses, is logged and tolerated: until 2.x every migration ran
+   * again on each activation and update, and those errors went by unseen, so the migrations that
+   * plugins already ship can produce them when 3.0 applies them once more.
+   *
    * @param string $tablename The table name, without the WordPress prefix.
    * @param string $schema    The column and key definitions, in parentheses.
+   *
+   * @throws RuntimeException When the table, or a column it declares, is missing afterwards.
    */
   protected function create($tablename, $schema)
   {
+    global $wpdb;
+
     // Validated before anything reaches dbDelta(): the name is interpolated into SQL.
     $table = $this->table($tablename);
 
@@ -74,8 +96,80 @@ abstract class Migration
     // add ";" at the end of the string $sql if missing
     $sql = rtrim($sql, ';') . ';';
 
-    require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+    if (!function_exists('dbDelta')) {
+      require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+    }
+
+    $before = count($GLOBALS['EZSQL_ERROR'] ?? []);
+
     dbDelta($sql);
+
+    $errors = array_slice($GLOBALS['EZSQL_ERROR'] ?? [], $before);
+    $cause = $errors === [] ? '' : ': ' . end($errors)['error_str'];
+
+    $suppress = $wpdb->suppress_errors();
+    // DESCRIBE, as dbDelta() itself uses: the SQLite integration of WordPress Playground knows it.
+    $columns = array_map('strtolower', (array) $wpdb->get_col("DESCRIBE `{$table}`", 0));
+    $wpdb->suppress_errors($suppress);
+
+    if ($columns === []) {
+      throw new RuntimeException("dbDelta() did not create {$table}{$cause}");
+    }
+
+    $missing = array_diff(static::declaredColumns($schema), $columns);
+
+    if ($missing !== []) {
+      throw new RuntimeException(sprintf('dbDelta() did not add %s to %s%s', implode(', ', $missing), $table, $cause));
+    }
+
+    foreach ($errors as $error) {
+      $this->toleratedErrors[] = $error;
+
+      // The probe dbDelta() makes of a table before creating it always fails: not news.
+      if (stripos(ltrim((string) ($error['query'] ?? '')), 'DESCRIBE ') !== 0) {
+        error_log(sprintf('[WP Bones] dbDelta() left %s as it was for: %s (%s)', $table, $error['query'] ?? '', $error['error_str'] ?? ''));
+      }
+    }
+  }
+
+  /**
+   * The database errors create() tolerated, which the Migrator does not count as a failure.
+   *
+   * @internal
+   *
+   * @return array<int, array{query: string, error_str: string}>
+   */
+  public function toleratedErrors(): array
+  {
+    return $this->toleratedErrors;
+  }
+
+  /**
+   * The column names a schema declares, lowercase, read the way dbDelta() reads them: one per
+   * line, the first word, keys left out.
+   *
+   * @return string[]
+   */
+  protected static function declaredColumns(string $schema): array
+  {
+    if (!preg_match('|\((.*)\)|ms', $schema, $match)) {
+      return [];
+    }
+
+    $columns = [];
+
+    foreach (explode("\n", trim($match[1])) as $line) {
+      $line = trim($line, " \t\n\r\0\x0B,");
+
+      preg_match('|^([^ ]*)|', $line, $first);
+      $name = strtolower(trim($first[1] ?? '', '`'));
+
+      if (!in_array($name, ['', 'primary', 'index', 'fulltext', 'unique', 'key', 'spatial'], true)) {
+        $columns[] = $name;
+      }
+    }
+
+    return $columns;
   }
 
   /**

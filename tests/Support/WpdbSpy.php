@@ -46,6 +46,27 @@ final class WpdbSpy
     return null;
   }
 
+  /** What get_col() answers, e.g. the columns a DESCRIBE reports. */
+  public array $columns = [];
+
+  public bool $suppressed = false;
+
+  /** @return string[] */
+  public function get_col(string $sql, int $x = 0): array
+  {
+    $this->queries[] = $sql;
+
+    return $this->columns;
+  }
+
+  public function suppress_errors(bool $suppress = true): bool
+  {
+    $previous = $this->suppressed;
+    $this->suppressed = $suppress;
+
+    return $previous;
+  }
+
   public function query(string $sql): int
   {
     $this->queries[] = $sql;
@@ -72,6 +93,7 @@ final class WpdbSpy
   public function reset(): void
   {
     $this->queries = [];
+    $this->columns = [];
   }
 
   public function last(): string

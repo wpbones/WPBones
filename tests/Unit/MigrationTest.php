@@ -4,25 +4,93 @@ declare(strict_types=1);
 
 namespace WPKirk\WPBones\Tests\Unit;
 
+use Brain\Monkey;
+use Brain\Monkey\Functions;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
+use RuntimeException;
 use WPKirk\WPBones\Database\Migration;
 use WPKirk\WPBones\Database\Migrations\Migration as LegacyMigration;
 use WPKirk\WPBones\Tests\Support\WpdbSpy;
 
 /**
- * Migration::create() ends in dbDelta(), a WordPress function, so only the guard that
- * runs before it is testable here. The happy path belongs to the WordPress-backed suite.
+ * Migration::create() ends in dbDelta(), a WordPress function: here it is replaced by a stand-in
+ * that records the SQL and leaves errors behind, to test what create() concludes from them. Real
+ * tables are created live by .claude/scripts/migrations-live-smoke.sh in the workspace.
  */
 final class MigrationTest extends TestCase
 {
   private WpdbSpy $wpdb;
 
+  private string $errorLog;
+
+  private string $log;
+
   protected function setUp(): void
   {
+    parent::setUp();
+    Monkey\setUp();
+
     $this->wpdb = $GLOBALS['wpdb'];
     $this->wpdb->reset();
     $this->wpdb->prefix = 'wp_';
+
+    $GLOBALS['EZSQL_ERROR'] = [];
+    $this->log = (string) tempnam(sys_get_temp_dir(), 'wpbones-migration-log-');
+    $this->errorLog = (string) ini_get('error_log');
+    ini_set('error_log', $this->log);
+  }
+
+  protected function tearDown(): void
+  {
+    ini_set('error_log', $this->errorLog);
+    unlink($this->log);
+    unset($GLOBALS['EZSQL_ERROR']);
+
+    Monkey\tearDown();
+    parent::tearDown();
+  }
+
+  /**
+   * dbDelta() as WordPress runs it, reduced to what create() can observe: the SQL it was given,
+   * and the errors it leaves in $EZSQL_ERROR.
+   *
+   * @param array<int, array{query: string, error_str: string}> $errors
+   */
+  private function dbDelta(array $errors = []): object
+  {
+    $calls = new \ArrayObject();
+
+    Functions\when('dbDelta')->alias(function ($sql) use ($calls, $errors) {
+      $calls[] = $sql;
+
+      foreach ($errors as $error) {
+        $GLOBALS['EZSQL_ERROR'][] = $error;
+      }
+
+      return [];
+    });
+
+    return $calls;
+  }
+
+  private function books(): object
+  {
+    return new class extends \WPKirk\WPBones\Database\Migration {
+      public function up()
+      {
+        $this->create(
+          'books',
+          "(
+            id bigint(20) unsigned NOT NULL auto_increment,
+            `title` varchar(20) NOT NULL default '',
+            sku varchar(20) NOT NULL default '',
+            PRIMARY KEY  (id),
+            KEY title (title)
+          ) {$this->charsetCollate};"
+        );
+      }
+    };
   }
 
   public function test_creating_a_migration_runs_nothing(): void
@@ -90,6 +158,76 @@ final class MigrationTest extends TestCase
     }
 
     $this->fail('expected InvalidArgumentException was not thrown');
+  }
+
+  public function test_create_hands_the_table_to_dbdelta_and_checks_its_columns(): void
+  {
+    $calls = $this->dbDelta();
+    $this->wpdb->columns = ['id', 'title', 'sku'];
+
+    $migration = $this->books();
+    $migration->up();
+
+    $this->assertCount(1, $calls);
+    $this->assertStringStartsWith('CREATE TABLE wp_books (', $calls[0]);
+    $this->assertStringEndsWith('COLLATE utf8mb4_unicode_520_ci;', $calls[0]);
+    $this->assertSame(['DESCRIBE `wp_books`'], $this->wpdb->queries);
+    $this->assertSame([], $migration->toleratedErrors());
+  }
+
+  public function test_create_fails_when_dbdelta_did_not_create_the_table(): void
+  {
+    $this->dbDelta([['query' => 'CREATE TABLE wp_books (...)', 'error_str' => 'You have an error in your SQL syntax']]);
+
+    $this->expectException(RuntimeException::class);
+    $this->expectExceptionMessage('dbDelta() did not create wp_books: You have an error in your SQL syntax');
+
+    $this->books()->up();
+  }
+
+  public function test_create_fails_when_a_declared_column_is_missing(): void
+  {
+    $this->dbDelta([['query' => 'ALTER TABLE wp_books ADD COLUMN sku varchar(20)', 'error_str' => 'Disk full']]);
+    $this->wpdb->columns = ['ID', 'Title'];
+
+    $this->expectException(RuntimeException::class);
+    $this->expectExceptionMessage('dbDelta() did not add sku to wp_books: Disk full');
+
+    $this->books()->up();
+  }
+
+  public function test_create_tolerates_what_dbdelta_could_not_reconcile_when_the_columns_are_there(): void
+  {
+    $default = ['query' => "ALTER TABLE wp_books ALTER COLUMN `id` SET DEFAULT ''", 'error_str' => "Invalid default value for 'id'"];
+    $probe = ['query' => 'DESCRIBE wp_books;', 'error_str' => "Table 'wp.wp_books' doesn't exist"];
+    $this->dbDelta([$probe, $default]);
+    $this->wpdb->columns = ['id', 'title', 'sku'];
+
+    $migration = $this->books();
+    $migration->up();
+
+    $this->assertSame([$probe, $default], $migration->toleratedErrors());
+
+    $log = (string) file_get_contents($this->log);
+    $this->assertStringContainsString("dbDelta() left wp_books as it was for: ALTER TABLE wp_books ALTER COLUMN `id` SET DEFAULT '' (Invalid default value for 'id')", $log);
+    $this->assertStringNotContainsString('DESCRIBE', $log, 'the probe of a new table is not news');
+  }
+
+  public function test_a_schema_on_one_line_declares_only_its_first_word_as_dbdelta_reads_it(): void
+  {
+    $this->dbDelta();
+    $this->wpdb->columns = ['id', 'name'];
+
+    $migration = new class extends \WPKirk\WPBones\Database\Migration {
+      public function up()
+      {
+        $this->create('items', "(id bigint(20) unsigned NOT NULL auto_increment, name varchar(20) NOT NULL default '', PRIMARY KEY  (id))");
+      }
+    };
+
+    $migration->up();
+
+    $this->assertSame([], $migration->toleratedErrors());
   }
 
   public function test_seed_helpers_write_to_the_prefixed_quoted_table(): void
