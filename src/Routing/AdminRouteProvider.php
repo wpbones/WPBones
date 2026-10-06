@@ -41,6 +41,10 @@ class AdminRouteProvider extends ServiceProvider
             $this->authorizeAdminPage($hookName, $page['capability'] ?? 'read');
 
             add_action("load-toplevel_page_{$page_slug}", function () use ($page) {
+              // A page with no menu entry has no title for get_admin_page_title(), and
+              // admin-header.php would pass null to strip_tags().
+              $GLOBALS['title'] = $page['title'] ?? '';
+
               add_filter(
                 'admin_title',
                 function () use ($page) {

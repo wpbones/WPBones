@@ -68,7 +68,7 @@ final class AdminRouteProviderTest extends TestCase
     @rmdir($this->basePath . '/config');
     @rmdir($this->basePath);
 
-    unset($GLOBALS['admin_page_hooks'], $GLOBALS['_registered_pages'], $GLOBALS['_parent_pages']);
+    unset($GLOBALS['admin_page_hooks'], $GLOBALS['_registered_pages'], $GLOBALS['_parent_pages'], $GLOBALS['title']);
 
     Monkey\tearDown();
     parent::tearDown();
@@ -162,6 +162,20 @@ final class AdminRouteProviderTest extends TestCase
     $this->fire('load-toplevel_page_my_page');
 
     $this->assertSame(['read'], $this->asked);
+  }
+
+  /**
+   * A page with no menu entry has no title for get_admin_page_title(), and admin-header.php
+   * passed the null to strip_tags(): a deprecation in debug.log on every visit, PHP 8.1+.
+   */
+  public function test_the_page_gives_wordpress_its_title_on_load(): void
+  {
+    $this->register([]);
+    $this->granted = ['read'];
+
+    $this->fire('load-toplevel_page_my_page');
+
+    $this->assertSame('My page', $GLOBALS['title'] ?? null);
   }
 
   public function test_an_empty_capability_falls_back_to_read(): void

@@ -61,7 +61,7 @@ final class PageProviderTest extends TestCase
     @rmdir($this->basePath . '/pages');
     @rmdir($this->basePath);
 
-    unset($GLOBALS['admin_page_hooks'], $GLOBALS['_registered_pages'], $GLOBALS['_parent_pages']);
+    unset($GLOBALS['admin_page_hooks'], $GLOBALS['_registered_pages'], $GLOBALS['_parent_pages'], $GLOBALS['title']);
 
     Monkey\tearDown();
     parent::tearDown();
@@ -165,6 +165,17 @@ final class PageProviderTest extends TestCase
     $this->fire('load-toplevel_page_about');
 
     $this->assertSame(['read'], $this->asked);
+  }
+
+  /** The same null title as a route page: see AdminRouteProviderTest. */
+  public function test_the_page_gives_wordpress_its_title_on_load(): void
+  {
+    $this->register('about');
+    $this->granted = ['read'];
+
+    $this->fire('load-toplevel_page_about');
+
+    $this->assertSame('A page', $GLOBALS['title'] ?? null);
   }
 
   public function test_the_guard_runs_before_any_other_load_callback(): void
