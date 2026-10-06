@@ -418,6 +418,34 @@ final class MigrateToV3Test extends TestCase
     $this->assertFileExists($this->bones->plugin . '/database/seeders/BookSeeder.php');
   }
 
+  public function test_a_seeder_is_deleted_only_once_its_migration_parses(): void
+  {
+    // Whatever the converter writes that PHP refuses (here a body that does not parse to begin
+    // with), the seeder stays and the half-made migration goes.
+    $this->put('database/seeders/Breaks.php', <<<'PHP'
+      <?php
+
+      use WPKirk\WPBones\Database\Seeder;
+
+      return new class extends Seeder {
+        protected $tablename = 'items';
+
+        public function run()
+        {
+          $x = fn() => 1;
+          class Nested {}
+        }
+      };
+      PHP);
+
+    $run = $this->convert();
+
+    $this->assertSame(0, $run['status'], $run['output']);
+    $this->assertFileExists($this->bones->plugin . '/database/seeders/Breaks.php', 'kept');
+    $this->assertSame([], glob($this->bones->plugin . '/database/migrations/*.php') ?: [], 'and the broken migration removed');
+    $this->assertStringContainsString('the migration made from it did not parse', $run['output']);
+  }
+
   public function test_answering_no_changes_nothing(): void
   {
     $this->put('database/seeders/BookSeeder.php', "<?php\nreturn new class extends \\WPKirk\\WPBones\\Database\\Seeder { protected \$tablename = 'b'; public function run() {} };\n");

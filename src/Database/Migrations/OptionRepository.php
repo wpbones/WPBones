@@ -233,13 +233,18 @@ class OptionRepository implements MigrationRepository
     return true;
   }
 
-  public function setVersion(string $version): void
+  public function setVersion(string $version): bool
   {
-    update_option($this->versionOption, $version, true);
+    // As in log(): a false is checked against what the database holds.
+    if (!update_option($this->versionOption, $version, true) && $this->read($this->versionOption) !== $version) {
+      return false;
+    }
 
     if ($this->fresh !== null) {
       $this->fresh['version'] = $version;
     }
+
+    return true;
   }
 
   public function setFailure(?array $failure): void
