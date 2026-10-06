@@ -71,6 +71,11 @@ final class AdminMenuProviderTest extends TestCase
       {
       }
 
+      public function csrfAction(): string
+      {
+        return 'my_plugin_csrf';
+      }
+
       public function getCallableHook($routes)
       {
         return fn() => 'rendered';

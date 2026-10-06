@@ -6,6 +6,7 @@ if (!defined('ABSPATH')) {
   exit();
 }
 
+use WPKirk\WPBones\Routing\Csrf;
 use WPKirk\WPBones\Support\ServiceProvider;
 use WPKirk\WPBones\Support\Traits\AuthorizesAdminPages;
 
@@ -101,6 +102,11 @@ class PageProvider extends ServiceProvider
         $hookName = get_plugin_page_hookname($page_slug, '');
 
         $this->authorizeAdminPage($hookName, $this->capabilityOf($page));
+
+        // A page that takes requests from elsewhere has a public csrf() returning false.
+        if (!(method_exists($page, 'csrf') && (new \ReflectionMethod($page, 'csrf'))->isPublic() && $page->csrf() === false)) {
+          Csrf::guard($hookName, $this->plugin->csrfAction());
+        }
 
         add_action("load-toplevel_page_{$page_slug}", function () use ($page) {
           // A page with no menu entry has no title for get_admin_page_title(), and

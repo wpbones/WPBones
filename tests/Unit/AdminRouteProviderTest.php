@@ -94,6 +94,11 @@ final class AdminRouteProviderTest extends TestCase
       {
       }
 
+      public function csrfAction(): string
+      {
+        return 'my_plugin_csrf';
+      }
+
       public function getCallableHook($routes)
       {
         return function () {
@@ -163,7 +168,8 @@ final class AdminRouteProviderTest extends TestCase
     $priorities = array_column($this->added['load-toplevel_page_my_page'], 0);
 
     $this->assertSame(PHP_INT_MIN, min($priorities));
-    $this->assertCount(1, array_keys($priorities, PHP_INT_MIN, true));
+    // Two guards at PHP_INT_MIN, the capability's and, since 3.0, the nonce's (CsrfTest).
+    $this->assertCount(2, array_keys($priorities, PHP_INT_MIN, true));
   }
 
   /** 3.0: a page that declares nothing is an admin page. In 2.x it asked for `read`. */

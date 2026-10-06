@@ -40,6 +40,11 @@ class AdminRouteProvider extends ServiceProvider
           if ($hook = $this->plugin->getCallableHook($page['route'])) {
             $this->authorizeAdminPage($hookName, $page['capability'] ?? 'manage_options');
 
+            // A route that takes requests from elsewhere (a webhook) says 'csrf' => false.
+            if (($page['route']['csrf'] ?? true) !== false) {
+              Csrf::guard($hookName, $this->plugin->csrfAction());
+            }
+
             add_action("load-toplevel_page_{$page_slug}", function () use ($page) {
               // A page with no menu entry has no title for get_admin_page_title(), and
               // admin-header.php would pass null to strip_tags().

@@ -116,7 +116,8 @@ abstract class WordPressAjaxServiceProvider extends ServiceProvider
   {
     $result = [];
     foreach ($args as $arg) {
-      $result[] = isset($_POST[$arg]) ? $_POST[$arg] : null;
+      // Without WordPress's slashes since 3.0: up to 2.x the raw $_POST value came back.
+      $result[] = isset($_POST[$arg]) ? wp_unslash($_POST[$arg]) : null;
     }
     return $result;
   }
@@ -128,17 +129,28 @@ abstract class WordPressAjaxServiceProvider extends ServiceProvider
    */
   protected function verifyNonce()
   {
-    if (!empty($this->nonceKey) && !empty($this->nonceHash)) {
-      if (!isset($_POST[$this->nonceKey])) {
-        wp_send_json_error(__("You don't have permission to do this. The nonce is missing."), 403);
-        return false;
-      }
-
-      if (wp_verify_nonce($_POST[$this->nonceKey], $this->nonceHash) === false) {
-        wp_send_json_error(__("You don't have permission to do this. The nonce is invalid."), 403);
-        return false;
-      }
+    // Since 3.0 a logged action always checks a nonce: up to 2.x a provider without $nonceHash ran
+    // its logged actions for any request, so a page on another site could call them.
+    if (empty($this->nonceKey) || empty($this->nonceHash)) {
+      _doing_it_wrong(
+        static::class . '::$nonceHash',
+        'A WP Bones Ajax provider with logged actions sets $nonceHash, and its requests send that nonce in the $nonceKey field: without them every request is refused.',
+        ''
+      );
+      wp_send_json_error(__("You don't have permission to do this. The nonce is missing."), 403);
+      return false;
     }
+
+    if (!isset($_POST[$this->nonceKey])) {
+      wp_send_json_error(__("You don't have permission to do this. The nonce is missing."), 403);
+      return false;
+    }
+
+    if (wp_verify_nonce(wp_unslash($_POST[$this->nonceKey]), $this->nonceHash) === false) {
+      wp_send_json_error(__("You don't have permission to do this. The nonce is invalid."), 403);
+      return false;
+    }
+
     return true;
   }
 

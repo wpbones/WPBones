@@ -37,7 +37,8 @@ class Request
 
   public function verifyNonce($nonce)
   {
-    return wp_verify_nonce($_REQUEST['_wpnonce'], $nonce);
+    // A request without the field is a failed check, not an undefined index notice.
+    return wp_verify_nonce(isset($_REQUEST['_wpnonce']) ? wp_unslash($_REQUEST['_wpnonce']) : '', $nonce);
   }
 
   public function get($key, $default = null)

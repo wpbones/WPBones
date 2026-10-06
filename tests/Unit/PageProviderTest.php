@@ -96,6 +96,11 @@ final class PageProviderTest extends TestCase
       public function __construct(public string $basePath)
       {
       }
+
+      public function csrfAction(): string
+      {
+        return 'my_plugin_csrf';
+      }
     };
 
     (new PageProvider($plugin))->register();

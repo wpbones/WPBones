@@ -14,6 +14,7 @@ use WPKirk\WPBones\Foundation\Log\LogServiceProvider;
 use WPKirk\WPBones\Routing\AdminMenuProvider;
 use WPKirk\WPBones\Routing\AdminRouteProvider;
 use WPKirk\WPBones\Routing\API\RestProvider;
+use WPKirk\WPBones\Routing\Csrf;
 use WPKirk\WPBones\Routing\Pages\PageProvider;
 use WPKirk\WPBones\Support\Str;
 use WPKirk\WPBones\Support\Traits\HasAttributes;
@@ -770,6 +771,28 @@ class Plugin extends Container implements PluginContract
   {
     _deprecated_function(__METHOD__, '1.6.0', 'baseUri');
     return $this->baseUri;
+  }
+
+  /**
+   * The nonce action of this plugin's admin pages: a request to one of them that is not a GET or a
+   * HEAD must carry it (since 3.0), in the fields csrfField() prints.
+   *
+   * @since 3.0.0
+   */
+  public function csrfAction(): string
+  {
+    return ($this->slug ?: basename($this->basePath)) . '_csrf';
+  }
+
+  /**
+   * The hidden fields a form of this plugin's admin pages posts the nonce in:
+   * `<?php echo $plugin->csrfField(); ?>`, or `{!! $plugin->csrfField() !!}` in Blade.
+   *
+   * @since 3.0.0
+   */
+  public function csrfField(): string
+  {
+    return Csrf::field($this->csrfAction());
   }
 
   /**
