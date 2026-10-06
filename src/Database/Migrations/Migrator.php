@@ -52,7 +52,7 @@ class Migrator
    */
   public function isDue(bool $byAdministrator = false): bool
   {
-    if ($this->repository->version() === $this->version) {
+    if (!$this->versionChanged()) {
       return false;
     }
 
@@ -63,6 +63,15 @@ class Migrator
     }
 
     return $byAdministrator && time() - (int) ($failure['time'] ?? 0) >= static::RETRY_AFTER;
+  }
+
+  /**
+   * Whether the database was migrated for another version of the plugin than this one, or never.
+   * Costs no query: the stored version is an autoloaded option.
+   */
+  public function versionChanged(): bool
+  {
+    return $this->repository->version() !== $this->version;
   }
 
   /**
