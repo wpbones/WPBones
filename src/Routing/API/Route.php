@@ -52,12 +52,35 @@ class Route
               [
                 'methods' => strtoupper($method),
                 'callback' => self::callback($route_args['callback'], $vendor),
-              ] + $route_args['options']
+              ] + self::options($route_args['options'], $method, "/{$vendor}{$route_name}")
             );
           }
         }
       }
     });
+  }
+
+  /**
+   * A route without a permission_callback is public, as it has always been, but it says
+   * so: WordPress requires the argument since 5.5 so that authors decide, and the
+   * framework used to answer "everyone" for them, silently.
+   */
+  private static function options(array $options, string $method, string $route): array
+  {
+    if (!isset($options['permission_callback'])) {
+      _doing_it_wrong(
+        "Route::{$method}",
+        sprintf(
+          "The WP Bones REST route %s has no permission_callback, so anyone can call it. Pass 'permission_callback' => '__return_true' if it is meant to be public. From WP Bones 3.0 a route without one will not be public.",
+          $route
+        ),
+        '2.1.2'
+      );
+
+      $options['permission_callback'] = '__return_true';
+    }
+
+    return $options;
   }
 
   /**
@@ -113,11 +136,9 @@ class Route
     if (in_array($method, self::METHODS)) {
       @[$path, $callback, $options] = $args;
 
-      $options = array_merge(['permission_callback' => '__return_true'], $options ?? []);
-
       self::$apis[self::$vendor][$method][$path] = [
         'callback' => $callback,
-        'options' => $options,
+        'options' => $options ?? [],
       ];
     }
   }
@@ -133,8 +154,6 @@ class Route
   public static function request($methods, $path, $callback, $options = []): void
   {
     $methods = (array) $methods;
-
-    $options = array_merge(['permission_callback' => '__return_true'], $options);
 
     foreach ($methods as $method) {
       $method = strtolower($method);
