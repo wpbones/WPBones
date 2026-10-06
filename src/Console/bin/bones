@@ -4192,12 +4192,12 @@ namespace Bones {
       $api = 'api';
 
       if (is_file('config/api.php')) {
-        $code = implode(' ', array_map(fn($token) => is_array($token) ? $token[1] : $token, $this->codeTokens((string) file_get_contents('config/api.php'))));
+        $path = $this->customApiPath((string) file_get_contents('config/api.php'));
 
-        if (preg_match('/[\'"]path[\'"]\s*=>\s*[\'"]([^\'"]*)[\'"]/', $code, $match)) {
-          $api = trim($match[1], '/') ?: 'api';
-        } elseif (preg_match('/[\'"]path[\'"]\s*=>/', $code)) {
+        if ($path === false) {
           $lines[] = "config/api.php: the REST route folder is not a literal path, so only api/ was read: check the routes elsewhere by hand";
+        } elseif ($path !== null) {
+          $api = trim($path, '/') ?: 'api';
         }
       }
 
@@ -4284,6 +4284,58 @@ namespace Bones {
       }
 
       return $entries;
+    }
+
+    /**
+     * The custom.path of config/api.php: the string when it is one whole literal, false when it is
+     * something else (a concatenation, a constant), null when there is none.
+     *
+     * @return string|false|null
+     */
+    protected function customApiPath(string $code)
+    {
+      $tokens = $this->codeTokens($code);
+      $count = count($tokens);
+      $depth = 0;
+      $inCustom = false;
+
+      for ($i = 0; $i < $count; $i++) {
+        $text = is_array($tokens[$i]) ? $tokens[$i][1] : $tokens[$i];
+
+        if ($text === '[' || $text === '(') {
+          $depth++;
+          continue;
+        }
+
+        if ($text === ']' || $text === ')') {
+          $depth--;
+          if ($inCustom && $depth < 2) {
+            $inCustom = false;
+          }
+          continue;
+        }
+
+        $isKey = is_array($tokens[$i]) && $tokens[$i][0] === T_CONSTANT_ENCAPSED_STRING
+          && is_array($tokens[$i + 1] ?? null) && $tokens[$i + 1][0] === T_DOUBLE_ARROW;
+
+        if (!$isKey) {
+          continue;
+        }
+
+        $key = substr($tokens[$i][1], 1, -1);
+
+        if ($depth === 1 && $key === 'custom') {
+          $inCustom = true;
+        } elseif ($inCustom && $depth === 2 && $key === 'path') {
+          $value = $tokens[$i + 2] ?? null;
+          $after = $tokens[$i + 3] ?? null;
+          $literal = is_array($value) && $value[0] === T_CONSTANT_ENCAPSED_STRING && in_array($after, [',', ']', ')'], true);
+
+          return $literal ? stripslashes(substr($value[1], 1, -1)) : false;
+        }
+      }
+
+      return null;
     }
 
     /**

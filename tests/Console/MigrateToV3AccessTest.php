@@ -165,6 +165,25 @@ final class MigrateToV3AccessTest extends TestCase
     $this->assertStringNotContainsString('/not-loaded', $run['output']);
   }
 
+  /** Only custom.path names the folder, and only a whole literal does (Codex, round 2 on #125). */
+  public function test_only_a_literal_custom_path_names_the_folder(): void
+  {
+    $this->put('config/api.php', "<?php\nreturn ['wp' => ['path' => '/unused'], 'custom' => ['path' => '/routes-api']];\n");
+    $this->put('routes-api/v/v1/route.php', "<?php\nRoute::get('/here', fn() => 1);\n");
+    $this->put('unused/v/v1/route.php', "<?php\nRoute::get('/not-here', fn() => 1);\n");
+
+    $run = $this->convert();
+
+    $this->assertStringContainsString("routes-api/v/v1/route.php:2: Route::get('/here')", $run['output']);
+    $this->assertStringNotContainsString('/not-here', $run['output']);
+
+    $this->put('config/api.php', "<?php\nreturn ['custom' => ['path' => '/routes' . '-api']];\n");
+
+    $run = $this->convert();
+
+    $this->assertStringContainsString('config/api.php: the REST route folder is not a literal path', $run['output']);
+  }
+
   /** A config the tokens cannot read is a review item, never "nothing to change" (Codex, round 1). */
   public function test_a_config_that_does_not_return_a_literal_array_is_flagged(): void
   {
