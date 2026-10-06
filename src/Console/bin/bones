@@ -4238,13 +4238,12 @@ namespace Bones {
           $code = (string) file_get_contents($entry->getPathname());
           $file = str_replace(DIRECTORY_SEPARATOR, '/', $entry->getPathname());
 
-          preg_match_all('/<form\b[^>]*>/i', $code, $forms, PREG_OFFSET_CAPTURE);
+          // A pages/ class that opts out (a public csrf() returning false) is not guarded.
+          if ($folder === 'pages' && preg_match('/\bfunction\s+csrf\s*\(\s*\)[^{]*\{\s*return\s+false\s*;/i', $code)) {
+            continue;
+          }
 
-          foreach ($forms[0] as [$tag, $at]) {
-            if (!preg_match('/\bmethod\s*=\s*["\']?post\b/i', $tag)) {
-              continue;
-            }
-
+          foreach ($this->postForms($code, $folder === 'pages') as $at) {
             // The form's own markup: up to its </form>, or the end of the file.
             $close = stripos($code, '</form', $at);
             $body = substr($code, $at, $close === false ? null : $close - $at);
@@ -4284,6 +4283,34 @@ namespace Bones {
       }
 
       return $lines;
+    }
+
+    /**
+     * The offsets of the POST forms a file renders. In a view only its HTML counts: a form inside a
+     * PHP string there is an example printed as text (htmlentities()), not one a browser submits.
+     * A pages/ class renders the strings it returns, so there they count too.
+     */
+    protected function postForms(string $code, bool $inStrings): array
+    {
+      $found = [];
+      $offset = 0;
+
+      foreach (token_get_all($code) as $token) {
+        $text = is_array($token) ? $token[1] : $token;
+        $kinds = $inStrings ? [T_INLINE_HTML, T_CONSTANT_ENCAPSED_STRING, T_ENCAPSED_AND_WHITESPACE] : [T_INLINE_HTML];
+
+        if (is_array($token) && in_array($token[0], $kinds, true) && preg_match_all('/<form\b[^>]*>/i', $text, $forms, PREG_OFFSET_CAPTURE)) {
+          foreach ($forms[0] as [$tag, $at]) {
+            if (preg_match('/\bmethod\s*=\s*\\\\?["\']?post\b/i', $tag)) {
+              $found[] = $offset + $at;
+            }
+          }
+        }
+
+        $offset += strlen($text);
+      }
+
+      return $found;
     }
 
     /**

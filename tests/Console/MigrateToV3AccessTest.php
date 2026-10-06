@@ -327,6 +327,18 @@ final class MigrateToV3AccessTest extends TestCase
     $this->assertStringContainsString('pages/Inline.php:3: a POST form without', $run['output']);
   }
 
+  /** Not reported (Codex, round 2 on #129): an opted-out page, and a form printed as an example. */
+  public function test_opted_out_pages_and_printed_examples_are_not_reported(): void
+  {
+    $this->put('pages/Hook.php', "<?php\nclass Hook extends Page {\n  public function capability() { return 'read'; }\n  public function csrf() { return false; }\n  public function render() { return '<form method=\"post\"></form>'; }\n}\n");
+    $this->put('resources/views/dashboard/example.php', "<?php wpkirk_code(htmlentities('<form action=\"\" method=\"post\">\n  <button>POST</button>\n</form>')); ?>\n<form method=\"post\">\n  <?php echo \$plugin->csrfField(); ?>\n</form>\n");
+
+    $run = $this->convert();
+
+    $this->assertStringNotContainsString('pages/Hook.php', $run['output']);
+    $this->assertStringNotContainsString('example.php', $run['output']);
+  }
+
   /** Since 3.0 a logged Ajax action needs $nonceHash: providers without one are listed. */
   public function test_ajax_providers_with_logged_actions_and_no_nonce_are_listed(): void
   {
