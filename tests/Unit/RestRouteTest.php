@@ -15,7 +15,8 @@ use WPKirk\WPBones\Routing\API\Route;
  * route that did not set one, so a `Route::post()` with no options was a public write
  * endpoint and WordPress's own notice about the missing argument never fired.
  *
- * In 2.x the route stays public, as it was, and says so with a notice; 3.0 will refuse it.
+ * 2.1.2 kept such a route public and said so with a notice. Since 3.0 it refuses every request,
+ * with the notice, until the route says who may call it.
  */
 final class RestRouteTest extends TestCase
 {
@@ -46,6 +47,12 @@ final class RestRouteTest extends TestCase
     Functions\when('_doing_it_wrong')->alias(function ($function, $message, $version) {
       $this->notices[] = [$function, $message, $version];
     });
+    Functions\when('__')->returnArg();
+    Functions\when('rest_authorization_required_code')->justReturn(401);
+
+    if (!class_exists(\WP_Error::class)) {
+      require dirname(__DIR__) . '/Support/WP_Error.php';
+    }
 
     Actions\expectAdded('rest_api_init')->whenHappen(function ($callback) {
       $this->restApiInit = $callback;
@@ -78,17 +85,21 @@ final class RestRouteTest extends TestCase
     return array_column($this->registered, 2, 1);
   }
 
-  public function test_a_route_without_a_permission_callback_stays_public_with_a_notice(): void
+  public function test_a_route_without_a_permission_callback_refuses_every_request_with_a_notice(): void
   {
     Route::post('/settings', fn() => 'saved');
 
     $args = $this->registerRoutes();
 
-    $this->assertSame('__return_true', $args['/settings']['permission_callback']);
+    $refusal = ($args['/settings']['permission_callback'])();
+    $this->assertInstanceOf(\WP_Error::class, $refusal);
+    $this->assertSame('rest_forbidden', $refusal->get_error_code());
+    $this->assertSame(['status' => 401], $refusal->get_error_data());
     $this->assertCount(1, $this->notices);
     [$function, $message, $version] = $this->notices[0];
     $this->assertSame('Route::post', $function);
     $this->assertStringContainsString('/wpkirk/v1/settings', $message);
+    $this->assertStringContainsString('refuses every request', $message);
     $this->assertStringContainsString("'permission_callback' => '__return_true'", $message);
     // No version: _doing_it_wrong() would print it as the WordPress version that added the message.
     $this->assertSame('', $version);
@@ -113,7 +124,7 @@ final class RestRouteTest extends TestCase
 
     $args = $this->registerRoutes();
 
-    $this->assertSame('__return_true', $args['/settings']['permission_callback']);
+    $this->assertInstanceOf(\WP_Error::class, ($args['/settings']['permission_callback'])());
     $this->assertCount(1, $this->notices);
   }
 

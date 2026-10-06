@@ -61,9 +61,9 @@ class Route
   }
 
   /**
-   * A route without a permission_callback is public, as it has always been, but it says
-   * so: WordPress requires the argument since 5.5 so that authors decide, and the
-   * framework used to answer "everyone" for them, silently.
+   * WordPress requires a permission_callback since 5.5, so that authors decide who may call a
+   * route. Up to 2.x the framework answered "everyone" for them (silently until 2.1.2, with a
+   * notice since); since 3.0 a route without one refuses every request, and says so.
    */
   private static function options(array $options, string $method, string $route): array
   {
@@ -71,17 +71,29 @@ class Route
       _doing_it_wrong(
         "Route::{$method}",
         sprintf(
-          "The WP Bones REST route %s has no permission_callback, so anyone can call it. Pass 'permission_callback' => '__return_true' if it is meant to be public. From WP Bones 3.0 a route without one will not be public.",
+          "The WP Bones REST route %s has no permission_callback, so it refuses every request. Pass 'permission_callback' => '__return_true' to make it public, or a function that checks the request.",
           $route
         ),
         // No version: WordPress would print it as its own version that added the message.
         ''
       );
 
-      $options['permission_callback'] = '__return_true';
+      $options['permission_callback'] = [self::class, 'forbidden'];
     }
 
     return $options;
+  }
+
+  /**
+   * The permission_callback of a route that declares none: WordPress's own refusal.
+   *
+   * @since 3.0.0
+   */
+  public static function forbidden(): WP_Error
+  {
+    return new WP_Error('rest_forbidden', __('Sorry, you are not allowed to do that.'), [
+      'status' => rest_authorization_required_code(),
+    ]);
   }
 
   /**

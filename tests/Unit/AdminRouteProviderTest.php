@@ -166,9 +166,26 @@ final class AdminRouteProviderTest extends TestCase
     $this->assertCount(1, array_keys($priorities, PHP_INT_MIN, true));
   }
 
-  public function test_a_page_without_a_capability_asks_for_read(): void
+  /** 3.0: a page that declares nothing is an admin page. In 2.x it asked for `read`. */
+  public function test_a_page_without_a_capability_asks_for_manage_options(): void
   {
     $this->register([]);
+    $this->granted = ['read'];
+
+    try {
+      $this->fire('load-toplevel_page_my_page');
+      $this->fail('A subscriber opened a page that declares no capability.');
+    } catch (\RuntimeException $e) {
+      $this->assertSame(403, $e->getCode());
+    }
+
+    $this->assertSame(['manage_options'], $this->asked);
+  }
+
+  /** A page meant for every user with a role says so. */
+  public function test_a_page_that_declares_read_is_open_to_a_subscriber(): void
+  {
+    $this->register(['capability' => 'read']);
     $this->granted = ['read'];
 
     $this->fire('load-toplevel_page_my_page');
@@ -183,38 +200,38 @@ final class AdminRouteProviderTest extends TestCase
   public function test_the_page_gives_wordpress_its_title_on_load(): void
   {
     $this->register([]);
-    $this->granted = ['read'];
+    $this->granted = ['read', 'manage_options'];
 
     $this->fire('load-toplevel_page_my_page');
 
     $this->assertSame('My page', $GLOBALS['title'] ?? null);
   }
 
-  public function test_an_empty_capability_falls_back_to_read(): void
+  public function test_an_empty_capability_falls_back_to_manage_options(): void
   {
     $this->register(['capability' => '']);
-    $this->granted = ['read'];
+    $this->granted = ['read', 'manage_options'];
 
     $this->fire('load-toplevel_page_my_page');
 
-    $this->assertSame(['read'], $this->asked);
+    $this->assertSame(['manage_options'], $this->asked);
     $this->assertSame([], $this->notices);
   }
 
   /**
    * A cast would ask WordPress for `Array` (no one has it) or for `1` (a user level that
    * contributors pass). A capability is a string: anything else is reported, and the page
-   * asks for `read`, which is what it was open to before.
+   * asks for the default, `manage_options`.
    */
   #[DataProvider('capabilitiesThatAreNotStrings')]
-  public function test_a_capability_that_is_not_a_string_falls_back_to_read_with_a_notice($capability): void
+  public function test_a_capability_that_is_not_a_string_falls_back_to_manage_options_with_a_notice($capability): void
   {
     $this->register(['capability' => $capability]);
-    $this->granted = ['read'];
+    $this->granted = ['read', 'manage_options'];
 
     $this->fire('load-toplevel_page_my_page');
 
-    $this->assertSame(['read'], $this->asked);
+    $this->assertSame(['manage_options'], $this->asked);
     $this->assertCount(1, $this->notices);
     $this->assertStringContainsString('my_page', $this->notices[0]);
   }

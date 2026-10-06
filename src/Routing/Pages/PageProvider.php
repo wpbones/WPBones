@@ -54,7 +54,8 @@ class PageProvider extends ServiceProvider
   }
 
   /**
-   * The capability a page asks for: what its capability() returns, `read` without one.
+   * The capability a page asks for: what its capability() returns, `manage_options` without one
+   * (it was `read` up to 2.x).
    *
    * The method is optional, and not declared by Page: a subclass may already have one with
    * another signature, and a class here never had to extend Page. It must be declared,
@@ -67,12 +68,12 @@ class PageProvider extends ServiceProvider
   private function capabilityOf($page)
   {
     if (!method_exists($page, 'capability')) {
-      return 'read';
+      return 'manage_options';
     }
 
     $method = new \ReflectionMethod($page, 'capability');
 
-    return $method->isPublic() && $method->getNumberOfRequiredParameters() === 0 ? $page->capability() : 'read';
+    return $method->isPublic() && $method->getNumberOfRequiredParameters() === 0 ? $page->capability() : 'manage_options';
   }
 
   /**

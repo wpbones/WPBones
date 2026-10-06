@@ -38,7 +38,7 @@ class AdminRouteProvider extends ServiceProvider
 
         if (!empty($hookName)) {
           if ($hook = $this->plugin->getCallableHook($page['route'])) {
-            $this->authorizeAdminPage($hookName, $page['capability'] ?? 'read');
+            $this->authorizeAdminPage($hookName, $page['capability'] ?? 'manage_options');
 
             add_action("load-toplevel_page_{$page_slug}", function () use ($page) {
               // A page with no menu entry has no title for get_admin_page_title(), and

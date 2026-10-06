@@ -29,7 +29,8 @@ class AdminMenuProvider extends ServiceProvider
       foreach ($menus as $topLevelSlug => $menu) {
         // sanitize array keys
         $menu['position'] = isset($menu['position']) ? $menu['position'] : null;
-        $menu['capability'] = isset($menu['capability']) ? $menu['capability'] : 'read';
+        // Since 3.0 a menu that says nothing is for administrators (it was `read` up to 2.x).
+        $menu['capability'] = isset($menu['capability']) ? $menu['capability'] : 'manage_options';
         $menu['icon'] = isset($menu['icon']) ? $menu['icon'] : '';
         $page_title = isset($menu['page_title']) ? $menu['page_title'] : $menu['menu_title'];
         $menu['page_title'] = sanitize_title($page_title);

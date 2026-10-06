@@ -14,7 +14,7 @@ if (!defined('ABSPATH')) {
  * Then you can use this class to create a custom page.
  *
  * Add a public capability() method that returns the capability a user needs to open the
- * page. Without it, the page asks for `read`: any logged-in user.
+ * page. Without it, the page asks for `manage_options` (`read`, any logged-in user, up to 2.x).
  *
  */
 abstract class Page

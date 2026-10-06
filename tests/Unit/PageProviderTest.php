@@ -13,7 +13,7 @@ use WPKirk\WPBones\Routing\Pages\PageProvider;
 /**
  * Audit S2 (2026-09-18), the `pages/` half: every class in `pages/` became an admin page
  * any logged-in user could open, and Page had no way to say otherwise. Page::capability()
- * now says which capability opens it, `read` unless the page overrides it.
+ * now says which capability opens it; since 3.0 `manage_options` unless the page says otherwise.
  */
 final class PageProviderTest extends TestCase
 {
@@ -157,9 +157,25 @@ final class PageProviderTest extends TestCase
     $this->assertSame('', $output);
   }
 
-  public function test_a_page_that_says_nothing_asks_for_read(): void
+  /** 3.0: a page that says nothing is an admin page. In 2.x it asked for `read`. */
+  public function test_a_page_that_says_nothing_asks_for_manage_options(): void
   {
     $this->register('about');
+    $this->granted = ['read'];
+
+    try {
+      $this->fire('load-toplevel_page_about');
+      $this->fail('A subscriber opened a page that declares no capability.');
+    } catch (\RuntimeException $e) {
+      $this->assertSame(403, $e->getCode());
+    }
+
+    $this->assertSame(['manage_options'], $this->asked);
+  }
+
+  public function test_a_page_that_asks_for_read_is_open_to_a_subscriber(): void
+  {
+    $this->register('about', "  public function capability() { return 'read'; }\n");
     $this->granted = ['read'];
 
     $this->fire('load-toplevel_page_about');
@@ -169,48 +185,48 @@ final class PageProviderTest extends TestCase
 
   /**
    * PageProvider never required `extends Page`: it calls title() and render(). A class that
-   * only has those two must still load, and ask for `read`, not stop wp-admin with a fatal.
+   * only has those two must still load, and ask for the default, not stop wp-admin with a fatal.
    */
-  public function test_a_class_that_does_not_extend_page_asks_for_read(): void
+  public function test_a_class_that_does_not_extend_page_asks_for_manage_options(): void
   {
     $this->register('legacy', '', '');
-    $this->granted = ['read'];
+    $this->granted = ['read', 'manage_options'];
 
     $this->fire('load-toplevel_page_legacy');
 
-    $this->assertSame(['read'], $this->asked);
+    $this->assertSame(['manage_options'], $this->asked);
   }
 
   /**
    * is_callable() is true through __call() as well (Codex, round 2): a page that forwards
    * unknown methods must not be asked for a capability it never declared.
    */
-  public function test_a_page_with_call_but_no_capability_method_asks_for_read(): void
+  public function test_a_page_with_call_but_no_capability_method_asks_for_manage_options(): void
   {
     $this->register('magic', "  public function __call(\$name, \$args) { throw new \\LogicException(\$name); }\n");
-    $this->granted = ['read'];
+    $this->granted = ['read', 'manage_options'];
 
     $this->fire('load-toplevel_page_magic');
 
-    $this->assertSame(['read'], $this->asked);
+    $this->assertSame(['manage_options'], $this->asked);
   }
 
   /** A capability() that needs arguments is not the method this check can call. */
   public function test_a_capability_method_with_required_arguments_is_not_called(): void
   {
-    $this->register('args', "  public function capability(\$user) { return 'manage_options'; }\n");
-    $this->granted = ['read'];
+    $this->register('args', "  public function capability(\$user) { return 'read'; }\n");
+    $this->granted = ['read', 'manage_options'];
 
     $this->fire('load-toplevel_page_args');
 
-    $this->assertSame(['read'], $this->asked);
+    $this->assertSame(['manage_options'], $this->asked);
   }
 
   /** The same null title as a route page: see AdminRouteProviderTest. */
   public function test_the_page_gives_wordpress_its_title_on_load(): void
   {
     $this->register('about');
-    $this->granted = ['read'];
+    $this->granted = ['read', 'manage_options'];
 
     $this->fire('load-toplevel_page_about');
 
