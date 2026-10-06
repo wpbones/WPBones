@@ -4,11 +4,15 @@ declare(strict_types=1);
 
 namespace WPKirk\WPBones\Tests\Unit;
 
-use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use WPKirk\WPBones\Database\Seeder;
 use WPKirk\WPBones\Tests\Support\WpdbSpy;
 
+/**
+ * Since 3.0 seed data is a migration (wpbones/WPBones#40). The Seeder class stays only so that a
+ * 2.x seeder file still loads: the update that brings a plugin onto 3.0 is run by the 2.x code,
+ * which includes database/seeders/*.php.
+ */
 final class SeederTest extends TestCase
 {
   private WpdbSpy $wpdb;
@@ -20,72 +24,34 @@ final class SeederTest extends TestCase
     $this->wpdb->prefix = 'wp_';
   }
 
-  public function test_run_inserts_into_the_prefixed_quoted_table(): void
+  public function test_a_2x_seeder_loads_and_does_nothing(): void
   {
-    new class extends Seeder {
+    $seeder = new class extends Seeder {
       protected $tablename = 'books';
+      protected $runOnce = true;
+
+      public bool $ran = false;
 
       public function run()
       {
+        $this->ran = true;
+        $this->truncate();
         $this->insert("(title) VALUES ('a')");
       }
     };
 
-    $this->assertSame(["INSERT INTO `wp_books` (title) VALUES ('a')"], $this->wpdb->queries);
+    $this->assertFalse($seeder->ran);
+    $this->assertSame([], $this->wpdb->queries);
   }
 
-  public function test_run_once_counts_first_then_runs(): void
+  public function test_a_seeder_without_a_table_name_no_longer_throws(): void
   {
-    new class extends Seeder {
-      protected $tablename = 'books';
-      protected $runOnce = true;
-
+    $seeder = new class extends Seeder {
       public function run()
       {
-        $this->truncate();
-        $this->truncate('other');
       }
     };
 
-    $this->assertSame(
-      ['SELECT COUNT(*) FROM `wp_books`', 'TRUNCATE TABLE `wp_books`', 'TRUNCATE TABLE `wp_other`'],
-      $this->wpdb->queries
-    );
-  }
-
-  public function test_a_table_name_that_is_not_an_identifier_is_refused_before_any_query(): void
-  {
-    try {
-      new class extends Seeder {
-        protected $tablename = 'books` WHERE 1; --';
-
-        public function run()
-        {
-          $this->insert("(title) VALUES ('a')");
-        }
-      };
-    } catch (InvalidArgumentException $e) {
-      $this->assertStringContainsString('Invalid table name', $e->getMessage());
-      $this->assertSame([], $this->wpdb->queries);
-
-      return;
-    }
-
-    $this->fail('expected InvalidArgumentException was not thrown');
-  }
-
-  public function test_truncate_refuses_an_explicit_name_that_is_not_an_identifier(): void
-  {
-    $this->expectException(InvalidArgumentException::class);
-    $this->expectExceptionMessage('Invalid table name');
-
-    new class extends Seeder {
-      protected $tablename = 'books';
-
-      public function run()
-      {
-        $this->truncate('other`; DROP TABLE wp_users; --');
-      }
-    };
+    $this->assertInstanceOf(Seeder::class, $seeder);
   }
 }

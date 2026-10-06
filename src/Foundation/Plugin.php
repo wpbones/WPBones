@@ -5,6 +5,9 @@ namespace WPKirk\WPBones\Foundation;
 use Closure;
 use WPKirk\WPBones\Container\Container;
 use WPKirk\WPBones\Contracts\Foundation\Plugin as PluginContract;
+use WPKirk\WPBones\Database\Migrations\MigrationResult;
+use WPKirk\WPBones\Database\Migrations\Migrator;
+use WPKirk\WPBones\Database\Migrations\OptionRepository;
 use WPKirk\WPBones\Database\WordPressOption;
 use WPKirk\WPBones\Foundation\Http\Request;
 use WPKirk\WPBones\Foundation\Log\LogServiceProvider;
@@ -80,6 +83,7 @@ class Plugin extends Container implements PluginContract
   protected $provides = [];
   private $_options = null;
   private $_request = null;
+  private $_migrator = null;
 
   public function __construct($basePath)
   {
@@ -117,8 +121,13 @@ class Plugin extends Container implements PluginContract
     register_activation_hook($this->file, [$this, '_activation']);
     register_deactivation_hook($this->file, [$this, '_deactivation']);
 
-    // handle plugin update
-    add_filter('upgrader_post_install', [$this, '_upgrader_post_install'], 10, 3);
+    // Migrations, and the end of an update: before the plugin's own init, whatever its priority.
+    // Not on plugins_loaded: a migration that seeds translated text would load the text domain
+    // before after_setup_theme, which WordPress 6.7 reports as too early.
+    add_action('init', [$this, '_migrate'], 1);
+
+    // Tell the administrators when a migration failed.
+    add_action('admin_notices', [$this, '_migration_notice']);
 
     /**
      * There are many pitfalls to using the uninstall hook. It ’ s a much cleaner, and easier, process to use the
@@ -233,30 +242,10 @@ class Plugin extends Container implements PluginContract
    */
   public function _init()
   {
-    // Use WordPress get_plugin_data() function for auto retrieve plugin information.
-    if (!function_exists('get_plugin_data')) {
-      require_once ABSPATH . 'wp-admin/includes/plugin.php';
+    // The header, unless the migrations on init already read it in this request.
+    if (empty($this->pluginData)) {
+      $this->initPluginData();
     }
-    $this->pluginData = get_plugin_data($this->file, false, false);
-
-    /**
-     * In $this->pluginData you'll find all WordPress
-     *
-     * Author = "Giovambattista Fazioli"
-     * AuthorName = "Giovambattista Fazioli"
-     * AuthorURI = "https://wpbones.com/"
-     * Description = "WPKirk is a WP Bones boilerplate plugin"
-     * DomainPath = "languages"
-     * Name = "WPKirk"
-     * Network = false
-     * PluginURI = "https://wpbones.com/"
-     * TextDomain = "wp-kirk"
-     * Title = "WPKirk"
-     * Version = "1.0.0"
-     */
-
-    // plugin slug
-    $this->slug = str_replace('-', '_', sanitize_title($this->pluginData['Name'])) . '_slug';
 
     // Load plugin text domain
     load_plugin_textdomain(
@@ -515,46 +504,132 @@ class Plugin extends Container implements PluginContract
   */
 
   /**
-   * Called when a plugin is updated; `upgrader_post_install`
+   * The plugin's migration runner (wpbones/WPBones#40).
    *
-   * @param $response
-   * @param $hook_extra
-   * @param $result
-   *
-   * @access private
-   *
-   * @return mixed
+   * @since 3.0.0
    */
-  public function _upgrader_post_install($response, $hook_extra, $result)
+  public function migrator(): Migrator
   {
-    // Check if the action is an update for a plugin
-    if (isset($hook_extra['plugin'])) {
-      // Verify if the updated plugin is the specific one
-      if ($hook_extra['plugin'] == plugin_basename($this->file)) {
-        // Call the update function
-        // include your own activation
-        $updated = include_once "{$this->basePath}/plugin/updated.php";
-
-        // updates/align the plugin options
-        $this->options->delta();
-
-        // migrations
-        foreach (glob("{$this->basePath}/database/migrations/*.php") as $filename) {
-          $instance = include $filename;
-        }
-
-        // seeders
-        foreach (glob("{$this->basePath}/database/seeders/*.php") as $filename) {
-          $instance = include $filename;
-        }
+    if (is_null($this->_migrator)) {
+      // The header is read on init; activation and the migrations can come earlier.
+      if (empty($this->pluginData)) {
+        $this->initPluginData();
       }
+
+      $this->_migrator = new Migrator(
+        "{$this->basePath}/database/migrations",
+        (string) $this->Version,
+        new OptionRepository($this->slug),
+        (string) $this->Name
+      );
     }
 
-    return $response;
+    return $this->_migrator;
+  }
+
+  /**
+   * Run the migrations when the plugin's version differs from the one the database was migrated
+   * for: after an update, whichever way it arrived (the dashboard, an uploaded ZIP, FTP, git,
+   * Composer), and on every site of a network the first time it loads a page. This request then
+   * also finishes the update: the options delta and plugin/updated.php.
+   *
+   * Hooked on `init`. Until 2.x an update ran everything from `upgrader_post_install`, which runs
+   * in the request doing the update with the old code still loaded, and never for a ZIP replaced
+   * through "Upload Plugin" or for files copied by other means.
+   *
+   * @access private
+   * @since 3.0.0
+   */
+  public function _migrate()
+  {
+    // WordPress checks a fresh auto-update by loading the home page with this key, giving it 50
+    // seconds: a slow migration there would get the new code rolled back over a migrated database.
+    // The next request runs them.
+    if (isset($_REQUEST['wp_scrape_key']) || wp_installing()) {
+      return;
+    }
+
+    if (!$this->migrator()->isDue(is_admin() && current_user_can('manage_options'))) {
+      return;
+    }
+
+    $this->runMigrations();
+  }
+
+  /**
+   * Run the pending migrations and, in the request that moved the stored version, finish the
+   * update: align the options and run plugin/updated.php, which receives the version it came from
+   * as $previousVersion. On a site migrated for the first time there is no previous version, and
+   * plugin/updated.php does not run. `php bones migrate` calls this too.
+   *
+   * @since 3.0.0
+   */
+  public function runMigrations(): MigrationResult
+  {
+    $migrator = $this->migrator();
+
+    if (glob("{$this->basePath}/database/seeders/*.php")) {
+      error_log(
+        sprintf(
+          '[WP Bones] %s: database/seeders/ does not run since WP Bones 3.0; php bones migrate:to-v3 turns the seeders into migrations',
+          $this->Name
+        )
+      );
+    }
+
+    $result = $migrator->migrate();
+
+    $this->finishMigration($result);
+
+    return $result;
+  }
+
+  protected function finishMigration(MigrationResult $result): void
+  {
+    if (!$result->advanced) {
+      return;
+    }
+
+    $this->options->delta();
+
+    if ($result->previous !== null && file_exists("{$this->basePath}/plugin/updated.php")) {
+      $previousVersion = $result->previous;
+
+      include "{$this->basePath}/plugin/updated.php";
+    }
+  }
+
+  /**
+   * Show the administrators the migration that failed, until it runs.
+   *
+   * @access private
+   * @since 3.0.0
+   */
+  public function _migration_notice()
+  {
+    if (!current_user_can('manage_options')) {
+      return;
+    }
+
+    $failure = $this->migrator()->failure();
+
+    if ($failure === null) {
+      return;
+    }
+
+    printf(
+      '<div class="notice notice-error"><p><strong>%1$s</strong>: the database migration <code>%2$s</code> failed, and the ones after it have not run: %3$s</p><p>Fix the cause and reload this page, or run <code>php bones migrate</code> from the plugin folder.</p></div>',
+      esc_html((string) $this->Name),
+      esc_html((string) ($failure['migration'] ?? '')),
+      esc_html((string) ($failure['message'] ?? ''))
+    );
   }
 
   /**
    * Called when a plugin is activated; `register_activation_hook()`
+   *
+   * Runs the pending migrations whatever the stored version says: activation is also how a
+   * migration added during development, without a version bump, gets run.
    *
    * @access private
    */
@@ -573,15 +648,7 @@ class Plugin extends Container implements PluginContract
     // include your own activation
     $activation = include_once "{$this->basePath}/plugin/activation.php";
 
-    // migrations
-    foreach (glob("{$this->basePath}/database/migrations/*.php") as $filename) {
-      $instance = include $filename;
-    }
-
-    // seeders
-    foreach (glob("{$this->basePath}/database/seeders/*.php") as $filename) {
-      $instance = include $filename;
-    }
+    $this->migrator()->migrate();
   }
 
   /**
