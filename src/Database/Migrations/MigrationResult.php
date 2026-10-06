@@ -31,8 +31,8 @@ final class MigrationResult
   public ?string $error = null;
 
   /**
-   * True when this request moved the stored version to the plugin's, so it is the one request that
-   * finishes the update (options delta, plugin/updated.php).
+   * True when this request stored the plugin's version, which it does only once the migrations and
+   * the update's own work (Migrator::migrate()'s $finish) went through.
    */
   public bool $advanced = false;
 
