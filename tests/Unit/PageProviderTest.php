@@ -238,6 +238,31 @@ final class PageProviderTest extends TestCase
     $this->assertSame(['read'], $this->asked);
   }
 
+  /** A POST without the plugin's nonce is refused here too (review of #129: removing it passed). */
+  public function test_a_post_without_the_nonce_is_refused(): void
+  {
+    Functions\when('wp_verify_nonce')->justReturn(false);
+    Functions\when('wp_unslash')->returnArg();
+    Functions\when('sanitize_text_field')->returnArg();
+    Functions\when('wp_nonce_ays')->alias(function () {
+      throw new \RuntimeException('expired', 403);
+    });
+
+    $this->register('form', "  public function capability() { return 'read'; }\n");
+    $this->granted = ['read'];
+    $server = $_SERVER;
+    $_SERVER['REQUEST_METHOD'] = 'POST';
+
+    try {
+      $this->fire('load-toplevel_page_form');
+      $this->fail('A POST without a nonce reached the page.');
+    } catch (\RuntimeException $e) {
+      $this->assertSame('expired', $e->getMessage());
+    } finally {
+      $_SERVER = $server;
+    }
+  }
+
   /** The same null title as a route page: see AdminRouteProviderTest. */
   public function test_the_page_gives_wordpress_its_title_on_load(): void
   {

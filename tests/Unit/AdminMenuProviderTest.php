@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace WPKirk\WPBones\Tests\Unit;
 
 use Brain\Monkey;
+use Brain\Monkey\Actions;
 use Brain\Monkey\Functions;
 use PHPUnit\Framework\TestCase;
 use WPKirk\WPBones\Routing\AdminMenuProvider;
@@ -114,6 +115,24 @@ final class AdminMenuProviderTest extends TestCase
     $this->assertArrayNotHasKey('menu:edit.php?post_type=book', $this->capabilities);
     $this->assertSame(['manage_options'], array_values(array_unique($this->capabilities)));
     $this->assertCount(2, $this->capabilities);
+  }
+
+  /** Every item is guarded, not only the first, which shares the menu's slug (review of #129). */
+  public function test_every_item_gets_the_csrf_guard(): void
+  {
+    $guarded = [];
+
+    foreach (['my_plugin_page_my_plugin', 'my_plugin_page_wpkirk_settings'] as $hook) {
+      Actions\expectAdded("load-{$hook}")->zeroOrMoreTimes()->whenHappen(function ($callback, $priority = 10) use (&$guarded, $hook) {
+        if ($priority === PHP_INT_MIN) {
+          $guarded[] = $hook;
+        }
+      });
+    }
+
+    $this->register(['my_plugin' => $this->menu()]);
+
+    $this->assertSame(['my_plugin_page_my_plugin', 'my_plugin_page_wpkirk_settings'], $guarded);
   }
 
   public function test_a_menu_that_declares_read_keeps_it_for_its_items(): void

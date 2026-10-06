@@ -141,12 +141,13 @@ abstract class WordPressAjaxServiceProvider extends ServiceProvider
       return false;
     }
 
-    if (!isset($_POST[$this->nonceKey])) {
+    // From the request, as check_ajax_referer() reads it: a JSON body fills no $_POST.
+    if (!isset($_REQUEST[$this->nonceKey])) {
       wp_send_json_error(__("You don't have permission to do this. The nonce is missing."), 403);
       return false;
     }
 
-    if (wp_verify_nonce(wp_unslash($_POST[$this->nonceKey]), $this->nonceHash) === false) {
+    if (wp_verify_nonce(wp_unslash($_REQUEST[$this->nonceKey]), $this->nonceHash) === false) {
       wp_send_json_error(__("You don't have permission to do this. The nonce is invalid."), 403);
       return false;
     }

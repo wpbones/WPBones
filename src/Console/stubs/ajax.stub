@@ -57,11 +57,13 @@ class {ClassName} extends ServiceProvider
   protected $nonceKey = 'nonce';
 
   /**
-   * The nonce hash used to verify the request.
+   * The nonce hash used to verify the request: the requests of the logged actions send
+   * wp_create_nonce('{ClassName}') in the $nonceKey field. Since WP Bones 3.0 a logged action
+   * refuses every request when this is empty.
    *
    * @var string
    */
-  protected $nonceHash = '';
+  protected $nonceHash = '{ClassName}';
 
   public function trusted()
   {

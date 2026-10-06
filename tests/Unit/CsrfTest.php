@@ -31,6 +31,8 @@ final class CsrfTest extends TestCase
 
   private array $post;
 
+  private array $requestVars;
+
   protected function setUp(): void
   {
     parent::setUp();
@@ -40,6 +42,7 @@ final class CsrfTest extends TestCase
     $this->valid = [];
     $this->server = $_SERVER;
     $this->post = $_POST;
+    $this->requestVars = $_REQUEST;
 
     Functions\when('wp_verify_nonce')->alias(fn($nonce, $action) => in_array("{$nonce}|{$action}", $this->valid, true) ? 1 : false);
     Functions\when('wp_unslash')->returnArg();
@@ -60,6 +63,7 @@ final class CsrfTest extends TestCase
   {
     $_SERVER = $this->server;
     $_POST = $this->post;
+    $_REQUEST = $this->requestVars;
     Monkey\tearDown();
     parent::tearDown();
   }
@@ -74,7 +78,9 @@ final class CsrfTest extends TestCase
   private function request(string $method, array $post = []): void
   {
     $_SERVER['REQUEST_METHOD'] = $method;
+    // As PHP fills them for a form post: $_REQUEST holds $_POST too.
     $_POST = $post;
+    $_REQUEST = $post;
   }
 
   public function test_a_post_without_the_nonce_is_refused_before_any_load_callback(): void
@@ -157,6 +163,43 @@ final class CsrfTest extends TestCase
     }
 
     $this->assertSame(4, $refused);
+  }
+
+  /** A fetch() with a JSON body has no $_POST: the nonce may come in the X-WPBones-Nonce header. */
+  public function test_the_nonce_may_come_in_a_header(): void
+  {
+    Csrf::guard('my_hook', 'my_plugin_csrf');
+    $this->valid = ['abc|my_plugin_csrf'];
+    $this->request('PUT');
+    $_SERVER['HTTP_X_WPBONES_NONCE'] = 'abc';
+
+    try {
+      $this->fire('load-my_hook');
+    } finally {
+      unset($_SERVER['HTTP_X_WPBONES_NONCE']);
+    }
+
+    $this->addToAssertionCount(1);
+  }
+
+  /**
+   * WordPress's own forms that post to the page it is on, each with its own nonce: Screen Options
+   * (when the plugin does not save the option itself) and the filesystem credentials form.
+   */
+  public function test_wordpress_s_own_nonced_posts_to_the_page_go_through(): void
+  {
+    Csrf::guard('my_hook', 'my_plugin_csrf');
+    $this->valid = ['so|screen-options-nonce', 'fs|filesystem-credentials'];
+
+    $this->request('POST', ['wp_screen_options' => ['option' => 'x'], 'screenoptionnonce' => 'so']);
+    $this->fire('load-my_hook');
+
+    $this->request('POST', ['_fs_nonce' => 'fs', 'hostname' => 'example.test']);
+    $this->fire('load-my_hook');
+
+    $this->request('POST', ['screenoptionnonce' => 'forged', 'store' => '1']);
+    $this->expectException(\RuntimeException::class);
+    $this->fire('load-my_hook');
   }
 
   public function test_the_field_carries_the_plugins_action(): void

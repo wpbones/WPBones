@@ -29,6 +29,8 @@ final class AjaxProviderTest extends TestCase
 
   private array $post;
 
+  private array $requestVars;
+
   protected function setUp(): void
   {
     parent::setUp();
@@ -38,6 +40,7 @@ final class AjaxProviderTest extends TestCase
     $this->ran = [];
     $this->notices = [];
     $this->post = $_POST;
+    $this->requestVars = $_REQUEST;
 
     Functions\when('__')->returnArg();
     Functions\when('wp_unslash')->alias(fn($value) => is_string($value) ? stripslashes($value) : $value);
@@ -58,6 +61,7 @@ final class AjaxProviderTest extends TestCase
   protected function tearDown(): void
   {
     $_POST = $this->post;
+    $_REQUEST = $this->requestVars;
     Monkey\tearDown();
     parent::tearDown();
   }
@@ -101,7 +105,7 @@ final class AjaxProviderTest extends TestCase
   public function test_a_logged_action_without_a_nonce_hash_refuses_every_request(): void
   {
     $this->provider('');
-    $_POST = ['nonce' => 'anything'];
+    $_POST = $_REQUEST = ['nonce' => 'anything'];
 
     $this->call();
 
@@ -113,7 +117,7 @@ final class AjaxProviderTest extends TestCase
   public function test_a_logged_action_with_its_nonce_runs(): void
   {
     $this->provider('my-plugin');
-    $_POST = ['nonce' => 'valid-my-plugin'];
+    $_POST = $_REQUEST = ['nonce' => 'valid-my-plugin'];
 
     $this->call();
 
@@ -123,7 +127,7 @@ final class AjaxProviderTest extends TestCase
   public function test_a_logged_action_without_the_nonce_in_the_request_is_refused(): void
   {
     $this->provider('my-plugin');
-    $_POST = [];
+    $_POST = $_REQUEST = [];
 
     $this->call();
 

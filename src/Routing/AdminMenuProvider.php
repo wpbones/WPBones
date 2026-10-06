@@ -106,8 +106,8 @@ class AdminMenuProvider extends ServiceProvider
             $hook
           );
 
-          // Since 3.0 a request that is not a GET carries the plugin's nonce; a route that takes
-          // requests from elsewhere (a webhook) says 'csrf' => false.
+          // Since 3.0 a request that is not a GET carries the plugin's nonce; a page that checks a
+          // nonce of its own says 'csrf' => false.
           if ($subMenuHook && (($subMenu['route']['csrf'] ?? true) !== false)) {
             Csrf::guard($subMenuHook, $this->plugin->csrfAction());
           }

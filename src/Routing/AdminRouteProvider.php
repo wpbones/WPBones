@@ -40,12 +40,13 @@ class AdminRouteProvider extends ServiceProvider
           if ($hook = $this->plugin->getCallableHook($page['route'])) {
             $this->authorizeAdminPage($hookName, $page['capability'] ?? 'manage_options');
 
-            // A route that takes requests from elsewhere (a webhook) says 'csrf' => false.
+            // A page that checks a nonce of its own says 'csrf' => false. (Not a way to take
+            // requests from elsewhere: wp-admin asks for a logged-in browser before any of this.)
             if (($page['route']['csrf'] ?? true) !== false) {
               Csrf::guard($hookName, $this->plugin->csrfAction());
             }
 
-            add_action("load-toplevel_page_{$page_slug}", function () use ($page) {
+            add_action("load-{$hookName}", function () use ($page) {
               // A page with no menu entry has no title for get_admin_page_title(), and
               // admin-header.php would pass null to strip_tags().
               $GLOBALS['title'] = $page['title'] ?? '';
@@ -63,7 +64,7 @@ class AdminRouteProvider extends ServiceProvider
             if (isset($page['route']['load'])) {
               [$controller, $method] = Str::parseCallback($page['route']['load']);
 
-              add_action("load-toplevel_page_{$page_slug}", function () use ($controller, $method) {
+              add_action("load-{$hookName}", function () use ($controller, $method) {
                 $className = "WPKirk\\Http\\Controllers\\{$controller}";
                 $instance = new $className();
 

@@ -4253,12 +4253,12 @@ namespace Bones {
             }
 
             $line = substr_count(substr($code, 0, $at), "\n") + 1;
-            $lines[] = "{$file}:{$line}: a POST form without \$plugin->csrfField(): since 3.0 the page refuses the request (a route that takes requests from elsewhere says 'csrf' => false)";
+            $lines[] = "{$file}:{$line}: a POST form without \$plugin->csrfField(): since 3.0 the page refuses the request (a page that checks a nonce of its own may say 'csrf' => false)";
           }
         }
       }
 
-      // Since 3.0 a logged Ajax action needs a nonce to check.
+      // Since 3.0 a logged Ajax action needs a nonce to check, and useHTTPPost() unslashes.
       if (is_dir('plugin')) {
         $classes = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator('plugin', \FilesystemIterator::SKIP_DOTS));
 
@@ -4268,17 +4268,31 @@ namespace Bones {
           }
 
           $code = (string) file_get_contents($entry->getPathname());
+          $file = str_replace(DIRECTORY_SEPARATOR, '/', $entry->getPathname());
 
-          // Only a direct child of the framework's provider: one of the plugin's own base classes
-          // may set $nonceHash for all its children, which a file alone cannot show.
-          if (!preg_match('/\bextends\s+\\\\?(?:[\w\\\\]+\\\\)?WordPressAjaxServiceProvider\b/', $code)
-            || !preg_match('/\$logged\s*=\s*(?:\[|array\s*\()\s*[\'"]/i', $code)
-            || preg_match('/\$nonceHash\s*=\s*[\'"][^\'"]+[\'"]/', $code)) {
-            continue;
+          // Only a direct child of the framework's provider, under its name or the one a use
+          // statement gives it: one of the plugin's own base classes may set $nonceHash for all its
+          // children, which a file alone cannot show.
+          $names = ['WordPressAjaxServiceProvider'];
+
+          if (preg_match_all('/\buse\s+[\w\\\\]*\\\\WordPressAjaxServiceProvider\s+as\s+(\w+)\s*;/i', $code, $aliases)) {
+            $names = array_merge($names, $aliases[1]);
           }
 
-          $file = str_replace(DIRECTORY_SEPARATOR, '/', $entry->getPathname());
-          $lines[] = "{$file} has logged Ajax actions and no \$nonceHash: since 3.0 they refuse every request until it sets one and its requests send the nonce";
+          $direct = (bool) preg_match('/\bextends\s+\\\\?(?:[\w\\\\]+\\\\)?(?:' . implode('|', array_map('preg_quote', $names)) . ')\b/', $code);
+
+          if ($direct
+            && preg_match('/\$logged\s*=\s*(?:\[|array\s*\()\s*[\'"]/i', $code)
+            && !preg_match('/\$nonceHash\s*=\s*[\'"][^\'"]+[\'"]/', $code)) {
+            $lines[] = "{$file} has logged Ajax actions and no \$nonceHash: since 3.0 they refuse every request until it sets one and its requests send the nonce";
+          }
+
+          if (strpos($code, 'useHTTPPost(') !== false && preg_match_all('/\b(?:stripslashes|wp_unslash)\s*\(/', $code, $calls, PREG_OFFSET_CAPTURE)) {
+            foreach ($calls[0] as [, $at]) {
+              $line = substr_count(substr($code, 0, $at), "\n") + 1;
+              $lines[] = "{$file}:{$line}: unslashes what useHTTPPost() returns? Since 3.0 it comes unslashed: a second pass corrupts quotes and backslashes";
+            }
+          }
         }
       }
 

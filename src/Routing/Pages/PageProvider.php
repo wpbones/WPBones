@@ -119,13 +119,13 @@ class PageProvider extends ServiceProvider
 
         $this->authorizeAdminPage($hookName, $this->capabilityOf($page));
 
-        // A page that takes requests from elsewhere has a public csrf() returning false: declared,
+        // A page that checks a nonce of its own has a public csrf() returning false: declared,
         // public and argument-free, as capability() (a csrf($token) of its own is not that).
         if (!$this->optsOutOfCsrf($page)) {
           Csrf::guard($hookName, $this->plugin->csrfAction());
         }
 
-        add_action("load-toplevel_page_{$page_slug}", function () use ($page) {
+        add_action("load-{$hookName}", function () use ($page) {
           // A page with no menu entry has no title for get_admin_page_title(), and
           // admin-header.php would pass null to strip_tags().
           $GLOBALS['title'] = $page->title();

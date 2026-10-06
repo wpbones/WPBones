@@ -339,6 +339,16 @@ final class MigrateToV3AccessTest extends TestCase
     $this->assertStringNotContainsString('example.php', $run['output']);
   }
 
+  /** useHTTPPost() unslashes since 3.0: a provider that unslashes its result again is listed. */
+  public function test_a_second_unslash_of_use_http_post_is_listed(): void
+  {
+    $this->put('plugin/Ajax/Prefs.php', "<?php\nclass Prefs extends AjaxServiceProvider {\n  public function save() {\n    [\$json] = \$this->useHTTPPost('prefs');\n    \$prefs = json_decode(stripslashes(\$json), true);\n  }\n}\n");
+
+    $run = $this->convert();
+
+    $this->assertStringContainsString('plugin/Ajax/Prefs.php:5: unslashes what useHTTPPost() returns', $run['output']);
+  }
+
   /** Since 3.0 a logged Ajax action needs $nonceHash: providers without one are listed. */
   public function test_ajax_providers_with_logged_actions_and_no_nonce_are_listed(): void
   {
@@ -353,6 +363,11 @@ final class MigrateToV3AccessTest extends TestCase
     $this->assertStringContainsString('plugin/Ajax/OpenAjax.php has logged Ajax actions and no $nonceHash', $run['output']);
     $this->assertStringNotContainsString('SafeAjax', $run['output']);
     $this->assertStringNotContainsString('PublicAjax', $run['output']);
+    // The framework's class imported under another name, as make:ajax and the boilerplates do.
+    $this->put('plugin/Ajax/AliasedAjax.php', "<?php\nuse WPKirk\\WPBones\\Foundation\\WordPressAjaxServiceProvider as ServiceProvider;\nclass AliasedAjax extends ServiceProvider {\n  protected \$logged = ['save'];\n}\n");
+    $run = $this->convert();
+    $this->assertStringContainsString('plugin/Ajax/AliasedAjax.php has logged Ajax actions', $run['output']);
+
     // A child of the plugin's own base class may inherit its nonce: not listed.
     $this->assertStringNotContainsString('ChildAjax', $run['output']);
     $this->assertStringContainsString('plugin/Ajax/QualifiedAjax.php has logged Ajax actions', $run['output']);

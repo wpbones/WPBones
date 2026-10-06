@@ -38,7 +38,18 @@ class Csrf
         return;
       }
 
-      $nonce = isset($_POST[self::FIELD]) ? sanitize_text_field(wp_unslash($_POST[self::FIELD])) : '';
+      // WordPress's own forms that post to the page they are on, each with a nonce of its own:
+      // Screen Options (when the plugin does not save the option itself), filesystem credentials.
+      foreach (['screenoptionnonce' => 'screen-options-nonce', '_fs_nonce' => 'filesystem-credentials'] as $field => $own) {
+        if (isset($_POST[$field]) && wp_verify_nonce(sanitize_text_field(wp_unslash($_POST[$field])), $own)) {
+          return;
+        }
+      }
+
+      // In the form field, in the query string, or, for a fetch() with a JSON body, which fills no
+      // $_POST, in the X-WPBones-Nonce header.
+      $nonce = $_SERVER['HTTP_X_WPBONES_NONCE'] ?? ($_REQUEST[self::FIELD] ?? '');
+      $nonce = is_string($nonce) ? sanitize_text_field(wp_unslash($nonce)) : '';
 
       if (!wp_verify_nonce($nonce, $action)) {
         // WordPress's own answer to a stale or missing nonce: "The link you followed has expired."
