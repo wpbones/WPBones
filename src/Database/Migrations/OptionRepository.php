@@ -8,8 +8,9 @@ namespace WPKirk\WPBones\Database\Migrations;
  * - `{prefix}_db_version`         the plugin version the database was migrated for, autoloaded,
  *                                 so the check every request makes costs no query;
  * - `{prefix}_migrations`         the migrations that ran: name → batch, plugin version, time;
- * - `{prefix}_migrations_failure` the failure that stopped the last run, if any;
- * - `{prefix}_migrations.lock`    the lock, held while a request runs migrations.
+ * - `{prefix}_migrations_failure` the failure that stopped the last run, or '' once one completes;
+ *                                 autoloaded and always present, so reading it costs no query;
+ * - `{prefix}_migrations.lock`    the lock, `time|token`, held while a request runs migrations.
  *
  * Options are per site, so on a multisite network every site migrates its own tables, the first
  * time one of its pages loads.
@@ -19,10 +20,11 @@ namespace WPKirk\WPBones\Database\Migrations;
 class OptionRepository implements MigrationRepository
 {
   /**
-   * After this many seconds a lock is taken as abandoned (its request died) and can be taken over.
-   * WooCommerce's installer uses the same.
+   * After this many seconds without a touch() a lock is taken as abandoned (its request died) and
+   * can be taken over: an hour, WP_Upgrader::create_lock()'s default. touch() runs before each
+   * migration, so only a single migration longer than that could be overtaken.
    */
-  public const LOCK_TIMEOUT = 600;
+  public const LOCK_TIMEOUT = 3600;
 
   protected string $versionOption;
 
@@ -31,6 +33,11 @@ class OptionRepository implements MigrationRepository
   protected string $failureOption;
 
   protected string $lockOption;
+
+  /**
+   * The value of the lock row this request inserted, `time|token`; null when it holds none.
+   */
+  protected ?string $held = null;
 
   /**
    * What refresh() read, past the caches; null until it runs.
@@ -73,40 +80,102 @@ class OptionRepository implements MigrationRepository
   {
     global $wpdb;
 
+    $value = $this->lockValue();
+
     $inserted = $wpdb->query(
       $wpdb->prepare(
         "INSERT IGNORE INTO `{$wpdb->options}` (`option_name`, `option_value`, `autoload`) VALUES (%s, %s, 'off') /* LOCK */",
         $this->lockOption,
-        (string) time()
+        $value
       )
     );
 
     if ($inserted) {
+      $this->held = $value;
+
       return true;
     }
 
-    $since = (int) $this->read($this->lockOption);
+    $current = (string) $this->read($this->lockOption);
 
-    if ($since > time() - static::LOCK_TIMEOUT) {
+    if ((int) $current > time() - static::LOCK_TIMEOUT) {
       return false;
     }
 
     // An abandoned lock: take it over, unless another request just did.
-    return (bool) $wpdb->query(
+    $taken = $wpdb->query(
       $wpdb->prepare(
         "UPDATE `{$wpdb->options}` SET `option_value` = %s WHERE `option_name` = %s AND `option_value` = %s",
-        (string) time(),
+        $value,
         $this->lockOption,
-        (string) $since
+        $current
       )
     );
+
+    if (!$taken) {
+      return false;
+    }
+
+    $this->held = $value;
+
+    return true;
   }
 
+  public function touch(): void
+  {
+    global $wpdb;
+
+    if ($this->held === null) {
+      return;
+    }
+
+    $value = $this->lockValue();
+
+    $touched = $wpdb->query(
+      $wpdb->prepare(
+        "UPDATE `{$wpdb->options}` SET `option_value` = %s WHERE `option_name` = %s AND `option_value` = %s",
+        $value,
+        $this->lockOption,
+        $this->held
+      )
+    );
+
+    // No row: another request took the lock over after a timeout. unlock() then leaves its row
+    // alone, since the value no longer matches.
+    if ($touched) {
+      $this->held = $value;
+    }
+  }
+
+  /**
+   * Delete the lock row only while it still carries this request's value: one taken over after a
+   * timeout belongs to another request now.
+   */
   public function unlock(): void
   {
     global $wpdb;
 
-    $wpdb->query($wpdb->prepare("DELETE FROM `{$wpdb->options}` WHERE `option_name` = %s", $this->lockOption));
+    if ($this->held === null) {
+      return;
+    }
+
+    $wpdb->query(
+      $wpdb->prepare(
+        "DELETE FROM `{$wpdb->options}` WHERE `option_name` = %s AND `option_value` = %s",
+        $this->lockOption,
+        $this->held
+      )
+    );
+
+    $this->held = null;
+  }
+
+  /**
+   * `time|token`: the time says how old the lock is, the token whose it is.
+   */
+  protected function lockValue(): string
+  {
+    return time() . '|' . bin2hex(random_bytes(8));
   }
 
   public function refresh(): void
@@ -114,6 +183,15 @@ class OptionRepository implements MigrationRepository
     $version = $this->read($this->versionOption);
     $ran = $this->read($this->ledgerOption);
     $failure = $this->read($this->failureOption);
+
+    // A persistent object cache can keep a version older than the database (after an import, a
+    // restore): every request would find the migrations due, wait for the lock, and see here
+    // that they are not. Drop the cached copies so the next request reads what is true.
+    if (get_option($this->versionOption, null) !== $version || get_option($this->failureOption, null) !== $failure) {
+      wp_cache_delete('alloptions', 'options');
+      wp_cache_delete($this->versionOption, 'options');
+      wp_cache_delete($this->failureOption, 'options');
+    }
 
     $this->fresh = [
       'version' => is_string($version) && $version !== '' ? $version : null,
@@ -133,16 +211,26 @@ class OptionRepository implements MigrationRepository
     return is_array($ran) ? $ran : [];
   }
 
-  public function log(string $migration, int $batch, string $version): void
+  public function log(string $migration, int $batch, string $version): bool
   {
     $ran = $this->ran();
     $ran[$migration] = ['batch' => $batch, 'version' => $version, 'time' => time()];
 
-    update_option($this->ledgerOption, $ran, false);
+    // update_option() answers false also for a value that did not change; the entry is new, so a
+    // false is checked against what the database holds.
+    if (!update_option($this->ledgerOption, $ran, false)) {
+      $stored = $this->read($this->ledgerOption);
+
+      if (!is_array($stored) || !isset($stored[$migration])) {
+        return false;
+      }
+    }
 
     if ($this->fresh !== null) {
       $this->fresh['ran'] = $ran;
     }
+
+    return true;
   }
 
   public function setVersion(string $version): void
@@ -156,14 +244,24 @@ class OptionRepository implements MigrationRepository
 
   public function setFailure(?array $failure): void
   {
-    if ($failure === null) {
-      delete_option($this->failureOption);
-    } else {
-      update_option($this->failureOption, $failure, true);
-    }
+    // An empty string rather than no option: an autoloaded option is read for free, a missing one
+    // costs a query, and the failure is checked on every request.
+    update_option($this->failureOption, $failure ?? '', true);
 
     if ($this->fresh !== null) {
       $this->fresh['failure'] = $failure;
+    }
+  }
+
+  /**
+   * Forget which migrations ran on this site, for an uninstall.php that drops the plugin's tables:
+   * otherwise a reinstall finds them all recorded and creates nothing. Call it with the plugin's
+   * slug, the name of its options row (`WPKirk()->slug`, or `<plugin_name>_slug`).
+   */
+  public static function forget(string $prefix): void
+  {
+    foreach (['_db_version', '_migrations', '_migrations_failure', '_migrations.lock'] as $suffix) {
+      delete_option($prefix . $suffix);
     }
   }
 

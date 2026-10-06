@@ -45,24 +45,22 @@ class Migrator
 
   /**
    * Whether this request should run the migrations: the database was migrated for another version
-   * of the plugin, or never. One comparison against an autoloaded option, so every request can ask.
+   * of the plugin, or never. Two autoloaded options, so every request can ask for free.
    *
-   * After a failure only an administrator's request retries, and not more than every RETRY_AFTER
-   * seconds: a public page would retry on every hit.
+   * After a failure of this version only an administrator's request retries, and not more than
+   * every RETRY_AFTER seconds: a public page would retry on every hit. That holds whatever the
+   * stored version says: a migration added without a version bump can fail too, during
+   * development. A failure of another version does not hold back this one, which may fix it.
    */
   public function isDue(bool $byAdministrator = false): bool
   {
-    if (!$this->versionChanged()) {
-      return false;
-    }
-
     $failure = $this->repository->failure();
 
-    if ($failure === null) {
-      return true;
+    if ($failure !== null && ($failure['version'] ?? null) === $this->version) {
+      return $byAdministrator && time() - (int) ($failure['time'] ?? 0) >= static::RETRY_AFTER;
     }
 
-    return $byAdministrator && time() - (int) ($failure['time'] ?? 0) >= static::RETRY_AFTER;
+    return $failure !== null || $this->versionChanged();
   }
 
   /**
@@ -162,8 +160,14 @@ class Migrator
    * Stops at the first one that throws or leaves a database error: it is not recorded, the failure
    * is, and the stored version stays where it was, so the next run starts from that migration.
    * When everything ran, the stored version becomes the plugin's.
+   *
+   * @param bool $automatic       True for the run a page load starts after isDue(): under the lock
+   *                              it asks again, since another request may have finished, or
+   *                              failed, in the meantime. Activation and `php bones migrate` run
+   *                              whatever the state.
+   * @param bool $byAdministrator What isDue() was asked with.
    */
-  public function migrate(): MigrationResult
+  public function migrate(bool $automatic = false, bool $byAdministrator = false): MigrationResult
   {
     if (!$this->repository->lock()) {
       return new MigrationResult(null, true);
@@ -174,6 +178,11 @@ class Migrator
       $this->repository->refresh();
 
       $result = new MigrationResult($this->repository->version());
+
+      if ($automatic && !$this->isDue($byAdministrator)) {
+        return $result;
+      }
+
       $result->outOfOrder = $this->outOfOrder();
 
       foreach ($result->outOfOrder as $name) {
@@ -184,6 +193,8 @@ class Migrator
       $batch = ($batches === [] ? 0 : max($batches)) + 1;
 
       foreach ($this->pending() as $name => $file) {
+        $this->repository->touch();
+
         $error = $this->runFile($file);
 
         if ($error !== null) {
@@ -202,13 +213,27 @@ class Migrator
           return $result;
         }
 
-        $this->repository->log($name, $batch, $this->version);
         $result->ran[] = $name;
+
+        if (!$this->repository->log($name, $batch, $this->version)) {
+          $result->failed = $name;
+          $result->error = 'it ran, but could not be recorded, so it would run again: the database did not accept the write';
+
+          $this->repository->setFailure([
+            'migration' => $name,
+            'message' => $result->error,
+            'version' => $this->version,
+            'time' => time(),
+          ]);
+
+          $this->log("migration {$name} {$result->error}");
+
+          return $result;
+        }
       }
 
-      if ($this->repository->failure() !== null) {
-        $this->repository->setFailure(null);
-      }
+      // Also on a site that never failed: the empty value keeps the option autoloaded.
+      $this->repository->setFailure(null);
 
       if ($this->repository->version() !== $this->version) {
         $this->repository->setVersion($this->version);

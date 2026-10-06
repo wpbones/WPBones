@@ -550,26 +550,34 @@ class Plugin extends Container implements PluginContract
       return;
     }
 
-    if (!$this->migrator()->isDue(is_admin() && current_user_can('manage_options'))) {
+    // `php bones migrate` loads WordPress and then runs them itself, so that it can tell what ran.
+    if (defined('WPBONES_COMMAND_LINE_VERSION')) {
       return;
     }
 
-    $this->runMigrations();
+    $byAdministrator = is_admin() && current_user_can('manage_options');
+
+    if (!$this->migrator()->isDue($byAdministrator)) {
+      return;
+    }
+
+    $this->runMigrations(true, $byAdministrator);
   }
 
   /**
    * Run the pending migrations and, in the request that moved the stored version, finish the
    * update: align the options and run plugin/updated.php, which receives the version it came from
    * as $previousVersion. On a site migrated for the first time there is no previous version, and
-   * plugin/updated.php does not run. `php bones migrate` calls this too.
+   * plugin/updated.php does not run. Activation and `php bones migrate` call this too, and run
+   * whatever the state; a page load runs it as $automatic, see Migrator::migrate().
    *
    * @since 3.0.0
    */
-  public function runMigrations(): MigrationResult
+  public function runMigrations(bool $automatic = false, bool $byAdministrator = false): MigrationResult
   {
     $this->warnAboutSeeders();
 
-    $result = $this->migrator()->migrate();
+    $result = $this->migrator()->migrate($automatic, $byAdministrator);
 
     $this->finishMigration($result);
 
@@ -624,12 +632,7 @@ class Plugin extends Container implements PluginContract
       return;
     }
 
-    // A failure keeps the stored version behind the plugin's: when they match there is nothing to
-    // show, and no query to make on every admin page.
-    if (!$this->migrator()->versionChanged()) {
-      return;
-    }
-
+    // An autoloaded option: no query on every admin page.
     $failure = $this->migrator()->failure();
 
     if ($failure === null) {
@@ -648,7 +651,8 @@ class Plugin extends Container implements PluginContract
    * Called when a plugin is activated; `register_activation_hook()`
    *
    * Runs the pending migrations whatever the stored version says: activation is also how a
-   * migration added during development, without a version bump, gets run.
+   * migration added during development, without a version bump, gets run. A plugin updated while
+   * inactive finishes its update here: plugin/updated.php runs, with the version it came from.
    *
    * @access private
    */
@@ -666,8 +670,7 @@ class Plugin extends Container implements PluginContract
     // include your own activation
     $activation = include_once "{$this->basePath}/plugin/activation.php";
 
-    $this->warnAboutSeeders();
-    $this->migrator()->migrate();
+    $this->runMigrations();
   }
 
   /**

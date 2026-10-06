@@ -230,6 +230,130 @@ final class MigrateToV3Test extends TestCase
     $this->assertSame(['SELECT COUNT(*) FROM `wp_items`', "UPDATE wp_items SET name = 'x'"], $this->runMigration($file));
   }
 
+  public function test_settings_in_comments_are_ignored(): void
+  {
+    $this->put('database/seeders/Commented.php', <<<'PHP'
+      <?php
+
+      use WPKirk\WPBones\Database\Seeder;
+
+      return new class extends Seeder {
+        // protected $tablename = 'wrong';
+        protected $tablename = 'items';
+
+        /* protected $runOnce = true; */
+        // protected $usePrefix = false;
+
+        public function run()
+        {
+          $this->insert("(name) VALUES ('a')");
+        }
+      };
+      PHP);
+
+    $this->convert();
+
+    $file = $this->converted('commented');
+    $code = (string) file_get_contents($file);
+    $this->assertStringNotContainsString('isEmpty', $code, 'no guard from a commented-out $runOnce');
+    $this->assertStringNotContainsString('protected $usePrefix', $code);
+    $this->assertSame(["INSERT INTO `wp_items` (name) VALUES ('a')"], $this->runMigration($file));
+  }
+
+  public function test_spacing_and_the_nullsafe_operator_are_read_like_any_call(): void
+  {
+    $this->put('database/seeders/Spaced.php', <<<'PHP'
+      <?php
+
+      use WPKirk\WPBones\Database\Seeder;
+
+      return new class extends Seeder {
+        protected $tablename = 'items';
+
+        public function run()
+        {
+          $this -> insert("(name) VALUES ('a')");
+          $this?->truncate();
+        }
+      };
+      PHP);
+
+    $this->convert();
+
+    $file = $this->converted('spaced');
+    $this->assertParses($file);
+    $this->assertSame(["INSERT INTO `wp_items` (name) VALUES ('a')", 'TRUNCATE TABLE `wp_items`'], $this->runMigration($file));
+  }
+
+  public function test_the_seeders_wpdb_property_keeps_working(): void
+  {
+    $this->put('database/seeders/UsesWpdb.php', <<<'PHP'
+      <?php
+
+      use WPKirk\WPBones\Database\Seeder;
+
+      return new class extends Seeder {
+        protected $tablename = 'items';
+
+        public function run()
+        {
+          $this->wpdb->query("DELETE FROM {$this->tablename} WHERE 1 = 0");
+        }
+      };
+      PHP);
+
+    $this->convert();
+
+    $file = $this->converted('uses_wpdb');
+    $this->assertSame(['DELETE FROM wp_items WHERE 1 = 0'], $this->runMigration($file));
+  }
+
+  public function test_a_namespace_declaration_is_kept_first(): void
+  {
+    $this->put('database/seeders/Namespaced.php', <<<'PHP'
+      <?php
+
+      namespace WPKirk\Seeds;
+
+      use WPKirk\WPBones\Database\Seeder;
+
+      return new class extends Seeder {
+        public function run()
+        {
+        }
+      };
+      PHP);
+
+    $this->convert();
+
+    $file = $this->converted('namespaced');
+    $this->assertParses($file);
+    $this->assertStringStartsWith("<?php\n\nnamespace WPKirk\\Seeds;\n\nif (!defined('ABSPATH'))", (string) file_get_contents($file));
+  }
+
+  public function test_truncating_a_named_table_without_the_prefix_is_flagged(): void
+  {
+    $this->put('database/seeders/NoPrefix.php', <<<'PHP'
+      <?php
+
+      use WPKirk\WPBones\Database\Seeder;
+
+      return new class extends Seeder {
+        protected $tablename = 'items';
+        protected $usePrefix = false;
+
+        public function run()
+        {
+          $this->truncate('other');
+        }
+      };
+      PHP);
+
+    $run = $this->convert();
+
+    $this->assertStringContainsString('2.x prefixed that name anyway', $run['output']);
+  }
+
   public function test_converted_seeders_run_after_every_migration_in_the_order_they_ran(): void
   {
     $this->put('database/migrations/2030_01_01_000000_create_items.php', "<?php\nreturn new class extends \\WPKirk\\WPBones\\Database\\Migration { public function up() {} };\n");

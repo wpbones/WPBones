@@ -70,11 +70,16 @@ final class WpdbSpy
     return $previous;
   }
 
-  public function query(string $sql): int
+  /** What query() answers: false is a refusal, as wpdb gives it. */
+  public int|bool $queryResult = 0;
+
+  public string $last_error = '';
+
+  public function query(string $sql): int|bool
   {
     $this->queries[] = $sql;
 
-    return 0;
+    return $this->queryResult;
   }
 
   /**
@@ -98,6 +103,8 @@ final class WpdbSpy
     $this->queries = [];
     $this->columns = [];
     $this->var = 0;
+    $this->queryResult = 0;
+    $this->last_error = '';
   }
 
   public function last(): string
