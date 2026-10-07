@@ -10,7 +10,6 @@
 
 > [!NOTE]
 > [![Latest Stable Version](https://poser.pugx.org/wpbones/wpbones/v/stable?style=for-the-badge)](https://packagist.org/packages/wpbones/wpbones) &nbsp;
-> [![Latest Unstable Version](https://poser.pugx.org/wpbones/wpbones/v/unstable?style=for-the-badge)](https://packagist.org/packages/wpbones/wpbones) &nbsp;
 > [![Total Downloads](https://poser.pugx.org/wpbones/wpbones/downloads?style=for-the-badge)](https://packagist.org/packages/wpbones/wpbones) &nbsp;
 > [![License](https://poser.pugx.org/wpbones/wpbones/license?style=for-the-badge)](https://packagist.org/packages/wpbones/wpbones) &nbsp;
 > [![Monthly Downloads](https://poser.pugx.org/wpbones/wpbones/d/monthly?style=for-the-badge)](https://packagist.org/packages/wpbones/wpbones) &nbsp;
