@@ -761,6 +761,20 @@ namespace Bones {
     const VERSION = WPBONES_COMMAND_LINE_VERSION;
 
     /**
+     * Where the framework's stubs are, relative to the plugin root.
+     *
+     * @since 3.1.0
+     */
+    const FRAMEWORK_STUBS = 'vendor/wpbones/wpbones/src/Console/stubs';
+
+    /**
+     * Where a plugin keeps its own stubs, which `make:*` prefers to the framework's.
+     *
+     * @since 3.1.0
+     */
+    const PLUGIN_STUBS = 'stubs';
+
+    /**
      * Used for additional kernel command.
      *
      * @var null
@@ -1528,14 +1542,137 @@ namespace Bones {
     }
 
     /**
-     * Return the content of a stub file.
+     * The content of a stub: the plugin's own `stubs/{$filename}.stub` when there is one, the
+     * framework's otherwise. A stub found nowhere stops the command before anything is written.
      *
-     * @param string $filename
-     * @return string
+     * Up to 3.0.x only the framework's stub was read, so the only way to change what `make:*`
+     * writes was to edit vendor/, which the next `composer update` put back (#133).
+     *
+     * @since 3.1.0 The plugin's `stubs/` folder comes first.
+     * @param string $filename The stub's name, without `.stub`.
      */
     public function getStubContent(string $filename): string
     {
-      return file_get_contents("vendor/wpbones/wpbones/src/Console/stubs/{$filename}.stub");
+      $own = self::PLUGIN_STUBS . "/{$filename}.stub";
+      $file = is_file($own) ? $own : self::FRAMEWORK_STUBS . "/{$filename}.stub";
+      $content = is_file($file) ? file_get_contents($file) : false;
+
+      if ($content === false) {
+        $this->error("Could not read the stub {$filename}.stub, neither from {$own} nor from the framework: nothing was written.");
+        exit(1);
+      }
+
+      if ($file === $own) {
+        $this->line(" Using {$own}");
+      }
+
+      return $content;
+    }
+
+    /**
+     * Copy the framework's stubs into the plugin's `stubs/` folder, where `make:*` reads them
+     * first: every stub, or the ones named. A stub already there is kept unless `--force`, since
+     * it is usually one the team has customised.
+     *
+     * @since 3.1.0
+     */
+    protected function publishStubs(): void
+    {
+      if ($this->isHelp()) {
+        $this->line("\nUsage:");
+        $this->info("  stub:publish [<stub> ...] [--force]\n");
+        $this->line('Copies the framework\'s stubs into ' . self::PLUGIN_STUBS . '/, where every make:* command reads them first.');
+        $this->line('Without names it copies them all. A stub already there is kept: pass --force to replace it.');
+        exit();
+      }
+
+      $available = [];
+
+      foreach (glob(self::FRAMEWORK_STUBS . '/*.stub') ?: [] as $file) {
+        $available[basename($file, '.stub')] = $file;
+      }
+
+      ksort($available);
+
+      if ($available === []) {
+        $this->error('No stubs found in ' . self::FRAMEWORK_STUBS . ': run composer install first.');
+        exit(1);
+      }
+
+      // `controller` and `controller.stub` name the same stub.
+      $names = array_values(
+        array_map(
+          fn($param) => preg_replace('/\.stub$/', '', (string) $param),
+          array_filter($this->getCommandParams() ?? [], fn($param) => strpos((string) $param, '--') !== 0),
+        ),
+      );
+      $unknown = array_diff($names, array_keys($available));
+
+      if ($unknown !== []) {
+        $this->error(
+          'Unknown stub(s): ' . implode(', ', $unknown) . '. The stubs are: ' . implode(', ', array_keys($available)) . '. Nothing was written.',
+        );
+        exit(1);
+      }
+
+      $this->mkdirIfNotExists(self::PLUGIN_STUBS);
+
+      foreach ($names === [] ? array_keys($available) : array_unique($names) as $name) {
+        $target = self::PLUGIN_STUBS . "/{$name}.stub";
+
+        if (file_exists($target) && !$this->hasOption('--force')) {
+          $this->warning(" Kept {$target}, already there: pass --force to replace it");
+
+          continue;
+        }
+
+        if (!copy($available[$name], $target)) {
+          $this->error("Could not write {$target}.");
+          exit(1);
+        }
+
+        $this->line(" Published {$target}");
+      }
+    }
+
+    /**
+     * The plugin's own stubs, which a deploy leaves out: development files, like the
+     * framework's. Only the `.stub` files go, so a plugin that keeps something else in a
+     * `stubs/` folder still ships it; a folder that holds nothing else goes whole, rather than
+     * arriving empty.
+     *
+     * @since 3.1.0
+     * @return string[] Entries of the deploy skip list.
+     */
+    protected function pluginStubsToSkip(): array
+    {
+      // The plugin root, as the deploy's skip list is relative to it.
+      $folder = __DIR__ . '/' . self::PLUGIN_STUBS;
+
+      if (!is_dir($folder)) {
+        return [];
+      }
+
+      $stubs = [];
+      $other = false;
+
+      foreach (scandir($folder) ?: [] as $entry) {
+        if ($entry === '.' || $entry === '..') {
+          continue;
+        }
+
+        if (is_file("{$folder}/{$entry}") && substr($entry, -5) === '.stub') {
+          $stubs[] = '/' . self::PLUGIN_STUBS . "/{$entry}";
+        } elseif (strpos($entry, '.') !== 0) {
+          $other = true;
+        }
+      }
+
+      if ($stubs === []) {
+        return [];
+      }
+
+      return $other ? $stubs : ['/' . self::PLUGIN_STUBS];
     }
 
     /**
@@ -1729,6 +1866,8 @@ namespace Bones {
       $this->line(' make:provider           Create a new service provider class');
       $this->line(' make:widget             Create a new Widget service provider class');
       $this->line(' (make:* never overwrite an existing file: pass --force to do it)');
+      $this->info('stub');
+      $this->line(' stub:publish            Copy the stubs into stubs/, where make:* reads them first');
 
       if ($this->kernel && $this->kernel->hasCommands()) {
         $this->info('Extensions');
@@ -1836,6 +1975,12 @@ namespace Bones {
       // make:widget {className}
       elseif ($this->isCommand('make:widget')) {
         $this->createWidget($this->getCommandArgument());
+      }
+      // -- stub ---------------------------------------------
+      //
+      // stub:publish {stub ...} [--force]
+      elseif ($this->isCommand('stub:publish')) {
+        $this->publishStubs();
       }
       // -- kernel --------------------------------------------------
       //
@@ -2574,6 +2719,7 @@ namespace Bones {
         '/phpcs.xml.dist',
         '/mix-manifest.json',
         '/release.sh',
+        ...$this->pluginStubsToSkip(),
       ]);
 
       // The new strict rules require that the composer must also be released to publish the plugin in the WordPress.org repository.
