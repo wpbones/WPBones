@@ -8,6 +8,11 @@
 
 </div>
 
+<div align="center">
+  <p><img src="https://raw.githubusercontent.com/wpbones/.github/main/glancecard/WPBones.svg" width="880" alt="WP Bones at a glance, refreshed daily: commits, releases, stars, issues and pull requests, a year of commit activity, the weekly rhythm, languages, latest commits and releases, contributors" /><br>
+  <sub>Made with <a href="https://github.com/gfazioli/glancecard">glancecard</a> · refreshed daily</sub></p>
+</div>
+
 > [!NOTE]
 > [![Latest Stable Version](https://poser.pugx.org/wpbones/wpbones/v/stable?style=for-the-badge)](https://packagist.org/packages/wpbones/wpbones) &nbsp;
 > [![Total Downloads](https://poser.pugx.org/wpbones/wpbones/downloads?style=for-the-badge)](https://packagist.org/packages/wpbones/wpbones) &nbsp;
