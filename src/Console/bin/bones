@@ -1676,6 +1676,44 @@ namespace Bones {
     }
 
     /**
+     * The JavaScript tests that sit beside the code they test, found the way the jest.config.js
+     * written by `migrate:to-v2` finds them: every `__tests__` folder, and every `*.test.*` or
+     * `*.spec.*` script. They live in resources/assets, which `--wp` ships. The skip list
+     * matches exact paths, so each one is listed where it is.
+     *
+     * vendor/ and node_modules/ are not walked: they are not the plugin's own code.
+     *
+     * @since 3.2.0
+     * @param string $relative The folder to walk, relative to the plugin root.
+     * @return string[] Entries of the deploy skip list.
+     */
+    protected function javascriptTestsToSkip(string $relative = ''): array
+    {
+      $entries = [];
+
+      foreach (scandir(__DIR__ . $relative) ?: [] as $name) {
+        // The deploy never copies a dot entry, so there is nothing to list in one.
+        if (strpos($name, '.') === 0 || in_array($name, ['vendor', 'node_modules'], true)) {
+          continue;
+        }
+
+        $path = "{$relative}/{$name}";
+
+        if (is_dir(__DIR__ . $path)) {
+          if ($name === '__tests__') {
+            $entries[] = $path;
+          } elseif (!is_link(__DIR__ . $path)) {
+            $entries = array_merge($entries, $this->javascriptTestsToSkip($path));
+          }
+        } elseif (preg_match('/\.(test|spec)\.(ts|tsx|js|jsx)$/', $name)) {
+          $entries[] = $path;
+        }
+      }
+
+      return $entries;
+    }
+
+    /**
      * Return true if the command is available in the system.
      *
      * @param string $command
@@ -2719,6 +2757,14 @@ namespace Bones {
         '/phpcs.xml.dist',
         '/mix-manifest.json',
         '/release.sh',
+        // The plugin's test suites: PHPUnit's, where PHPUnit looks for it, and Jest's.
+        '/tests',
+        '/phpunit.xml',
+        '/phpunit.xml.dist',
+        '/phpunit.dist.xml',
+        '/jest.config.js',
+        '/jest.config.json',
+        ...$this->javascriptTestsToSkip(),
         ...$this->pluginStubsToSkip(),
       ]);
 
