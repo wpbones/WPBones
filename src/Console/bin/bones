@@ -1714,7 +1714,8 @@ namespace Bones {
 
     /**
      * The agent instruction files, wherever they are: vendor/ included, since none of them is
-     * ever something a plugin runs. node_modules/ is not walked, the deploy leaves it out whole.
+     * ever something a plugin runs. The root node_modules/ is not walked, the deploy leaves it
+     * out whole; one deeper down, which `--wp` can ship from resources/assets, is.
      *
      * @since 3.3.0
      * @return string[] Entries of the deploy skip list.
@@ -1723,7 +1724,7 @@ namespace Bones {
     {
       return $this->pathsToSkip(
         fn(string $name, bool $isDir) => !$isDir && in_array($name, self::AGENT_INSTRUCTIONS, true),
-        ['node_modules'],
+        ['/node_modules'],
       );
     }
 
@@ -1731,13 +1732,13 @@ namespace Bones {
      * Walk the plugin and list the paths $matches picks. The skip list matches exact paths, so
      * each one is listed where it is; a folder picked is listed whole and not walked.
      *
-     * Not walked either: a dot entry, which the deploy never copies, a folder named in $prune,
-     * at any depth, a linked folder, and a folder that cannot be read, which the copy could not
-     * read either.
+     * Not walked either: a dot entry, which the deploy never copies, a folder in $prune, a linked
+     * folder, and a folder that cannot be read, which the copy could not read either.
      *
      * @since 3.3.0
      * @param callable(string, bool): bool $matches Given an entry's name and whether it is a folder.
-     * @param string[] $prune Names of the folders not to walk.
+     * @param string[] $prune Folders not to walk: a name, at any depth, or a path from the plugin
+     *                        root, with its leading slash.
      * @param string $relative The folder to walk, relative to the plugin root.
      * @return string[] Entries of the deploy skip list.
      */
@@ -1746,11 +1747,12 @@ namespace Bones {
       $entries = [];
 
       foreach (scandir(__DIR__ . $relative) ?: [] as $name) {
-        if (strpos($name, '.') === 0 || in_array($name, $prune, true)) {
+        $path = "{$relative}/{$name}";
+
+        if (strpos($name, '.') === 0 || in_array($name, $prune, true) || in_array($path, $prune, true)) {
           continue;
         }
 
-        $path = "{$relative}/{$name}";
         $isDir = is_dir(__DIR__ . $path);
 
         if ($matches($name, $isDir)) {

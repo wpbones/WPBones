@@ -42,6 +42,10 @@ final class DeployAgentInstructionsTest extends TestCase
         'plugin/Providers/AgentsServiceProvider.php' => "<?php\n// runtime code\n",
         'resources/assets/apps/AGENTS.md' => "# internal notes\n",
         'resources/assets/apps/agents-panel.tsx' => "export {};\n",
+        // Not the root node_modules/, which the deploy leaves out whole: --wp ships this one.
+        'resources/assets/apps/node_modules/pkg/CLAUDE.md' => "# a dependency's notes\n",
+        'resources/assets/apps/node_modules/pkg/index.js' => "module.exports = {};\n",
+        'node_modules/pkg/index.js' => "module.exports = {};\n",
         'vendor/acme/lib/AGENTS.md' => "# internal notes\n",
         'vendor/acme/lib/functions.php' => "<?php\n",
         'docs/agents.md' => "# the plugin's agents feature\n",
@@ -123,6 +127,7 @@ final class DeployAgentInstructionsTest extends TestCase
         'plugin/Providers/AgentsServiceProvider.php',
         'readme.txt',
         'resources/assets/apps/agents-panel.tsx',
+        'resources/assets/apps/node_modules/pkg/index.js',
         'vendor/acme/lib/functions.php',
         'wp-kirk.php',
       ],
