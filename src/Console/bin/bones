@@ -775,6 +775,22 @@ namespace Bones {
     const PLUGIN_STUBS = 'stubs';
 
     /**
+     * The instruction files coding agents read from a repository: AGENTS.md (Codex, Cursor,
+     * Copilot and most others) with Codex's override, AGENT.md, Claude Code's CLAUDE.md and
+     * CLAUDE.local.md, Gemini CLI's GEMINI.md. A deploy leaves them out wherever they are.
+     *
+     * @since 3.3.0
+     */
+    const AGENT_INSTRUCTIONS = [
+      'AGENTS.md',
+      'AGENTS.override.md',
+      'AGENT.md',
+      'CLAUDE.md',
+      'CLAUDE.local.md',
+      'GEMINI.md',
+    ];
+
+    /**
      * Used for additional kernel command.
      *
      * @var null
@@ -1708,6 +1724,43 @@ namespace Bones {
             $entries = array_merge($entries, $this->javascriptTestsToSkip($path));
           }
         } elseif (preg_match('/\.(test|spec)\.(ts|tsx|js|jsx)$/', $name)) {
+          $entries[] = $path;
+        }
+      }
+
+      return $entries;
+    }
+
+    /**
+     * The instruction files coding agents read, wherever they are, vendor/ included: notes for
+     * whoever works on the code, never something a plugin runs. A web server hands out a
+     * plugin's files as they are, so a CLAUDE.md that reaches the package can be read on every
+     * site that installs the plugin. Their folders (.claude/, .codex/, .cursor/, .github/) need
+     * no entry, since the deploy never copies a dot entry.
+     *
+     * node_modules/ is not walked: the deploy leaves it out whole. Neither is a folder that
+     * cannot be read, which the copy could not read either.
+     *
+     * @since 3.3.0
+     * @param string $relative The folder to walk, relative to the plugin root.
+     * @return string[] Entries of the deploy skip list.
+     */
+    protected function agentInstructionsToSkip(string $relative = ''): array
+    {
+      $entries = [];
+
+      foreach (scandir(__DIR__ . $relative) ?: [] as $name) {
+        if (strpos($name, '.') === 0 || $name === 'node_modules') {
+          continue;
+        }
+
+        $path = "{$relative}/{$name}";
+
+        if (is_dir(__DIR__ . $path)) {
+          if (!is_link(__DIR__ . $path) && is_readable(__DIR__ . $path)) {
+            $entries = array_merge($entries, $this->agentInstructionsToSkip($path));
+          }
+        } elseif (in_array($name, self::AGENT_INSTRUCTIONS, true)) {
           $entries[] = $path;
         }
       }
@@ -2768,6 +2821,7 @@ namespace Bones {
         '/jest.config.json',
         ...$this->javascriptTestsToSkip(),
         ...$this->pluginStubsToSkip(),
+        ...$this->agentInstructionsToSkip(),
       ]);
 
       // The new strict rules require that the composer must also be released to publish the plugin in the WordPress.org repository.
