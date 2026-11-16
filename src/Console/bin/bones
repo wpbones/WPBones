@@ -1695,73 +1695,68 @@ namespace Bones {
      * The JavaScript tests that sit beside the code they test, found the way the jest.config.js
      * written by `migrate:to-v2` finds them: every `__tests__` folder, and every `*.test.*` or
      * `*.spec.*` script, with the `__snapshots__` and `__mocks__` folders Jest keeps beside them.
-     * They live in resources/assets, which `--wp` ships. The skip list matches exact paths, so
-     * each one is listed where it is.
+     * They live in resources/assets, which `--wp` ships.
      *
-     * vendor/ and node_modules/ are not walked: they are not the plugin's own code. Neither is a
-     * folder that cannot be read, which the copy could not read either.
+     * vendor/ and node_modules/ are not walked: they are not the plugin's own code.
      *
      * @since 3.2.0
-     * @param string $relative The folder to walk, relative to the plugin root.
      * @return string[] Entries of the deploy skip list.
      */
-    protected function javascriptTestsToSkip(string $relative = ''): array
+    protected function javascriptTestsToSkip(): array
     {
-      $entries = [];
-
-      foreach (scandir(__DIR__ . $relative) ?: [] as $name) {
-        // The deploy never copies a dot entry, so there is nothing to list in one.
-        if (strpos($name, '.') === 0 || in_array($name, ['vendor', 'node_modules'], true)) {
-          continue;
-        }
-
-        $path = "{$relative}/{$name}";
-
-        if (is_dir(__DIR__ . $path)) {
-          if (in_array($name, ['__tests__', '__snapshots__', '__mocks__'], true)) {
-            $entries[] = $path;
-          } elseif (!is_link(__DIR__ . $path) && is_readable(__DIR__ . $path)) {
-            $entries = array_merge($entries, $this->javascriptTestsToSkip($path));
-          }
-        } elseif (preg_match('/\.(test|spec)\.(ts|tsx|js|jsx)$/', $name)) {
-          $entries[] = $path;
-        }
-      }
-
-      return $entries;
+      return $this->pathsToSkip(
+        fn(string $name, bool $isDir) => $isDir
+          ? in_array($name, ['__tests__', '__snapshots__', '__mocks__'], true)
+          : (bool) preg_match('/\.(test|spec)\.(ts|tsx|js|jsx)$/', $name),
+        ['vendor', 'node_modules'],
+      );
     }
 
     /**
-     * The instruction files coding agents read, wherever they are, vendor/ included: notes for
-     * whoever works on the code, never something a plugin runs. A web server hands out a
-     * plugin's files as they are, so a CLAUDE.md that reaches the package can be read on every
-     * site that installs the plugin. Their folders (.claude/, .codex/, .cursor/, .github/) need
-     * no entry, since the deploy never copies a dot entry.
-     *
-     * node_modules/ is not walked: the deploy leaves it out whole. Neither is a folder that
-     * cannot be read, which the copy could not read either.
+     * The agent instruction files, wherever they are: vendor/ included, since none of them is
+     * ever something a plugin runs. node_modules/ is not walked, the deploy leaves it out whole.
      *
      * @since 3.3.0
+     * @return string[] Entries of the deploy skip list.
+     */
+    protected function agentInstructionsToSkip(): array
+    {
+      return $this->pathsToSkip(
+        fn(string $name, bool $isDir) => !$isDir && in_array($name, self::AGENT_INSTRUCTIONS, true),
+        ['node_modules'],
+      );
+    }
+
+    /**
+     * Walk the plugin and list the paths $matches picks. The skip list matches exact paths, so
+     * each one is listed where it is; a folder picked is listed whole and not walked.
+     *
+     * Not walked either: a dot entry, which the deploy never copies, a folder named in $prune,
+     * at any depth, a linked folder, and a folder that cannot be read, which the copy could not
+     * read either.
+     *
+     * @since 3.3.0
+     * @param callable(string, bool): bool $matches Given an entry's name and whether it is a folder.
+     * @param string[] $prune Names of the folders not to walk.
      * @param string $relative The folder to walk, relative to the plugin root.
      * @return string[] Entries of the deploy skip list.
      */
-    protected function agentInstructionsToSkip(string $relative = ''): array
+    protected function pathsToSkip(callable $matches, array $prune, string $relative = ''): array
     {
       $entries = [];
 
       foreach (scandir(__DIR__ . $relative) ?: [] as $name) {
-        if (strpos($name, '.') === 0 || $name === 'node_modules') {
+        if (strpos($name, '.') === 0 || in_array($name, $prune, true)) {
           continue;
         }
 
         $path = "{$relative}/{$name}";
+        $isDir = is_dir(__DIR__ . $path);
 
-        if (is_dir(__DIR__ . $path)) {
-          if (!is_link(__DIR__ . $path) && is_readable(__DIR__ . $path)) {
-            $entries = array_merge($entries, $this->agentInstructionsToSkip($path));
-          }
-        } elseif (in_array($name, self::AGENT_INSTRUCTIONS, true)) {
+        if ($matches($name, $isDir)) {
           $entries[] = $path;
+        } elseif ($isDir && !is_link(__DIR__ . $path) && is_readable(__DIR__ . $path)) {
+          $entries = array_merge($entries, $this->pathsToSkip($matches, $prune, $path));
         }
       }
 

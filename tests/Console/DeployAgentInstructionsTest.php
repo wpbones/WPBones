@@ -98,51 +98,22 @@ final class DeployAgentInstructionsTest extends TestCase
     $result = $this->deploy();
 
     $this->assertSame(0, $result['status'], $result['output']);
-    $this->assertFileExists($this->target . '/wp-kirk.php', 'the deploy did not run');
-    $this->assertFileDoesNotExist($this->target . '/AGENTS.md');
-    $this->assertFileDoesNotExist($this->target . '/AGENTS.override.md');
-    $this->assertFileDoesNotExist($this->target . '/AGENT.md');
-    $this->assertFileDoesNotExist($this->target . '/CLAUDE.local.md');
-    $this->assertFileDoesNotExist($this->target . '/GEMINI.md');
-    $this->assertFileDoesNotExist($this->target . '/plugin/Providers/CLAUDE.md');
-    $this->assertFileDoesNotExist($this->target . '/vendor/acme/lib/AGENTS.md');
-  }
-
-  public function test_a_claude_md_link_does_not_reach_the_package(): void
-  {
-    $result = $this->deploy();
-
-    $this->assertSame(0, $result['status'], $result['output']);
-    // assertFileDoesNotExist follows the link, which points at a file the deploy left out too.
-    $this->assertFalse(is_link($this->target . '/CLAUDE.md'), 'CLAUDE.md shipped as a link');
-    $this->assertFileDoesNotExist($this->target . '/CLAUDE.md');
+    // The exact listing: a single agent file, the CLAUDE.md link, or a dot folder would show.
+    $this->assertSame(
+      [
+        'docs/agents.md',
+        'plugin/Providers/AgentsServiceProvider.php',
+        'readme.txt',
+        'vendor/acme/lib/functions.php',
+        'wp-kirk.php',
+      ],
+      $this->packaged(),
+    );
   }
 
   public function test_none_reach_a_wordpress_org_package(): void
   {
-    $result = $this->deploy('--wp');
-
-    $this->assertSame(0, $result['status'], $result['output']);
-    $this->assertFileExists(
-      $this->target . '/resources/assets/apps/agents-panel.tsx',
-      '--wp did not keep resources/assets',
-    );
-    $this->assertFileDoesNotExist($this->target . '/resources/assets/apps/AGENTS.md');
-    $this->assertFileDoesNotExist($this->target . '/AGENTS.md');
-  }
-
-  public function test_their_folders_never_reached_the_package(): void
-  {
-    $result = $this->deploy();
-
-    $this->assertSame(0, $result['status'], $result['output']);
-    $this->assertDirectoryDoesNotExist($this->target . '/.claude');
-    $this->assertDirectoryDoesNotExist($this->target . '/.codex');
-  }
-
-  public function test_everything_else_still_ships(): void
-  {
-    // --wp, which keeps resources/assets, so the script beside the AGENTS.md there is checked too.
+    // --wp keeps resources/assets, where an AGENTS.md sits beside a script that must ship.
     $result = $this->deploy('--wp');
 
     $this->assertSame(0, $result['status'], $result['output']);
