@@ -106,4 +106,85 @@ final class DeployDestinationTest extends TestCase
     $this->assertDirectoryDoesNotExist($this->bones->plugin . '/made-by-mistake');
     $this->assertFileExists($this->bones->plugin . '/wp-kirk.php');
   }
+
+  /**
+   * PHP's recursive mkdir collapses "link/.." lexically, the OS follows the link first; the guard
+   * resolves like the OS, so the folder must land where the guard looked (Codex review of #143).
+   */
+  public function test_a_symlink_followed_by_dot_dot_creates_where_the_os_resolves(): void
+  {
+    mkdir($this->bones->root . '/a/b', 0777, true);
+    symlink($this->bones->root . '/a/b', $this->bones->root . '/link');
+
+    $run = $this->bones->run(['deploy', $this->bones->root . '/link/../x', '--no-build']);
+
+    $this->assertSame(0, $run['status'], $run['output']);
+    $this->assertFileExists($this->bones->root . '/a/x/wp-kirk.php');
+    $this->assertDirectoryDoesNotExist($this->bones->root . '/x');
+  }
+
+  public function test_a_refused_destination_behind_a_symlink_creates_nothing(): void
+  {
+    mkdir($this->bones->plugin . '/sub');
+    mkdir($this->bones->root . '/out');
+    symlink($this->bones->plugin . '/sub', $this->bones->root . '/out/alias');
+
+    $run = $this->bones->run(['deploy', '../out/alias/../deep/er', '--no-build']);
+
+    $this->assertNotSame(0, $run['status'], $run['output']);
+    $this->assertStringContainsString('inside the plugin', $run['stderr']);
+    $this->assertDirectoryDoesNotExist($this->bones->plugin . '/deep');
+    $this->assertDirectoryDoesNotExist($this->bones->root . '/out/deep');
+  }
+
+  /** deleteDirectory() built a glob() pattern from the path, so "[ab]" matched the folders xa and xb. */
+  public function test_a_destination_with_glob_characters_replaces_only_itself(): void
+  {
+    $old = $this->bones->root . '/x[ab]';
+    mkdir($old);
+    file_put_contents($old . '/wp-kirk.php', "<?php\n/**\n * Plugin Name: WP Kirk\n */\n");
+    file_put_contents($old . '/stale.txt', 'old');
+    mkdir($this->bones->root . '/xa');
+    file_put_contents($this->bones->root . '/xa/SENTINEL.txt', 'keep me');
+
+    $run = $this->bones->run(['deploy', $old, '--no-build']);
+
+    $this->assertSame(0, $run['status'], $run['output']);
+    $this->assertFileDoesNotExist($old . '/stale.txt');
+    $this->assertFileExists($old . '/src/Kernel.php');
+    $this->assertFileExists($this->bones->root . '/xa/SENTINEL.txt');
+  }
+
+  /** is_dir() follows a link, so the old delete emptied the folder a link in the destination pointed at. */
+  public function test_replacing_a_destination_does_not_follow_a_symlinked_folder(): void
+  {
+    $old = $this->bones->root . '/out';
+    mkdir($old);
+    file_put_contents($old . '/wp-kirk.php', "<?php\n/**\n * Plugin Name: WP Kirk\n */\n");
+    mkdir($this->bones->root . '/precious');
+    file_put_contents($this->bones->root . '/precious/SENTINEL.txt', 'keep me');
+    symlink($this->bones->root . '/precious', $old . '/linked');
+
+    $run = $this->bones->run(['deploy', $old, '--no-build']);
+
+    $this->assertSame(0, $run['status'], $run['output']);
+    $this->assertFileExists($this->bones->root . '/precious/SENTINEL.txt');
+    $this->assertFalse(is_link($old . '/linked'));
+  }
+
+  public function test_a_nested_copy_that_fails_fails_the_deploy(): void
+  {
+    if (PHP_OS_FAMILY === 'Windows' || (function_exists('posix_geteuid') && posix_geteuid() === 0)) {
+      $this->markTestSkipped('An unreadable file is not enforced here.');
+    }
+
+    file_put_contents($this->bones->plugin . '/src/Unreadable.php', "<?php // secret\n");
+    chmod($this->bones->plugin . '/src/Unreadable.php', 0000);
+
+    $run = $this->bones->run(['deploy', $this->bones->root . '/out/my-plugin', '--no-build']);
+
+    $this->assertSame(1, $run['status'], $run['output']);
+    $this->assertStringContainsString('Unreadable.php', $run['stderr']);
+    $this->assertStringNotContainsString('Deploy completed', $run['output']);
+  }
 }

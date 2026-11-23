@@ -2622,17 +2622,23 @@ namespace Bones {
      */
     public function deleteDirectory(string $path)
     {
-      $path = rtrim($path, '/');
+      // No glob(): a "[", "*", "?" or "{" in the path is a pattern, not a name. A link is
+      // unlinked, never followed into the folder it points at.
+      foreach (scandir($path) ?: [] as $entry) {
+        if ($entry === '.' || $entry === '..') {
+          continue;
+        }
 
-      array_map(function ($file) {
-        if (is_dir($file)) {
+        $file = rtrim($path, '/') . '/' . $entry;
+
+        if (!is_link($file) && is_dir($file)) {
           $this->deleteDirectory($file);
         } else {
           @unlink($file);
         }
-      }, glob("{$path}/" . '{,.}[!.,!..]*', GLOB_MARK | GLOB_BRACE));
+      }
 
-      @rmdir("{$path}");
+      @rmdir($path);
     }
 
     /**
@@ -2855,16 +2861,17 @@ namespace Bones {
 
       $this->startProgress("Copying to 📁 {$path}");
       $copied = $this->xcopy(__DIR__, $path);
-      $this->endProgress();
 
       if (!$copied) {
-        if ($is_create_zip) {
+        if ($is_create_zip && is_dir($path)) {
           $this->deleteDirectory($path);
         }
 
         $this->error("Deploy failed: could not write '{$this->copyFailure}'. The destination is incomplete.");
         exit(1);
       }
+
+      $this->endProgress();
 
       if (!$keep_dev) {
         $this->pruneDevPackages($path);
@@ -3060,9 +3067,18 @@ namespace Bones {
         return @copy($source, $dest) || $this->copyFailed($dest);
       }
 
-      // Make destination directory
-      if (!is_dir($dest) && !@mkdir($dest, $permissions, true) && !is_dir($dest)) {
-        return $this->copyFailed($dest);
+      // Make destination directory, and its missing parents from the top down. Not mkdir()'s
+      // recursive flag: PHP collapses "link/.." lexically, while the guard resolved the link first.
+      $missing = [];
+
+      for ($dir = $dest; !is_dir($dir); $dir = dirname($dir)) {
+        array_unshift($missing, $dir);
+      }
+
+      foreach ($missing as $dir) {
+        if (!@mkdir($dir, $permissions) && !is_dir($dir)) {
+          return $this->copyFailed($dir);
+        }
       }
 
       // Loop through the folder
