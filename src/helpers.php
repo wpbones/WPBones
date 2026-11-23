@@ -291,8 +291,8 @@ if (!function_exists('wpbones_modules')) {
      */
     function wpbones_modules($file)
     {
-        // append ".php" if not present
-        $file_name = rtrim($file, '.php') . '.php';
+        // append ".php" if not present (not rtrim(): it strips a set of characters, see #142)
+        $file_name = str_ends_with($file, '.php') ? $file : $file . '.php';
 
         $path = WPKirk()->basePath . '/plugin/modules/' . $file_name;
 
