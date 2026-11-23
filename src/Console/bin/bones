@@ -811,6 +811,9 @@ namespace Bones {
      */
     protected string $rootDeploy = '';
 
+    /** The first path a deploy could not write, set by xcopy(). */
+    protected ?string $copyFailure = null;
+
     /**
      * WP-CLI version
      *
@@ -2851,8 +2854,17 @@ namespace Bones {
       $this->rootDeploy = __DIR__;
 
       $this->startProgress("Copying to 📁 {$path}");
-      $this->xcopy(__DIR__, $path);
+      $copied = $this->xcopy(__DIR__, $path);
       $this->endProgress();
+
+      if (!$copied) {
+        if ($is_create_zip) {
+          $this->deleteDirectory($path);
+        }
+
+        $this->error("Deploy failed: could not write '{$this->copyFailure}'. The destination is incomplete.");
+        exit(1);
+      }
 
       if (!$keep_dev) {
         $this->pruneDevPackages($path);
@@ -3019,6 +3031,10 @@ namespace Bones {
     /**
      * Copy a whole folder. Used by deploy()
      *
+     * Missing parents of $dest are created, as `mkdir -p` would. A file left out on purpose
+     * (a dotfile, the skip list) is not a failure: false means a write failed, and
+     * $copyFailure holds the path.
+     *
      * @param string $source The source path
      * @param string $dest The target path
      * @param int|null $permissions The permissions to set
@@ -3029,7 +3045,7 @@ namespace Bones {
     {
       // Check for symlinks
       if (is_link($source)) {
-        return symlink(readlink($source), $dest);
+        return @symlink(readlink($source), $dest) || $this->copyFailed($dest);
       }
 
       // Simple copy for a file
@@ -3038,14 +3054,15 @@ namespace Bones {
         // we don't copy it
 
         if (strpos(basename($source), '.') === 0 || $this->skip($source)) {
-          return false;
+          return true;
         }
-        return copy($source, $dest);
+
+        return @copy($source, $dest) || $this->copyFailed($dest);
       }
 
       // Make destination directory
-      if (!is_dir($dest)) {
-        mkdir($dest, $permissions);
+      if (!is_dir($dest) && !@mkdir($dest, $permissions, true) && !is_dir($dest)) {
+        return $this->copyFailed($dest);
       }
 
       // Loop through the folder
@@ -3058,13 +3075,27 @@ namespace Bones {
         }
 
         // Deep copy directories
-        $this->xcopy("{$source}/{$entry}", "{$dest}/{$entry}", $permissions);
+        if (!$this->xcopy("{$source}/{$entry}", "{$dest}/{$entry}", $permissions)) {
+          $dir->close();
+
+          return false;
+        }
       }
 
       // Clean up
       $dir->close();
 
       return true;
+    }
+
+    /**
+     * Remember the first path a deploy could not write. Always false, for `|| $this->copyFailed()`.
+     */
+    protected function copyFailed(string $path): bool
+    {
+      $this->copyFailure ??= $path;
+
+      return false;
     }
 
     /**
