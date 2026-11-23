@@ -187,4 +187,23 @@ final class DeployDestinationTest extends TestCase
     $this->assertStringContainsString('Unreadable.php', $run['stderr']);
     $this->assertStringNotContainsString('Deploy completed', $run['output']);
   }
+
+  public function test_a_nested_copy_that_fails_leaves_no_zip_and_no_staging_folder(): void
+  {
+    if (PHP_OS_FAMILY === 'Windows' || (function_exists('posix_geteuid') && posix_geteuid() === 0)) {
+      $this->markTestSkipped('An unreadable file is not enforced here.');
+    }
+
+    file_put_contents($this->bones->plugin . '/src/Unreadable.php', "<?php // secret\n");
+    chmod($this->bones->plugin . '/src/Unreadable.php', 0000);
+
+    $target = $this->bones->root . '/out/my-plugin';
+    $run = $this->bones->run(['deploy', $target, '--create-zip', '--no-build']);
+
+    $this->assertSame(1, $run['status'], $run['output']);
+    $this->assertStringContainsString('Unreadable.php', $run['stderr']);
+    $this->assertStringNotContainsString('Deploy completed', $run['output']);
+    $this->assertFileDoesNotExist($target . '.zip');
+    $this->assertDirectoryDoesNotExist($target . '-tmp');
+  }
 }
