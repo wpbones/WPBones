@@ -206,4 +206,31 @@ final class DeployDestinationTest extends TestCase
     $this->assertFileDoesNotExist($target . '.zip');
     $this->assertDirectoryDoesNotExist($target . '-tmp');
   }
+
+  /**
+   * "missing/../link/x": the guard cannot follow the link past a missing component, and creating
+   * "missing" would make the ".." resolve through the link to a folder nobody approved
+   * (Codex review of #143, round 2).
+   */
+  public function test_dot_dot_after_a_missing_component_is_refused_before_anything_is_created(): void
+  {
+    mkdir($this->bones->root . '/elsewhere');
+    symlink($this->bones->root . '/elsewhere', $this->bones->root . '/link');
+
+    $run = $this->bones->run(['deploy', $this->bones->root . '/missing/../link/x', '--no-build']);
+
+    $this->assertSame(1, $run['status'], $run['output']);
+    $this->assertStringNotContainsString('Deploy completed', $run['output']);
+    $this->assertDirectoryDoesNotExist($this->bones->root . '/missing');
+    $this->assertSame([], array_values(array_diff(scandir($this->bones->root . '/elsewhere'), ['.', '..'])));
+  }
+
+  /** A ".." in the existing prefix keeps working: it is the documented `deploy ../deploy-version`. */
+  public function test_a_new_folder_beside_the_plugin_is_still_created(): void
+  {
+    $run = $this->bones->run(['deploy', '../deploy-version', '--no-build']);
+
+    $this->assertSame(0, $run['status'], $run['output']);
+    $this->assertFileExists($this->bones->root . '/deploy-version/wp-kirk.php');
+  }
 }

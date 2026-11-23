@@ -3072,6 +3072,12 @@ namespace Bones {
       $missing = [];
 
       for ($dir = $dest; !is_dir($dir); $dir = dirname($dir)) {
+        // A "." or ".." after a missing folder would resolve differently once that folder exists,
+        // through a link the guard never followed; and dirname() stops changing at the root.
+        if (in_array(basename($dir), ['.', '..'], true) || dirname($dir) === $dir) {
+          return $this->copyFailed($dir);
+        }
+
         array_unshift($missing, $dir);
       }
 
