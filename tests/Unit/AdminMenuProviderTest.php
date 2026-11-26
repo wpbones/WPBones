@@ -170,6 +170,7 @@ final class AdminMenuProviderTest extends TestCase
       'Dashicons class' => ['dashicons-admin-plugins'],
       'base64 SVG' => ['data:image/svg+xml;base64,PHN2Zy8+'],
       'none' => ['none'],
+      'div, the older none' => ['div'],
     ];
   }
 
@@ -189,6 +190,7 @@ final class AdminMenuProviderTest extends TestCase
       'https' => ['https://cdn.example.test/menu.png'],
       'http' => ['http://cdn.example.test/menu.png'],
       'protocol-relative' => ['//cdn.example.test/menu.png'],
+      'uppercase scheme' => ['HTTPS://cdn.example.test/menu.png'],
     ];
   }
 

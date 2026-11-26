@@ -23,12 +23,14 @@ class AdminMenuProvider extends ServiceProvider
   /**
    * The `icon` of config/menus.php, as add_menu_page() takes it.
    *
-   * What WordPress reads by itself passes through: a Dashicons class (`dashicons-*`), a base64
-   * SVG (`data:`), `none`, an absolute URL and, since WordPress 7.2, the name of a registered icon
-   * (`core-admin/pin`). Anything else is a file in the plugin's public/images folder.
+   * What WordPress reads by itself passes through: a Dashicons class (`dashicons-*`), a `data:`
+   * URI (a base64 SVG), `none` (or the older `div`), an absolute URL and, since WordPress 7.2, the
+   * name of a registered icon (`core-admin/pin`). Anything else is a file in the plugin's
+   * public/images folder.
    *
-   * An icon name is recognised only where WordPress supports it. A menu that must also run on
-   * earlier versions gates it in config/menus.php:
+   * An icon name is recognised only where WordPress supports it, by wp_is_valid_icon_name(): on
+   * 7.2 a lowercase `folder/name` with no extension is read as an icon name, not as a file. A menu
+   * that must also run on earlier versions gates the name in config/menus.php:
    * `'icon' => function_exists('wp_is_valid_icon_name') ? 'core-admin/pin' : 'dashicons-admin-post'`.
    *
    * @param string $icon The `icon` value of config/menus.php.
@@ -37,7 +39,7 @@ class AdminMenuProvider extends ServiceProvider
    */
   protected function menuIcon(string $icon): array
   {
-    if ($icon === '' || $icon === 'none' || strpos($icon, 'dashicons') === 0 || strpos($icon, 'data:') === 0) {
+    if (in_array($icon, ['', 'none', 'div'], true) || strpos($icon, 'dashicons') === 0 || strpos($icon, 'data:') === 0) {
       return [$icon, false];
     }
 
