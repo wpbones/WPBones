@@ -223,6 +223,29 @@ class Plugin extends Container implements PluginContract
   }
 
   /**
+   * Load the plugin's translations from the `Text Domain` and `Domain Path` of its header.
+   *
+   * The literal 'wp-kirk' is only the fallback for a header without a Text Domain: `bones rename`
+   * rewrites it in the vendor copy to the slug it derives from the plugin name, which is not
+   * always the Text Domain the plugin declares. `Domain Path` defaults to `languages` and may
+   * carry the leading slash WordPress documents.
+   *
+   * @since 3.4.1
+   * @return void
+   */
+  public function loadTextDomain()
+  {
+    $domain = !empty($this->pluginData['TextDomain']) ? $this->pluginData['TextDomain'] : 'wp-kirk';
+    $path = trim($this->pluginData['DomainPath'] ?? '', '/\\');
+
+    load_plugin_textdomain(
+      $domain,
+      false,
+      trailingslashit(basename($this->basePath)) . ($path !== '' ? $path : 'languages')
+    );
+  }
+
+  /**
    * Fires after WordPress has finished loading but before any headers are sent.
    *
    * Most of WP is loaded at this stage, and the user is authenticated. WP continues
@@ -249,13 +272,7 @@ class Plugin extends Container implements PluginContract
       $this->initPluginData();
     }
 
-    // Load plugin text domain
-    load_plugin_textdomain(
-      'wp-kirk',
-      false,
-      trailingslashit(basename($this->basePath)) . $this->pluginData['DomainPath']
-    );
-
+    $this->loadTextDomain();
 
     // Load all available hooks
     // @since 1.8.0
