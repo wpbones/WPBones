@@ -7,6 +7,8 @@ namespace WPKirk\WPBones\Tests\Unit;
 use Brain\Monkey;
 use Brain\Monkey\Actions;
 use Brain\Monkey\Functions;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\RunInSeparateProcess;
 use PHPUnit\Framework\TestCase;
 use WPKirk\WPBones\Routing\AdminMenuProvider;
 
@@ -26,6 +28,9 @@ final class AdminMenuProviderTest extends TestCase
    */
   private array $capabilities = [];
 
+  /** The icon each add_menu_page() call received, by menu slug. */
+  private array $icons = [];
+
   private string $basePath;
 
   protected function setUp(): void
@@ -34,10 +39,12 @@ final class AdminMenuProviderTest extends TestCase
     Monkey\setUp();
 
     $this->capabilities = [];
+    $this->icons = [];
 
     Functions\when('sanitize_title')->alias(fn($title) => strtolower(preg_replace('/[^A-Za-z0-9_]+/', '-', (string) $title)));
-    Functions\when('add_menu_page')->alias(function ($pageTitle, $menuTitle, $capability, $slug) {
+    Functions\when('add_menu_page')->alias(function ($pageTitle, $menuTitle, $capability, $slug, $callback = '', $icon = '') {
       $this->capabilities["menu:{$slug}"] = $capability;
+      $this->icons[$slug] = $icon;
 
       return "toplevel_page_{$slug}";
     });
@@ -141,6 +148,93 @@ final class AdminMenuProviderTest extends TestCase
 
     $this->assertSame('read', $this->capabilities['menu:my_plugin']);
     $this->assertSame(['read'], array_values(array_unique($this->capabilities)));
+  }
+
+  /**
+   * What WordPress reads by itself reaches add_menu_page() unchanged, with no `<img>` padding
+   * rule; up to 3.3.1 `none` and an absolute URL were turned into a file of the plugin's images.
+   */
+  #[DataProvider('iconsWordPressReads')]
+  public function test_an_icon_wordpress_reads_passes_through(string $icon): void
+  {
+    $this->register(['my_plugin' => $this->menu(['icon' => $icon])]);
+
+    $this->assertSame($icon, $this->icons['my_plugin']);
+    $this->assertFalse(has_action('admin_head'));
+  }
+
+  public static function iconsWordPressReads(): array
+  {
+    return [
+      'no icon' => [''],
+      'Dashicons class' => ['dashicons-admin-plugins'],
+      'base64 SVG' => ['data:image/svg+xml;base64,PHN2Zy8+'],
+      'none' => ['none'],
+    ];
+  }
+
+  /** An absolute URL is an `<img>` WordPress loads as it is: it keeps the padding rule. */
+  #[DataProvider('absoluteUrls')]
+  public function test_an_absolute_url_passes_through_as_an_image(string $icon): void
+  {
+    $this->register(['my_plugin' => $this->menu(['icon' => $icon])]);
+
+    $this->assertSame($icon, $this->icons['my_plugin']);
+    $this->assertNotFalse(has_action('admin_head'));
+  }
+
+  public static function absoluteUrls(): array
+  {
+    return [
+      'https' => ['https://cdn.example.test/menu.png'],
+      'http' => ['http://cdn.example.test/menu.png'],
+      'protocol-relative' => ['//cdn.example.test/menu.png'],
+    ];
+  }
+
+  public function test_a_file_name_is_an_image_of_the_plugin(): void
+  {
+    $this->register(['my_plugin' => $this->menu(['icon' => 'logo-menu.png'])]);
+
+    $this->assertSame('https://example.test/images/logo-menu.png', $this->icons['my_plugin']);
+    $this->assertNotFalse(has_action('admin_head'));
+  }
+
+  /**
+   * Before WordPress 7.2 an icon name means nothing to add_menu_page(), so it stays what it was in
+   * 3.3.1, a file name; config/menus.php gates it with function_exists('wp_is_valid_icon_name').
+   */
+  public function test_without_icon_names_support_a_name_is_still_a_file_name(): void
+  {
+    $this->assertFalse(function_exists('wp_is_valid_icon_name'), 'this process must not know icon names');
+
+    $this->register(['my_plugin' => $this->menu(['icon' => 'core-admin/pin'])]);
+
+    $this->assertSame('https://example.test/images/core-admin/pin', $this->icons['my_plugin']);
+  }
+
+  /**
+   * WordPress 7.2 takes the name of a registered icon (`core-admin/pin`) in add_menu_page(). Run
+   * apart: Brain Monkey cannot undefine the function, and the test above needs it absent.
+   */
+  #[RunInSeparateProcess]
+  public function test_with_icon_names_support_a_registered_icon_name_passes_through(): void
+  {
+    // WordPress 7.2's wp_is_valid_icon_name(), src/wp-includes/icons.php.
+    Functions\when('wp_is_valid_icon_name')->alias(
+      fn($name) => is_string($name) && (bool) preg_match('#^[a-z0-9](?:[a-z0-9_-]*[a-z0-9])?/[a-z0-9](?:[a-z0-9_-]*[a-z0-9])?$#D', $name)
+    );
+
+    $this->register([
+      'my_plugin' => $this->menu(['icon' => 'core-admin/pin']),
+      'my_other_plugin' => $this->menu(['icon' => 'my-plugin/logo_dark']),
+      'my_third_plugin' => $this->menu(['icon' => 'icons/logo-menu.png']),
+    ]);
+
+    $this->assertSame('core-admin/pin', $this->icons['my_plugin']);
+    $this->assertSame('my-plugin/logo_dark', $this->icons['my_other_plugin']);
+    // a path with an extension is not an icon name: still one of the plugin's images
+    $this->assertSame('https://example.test/images/icons/logo-menu.png', $this->icons['my_third_plugin']);
   }
 
   public function test_an_item_keeps_its_own_capability(): void

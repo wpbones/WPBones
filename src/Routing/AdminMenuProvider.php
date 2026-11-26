@@ -20,6 +20,38 @@ use WPKirk\WPBones\Support\Str;
 
 class AdminMenuProvider extends ServiceProvider
 {
+  /**
+   * The `icon` of config/menus.php, as add_menu_page() takes it.
+   *
+   * What WordPress reads by itself passes through: a Dashicons class (`dashicons-*`), a base64
+   * SVG (`data:`), `none`, an absolute URL and, since WordPress 7.2, the name of a registered icon
+   * (`core-admin/pin`). Anything else is a file in the plugin's public/images folder.
+   *
+   * An icon name is recognised only where WordPress supports it. A menu that must also run on
+   * earlier versions gates it in config/menus.php:
+   * `'icon' => function_exists('wp_is_valid_icon_name') ? 'core-admin/pin' : 'dashicons-admin-post'`.
+   *
+   * @param string $icon The `icon` value of config/menus.php.
+   *
+   * @return array{0: string, 1: bool} The icon, and whether WordPress draws it as an `<img>`.
+   */
+  protected function menuIcon(string $icon): array
+  {
+    if ($icon === '' || $icon === 'none' || strpos($icon, 'dashicons') === 0 || strpos($icon, 'data:') === 0) {
+      return [$icon, false];
+    }
+
+    if (function_exists('wp_is_valid_icon_name') && wp_is_valid_icon_name($icon)) {
+      return [$icon, false];
+    }
+
+    if (preg_match('#^(https?:)?//#i', $icon)) {
+      return [$icon, true];
+    }
+
+    return [$this->plugin->images . '/' . $icon, true];
+  }
+
   // register
   public function register()
   {
@@ -35,14 +67,7 @@ class AdminMenuProvider extends ServiceProvider
         $page_title = isset($menu['page_title']) ? $menu['page_title'] : $menu['menu_title'];
         $menu['page_title'] = sanitize_title($page_title);
 
-        // icon
-        $icon = $menu['icon'];
-        $hasImage = false;
-
-        if (isset($menu['icon']) && !empty($menu['icon']) && 'dashicons' != substr($menu['icon'], 0, 9) && 'data:' != substr($menu['icon'], 0, 5)) {
-          $icon = $this->plugin->images . '/' . $menu['icon'];
-          $hasImage = true;
-        }
+        [$icon, $hasImage] = $this->menuIcon((string) $menu['icon']);
 
         $firstMenu = true;
 
